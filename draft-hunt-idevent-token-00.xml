@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type='text/xsl' href='http://xml.resource.org/authoring/rfc2629.xslt' ?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<?rfc toc="yes"?>
+<?rfc tocompact="yes"?>
+<?rfc tocdepth="3"?>
+<?rfc tocindent="yes"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc comments="yes"?>
+<?rfc inline="yes"?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+<rfc category="std" docName="draft-hunt-idevent-token-00" ipr="trust200902">
+  <front>
+    <title abbrev="draft-hunt-idevent-token">Identity Event Token</title>
+
+    <author fullname="Phil Hunt" initials="P." role="editor" surname="Hunt">
+      <organization abbrev="Oracle">Oracle Corporation</organization>
+
+      <address>
+        <email>phil.hunt@yahoo.com</email>
+      </address>
+    </author>
+    
+    <author fullname="William Denniss" initials="W." surname="Denniss">
+      <organization abbrev="Google">Salesforce.com</organization>
+
+      <address>
+        <email>wdenniss@google.com</email>
+      </address>
+    </author>
+    
+
+    <author fullname="Morteza Ansari" initials="M.A." surname="Ansari">
+      <organization abbrev="Cisco">Cisco</organization>
+
+      <address>
+        <email>morteza.ansari@cisco.com</email>
+      </address>
+    </author>
+
+    
+    <date year="2016"/>
+    <keyword>Identity</keyword>
+    <keyword>Event</keyword>
+    <keyword>Token</keyword>
+    <keyword>Internet-Draft</keyword>
+
+    <abstract>
+      <t>This specification defines an Identity Event token which may
+      be distributed via a protocol such as HTTP and for which an event feed
+      and subscription service is described in the spec <xref target="idevent-subscription"/> </t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section anchor="intro" title="Introduction and Overview" toc="default">
+      <t>[[introduction text here]]</t>
+
+      <section anchor="notat" title="Notational Conventions" toc="default">
+        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+        document are to be interpreted as described in <xref
+        target="RFC2119"/>. These keywords are capitalized when used to
+        unambiguously specify requirements of the protocol or application
+        features and behavior that affect the interoperability and security of
+        implementations. When these words are not capitalized, they are meant
+        in their natural-language sense.</t>
+
+        <t>For purposes of readability examples are not URL encoded.
+        Implementers MUST percent encode URLs as described in <xref
+        target="RFC3986">Section 2.1 of</xref>.</t>
+
+        <t>Throughout this documents all figures MAY contain spaces and extra
+        line-wrapping for readability and space limitations. Similarly, some
+        URI's contained within examples, have been shortened for space and
+        readability reasons.</t>
+      </section>
+
+      <section anchor="defs" title="Definitions" toc="default">
+        <t>This specification uses definitions from the specification <xref target="idevent-subscription"/>.</t>
+        
+      </section>
+    </section>
+
+    <section anchor="events" title="Events">
+      <t>An identity event conveys a message (in the form of a token) about security subject 
+      that may be of interest to a subscriber or set of subscribers participating
+      in an event feed (see <xref target="idevent-subscription"/>).</t>
+      <t>An event message contains a <spanx style="verb">type</spanx> specifying
+      the type of event being conveyed, and <spanx style="verb">resourceUris</spanx> which specifies
+      one or more affected resources about which the event is about. 
+      An event may also contain additional metadata. For example a SCIM 
+      provisioning event describes attributes that have been modified, and/or values representing the
+      final state of the affected attribute(s).</t>
+
+      <t></t>
+      
+
+      <section title="Event Metadata">
+        <t>The following are attributes that may be included in an event
+        message:<list style="hanging">
+            <t hangText="schemas">A multi-valued String attribute that
+            contains the value <spanx style="verb">urn:ietf:params:scim:schemas:notify:2.0:Event</spanx>.</t>
+
+            <t hangText="feedUris">A multivalued String containing the URIs of
+            the feeds the event is associated with. The notification hub may
+            filter these values to be only those values relevant to a
+            particular subscriber. In doing so, the notification hub is not
+            obligated to deliver repeated events to the same subscriber.
+            [DISCUSS: Is this problematic if the subscriber is using multiple
+            endpoints?]</t>
+
+            <t hangText="publisherUri"><vspace blankLines="0"/>A single valued
+            string containing the URI of the SCIM Service Provider publishing
+            the event. Typically this is the SCIM Service Provider's root
+            endpoint.</t>
+
+            <t hangText="resourceUris"><vspace blankLines="0"/>A multi-valued
+            string that contains the URIs of one or more affected resources in
+            the event. For each resource URI included, the event must be
+            identical.</t>
+
+            <t hangText="type"><vspace blankLines="0"/>A single-valued string
+            that contains the type of event as described in <xref
+            target="eventTypes"/> or defined in the event extension registry
+            in <xref target="eventTypesRegistry"/>.</t>
+
+            <t hangText="attributes"><vspace blankLines="0"/>[[MOVE TO SCIM Profile of Events]]A multi-valued
+            list of affected SCIM attributes. Each attribute listed may be a
+            fully-qualified attribute name or an attribute "path" as defined
+            in Figure 7 of Section 3.3.2 of <xref
+            target="RFC7644"/></t>
+
+            <t hangText="values"><vspace blankLines="0"/>[[MOVE TO SCIM PROFILE]]A JSON object
+            structure containing the affected attributes and their associated
+            values. If the "values" attribute is supplied, the event message
+            MUST be encrypted. Service providers SHOULD take care to ensure
+            that eligible subscribers are able to see attribute values.
+            Alternatively, subscribers MAY use the resourceURIs to retrieve
+            the final attribute values. When doing so, the SCIM service
+            provider can then assess the subscribers right to obtain the
+            actual attribute values.</t>
+
+            <t>[[MOVE TO SCIM PROFILE OF EVENTS]]For a password change event, the clear text password attribute
+            value MAY be included in the values attribute. <spanx
+            style="verb">PASSWORD</spanx> event.</t>
+          </list></t>
+      </section>
+
+      <section anchor="eventMessage" title="Event Token">
+        <t>An Event Token is a JWT (<xref target="RFC7519"/>)that is constructed by building a JSON
+        structure (see <xref target="RFC7159"/>) that constitutes an event "message" and which is then
+        used as the body of a JWT.</t>
+        <t>While this specification uses JWT to convey an event message, implementers
+        SHALL NOT use these events to convey authentication assertions or 
+        identity tokens[[references??]].</t>
+        <t><figure anchor="exampleJsonEvent" title="Example Event JSON Data">
+            <preamble>The
+            following is an example event message(it has been modified
+            for readability):</preamble>
+
+            <artwork>{  
+  "schemas":[
+    "urn:ietf:params:scim:schemas:notify:2.0:Event",
+    "urn:ietf:params:scim:schemas:extension:Event:SCIM"
+  ],
+  "publisherUri":"https://scim.example.com",  
+  "feedUris":[
+   "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
+   "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
+  ],  
+  "resourceUris":[
+    "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9"
+  ],
+  "type":"CREATE",
+  "urn:ietf:params:scim:schemas:extension:Event:SCIM":{
+    "attributes":["id","name","userName","password","emails"],
+    "values":{
+      "emails":[
+       {"type":"work","value":"jdoe@example.com"}
+      ],
+      "password":"not4u2no",
+      "userName":"jdoe",
+      "id":"44f6142df96bd6ab61e7521d9",
+      "name":{
+        "givenName":"John",
+        "familyName":"Doe"
+      }
+    }  
+  }
+}</artwork>
+          </figure></t>
+
+        <t>When transmitted, the above JSON body must be converted into a JWT
+        as per <xref target="RFC7519"/>. In this
+        example, because the event contains attribute values, the token MUST
+        be encrypted per JWE (see <xref
+        target="RFC7516"/>) before transmission.</t>
+        <t>[[Figures below need to be updated to reflect the new message body above]]</t>
+        <t><figure>
+            <preamble>The following is an example of a SCIM Event expressed in
+            an unsecured JWT token. The JWT header of:</preamble>
+
+            <artwork>{"alg":"none"}</artwork>
+          </figure><figure>
+            <preamble>Base64url encoding of the octets of the UTF-8
+            representation of the header yields:</preamble>
+
+            <artwork>eyJhbGciOiJub25lIn0</artwork>
+          </figure><figure>
+            <preamble>The example JSON Event Data is encoded as
+            follows:</preamble>
+
+            <artwork>eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ</artwork>
+          </figure><figure anchor="eventToken"
+            title="Example Unsecured Event Token">
+            <preamble>The encoded JWS signature is the empty string.
+            Concatenating the parts yields:</preamble>
+
+            <artwork>eyJhbGciOiJub25lIn0
+.
+eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+.</artwork>
+          </figure></t>
+
+        <t>To create and or validate a signed or encrypted event token follow
+        the instructions in section 7 of <xref
+        target="RFC7519"/>.</t>
+      </section>
+    </section>
+
+   
+
+
+
+    <section anchor="Security" title="Security Considerations" toc="default">
+
+      <t>[[TO BE COMPLETED]]</t>
+    </section>
+
+    <section anchor="IANA" title="IANA Considerations">
+      
+      <section anchor="eventTypesRegistry" title="Event Type Registry">
+        <t>[[TODO: Registration of Event Types]]</t>
+      </section>
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+
+      <reference anchor="idevent-subscription">
+        
+        <front>
+          <title>Identity Event Subscription Protocol (work in progress)</title>
+          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
+          <date/>
+        </front>  
+        <format type="TXT" target="draft-hunt-idevent-subscription-00.txt"/>    
+      </reference>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
+
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml'?>
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5988.xml'?>
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7159.xml'?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml'?>
+      
+    </references>
+
+    <references title="Informative References">
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml'?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml'?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7517.xml'?>
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml'?>
+    
+    </references>
+
+    <section title="Appendix A. Event Types">
+    <section anchor="eventTypes" title="SCIM Event Types">
+        <t>This specification defines 8 events. Additional event types may be
+        defined using the Event Type IANA registration process described in
+        <xref target="eventTypesRegistry"/>.<list style="hanging">
+            <t hangText="ADD"><vspace blankLines="0"/>The specified resource
+            URI was added to the feed. An add does not necessarily indicate a
+            resource is new or has been recently created, but rather that it
+            has been added to a feed. For example, an existing user has had a
+            new role (e.g. CRM_User) added to their profile which has caused
+            their resource to join a feed.</t>
+
+            <t hangText="CREATE"><vspace blankLines="0"/>The new resource URI
+            has been created at the service provider and has been added to the
+            feed. When a CREATE event is sent, a corresponding ADD event is
+            not issued. For example, a new user was created via HTTP POST,
+            whose attribute profile met the criteria of a current feed. </t>
+
+            <t hangText="ACTIVATE"><vspace blankLines="0"/>The specified
+            resource (e.g. User) has been activated or is otherwise available
+            for use. [TODO: this seems to be a higher level concept that may
+            consist of multiple attributes changing - How to differentiate
+            between activate and MODIFY events]</t>
+
+            <t hangText="MODIFY"><vspace blankLines="0"/>The specified
+            resource has been updated (e.g. one or more attributes has
+            changed).</t>
+
+            <t hangText="DEACTIVATE"><vspace blankLines="0"/>The specified
+            resource (e.g. User) has been deactivated. [TODO: Is there a
+            corresponding MODIFY event?]</t>
+
+            <t hangText="DELETE">The specified resource has been deleted from
+            the service provider and is also removed from the feed. When a
+            DELETE is sent, a corresponding REMOVE is not issued.</t>
+
+            <t hangText="REMOVE"><vspace blankLines="0"/>The specified
+            resource has been removed from the feed. Removal does not indicate
+            that the resource was deleted or otherwise deactivated.</t>
+
+            <t hangText="PASSWORD"><vspace blankLines="0"/>The specified
+            resource (e.g. User) has changed its password. If secure exchange
+            is possible with the subscriber, the event may also include the
+            raw password update text. A PASSWORD event MUST be transmitted in
+            encrypted form (see <xref target="eventMessage"/>).</t>
+
+            <t hangText="CONFIRMATION">A special event that is used during
+            Polling Feed Registrations and Web Callback URI subscriptions to
+            confirm successful configuration of an event feed. The contents of
+            a CONFIRMATION event SHALL be defined by the registration process
+            documented in following sections [TODO add reference]</t>
+          </list></t>
+      </section>
+    </section>
+    
+    <section title="Contributors"/>
+
+    <section title="Acknowledgments">
+      <t>The editor would like to thank the participants in the the SCIM
+      working group for their support of this specification.</t>
+    </section>
+
+    <section title="Change Log">
+      <t>Draft 00 - PH - First Draft</t>
+    </section>
+  </back>
+</rfc>
