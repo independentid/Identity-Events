@@ -88,64 +88,92 @@
       <t>An identity event conveys a message (in the form of a token) about security subject 
       that may be of interest to a subscriber or set of subscribers participating
       in an event feed (see <xref target="idevent-subscription"/>).</t>
-      <t>An event message contains a <spanx style="verb">type</spanx> specifying
-      the type of event being conveyed, and <spanx style="verb">resourceUris</spanx> which specifies
-      one or more affected resources about which the event is about. 
-      An event may also contain additional metadata. For example a SCIM 
-      provisioning event describes attributes that have been modified, and/or values representing the
-      final state of the affected attribute(s).</t>
+      <t>An event message is indicated by the attribute <spanx style="verb">schemas</spanx>
+      having one value as <spanx style="verb">urn:ietf:params:scim:schemas:Event</spanx>
+      and more or more additional values indicating one or more event extension schema URIs.
+      An event extension schema URI indicates to the reader what event information and
+      event types are contained in the event message. The attribute <spanx style="verb">resourceUris</spanx> specifies
+      one or more affected resources which are the subject of the event.</t>
 
-      <t></t>
+      <t>The schema and structure of an event follows the SCIM schema model 
+      as defined in <xref target="RFC7643"/>. This means that an event
+      has the following aspects:<list style="symbols">
+        <t>a common set of attributes common to every event, and</t>
+        <t>one or more schema extensions (see Section 3 of <xref target="RFC7643"/>) 
+        that each define a set of attributes that belonging to an extension.</t>
+      </list> </t>
+      <figure>
+        <preamble>The following non-normative example shows a password change event:</preamble>
+        <artwork>{  
+  "schemas":[
+    "urn:ietf:params:scim:schemas:Event",
+    "urn:ietf:params:scim:schemas:extension:Event:SCIM:password",
+    "urn:ietf:params:scim:schemas:extension:Event:RISC:password"
+  ],
+  "publisherUri":"https://scim.example.com",  
+  "feedUris":[
+   "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
+   "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
+  ],  
+  "resourceUris":[
+    "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9"
+  ],
+  "urn:ietf:params:scim:schemas:extension:Event:SCIM:password":{
+    "id":"44f6142df96bd6ab61e7521d9",
+    "resetCount":5
+  },
+  "urn:ietf:params:scim:schemas:extension:Event:RISC:password":{
+    "terminateSession":true
+  }
+}</artwork>
+      </figure>      
+      <t>The above example shows an event that has a dual-extension and
+      actually expresses a password update event. The event has a dual-extension
+      which allows two different sub-events to be expressed based on one 
+      state change at the publisher. Multiple events MAY be asserted at
+      the same time (when appropriate), and carry different or even overlapping 
+      attributes. This is expressed by placing the event extensions each within 
+      its own JSON object (in this example, 
+      <spanx style="verb">urn:ietf:params:scim:schemas:extension:Event:SCIM:password</spanx> and 
+      <spanx style="verb">urn:ietf:params:scim:schemas:extension:Event:RISC:password</spanx>).
+      In this example, a SCIM event indicates that a password has been updated 
+      and the current password reset count is 5.  The other extension is a 
+      "RISC" extension and lets a subscriber know that any current  
+      sessions associated with the subject should be terminated.
+      </t>
+      <t>By expressing multiple extensions at the same time, the publisher
+      indicates that each event type stems from the same originating event.
+      Publishers MAY split a single event into multiple separate events (e.g.
+      each with only one event schema extension). Publishing single-events
+      may be more important when it is appropriate to minimize information 
+      disclosure to a particular subscriber or set of subscribers.</t>
       
-
-      <section title="Event Metadata">
+      <section title="Core Event Properties">
         <t>The following are attributes that may be included in an event
         message:<list style="hanging">
-            <t hangText="schemas">A multi-valued String attribute that
-            contains the value <spanx style="verb">urn:ietf:params:scim:schemas:notify:2.0:Event</spanx>.</t>
+            <t hangText="schemas"><vspace blankLines="0"/>A multi-valued String attribute that MUST
+            contains the value <spanx style="verb">urn:ietf:params:scim:schemas:Event</spanx>
+            and at least one other event extension URIs. </t>
 
-            <t hangText="feedUris">A multivalued String containing the URIs of
-            the feeds the event is associated with. The notification hub may
+            <t hangText="feedUris"><vspace blankLines="0"/>A multivalued String containing the URIs of
+            the feeds the event is associated with. The publisher may
             filter these values to be only those values relevant to a
-            particular subscriber. In doing so, the notification hub is not
+            particular subscriber. In doing so, the publisher is not
             obligated to deliver repeated events to the same subscriber.
-            [DISCUSS: Is this problematic if the subscriber is using multiple
-            endpoints?]</t>
+            </t>
 
             <t hangText="publisherUri"><vspace blankLines="0"/>A single valued
-            string containing the URI of the SCIM Service Provider publishing
-            the event. Typically this is the SCIM Service Provider's root
+            string containing the URI of the service provider publishing
+            the event. For example, in SCIM, this is the SCIM Service Provider's root
             endpoint.</t>
 
             <t hangText="resourceUris"><vspace blankLines="0"/>A multi-valued
             string that contains the URIs of one or more affected resources in
             the event. For each resource URI included, the event must be
-            identical.</t>
+            identical. For each event extension expressed, each extension 
+            MUST apply to each resourceUris value.</t>
 
-            <t hangText="type"><vspace blankLines="0"/>A single-valued string
-            that contains the type of event as described in <xref
-            target="eventTypes"/> or defined in the event extension registry
-            in <xref target="eventTypesRegistry"/>.</t>
-
-            <t hangText="attributes"><vspace blankLines="0"/>[[MOVE TO SCIM Profile of Events]]A multi-valued
-            list of affected SCIM attributes. Each attribute listed may be a
-            fully-qualified attribute name or an attribute "path" as defined
-            in Figure 7 of Section 3.3.2 of <xref
-            target="RFC7644"/></t>
-
-            <t hangText="values"><vspace blankLines="0"/>[[MOVE TO SCIM PROFILE]]A JSON object
-            structure containing the affected attributes and their associated
-            values. If the "values" attribute is supplied, the event message
-            MUST be encrypted. Service providers SHOULD take care to ensure
-            that eligible subscribers are able to see attribute values.
-            Alternatively, subscribers MAY use the resourceURIs to retrieve
-            the final attribute values. When doing so, the SCIM service
-            provider can then assess the subscribers right to obtain the
-            actual attribute values.</t>
-
-            <t>[[MOVE TO SCIM PROFILE OF EVENTS]]For a password change event, the clear text password attribute
-            value MAY be included in the values attribute. <spanx
-            style="verb">PASSWORD</spanx> event.</t>
+            
           </list></t>
       </section>
 
@@ -163,7 +191,7 @@
 
             <artwork>{  
   "schemas":[
-    "urn:ietf:params:scim:schemas:notify:2.0:Event",
+    "urn:ietf:params:scim:schemas:Event",
     "urn:ietf:params:scim:schemas:extension:Event:SCIM"
   ],
   "publisherUri":"https://scim.example.com",  
@@ -174,8 +202,7 @@
   "resourceUris":[
     "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9"
   ],
-  "type":"CREATE",
-  "urn:ietf:params:scim:schemas:extension:Event:SCIM":{
+  "urn:ietf:params:scim:schemas:extension:Event:SCIM:create":{
     "attributes":["id","name","userName","password","emails"],
     "values":{
       "emails":[
@@ -289,7 +316,7 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
 
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7159.xml'?>
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml'?>
-      
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml'?>
     </references>
 
     <references title="Informative References">
