@@ -49,8 +49,9 @@
 
     <abstract>
       <t>This specification defines an Identity Event token which may
-      be distributed via a protocol such as HTTP and for which an event feed
-      and subscription service is described in the spec <xref target="idevent-subscription"/> </t>
+      be distributed via a protocol such as HTTP. An identity event token
+      describes a statement of fact that may be shared by an event publisher
+      with registered subscribers.</t>
     </abstract>
   </front>
 
@@ -61,25 +62,16 @@
       on the JSON Web Token format <xref target="RFC7519"/> in order to provide a self-contained 
       message "token" that can be optionally signed using JSON Web Signature <xref target="RFC7515"/>
       and/or encrypted using JSON Web Encryption <xref target="RFC7516"/>.</t>
-      <t>For the purpose of this specification an "event" is a historical statement
-      of fact by a publisher that the state of a resource it controls has changed
-      directly or indirectly that may be of interest to a subscriber. 
-      For example, a resource has been created,
-      modified, removed, or updated. In addition to direct changes of state, 
-      there may be higher-level conclusions 
-      made that describe an effect resulting from a change. For example, a
-      publisher may wish to indicate that a new user has taken over an email
-      identifier that may have been used in the past.</t>
-      <t>A subscriber having 
-      been informed of the event, may take its own independent action, if any, 
-      within its own context. For example, having been informed of the identifier being used by someone-else,
-      the subscriber may remove or ensure that the new user is not granted
-      access to resources associated with the previous user.</t>
-      <t>This specification is intended to be extended by other specifications. 
-      It is intended to establish a common identity event format to enable inter-op
-      and easier adoption of event based systems and protocols. This specification 
-      does include the definition of some SCIM events. However the inclusion of 
-      SCIM events is intended to be informative to other extenders and not intended 
+      
+      <t>For the purpose of this specification an "event" is a statement
+      of fact by a publisher that the state of a resource it controls has 
+      changed in some way (explicitly or implicitly). Based on some agreed 
+      upon criteria for an event feed, the publisher distributes the event
+      to the appropriate subscribers.</t>
+      
+      <t>While this specification is intended as a base specification, this specification 
+      does include the definition of some SCIM and other events. The inclusion of 
+      SCIM events is intended to be informative to other extensions and not intended 
       to replace events that may be defined for other purposes. At the time 
       of writing of this specifications there are several discussions going on around the need 
       for identity events. Some of these include:<list style="symbols">
@@ -91,6 +83,27 @@
         <t>The HEART WG <xref target="HEART"/> which intends to define privacy and security related events
         in health-related data sharing APIs.</t>
       </list></t>
+      
+      <t>A resource state change event MAY include explicit changes such as:
+      a resource that has been created, modified, removed, or updated. In 
+      addition to explicit changes of state, there may be higher-level conclusions 
+      made that describe an effect resulting from a change. For example, a
+      publisher may wish to indicate that a user resource has taken over an email
+      identifier that may have been used in the past. This hypothetical event 
+      is a high-level conclusion that takes into account that another resource 
+      had a personal identifier that potentially conflicts with a newer resource.
+      Because of the potential security impact, the publisher may wish to
+      notify its subscribers of the identifier re-use. In this way, the event
+      is not describing a particular state change to a resource, it describes
+      a meta-conclusion based on its own business and security rules (this
+      is often called an 'account take-over' event).</t>
+      
+      <t>A subscriber having received an event, takes its own independent 
+      action, if any. For example, having been informed of a personal identifier
+      now being associated with a different resource (i.e. is being used 
+      by someone-else), the subscriber may choose to ensure that the new 
+      user is not granted access to resources associated with the previous user.</t>
+      
       <t>Events SHOULD NOT be used to convey commands or requests. To do so
       requires complex bi-directional signaling and error recovery mechanisms which fall
       outside the scope of this specification. The intent of this specification
@@ -100,6 +113,11 @@
       While event tokens may be used for other purposes, the specification
       only considers security and privacy concerns relevant to identity 
       and personal information.</t>
+      
+      <t>This specification is intended to be optionally used with the identity
+      event subscription management specification which provides the details 
+      of event feeds and how subscribers register for events(see 
+      <xref target="idevent-subscription"/>).</t>
 
       <section anchor="notat" title="Notational Conventions" toc="default">
         <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
@@ -128,15 +146,21 @@
     </section>
 
     <section anchor="events" title="Events">
-      <t>An identity event conveys a message (in the form of a token) about security subject 
-      that may be of interest to a subscriber or set of subscribers participating
-      in an event feed (see <xref target="idevent-subscription"/>).</t>
-      <t>An event message is indicated by the attribute <spanx style="verb">schemas</spanx>
-      having one value as <spanx style="verb">urn:ietf:params:scim:schemas:Event</spanx>
-      and more or more additional values indicating one or more event extension schema URIs.
-      An event extension schema URI indicates to the reader what event information and
-      event types are contained in the event message. The attribute <spanx style="verb">resourceUris</spanx> specifies
-      one or more affected resources which are the subject of the event.</t>
+      <t>An identity event conveys a message (in the form of a token) about 
+      a resource (e.g. a security subject) that may be of interest to a 
+      subscriber or set of subscribers participating in an event feed 
+      (see <xref target="idevent-subscription"/>).</t>
+      
+      <t>An event message is indicated a JSON object containing the attribute 
+      <spanx style="verb">schemas</spanx> and having at least one value 
+      as <spanx style="verb">urn:ietf:params:scim:schemas:Event</spanx>. The 
+      <spanx style="verb">schemas</spanx> usually contains other values
+      that convey one or more event extension schema URIs.
+      An event extension schema URI indicates to the reader what event 
+      information and event types are contained in the event message. 
+      The attribute <spanx style="verb">resourceUris</spanx> specifies
+      one or more affected resources which are the subject of the event. [should resourceUris 
+      be required?? Or could it be required as part of an extension schema]</t>
 
       <t>The schema and structure of an event follows the SCIM schema model 
       as defined in <xref target="RFC7643"/>. This means that an event
@@ -146,7 +170,8 @@
         that each define a set of attributes that belonging to an extension.</t>
       </list> </t>
       <figure>
-        <preamble>The following non-normative example shows a password change event:</preamble>
+        <preamble>The following is a non-normative example showing a password change event
+        that conveys both a hypothetical RISC event and a SCIM event in the same message:</preamble>
         <artwork>{  
   "schemas":[
     "urn:ietf:params:scim:schemas:Event",
@@ -174,24 +199,27 @@
   }
 }</artwork>
       </figure>      
-      <t>The above example shows an event that has a dual-extension and
-      actually expresses a password update event. The event has a dual-extension
-      which allows two different sub-events to be expressed based on one 
-      state change at the publisher. Multiple events MAY be asserted at
-      the same time (when appropriate), and carry different or even overlapping 
-      attributes. This is expressed by placing the event extensions each within 
-      its own JSON object (in this example, 
+      <t>The event in the figure above has dual-extensions
+      which allows two different events to be expressed based on one 
+      state change at the publisher. An event MAY assert multiple different
+      event types at the the same time (when appropriate), and carry 
+      different or even overlapping attributes. Each event extension has
+      its own set of attributes expressed within its own JSON object (in 
+      this example, 
       <spanx style="verb">urn:ietf:params:scim:schemas:extension:Event:SCIM:password</spanx> and 
       <spanx style="verb">urn:ietf:params:scim:schemas:extension:Event:RISC:password</spanx>).
-      In this example, a SCIM event (see <xref target="scimEvents"/>) indicates that a password has been updated 
+      In this example, the SCIM event (see <xref target="scimEvents"/>) indicates that a password has been updated 
       and the current password reset count is 5. Notice that the value for 
       "resetAttempts" is actually part of its own schema SCIM extension 
       <spanx>urn:ietf:params:scim:schemas:extension:account:2.0:Password</spanx>.  
       </t>
-      <t>The other event extension is a 
+      
+      <t>The other event extension is a hypothetical 
       "RISC" extension and lets a subscriber know that any current  
       sessions associated with the subject should be terminated.
-      </t>
+      [NOTE: at the time of writing there is no actual definition of RISC
+      events, so these examples are hypothetical]</t>
+      
       <t>By expressing multiple extensions at the same time, the publisher
       indicates that each event type stems from the same originating event.
       Publishers MAY split a single event into multiple separate events (e.g.
@@ -199,7 +227,7 @@
       may be more important when it is appropriate to minimize information 
       disclosure to a particular subscriber or set of subscribers.</t>
       
-      <section title="Core Event Properties">
+      <section title="Core Event Attributes">
         <t>The following are attributes that may be included in an event
         message:<list style="hanging">
             <t hangText="schemas"><vspace blankLines="0"/>A multi-valued String attribute that MUST
@@ -214,17 +242,15 @@
             </t>
 
             <t hangText="publisherUri"><vspace blankLines="0"/>A single valued
-            string containing the URI of the service provider publishing
+            String containing the URI of the service provider publishing
             the event. For example, in SCIM, this is the SCIM Service Provider's root
             endpoint.</t>
 
             <t hangText="resourceUris"><vspace blankLines="0"/>A multi-valued
-            string that contains the URIs of one or more affected resources in
+            String that contains the URIs of one or more affected resources in
             the event. For each resource URI included, the event must be
             identical. For each event extension expressed, each extension 
-            MUST apply to each resourceUris value.</t>
-
-            
+            MUST apply to each resourceUris value.</t>            
           </list></t>
       </section>
 
@@ -247,8 +273,8 @@
   ],
   "publisherUri":"https://scim.example.com",  
   "feedUris":[
-   "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
-   "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
+   "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
   ],  
   "resourceUris":[
     "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9"
@@ -276,7 +302,7 @@
         example, because the event contains attribute values, the token MUST
         be encrypted per JWE (see <xref
         target="RFC7516"/>) before transmission.</t>
-        <t>[[Figures below need to be updated to reflect the new message body above]]</t>
+     
         <t><figure>
             <preamble>The following is an example of a SCIM Event expressed in
             an unsecured JWT token. The JWT header of:</preamble>
@@ -291,36 +317,50 @@
             <preamble>The example JSON Event Data is encoded as
             follows:</preamble>
 
-            <artwork>eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
-kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
-FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
-WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
-WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
-hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
-VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
-SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
-b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
-tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
-1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ</artwork>
-          </figure><figure anchor="eventToken"
+            <artwork>
+eyAgCiAgInNjaGVtYXMiOlsKICAgICJ1cm46aWV0ZjpwYXJhbXM6c2NpbTpzY2h
+lbWFzOkV2ZW50IiwKICAgICJ1cm46aWV0ZjpwYXJhbXM6c2NpbTpzY2hlbWFzOm
+V4dGVuc2lvbjpFdmVudDpTQ0lNIgogIF0sCiAgInB1Ymxpc2hlclVyaSI6Imh0d
+HBzOi8vc2NpbS5leGFtcGxlLmNvbSIsICAKICAiZmVlZFVyaXMiOlsKICAgImh0
+dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU
+5M2I3NzU0IiwKICAgImh0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy81ZD
+c2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3IgogIF0sICAKICAicmVzb3VyY2VVcmlzI
+jpbCiAgICAiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL1VzZXJzLzQ0ZjYxNDJk
+Zjk2YmQ2YWI2MWU3NTIxZDkiCiAgXSwKICAidXJuOmlldGY6cGFyYW1zOnNjaW0
+6c2NoZW1hczpleHRlbnNpb246RXZlbnQ6U0NJTTpjcmVhdGUiOnsKICAgICJhdH
+RyaWJ1dGVzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlb
+WFpbHMiXSwKICAgICJ2YWx1ZXMiOnsKICAgICAgImVtYWlscyI6WwogICAgICAg
+eyJ0eXBlIjoid29yayIsInZhbHVlIjoiamRvZUBleGFtcGxlLmNvbSJ9CiAgICA
+gIF0sCiAgICAgICJwYXNzd29yZCI6Im5vdDR1Mm5vIiwKICAgICAgInVzZXJOYW
+1lIjoiamRvZSIsCiAgICAgICJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZ
+DkiLAogICAgICAibmFtZSI6ewogICAgICAgICJnaXZlbk5hbWUiOiJKb2huIiwK
+ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp
+9</artwork>
+</figure><figure anchor="eventToken"
             title="Example Unsecured Event Token">
             <preamble>The encoded JWS signature is the empty string.
             Concatenating the parts yields:</preamble>
 
             <artwork>eyJhbGciOiJub25lIn0
 .
-eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
-kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
-FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
-WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
-WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
-hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
-VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
-SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
-b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
-tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
-1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
-.</artwork>
+eyAgCiAgInNjaGVtYXMiOlsKICAgICJ1cm46aWV0ZjpwYXJhbXM6c2NpbTpzY2h
+lbWFzOkV2ZW50IiwKICAgICJ1cm46aWV0ZjpwYXJhbXM6c2NpbTpzY2hlbWFzOm
+V4dGVuc2lvbjpFdmVudDpTQ0lNIgogIF0sCiAgInB1Ymxpc2hlclVyaSI6Imh0d
+HBzOi8vc2NpbS5leGFtcGxlLmNvbSIsICAKICAiZmVlZFVyaXMiOlsKICAgImh0
+dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU
+5M2I3NzU0IiwKICAgImh0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy81ZD
+c2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3IgogIF0sICAKICAicmVzb3VyY2VVcmlzI
+jpbCiAgICAiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL1VzZXJzLzQ0ZjYxNDJk
+Zjk2YmQ2YWI2MWU3NTIxZDkiCiAgXSwKICAidXJuOmlldGY6cGFyYW1zOnNjaW0
+6c2NoZW1hczpleHRlbnNpb246RXZlbnQ6U0NJTTpjcmVhdGUiOnsKICAgICJhdH
+RyaWJ1dGVzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlb
+WFpbHMiXSwKICAgICJ2YWx1ZXMiOnsKICAgICAgImVtYWlscyI6WwogICAgICAg
+eyJ0eXBlIjoid29yayIsInZhbHVlIjoiamRvZUBleGFtcGxlLmNvbSJ9CiAgICA
+gIF0sCiAgICAgICJwYXNzd29yZCI6Im5vdDR1Mm5vIiwKICAgICAgInVzZXJOYW
+1lIjoiamRvZSIsCiAgICAgICJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZ
+DkiLAogICAgICAibmFtZSI6ewogICAgICAgICJnaXZlbk5hbWUiOiJKb2huIiwK
+ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp
+9.</artwork>
           </figure></t>
 
         <t>To create and or validate a signed or encrypted event token follow

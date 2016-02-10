@@ -5,10 +5,10 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                              W. Denniss
-Expires: August 7, 2016                                           Google
+Expires: August 13, 2016                                          Google
                                                                M. Ansari
                                                                    Cisco
-                                                        February 4, 2016
+                                                       February 10, 2016
 
 
                           Identity Event Token
@@ -17,9 +17,9 @@ Expires: August 7, 2016                                           Google
 Abstract
 
    This specification defines an Identity Event token which may be
-   distributed via a protocol such as HTTP and for which an event feed
-   and subscription service is described in the spec
-   [idevent-subscription]
+   distributed via a protocol such as HTTP.  An identity event token
+   describes a statement of fact that may be shared by an event
+   publisher with registered subscribers.
 
 Status of This Memo
 
@@ -36,7 +36,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on August 7, 2016.
+   This Internet-Draft will expire on August 13, 2016.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hunt, et al.             Expires August 7, 2016                 [Page 1]
+Hunt, et al.             Expires August 13, 2016                [Page 1]
 
 Internet-Draft          draft-hunt-idevent-token           February 2016
 
@@ -64,27 +64,116 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
 Table of Contents
 
    1.  Introduction and Overview . . . . . . . . . . . . . . . . . .   2
-     1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   2
-     1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   3
-   2.  Events  . . . . . . . . . . . . . . . . . . . . . . . . . . .   3
-     2.1.  Core Event Properties . . . . . . . . . . . . . . . . . .   5
-     2.2.  Event Token . . . . . . . . . . . . . . . . . . . . . . .   5
-   3.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
-   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   8
-     4.1.  Event Type Registry . . . . . . . . . . . . . . . . . . .   8
-   5.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   8
-     5.1.  Normative References  . . . . . . . . . . . . . . . . . .   8
-     5.2.  Informative References  . . . . . . . . . . . . . . . . .   8
-   Appendix A.  Appendix A. Event Types  . . . . . . . . . . . . . .   9
-     A.1.  SCIM Event Types  . . . . . . . . . . . . . . . . . . . .   9
-   Appendix B.  Contributors . . . . . . . . . . . . . . . . . . . .  10
-   Appendix C.  Acknowledgments  . . . . . . . . . . . . . . . . . .  10
-   Appendix D.  Change Log . . . . . . . . . . . . . . . . . . . . .  10
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  10
+     1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   4
+     1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   4
+   2.  Events  . . . . . . . . . . . . . . . . . . . . . . . . . . .   4
+     2.1.  Core Event Attributes . . . . . . . . . . . . . . . . . .   6
+     2.2.  Event Token . . . . . . . . . . . . . . . . . . . . . . .   7
+   3.  Security Considerations . . . . . . . . . . . . . . . . . . .   9
+   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   9
+     4.1.  Event Type Registry . . . . . . . . . . . . . . . . . . .   9
+   5.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   9
+     5.1.  Normative References  . . . . . . . . . . . . . . . . . .   9
+     5.2.  Informative References  . . . . . . . . . . . . . . . . .  10
+   Appendix A.  Appendix A. Event Types  . . . . . . . . . . . . . .  11
+     A.1.  SCIM Events . . . . . . . . . . . . . . . . . . . . . . .  11
+       A.1.1.  Event Schema URIs . . . . . . . . . . . . . . . . . .  11
+       A.1.2.  SCIM Event Attributes . . . . . . . . . . . . . . . .  12
+   Appendix B.  Contributors . . . . . . . . . . . . . . . . . . . .  13
+   Appendix C.  Acknowledgments  . . . . . . . . . . . . . . . . . .  13
+   Appendix D.  Change Log . . . . . . . . . . . . . . . . . . . . .  13
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  13
 
 1.  Introduction and Overview
 
-   [[introduction text here]]
+   This specification defines an extensible event token format which may
+   be exchanged using protocols such as HTTP.  The specification builds
+   on the JSON Web Token format [RFC7519] in order to provide a self-
+   contained message "token" that can be optionally signed using JSON
+   Web Signature [RFC7515] and/or encrypted using JSON Web Encryption
+   [RFC7516].
+
+   For the purpose of this specification an "event" is a statement of
+   fact by a publisher that the state of a resource it controls has
+   changed in some way (explicitly or implicitly).  Based on some agreed
+   upon criteria for an event feed, the publisher distributes the event
+   to the appropriate subscribers.
+
+   While this specification is intended as a base specification, this
+   specification does include the definition of some SCIM and other
+   events.  The inclusion of SCIM events is intended to be informative
+   to other extensions and not intended to replace events that may be
+   defined for other purposes.  At the time of writing of this
+   specifications there are several discussions going on around the need
+   for identity events.  Some of these include:
+
+
+
+Hunt, et al.             Expires August 13, 2016                [Page 2]
+
+Internet-Draft          draft-hunt-idevent-token           February 2016
+
+
+   o  Events to allow SCIM resource co-ordination between SCIM domains.
+
+   o  OAuth Token Revocation (see [RFC7009])
+
+   o  OpenID Logout or downstream logout notification.
+
+   o  Session Cancellation
+
+   o  OpenID Risk Incident Sharing and Coordination (RISC) Events.  See
+      [RISC]
+
+   o  The HEART WG [HEART] which intends to define privacy and security
+      related events in health-related data sharing APIs.
+
+   A resource state change event MAY include explicit changes such as: a
+   resource that has been created, modified, removed, or updated.  In
+   addition to explicit changes of state, there may be higher-level
+   conclusions made that describe an effect resulting from a change.
+   For example, a publisher may wish to indicate that a user resource
+   has taken over an email identifier that may have been used in the
+   past.  This hypothetical event is a high-level conclusion that takes
+   into account that another resource had a personal identifier that
+   potentially conflicts with a newer resource.  Because of the
+   potential security impact, the publisher may wish to notify its
+   subscribers of the identifier re-use.  In this way, the event is not
+   describing a particular state change to a resource, it describes a
+   meta-conclusion based on its own business and security rules (this is
+   often called an 'account take-over' event).
+
+   A subscriber having received an event, takes its own independent
+   action, if any.  For example, having been informed of a personal
+   identifier now being associated with a different resource (i.e. is
+   being used by someone-else), the subscriber may choose to ensure that
+   the new user is not granted access to resources associated with the
+   previous user.
+
+   Events SHOULD NOT be used to convey commands or requests.  To do so
+   requires complex bi-directional signaling and error recovery
+   mechanisms which fall outside the scope of this specification.  The
+   intent of this specification is to define a way of stating historical
+   statements of fact that subscribers may interpret for their own use.
+
+   This specification is scoped to security and identity related events.
+   While event tokens may be used for other purposes, the specification
+   only considers security and privacy concerns relevant to identity and
+   personal information.
+
+
+
+
+
+Hunt, et al.             Expires August 13, 2016                [Page 3]
+
+Internet-Draft          draft-hunt-idevent-token           February 2016
+
+
+   This specification is intended to be optionally used with the
+   identity event subscription management specification which provides
+   the details of event feeds and how subscribers register for
+   events(see [idevent-subscription]).
 
 1.1.  Notational Conventions
 
@@ -106,14 +195,6 @@ Table of Contents
    URI's contained within examples, have been shortened for space and
    readability reasons.
 
-
-
-
-Hunt, et al.             Expires August 7, 2016                 [Page 2]
-
-Internet-Draft          draft-hunt-idevent-token           February 2016
-
-
 1.2.  Definitions
 
    This specification uses definitions from the specification
@@ -121,18 +202,29 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
 
 2.  Events
 
-   An identity event conveys a message (in the form of a token) about
-   security subject that may be of interest to a subscriber or set of
-   subscribers participating in an event feed (see
+   An identity event conveys a message (in the form of a token) about a
+   resource (e.g. a security subject) that may be of interest to a
+   subscriber or set of subscribers participating in an event feed (see
    [idevent-subscription]).
 
-   An event message is indicated by the attribute "schemas" having one
-   value as "urn:ietf:params:scim:schemas:Event" and more or more
-   additional values indicating one or more event extension schema URIs.
-   An event extension schema URI indicates to the reader what event
+   An event message is indicated a JSON object containing the attribute
+   "schemas" and having at least one value as
+   "urn:ietf:params:scim:schemas:Event".  The "schemas" usually contains
+   other values that convey one or more event extension schema URIs.  An
+   event extension schema URI indicates to the reader what event
    information and event types are contained in the event message.  The
    attribute "resourceUris" specifies one or more affected resources
-   which are the subject of the event.
+   which are the subject of the event. [should resourceUris be
+   required?? Or could it be required as part of an extension schema]
+
+
+
+
+
+Hunt, et al.             Expires August 13, 2016                [Page 4]
+
+Internet-Draft          draft-hunt-idevent-token           February 2016
+
 
    The schema and structure of an event follows the SCIM schema model as
    defined in [RFC7643].  This means that an event has the following
@@ -143,34 +235,9 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
    o  one or more schema extensions (see Section 3 of [RFC7643]) that
       each define a set of attributes that belonging to an extension.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.             Expires August 7, 2016                 [Page 3]
-
-Internet-Draft          draft-hunt-idevent-token           February 2016
-
-
-   The following non-normative example shows a password change event:
+   The following is a non-normative example showing a password change
+   event that conveys both a hypothetical RISC event and a SCIM event in
+   the same message:
 
    {
      "schemas":[
@@ -188,26 +255,44 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
      ],
      "urn:ietf:params:scim:schemas:extension:Event:SCIM:password":{
        "id":"44f6142df96bd6ab61e7521d9",
-       "resetCount":5
+       "values":{
+         "urn:ietf:params:scim:schemas:extension:account:2.0:Password":{
+           "resetAttempts":5
+         }
+       }
      },
      "urn:ietf:params:scim:schemas:extension:Event:RISC:password":{
        "terminateSession":true
      }
    }
 
-   The above example shows an event that has a dual-extension and
-   actually expresses a password update event.  The event has a dual-
-   extension which allows two different sub-events to be expressed based
-   on one state change at the publisher.  Multiple events MAY be
-   asserted at the same time (when appropriate), and carry different or
-   even overlapping attributes.  This is expressed by placing the event
-   extensions each within its own JSON object (in this example,
+   The event in the figure above has dual-extensions which allows two
+   different events to be expressed based on one state change at the
+   publisher.  An event MAY assert multiple different event types at the
+   the same time (when appropriate), and carry different or even
+   overlapping attributes.  Each event extension has its own set of
+   attributes expressed within its own JSON object (in this example,
    "urn:ietf:params:scim:schemas:extension:Event:SCIM:password" and
    "urn:ietf:params:scim:schemas:extension:Event:RISC:password").  In
-   this example, a SCIM event indicates that a password has been updated
-   and the current password reset count is 5.  The other extension is a
-   "RISC" extension and lets a subscriber know that any current sessions
-   associated with the subject should be terminated.
+
+
+
+Hunt, et al.             Expires August 13, 2016                [Page 5]
+
+Internet-Draft          draft-hunt-idevent-token           February 2016
+
+
+   this example, the SCIM event (see Appendix A.1) indicates that a
+   password has been updated and the current password reset count is 5.
+   Notice that the value for "resetAttempts" is actually part of its own
+   schema SCIM extension
+   _urn:ietf:params:scim:schemas:extension:account:2.0:Password_.
+
+   The other event extension is a hypothetical "RISC" extension and lets
+   a subscriber know that any current sessions associated with the
+   subject should be terminated.  [NOTE: at the time of writing there is
+   no actual definition of RISC events, so these examples are
+   hypothetical]
 
    By expressing multiple extensions at the same time, the publisher
    indicates that each event type stems from the same originating event.
@@ -217,16 +302,7 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
    minimize information disclosure to a particular subscriber or set of
    subscribers.
 
-
-
-
-
-Hunt, et al.             Expires August 7, 2016                 [Page 4]
-
-Internet-Draft          draft-hunt-idevent-token           February 2016
-
-
-2.1.  Core Event Properties
+2.1.  Core Event Attributes
 
    The following are attributes that may be included in an event
    message:
@@ -244,15 +320,23 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
       same subscriber.
 
    publisherUri
-      A single valued string containing the URI of the service provider
+      A single valued String containing the URI of the service provider
       publishing the event.  For example, in SCIM, this is the SCIM
       Service Provider's root endpoint.
 
    resourceUris
-      A multi-valued string that contains the URIs of one or more
+      A multi-valued String that contains the URIs of one or more
       affected resources in the event.  For each resource URI included,
       the event must be identical.  For each event extension expressed,
       each extension MUST apply to each resourceUris value.
+
+
+
+
+Hunt, et al.             Expires August 13, 2016                [Page 6]
+
+Internet-Draft          draft-hunt-idevent-token           February 2016
+
 
 2.2.  Event Token
 
@@ -264,24 +348,6 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
    implementers SHALL NOT use these events to convey authentication
    assertions or identity tokens[[references??]].
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.             Expires August 7, 2016                 [Page 5]
-
-Internet-Draft          draft-hunt-idevent-token           February 2016
-
-
    The following is an example event message(it has been modified for
    readability):
 
@@ -292,8 +358,8 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
      ],
      "publisherUri":"https://scim.example.com",
      "feedUris":[
-      "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
-      "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
+      "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
+      "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
      ],
      "resourceUris":[
        "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9"
@@ -319,24 +385,22 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
 
    When transmitted, the above JSON body must be converted into a JWT as
    per [RFC7519].  In this example, because the event contains attribute
+
+
+
+
+Hunt, et al.             Expires August 13, 2016                [Page 7]
+
+Internet-Draft          draft-hunt-idevent-token           February 2016
+
+
    values, the token MUST be encrypted per JWE (see [RFC7516]) before
    transmission.
-
-   [[Figures below need to be updated to reflect the new message body
-   above]]
 
    The following is an example of a SCIM Event expressed in an unsecured
    JWT token.  The JWT header of:
 
    {"alg":"none"}
-
-
-
-
-Hunt, et al.             Expires August 7, 2016                 [Page 6]
-
-Internet-Draft          draft-hunt-idevent-token           February 2016
-
 
    Base64url encoding of the octets of the UTF-8 representation of the
    header yields:
@@ -345,35 +409,70 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
 
    The example JSON Event Data is encoded as follows:
 
-   eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
-   kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
-   FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
-   WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
-   WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
-   hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
-   VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
-   SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
-   b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
-   tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
-   1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+   eyAgCiAgInNjaGVtYXMiOlsKICAgICJ1cm46aWV0ZjpwYXJhbXM6c2NpbTpzY2h
+   lbWFzOkV2ZW50IiwKICAgICJ1cm46aWV0ZjpwYXJhbXM6c2NpbTpzY2hlbWFzOm
+   V4dGVuc2lvbjpFdmVudDpTQ0lNIgogIF0sCiAgInB1Ymxpc2hlclVyaSI6Imh0d
+   HBzOi8vc2NpbS5leGFtcGxlLmNvbSIsICAKICAiZmVlZFVyaXMiOlsKICAgImh0
+   dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU
+   5M2I3NzU0IiwKICAgImh0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy81ZD
+   c2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3IgogIF0sICAKICAicmVzb3VyY2VVcmlzI
+   jpbCiAgICAiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL1VzZXJzLzQ0ZjYxNDJk
+   Zjk2YmQ2YWI2MWU3NTIxZDkiCiAgXSwKICAidXJuOmlldGY6cGFyYW1zOnNjaW0
+   6c2NoZW1hczpleHRlbnNpb246RXZlbnQ6U0NJTTpjcmVhdGUiOnsKICAgICJhdH
+   RyaWJ1dGVzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlb
+   WFpbHMiXSwKICAgICJ2YWx1ZXMiOnsKICAgICAgImVtYWlscyI6WwogICAgICAg
+   eyJ0eXBlIjoid29yayIsInZhbHVlIjoiamRvZUBleGFtcGxlLmNvbSJ9CiAgICA
+   gIF0sCiAgICAgICJwYXNzd29yZCI6Im5vdDR1Mm5vIiwKICAgICAgInVzZXJOYW
+   1lIjoiamRvZSIsCiAgICAgICJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZ
+   DkiLAogICAgICAibmFtZSI6ewogICAgICAgICJnaXZlbk5hbWUiOiJKb2huIiwK
+   ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp
+   9
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires August 13, 2016                [Page 8]
+
+Internet-Draft          draft-hunt-idevent-token           February 2016
+
 
    The encoded JWS signature is the empty string.  Concatenating the
    parts yields:
 
    eyJhbGciOiJub25lIn0
    .
-   eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
-   kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
-   FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
-   WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
-   WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
-   hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
-   VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
-   SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
-   b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
-   tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
-   1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
-   .
+   eyAgCiAgInNjaGVtYXMiOlsKICAgICJ1cm46aWV0ZjpwYXJhbXM6c2NpbTpzY2h
+   lbWFzOkV2ZW50IiwKICAgICJ1cm46aWV0ZjpwYXJhbXM6c2NpbTpzY2hlbWFzOm
+   V4dGVuc2lvbjpFdmVudDpTQ0lNIgogIF0sCiAgInB1Ymxpc2hlclVyaSI6Imh0d
+   HBzOi8vc2NpbS5leGFtcGxlLmNvbSIsICAKICAiZmVlZFVyaXMiOlsKICAgImh0
+   dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU
+   5M2I3NzU0IiwKICAgImh0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy81ZD
+   c2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3IgogIF0sICAKICAicmVzb3VyY2VVcmlzI
+   jpbCiAgICAiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL1VzZXJzLzQ0ZjYxNDJk
+   Zjk2YmQ2YWI2MWU3NTIxZDkiCiAgXSwKICAidXJuOmlldGY6cGFyYW1zOnNjaW0
+   6c2NoZW1hczpleHRlbnNpb246RXZlbnQ6U0NJTTpjcmVhdGUiOnsKICAgICJhdH
+   RyaWJ1dGVzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlb
+   WFpbHMiXSwKICAgICJ2YWx1ZXMiOnsKICAgICAgImVtYWlscyI6WwogICAgICAg
+   eyJ0eXBlIjoid29yayIsInZhbHVlIjoiamRvZUBleGFtcGxlLmNvbSJ9CiAgICA
+   gIF0sCiAgICAgICJwYXNzd29yZCI6Im5vdDR1Mm5vIiwKICAgICAgInVzZXJOYW
+   1lIjoiamRvZSIsCiAgICAgICJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZ
+   DkiLAogICAgICAibmFtZSI6ewogICAgICAgICJnaXZlbk5hbWUiOiJKb2huIiwK
+   ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp
+   9.
 
                   Figure 2: Example Unsecured Event Token
 
@@ -383,16 +482,6 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
 3.  Security Considerations
 
    [[TO BE COMPLETED]]
-
-
-
-
-
-
-Hunt, et al.             Expires August 7, 2016                 [Page 7]
-
-Internet-Draft          draft-hunt-idevent-token           February 2016
-
 
 4.  IANA Considerations
 
@@ -407,6 +496,15 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
    [idevent-subscription]
               Oracle Corporation, "Identity Event Subscription Protocol
               (work in progress)".
+
+
+
+
+
+Hunt, et al.             Expires August 13, 2016                [Page 9]
+
+Internet-Draft          draft-hunt-idevent-token           February 2016
+
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -437,18 +535,16 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
 
 5.2.  Informative References
 
+   [HEART]    The OpenId Foundation, "HEART Working Group (work in
+              progress)".
+
+   [RFC7009]  Lodderstedt, T., Ed., Dronia, S., and M. Scurtescu, "OAuth
+              2.0 Token Revocation", RFC 7009, DOI 10.17487/RFC7009,
+              August 2013, <http://www.rfc-editor.org/info/rfc7009>.
+
    [RFC7515]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
               Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May
               2015, <http://www.rfc-editor.org/info/rfc7515>.
-
-
-
-
-
-Hunt, et al.             Expires August 7, 2016                 [Page 8]
-
-Internet-Draft          draft-hunt-idevent-token           February 2016
-
 
    [RFC7516]  Jones, M. and J. Hildebrand, "JSON Web Encryption (JWE)",
               RFC 7516, DOI 10.17487/RFC7516, May 2015,
@@ -458,20 +554,33 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
               DOI 10.17487/RFC7517, May 2015,
               <http://www.rfc-editor.org/info/rfc7517>.
 
+
+
+
+Hunt, et al.             Expires August 13, 2016               [Page 10]
+
+Internet-Draft          draft-hunt-idevent-token           February 2016
+
+
    [RFC7644]  Hunt, P., Ed., Grizzle, K., Ansari, M., Wahlstroem, E.,
               and C. Mortimore, "System for Cross-domain Identity
               Management: Protocol", RFC 7644, DOI 10.17487/RFC7644,
               September 2015, <http://www.rfc-editor.org/info/rfc7644>.
 
+   [RISC]     The OpenId Foundation, "RISC (Risk and Incident Sharing
+              and Coordination) Working Group (work in progress)".
+
 Appendix A.  Appendix A.  Event Types
 
-A.1.  SCIM Event Types
+A.1.  SCIM Events
 
-   This specification defines 8 events.  Additional event types may be
-   defined using the Event Type IANA registration process described in
-   Section 4.1.
+A.1.1.  Event Schema URIs
 
-   ADD
+   This specification defines event schema URI for SCIM.  Additional
+   event types may be defined using the Event Type IANA registration
+   process described in Section 4.1.
+
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:add
       The specified resource URI was added to the feed.  An add does not
       necessarily indicate a resource is new or has been recently
       created, but rather that it has been added to a feed.  For
@@ -479,56 +588,94 @@ A.1.  SCIM Event Types
       added to their profile which has caused their resource to join a
       feed.
 
-   CREATE
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:create
       The new resource URI has been created at the service provider and
       has been added to the feed.  When a CREATE event is sent, a
       corresponding ADD event is not issued.  For example, a new user
       was created via HTTP POST, whose attribute profile met the
       criteria of a current feed.
 
-   ACTIVATE
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:activate
       The specified resource (e.g.  User) has been activated or is
       otherwise available for use.  [TODO: this seems to be a higher
       level concept that may consist of multiple attributes changing -
       How to differentiate between activate and MODIFY events]
 
-   MODIFY
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:modify
       The specified resource has been updated (e.g. one or more
       attributes has changed).
 
-   DEACTIVATE
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:deactivate
+      The specified resource (e.g.  User) has been deactivated.  [TODO:
+      Is there a corresponding MODIFY event?]
+
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:delete
 
 
 
-
-Hunt, et al.             Expires August 7, 2016                 [Page 9]
+Hunt, et al.             Expires August 13, 2016               [Page 11]
 
 Internet-Draft          draft-hunt-idevent-token           February 2016
 
 
-      The specified resource (e.g.  User) has been deactivated.  [TODO:
-      Is there a corresponding MODIFY event?]
+      The specified resource has been deleted from the service provider
+      and is also removed from the feed.  When a DELETE is sent, a
+      corresponding REMOVE is not issued.
 
-   DELETE  The specified resource has been deleted from the service
-      provider and is also removed from the feed.  When a DELETE is
-      sent, a corresponding REMOVE is not issued.
-
-   REMOVE
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:remove
       The specified resource has been removed from the feed.  Removal
       does not indicate that the resource was deleted or otherwise
       deactivated.
 
-   PASSWORD
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:password
       The specified resource (e.g.  User) has changed its password.  If
       secure exchange is possible with the subscriber, the event may
       also include the raw password update text.  A PASSWORD event MUST
       be transmitted in encrypted form (see Section 2.2).
 
-   CONFIRMATION  A special event that is used during Polling Feed
-      Registrations and Web Callback URI subscriptions to confirm
-      successful configuration of an event feed.  The contents of a
-      CONFIRMATION event SHALL be defined by the registration process
-      documented in following sections [TODO add reference]
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:confirmation
+      A special event that is used during Polling Feed Registrations and
+      Web Callback URI subscriptions to confirm successful configuration
+      of an event feed.  The contents of a CONFIRMATION event SHALL be
+      defined by the registration process documented in following
+      sections [TODO add reference]
+
+A.1.2.  SCIM Event Attributes
+
+   The following attributes are defined for all of the schema URI
+   defined in Appendix A.1.1 or any schema defined within the uri
+   namespace "urn:ietf:params:scim:schemas:extension:Event:SCIM".
+
+   id
+      An optional multi-valued SCIM "id" value of the affected
+      resource(s) as defined in Section 3.1 [RFC7643].  If provided the
+      identifiers MUST correspond to the values referenced in
+      "resourceUris".
+
+   attributes
+      A multi-valued list of affected SCIM attributes.  Each attribute
+      listed may be a fully-qualified attribute name or an attribute
+      "path" as defined in Figure 7 of Section 3.3.2 of [RFC7644]
+
+   values
+      A JSON object structure containing the affected attributes and
+      their associated values.  If the "values" attribute is supplied,
+      the event message MUST be encrypted.  Service providers SHOULD
+      take care to ensure that eligible subscribers are able to see
+      attribute values.  Alternatively, subscribers MAY use the
+      resourceURIs to retrieve the final attribute values.  When doing
+      so, the SCIM service provider can then assess the subscribers
+      right to obtain the actual attribute values.
+
+
+
+Hunt, et al.             Expires August 13, 2016               [Page 12]
+
+Internet-Draft          draft-hunt-idevent-token           February 2016
+
+
+      For a password change event, the clear text password attribute
+      value MAY be included in the values attribute.  "PASSWORD" event.
 
 Appendix B.  Contributors
 
@@ -555,13 +702,6 @@ Authors' Addresses
    Email: wdenniss@google.com
 
 
-
-
-Hunt, et al.             Expires August 7, 2016                [Page 10]
-
-Internet-Draft          draft-hunt-idevent-token           February 2016
-
-
    Morteza Ansari
    Cisco
 
@@ -585,32 +725,4 @@ Internet-Draft          draft-hunt-idevent-token           February 2016
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.             Expires August 7, 2016                [Page 11]
+Hunt, et al.             Expires August 13, 2016               [Page 13]
