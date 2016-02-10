@@ -56,7 +56,50 @@
 
   <middle>
     <section anchor="intro" title="Introduction and Overview" toc="default">
-      <t>[[introduction text here]]</t>
+      <t>This specification defines an extensible event token format which may
+      be exchanged using protocols such as HTTP. The specification builds
+      on the JSON Web Token format <xref target="RFC7519"/> in order to provide a self-contained 
+      message "token" that can be optionally signed using JSON Web Signature <xref target="RFC7515"/>
+      and/or encrypted using JSON Web Encryption <xref target="RFC7516"/>.</t>
+      <t>For the purpose of this specification an "event" is a historical statement
+      of fact by a publisher that the state of a resource it controls has changed
+      directly or indirectly that may be of interest to a subscriber. 
+      For example, a resource has been created,
+      modified, removed, or updated. In addition to direct changes of state, 
+      there may be higher-level conclusions 
+      made that describe an effect resulting from a change. For example, a
+      publisher may wish to indicate that a new user has taken over an email
+      identifier that may have been used in the past.</t>
+      <t>A subscriber having 
+      been informed of the event, may take its own independent action, if any, 
+      within its own context. For example, having been informed of the identifier being used by someone-else,
+      the subscriber may remove or ensure that the new user is not granted
+      access to resources associated with the previous user.</t>
+      <t>This specification is intended to be extended by other specifications. 
+      It is intended to establish a common identity event format to enable inter-op
+      and easier adoption of event based systems and protocols. This specification 
+      does include the definition of some SCIM events. However the inclusion of 
+      SCIM events is intended to be informative to other extenders and not intended 
+      to replace events that may be defined for other purposes. At the time 
+      of writing of this specifications there are several discussions going on around the need 
+      for identity events. Some of these include:<list style="symbols">
+        <t>Events to allow SCIM resource co-ordination between SCIM domains.</t>
+        <t>OAuth Token Revocation (see <xref target="RFC7009"/>)</t>
+        <t>OpenID Logout or downstream logout notification.</t>
+        <t>Session Cancellation</t>
+        <t>OpenID Risk Incident Sharing and Coordination (RISC) Events. See <xref target="RISC"/></t>
+        <t>The HEART WG <xref target="HEART"/> which intends to define privacy and security related events
+        in health-related data sharing APIs.</t>
+      </list></t>
+      <t>Events SHOULD NOT be used to convey commands or requests. To do so
+      requires complex bi-directional signaling and error recovery mechanisms which fall
+      outside the scope of this specification. The intent of this specification
+      is to define a way of stating historical statements of fact that 
+      subscribers may interpret for their own use.</t>
+      <t>This specification is scoped to security and identity related events.
+      While event tokens may be used for other purposes, the specification
+      only considers security and privacy concerns relevant to identity 
+      and personal information.</t>
 
       <section anchor="notat" title="Notational Conventions" toc="default">
         <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
@@ -120,7 +163,11 @@
   ],
   "urn:ietf:params:scim:schemas:extension:Event:SCIM:password":{
     "id":"44f6142df96bd6ab61e7521d9",
-    "resetCount":5
+    "values":{
+      "urn:ietf:params:scim:schemas:extension:account:2.0:Password":{
+        "resetAttempts":5
+      }
+    }
   },
   "urn:ietf:params:scim:schemas:extension:Event:RISC:password":{
     "terminateSession":true
@@ -136,8 +183,12 @@
       its own JSON object (in this example, 
       <spanx style="verb">urn:ietf:params:scim:schemas:extension:Event:SCIM:password</spanx> and 
       <spanx style="verb">urn:ietf:params:scim:schemas:extension:Event:RISC:password</spanx>).
-      In this example, a SCIM event indicates that a password has been updated 
-      and the current password reset count is 5.  The other extension is a 
+      In this example, a SCIM event (see <xref target="scimEvents"/>) indicates that a password has been updated 
+      and the current password reset count is 5. Notice that the value for 
+      "resetAttempts" is actually part of its own schema SCIM extension 
+      <spanx>urn:ietf:params:scim:schemas:extension:account:2.0:Password</spanx>.  
+      </t>
+      <t>The other event extension is a 
       "RISC" extension and lets a subscriber know that any current  
       sessions associated with the subject should be terminated.
       </t>
@@ -307,79 +358,137 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
         </front>  
         <format type="TXT" target="draft-hunt-idevent-subscription-00.txt"/>    
       </reference>
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml' ?><!-- Keywords -->
 
 
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml'?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml'?><!-- URIs -->
 
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5988.xml'?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5988.xml'?><!-- Web Linking -->
 
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7159.xml'?>
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml'?>
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml'?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7159.xml'?><!-- JSON -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml'?><!-- JWT -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml'?><!-- SCIM Schema -->
     </references>
-
+ 
     <references title="Informative References">
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml'?>
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml'?>
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7517.xml'?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7009.xml'?><!-- OAuth Revocation -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml'?><!-- JWS -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml'?><!-- JWE -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7517.xml'?><!-- JWK -->
 
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml'?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml'?><!-- SCIM Protocl -->
     
+      <reference anchor="RISC">
+        <front>
+          <title>RISC (Risk and Incident Sharing and Coordination) Working Group (work in progress)</title>
+          <author> <organization>The OpenId Foundation</organization></author>
+          <date/>
+        </front>
+        <format type="HTML" target="http://openid.net/wg/risc/"/>
+      </reference>
+
+      <reference anchor="HEART">
+        <front>
+          <title>HEART Working Group (work in progress)</title>
+          <author> <organization>The OpenId Foundation</organization></author>
+          <date/>
+        </front>
+        <format type="HTML" target="http://openid.net/wg/heart/"/>
+      </reference>
+
     </references>
 
     <section title="Appendix A. Event Types">
-    <section anchor="eventTypes" title="SCIM Event Types">
-        <t>This specification defines 8 events. Additional event types may be
-        defined using the Event Type IANA registration process described in
-        <xref target="eventTypesRegistry"/>.<list style="hanging">
-            <t hangText="ADD"><vspace blankLines="0"/>The specified resource
+      <section anchor="scimEvents" title="SCIM Events">
+    
+        <section anchor="scimSchemaUri" title="Event Schema URIs">
+          <t>This specification defines event schema URI for SCIM. Additional event types may be
+          defined using the Event Type IANA registration process described in
+          <xref target="eventTypesRegistry"/>.<list style="hanging">
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:add"><vspace blankLines="0"/>The specified resource
             URI was added to the feed. An add does not necessarily indicate a
             resource is new or has been recently created, but rather that it
             has been added to a feed. For example, an existing user has had a
             new role (e.g. CRM_User) added to their profile which has caused
             their resource to join a feed.</t>
 
-            <t hangText="CREATE"><vspace blankLines="0"/>The new resource URI
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:create"><vspace blankLines="0"/>The new resource URI
             has been created at the service provider and has been added to the
             feed. When a CREATE event is sent, a corresponding ADD event is
             not issued. For example, a new user was created via HTTP POST,
             whose attribute profile met the criteria of a current feed. </t>
 
-            <t hangText="ACTIVATE"><vspace blankLines="0"/>The specified
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:activate"><vspace blankLines="0"/>The specified
             resource (e.g. User) has been activated or is otherwise available
             for use. [TODO: this seems to be a higher level concept that may
             consist of multiple attributes changing - How to differentiate
             between activate and MODIFY events]</t>
 
-            <t hangText="MODIFY"><vspace blankLines="0"/>The specified
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:modify"><vspace blankLines="0"/>The specified
             resource has been updated (e.g. one or more attributes has
             changed).</t>
 
-            <t hangText="DEACTIVATE"><vspace blankLines="0"/>The specified
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:deactivate"><vspace blankLines="0"/>The specified
             resource (e.g. User) has been deactivated. [TODO: Is there a
             corresponding MODIFY event?]</t>
 
-            <t hangText="DELETE">The specified resource has been deleted from
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:delete"><vspace blankLines="0"/>The specified resource has been deleted from
             the service provider and is also removed from the feed. When a
             DELETE is sent, a corresponding REMOVE is not issued.</t>
 
-            <t hangText="REMOVE"><vspace blankLines="0"/>The specified
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:remove"><vspace blankLines="0"/>The specified
             resource has been removed from the feed. Removal does not indicate
             that the resource was deleted or otherwise deactivated.</t>
 
-            <t hangText="PASSWORD"><vspace blankLines="0"/>The specified
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:password"><vspace blankLines="0"/>The specified
             resource (e.g. User) has changed its password. If secure exchange
             is possible with the subscriber, the event may also include the
             raw password update text. A PASSWORD event MUST be transmitted in
             encrypted form (see <xref target="eventMessage"/>).</t>
 
-            <t hangText="CONFIRMATION">A special event that is used during
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:confirmation"><vspace blankLines="0"/>A special event that is used during
             Polling Feed Registrations and Web Callback URI subscriptions to
             confirm successful configuration of an event feed. The contents of
             a CONFIRMATION event SHALL be defined by the registration process
             documented in following sections [TODO add reference]</t>
           </list></t>
+        </section>
+        <section title="SCIM Event Attributes">
+          <t>The following attributes are defined for all of the schema 
+          URI defined in <xref target="scimSchemaUri"/> or any schema defined 
+          within the uri namespace 
+          <spanx style="verb">urn:ietf:params:scim:schemas:extension:Event:SCIM</spanx>.
+          <list style="hanging">
+            <t hangText="id"><vspace blankLines="0"/>An optional multi-valued 
+            SCIM <spanx style="verb">id</spanx> value of the affected resource(s) 
+            as defined in <xref target="RFC7643">Section 3.1</xref>. If 
+            provided the identifiers MUST correspond to the values referenced
+            in <spanx style="verb">resourceUris</spanx>.</t>
+            <t hangText="attributes"><vspace blankLines="0"/>A multi-valued
+            list of affected SCIM attributes. Each attribute listed may be a
+            fully-qualified attribute name or an attribute "path" as defined
+            in Figure 7 of Section 3.3.2 of <xref
+            target="RFC7644"/></t>
+
+            <t hangText="values"><vspace blankLines="0"/>A JSON object
+            structure containing the affected attributes and their associated
+            values. If the "values" attribute is supplied, the event message
+            MUST be encrypted. Service providers SHOULD take care to ensure
+            that eligible subscribers are able to see attribute values.
+            Alternatively, subscribers MAY use the resourceURIs to retrieve
+            the final attribute values. When doing so, the SCIM service
+            provider can then assess the subscribers right to obtain the
+            actual attribute values.</t>
+
+            <t>For a password change event, the clear text password attribute
+            value MAY be included in the values attribute. <spanx
+            style="verb">PASSWORD</spanx> event.</t>          
+          </list>
+          
+          </t>
+          
+        </section>
+       
       </section>
     </section>
     
