@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type='text/xsl' href='http://xml.resource.org/authoring/rfc2629.xslt' ?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<?rfc toc="yes"?>
+<?rfc tocompact="yes"?>
+<?rfc tocdepth="3"?>
+<?rfc tocindent="yes"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc comments="yes"?>
+<?rfc inline="yes"?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+<rfc category="std" docName="draft-hunt-idevent-scim-00" ipr="trust200902">
+  <front>
+    <title abbrev="draft-hunt-idevent-scim">SCIM Event Extension</title>
+
+    <author fullname="Phil Hunt" initials="P." role="editor" surname="Hunt">
+      <organization abbrev="Oracle">Oracle Corporation</organization>
+
+      <address>
+        <email>phil.hunt@yahoo.com</email>
+      </address>
+    </author>
+    
+    <author fullname="William Denniss" initials="W." surname="Denniss">
+      <organization abbrev="Google">Salesforce.com</organization>
+
+      <address>
+        <email>wdenniss@google.com</email>
+      </address>
+    </author>
+    
+
+    <author fullname="Morteza Ansari" initials="M.A." surname="Ansari">
+      <organization abbrev="Cisco">Cisco</organization>
+
+      <address>
+        <email>morteza.ansari@cisco.com</email>
+      </address>
+    </author>
+
+    
+    <date year="2016"/>
+    <keyword>Identity</keyword>
+    <keyword>Event</keyword>
+    <keyword>Token</keyword>
+    <keyword>Internet-Draft</keyword>
+    <keyword>SCIM</keyword>
+
+    <abstract>
+      <t>Thie specification extends the Identity Event Token specification
+      to define a set of events to be used with SCIM.</t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section anchor="intro" title="Introduction and Overview" toc="default">
+      <t>This specification extends the Identity Event Token <xref target="idevent-token"/> to define events
+      for SCIM Protocol <xref target="RFC7644"/>.</t>
+
+      <section anchor="notat" title="Notational Conventions" toc="default">
+        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+        document are to be interpreted as described in <xref
+        target="RFC2119"/>. These keywords are capitalized when used to
+        unambiguously specify requirements of the protocol or application
+        features and behavior that affect the interoperability and security of
+        implementations. When these words are not capitalized, they are meant
+        in their natural-language sense.</t>
+
+        <t>For purposes of readability examples are not URL encoded.
+        Implementers MUST percent encode URLs as described in <xref
+        target="RFC3986">Section 2.1 of</xref>.</t>
+
+        <t>Throughout this documents all figures MAY contain spaces and extra
+        line-wrapping for readability and space limitations. Similarly, some
+        URI's contained within examples, have been shortened for space and
+        readability reasons.</t>
+      </section>
+
+      <section anchor="defs" title="Definitions" toc="default">
+        <t>This specification uses definitions from the specification <xref target="idevent-subscription"/>.</t>
+        
+      </section>
+    </section>
+
+      <section anchor="scimEvents" title="SCIM Events">
+    
+        <section anchor="scimSchemaUri" title="Event Schema URIs">
+          <t>The following defines the schema URI for events used by SCIM. <list style="hanging">
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:add"><vspace blankLines="0"/>The specified resource
+            URI was added to the feed. An add does not necessarily indicate a
+            resource is new or has been recently created, but rather that it
+            has been added to a feed. For example, an existing user has had a
+            new role (e.g. CRM_User) added to their profile which has caused
+            their resource to join a feed.</t>
+
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:create"><vspace blankLines="0"/>The new resource URI
+            has been created at the service provider and has been added to the
+            feed. When a CREATE event is sent, a corresponding ADD event is
+            not issued. For example, a new user was created via HTTP POST,
+            whose attribute profile met the criteria of a current feed. </t>
+
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:activate"><vspace blankLines="0"/>The specified
+            resource (e.g. User) has been activated or is otherwise available
+            for use. [TODO: this seems to be a higher level concept that may
+            consist of multiple attributes changing - How to differentiate
+            between activate and MODIFY events]</t>
+
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:modify"><vspace blankLines="0"/>The specified
+            resource has been updated (e.g. one or more attributes has
+            changed).</t>
+
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:deactivate"><vspace blankLines="0"/>The specified
+            resource (e.g. User) has been deactivated. [TODO: Is there a
+            corresponding MODIFY event?]</t>
+
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:delete"><vspace blankLines="0"/>The specified resource has been deleted from
+            the service provider and is also removed from the feed. When a
+            DELETE is sent, a corresponding REMOVE is not issued.</t>
+
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:remove"><vspace blankLines="0"/>The specified
+            resource has been removed from the feed. Removal does not indicate
+            that the resource was deleted or otherwise deactivated.</t>
+
+            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:password"><vspace blankLines="0"/>The specified
+            resource (e.g. User) has changed its password. If secure exchange
+            is possible with the subscriber, the event may also include the
+            raw password update text. A PASSWORD event MUST be transmitted in
+            encrypted form (see <xref target="idevent-token"/>).</t>
+
+          </list></t>
+        </section>
+        <section anchor="attributes" title="SCIM Event Attributes">
+          <t>The following attributes are defined for all of the schema 
+          URI defined in <xref target="scimSchemaUri"/> or any schema defined 
+          within the uri namespace 
+          <spanx style="verb">urn:ietf:params:scim:schemas:extension:Event:SCIM</spanx>.
+          <list style="hanging">
+            <t hangText="id"><vspace blankLines="0"/>An optional multi-valued 
+            SCIM <spanx style="verb">id</spanx> value of the affected resource(s) 
+            as defined in <xref target="RFC7643">Section 3.1</xref>. If 
+            provided the identifiers MUST correspond to the values referenced
+            in <spanx style="verb">resourceUris</spanx>.</t>
+            <t hangText="attributes"><vspace blankLines="0"/>A multi-valued
+            list of affected SCIM attributes. Each attribute listed may be a
+            fully-qualified attribute name or an attribute "path" as defined
+            in Figure 7 of Section 3.3.2 of <xref
+            target="RFC7644"/></t>
+
+            <t hangText="values"><vspace blankLines="0"/>A JSON object
+            structure containing the affected attributes and their associated
+            values. If the "values" attribute is supplied, the event message
+            MUST be encrypted. Service providers SHOULD take care to ensure
+            that eligible subscribers are able to see attribute values.
+            Alternatively, subscribers MAY use the resourceURIs to retrieve
+            the final attribute values. When doing so, the SCIM service
+            provider can then assess the subscribers right to obtain the
+            actual attribute values.</t>
+
+            <t>For a password change event, the clear text password attribute
+            value MAY be included in the values attribute. <spanx
+            style="verb">PASSWORD</spanx> event.</t>          
+          </list>
+          
+          </t>
+          
+        </section>
+       
+      </section>
+
+
+
+    <section anchor="Security" title="Security Considerations" toc="default">
+
+      <t>[[TO BE COMPLETED]]</t>
+    </section>
+
+    <section anchor="IANA" title="IANA Considerations">
+       <t>This section registers the schema extensions found in <xref target="scimSchemaUri"/>
+       in the "System for Cross-domain Identity Management(SCIM) Schema URIs" registry as per
+       <xref target="RFC7643">Section 10.3</xref>.<list style="hanging">
+         <t hangText="Schema URI:">See <xref target="scimSchemaUri"/>.</t>
+         <t hangText="Schema Name:">See corresponding names under <xref target="scimSchemaUri"/>.</t>
+         <t hangText="Intented ResourceType:">N/A. Events are not intended to be persisted in SCIM.</t>
+         <t hangText="Purpose:">See each description in <xref target="scimSchemaUri"/>.</t>
+         <t hangText="Single-valued Attributes:">None.</t>
+         <t hangText="Multi-valued Attributes:">All schemas in this specification share the same attributes. See <xref target="attributes"/>.</t>
+       </list> 
+       </t>
+       <texttable>
+       <preamble>Summary of schema URI registrations:</preamble>
+       <ttcol>Schema URI</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
+       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:add</c><c>Resource added to Feed Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:remove</c><c>Resource Removal From Feed Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:create</c><c>New Resource Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:modify</c><c>Resource Modified Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:delete</c><c>Resource Deleted Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:activate</c><c>Resource Activated Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:deactivate</c><c>Resource Deactivated Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:password</c><c>Password Change Event</c><c><xref target="scimSchemaUri"/></c>
+       </texttable>
+      
+       
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+
+      <reference anchor="idevent-token">
+        
+        <front>
+          <title>Identity Event Token (work in progress)</title>
+          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
+          <date/>
+        </front>  
+        <format type="TXT" target="draft-hunt-idevent-token-00.txt"/>    
+      </reference>
+      
+      <reference anchor="idevent-subscription">
+        
+        <front>
+          <title>Identity Event Subscription Protocol (work in progress)</title>
+          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
+          <date/>
+        </front>  
+        <format type="TXT" target="draft-hunt-idevent-subscription-00.txt"/>    
+      </reference>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml' ?><!-- Keywords -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml' ?>
+
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml'?><!-- SCIM Schema -->
+    </references>
+ 
+    <references title="Informative References">
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml'?><!-- SCIM Protocl -->
+ 
+
+    </references>
+
+    <section title="Contributors"/>
+
+    <section title="Acknowledgments">
+      <t>The editor would like to thank the participants in the the SCIM
+      working group and the id-event list for their support of this specification.</t>
+    </section>
+
+    <section title="Change Log">
+      <t>Draft 00 - PH - First Draft</t>
+    </section>
+  </back>
+</rfc>

@@ -1,0 +1,392 @@
+
+
+
+
+Network Working Group                                       P. Hunt, Ed.
+Internet-Draft                                                    Oracle
+Intended status: Standards Track                              W. Denniss
+Expires: August 14, 2016                                          Google
+                                                               M. Ansari
+                                                                   Cisco
+                                                       February 11, 2016
+
+
+                          SCIM Event Extension
+                       draft-hunt-idevent-scim-00
+
+Abstract
+
+   Thie specification extends the Identity Event Token specification to
+   define a set of events to be used with SCIM.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at http://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on August 14, 2016.
+
+Copyright Notice
+
+   Copyright (c) 2016 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents
+   (http://trustee.ietf.org/license-info) in effect on the date of
+   publication of this document.  Please review these documents
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
+   the Trust Legal Provisions and are provided without warranty as
+   described in the Simplified BSD License.
+
+
+
+Hunt, et al.             Expires August 14, 2016                [Page 1]
+
+Internet-Draft           draft-hunt-idevent-scim           February 2016
+
+
+Table of Contents
+
+   1.  Introduction and Overview . . . . . . . . . . . . . . . . . .   2
+     1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   2
+     1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   2
+   2.  SCIM Events . . . . . . . . . . . . . . . . . . . . . . . . .   3
+     2.1.  Event Schema URIs . . . . . . . . . . . . . . . . . . . .   3
+     2.2.  SCIM Event Attributes . . . . . . . . . . . . . . . . . .   4
+   3.  Security Considerations . . . . . . . . . . . . . . . . . . .   4
+   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   4
+   5.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   5
+     5.1.  Normative References  . . . . . . . . . . . . . . . . . .   5
+     5.2.  Informative References  . . . . . . . . . . . . . . . . .   6
+   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .   6
+   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .   6
+   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .   6
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   6
+
+1.  Introduction and Overview
+
+   This specification extends the Identity Event Token [idevent-token]
+   to define events for SCIM Protocol [RFC7644].
+
+1.1.  Notational Conventions
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+   document are to be interpreted as described in [RFC2119].  These
+   keywords are capitalized when used to unambiguously specify
+   requirements of the protocol or application features and behavior
+   that affect the interoperability and security of implementations.
+   When these words are not capitalized, they are meant in their
+   natural-language sense.
+
+   For purposes of readability examples are not URL encoded.
+   Implementers MUST percent encode URLs as described in Section 2.1 of
+   [RFC3986].
+
+   Throughout this documents all figures MAY contain spaces and extra
+   line-wrapping for readability and space limitations.  Similarly, some
+   URI's contained within examples, have been shortened for space and
+   readability reasons.
+
+1.2.  Definitions
+
+   This specification uses definitions from the specification
+   [idevent-subscription].
+
+
+
+
+Hunt, et al.             Expires August 14, 2016                [Page 2]
+
+Internet-Draft           draft-hunt-idevent-scim           February 2016
+
+
+2.  SCIM Events
+
+2.1.  Event Schema URIs
+
+   The following defines the schema URI for events used by SCIM.
+
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:add
+      The specified resource URI was added to the feed.  An add does not
+      necessarily indicate a resource is new or has been recently
+      created, but rather that it has been added to a feed.  For
+      example, an existing user has had a new role (e.g.  CRM_User)
+      added to their profile which has caused their resource to join a
+      feed.
+
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:create
+      The new resource URI has been created at the service provider and
+      has been added to the feed.  When a CREATE event is sent, a
+      corresponding ADD event is not issued.  For example, a new user
+      was created via HTTP POST, whose attribute profile met the
+      criteria of a current feed.
+
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:activate
+      The specified resource (e.g.  User) has been activated or is
+      otherwise available for use.  [TODO: this seems to be a higher
+      level concept that may consist of multiple attributes changing -
+      How to differentiate between activate and MODIFY events]
+
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:modify
+      The specified resource has been updated (e.g. one or more
+      attributes has changed).
+
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:deactivate
+      The specified resource (e.g.  User) has been deactivated.  [TODO:
+      Is there a corresponding MODIFY event?]
+
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:delete
+      The specified resource has been deleted from the service provider
+      and is also removed from the feed.  When a DELETE is sent, a
+      corresponding REMOVE is not issued.
+
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:remove
+      The specified resource has been removed from the feed.  Removal
+      does not indicate that the resource was deleted or otherwise
+      deactivated.
+
+   urn:ietf:params:scim:schemas:extension:Event:SCIM:password
+      The specified resource (e.g.  User) has changed its password.  If
+      secure exchange is possible with the subscriber, the event may
+
+
+
+Hunt, et al.             Expires August 14, 2016                [Page 3]
+
+Internet-Draft           draft-hunt-idevent-scim           February 2016
+
+
+      also include the raw password update text.  A PASSWORD event MUST
+      be transmitted in encrypted form (see [idevent-token]).
+
+2.2.  SCIM Event Attributes
+
+   The following attributes are defined for all of the schema URI
+   defined in Section 2.1 or any schema defined within the uri namespace
+   "urn:ietf:params:scim:schemas:extension:Event:SCIM".
+
+   id
+      An optional multi-valued SCIM "id" value of the affected
+      resource(s) as defined in Section 3.1 [RFC7643].  If provided the
+      identifiers MUST correspond to the values referenced in
+      "resourceUris".
+
+   attributes
+      A multi-valued list of affected SCIM attributes.  Each attribute
+      listed may be a fully-qualified attribute name or an attribute
+      "path" as defined in Figure 7 of Section 3.3.2 of [RFC7644]
+
+   values
+      A JSON object structure containing the affected attributes and
+      their associated values.  If the "values" attribute is supplied,
+      the event message MUST be encrypted.  Service providers SHOULD
+      take care to ensure that eligible subscribers are able to see
+      attribute values.  Alternatively, subscribers MAY use the
+      resourceURIs to retrieve the final attribute values.  When doing
+      so, the SCIM service provider can then assess the subscribers
+      right to obtain the actual attribute values.
+
+      For a password change event, the clear text password attribute
+      value MAY be included in the values attribute.  "PASSWORD" event.
+
+3.  Security Considerations
+
+   [[TO BE COMPLETED]]
+
+4.  IANA Considerations
+
+   This section registers the schema extensions found in Section 2.1 in
+   the "System for Cross-domain Identity Management(SCIM) Schema URIs"
+   registry as per Section 10.3 [RFC7643].
+
+   Schema URI:  See Section 2.1.
+
+   Schema Name:  See corresponding names under Section 2.1.
+
+
+
+
+
+Hunt, et al.             Expires August 14, 2016                [Page 4]
+
+Internet-Draft           draft-hunt-idevent-scim           February 2016
+
+
+   Intented ResourceType:  N/A.  Events are not intended to be persisted
+      in SCIM.
+
+   Purpose:  See each description in Section 2.1.
+
+   Single-valued Attributes:  None.
+
+   Multi-valued Attributes:  All schemas in this specification share the
+      same attributes.  See Section 2.2.
+
+                   Summary of schema URI registrations:
+
+   +----------------------------------+------------------+-------------+
+   | Schema URI                       | Name             | Reference   |
+   +----------------------------------+------------------+-------------+
+   | urn:ietf:params:scim:schemas:    | Resource added   | Section 2.1 |
+   | extension:Event:SCIM:add         | to Feed Event    |             |
+   | urn:ietf:params:scim:schemas:    | Resource Removal | Section 2.1 |
+   | extension:Event:SCIM:remove      | From Feed Event  |             |
+   | urn:ietf:params:scim:schemas:    | New Resource     | Section 2.1 |
+   | extension:Event:SCIM:create      | Event            |             |
+   | urn:ietf:params:scim:schemas:    | Resource         | Section 2.1 |
+   | extension:Event:SCIM:modify      | Modified Event   |             |
+   | urn:ietf:params:scim:schemas:    | Resource Deleted | Section 2.1 |
+   | extension:Event:SCIM:delete      | Event            |             |
+   | urn:ietf:params:scim:schemas:    | Resource         | Section 2.1 |
+   | extension:Event:SCIM:activate    | Activated Event  |             |
+   | urn:ietf:params:scim:schemas:    | Resource         | Section 2.1 |
+   | extension:Event:SCIM:deactivate  | Deactivated      |             |
+   |                                  | Event            |             |
+   | urn:ietf:params:scim:schemas:    | Password Change  | Section 2.1 |
+   | extension:Event:SCIM:password    | Event            |             |
+   +----------------------------------+------------------+-------------+
+
+5.  References
+
+5.1.  Normative References
+
+   [idevent-subscription]
+              Oracle Corporation, "Identity Event Subscription Protocol
+              (work in progress)".
+
+   [idevent-token]
+              Oracle Corporation, "Identity Event Token (work in
+              progress)".
+
+
+
+
+
+
+Hunt, et al.             Expires August 14, 2016                [Page 5]
+
+Internet-Draft           draft-hunt-idevent-scim           February 2016
+
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <http://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC3986]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
+              Resource Identifier (URI): Generic Syntax", STD 66,
+              RFC 3986, DOI 10.17487/RFC3986, January 2005,
+              <http://www.rfc-editor.org/info/rfc3986>.
+
+   [RFC7643]  Hunt, P., Ed., Grizzle, K., Wahlstroem, E., and C.
+              Mortimore, "System for Cross-domain Identity Management:
+              Core Schema", RFC 7643, DOI 10.17487/RFC7643, September
+              2015, <http://www.rfc-editor.org/info/rfc7643>.
+
+5.2.  Informative References
+
+   [RFC7644]  Hunt, P., Ed., Grizzle, K., Ansari, M., Wahlstroem, E.,
+              and C. Mortimore, "System for Cross-domain Identity
+              Management: Protocol", RFC 7644, DOI 10.17487/RFC7644,
+              September 2015, <http://www.rfc-editor.org/info/rfc7644>.
+
+Appendix A.  Contributors
+
+Appendix B.  Acknowledgments
+
+   The editor would like to thank the participants in the the SCIM
+   working group and the id-event list for their support of this
+   specification.
+
+Appendix C.  Change Log
+
+   Draft 00 - PH - First Draft
+
+Authors' Addresses
+
+   Phil Hunt (editor)
+   Oracle Corporation
+
+   Email: phil.hunt@yahoo.com
+
+
+   William Denniss
+   Salesforce.com
+
+   Email: wdenniss@google.com
+
+
+
+
+
+Hunt, et al.             Expires August 14, 2016                [Page 6]
+
+Internet-Draft           draft-hunt-idevent-scim           February 2016
+
+
+   Morteza Ansari
+   Cisco
+
+   Email: morteza.ansari@cisco.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires August 14, 2016                [Page 7]
