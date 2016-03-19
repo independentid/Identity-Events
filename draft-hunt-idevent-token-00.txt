@@ -17,9 +17,10 @@ Expires: September 20, 2016                                       Google
 Abstract
 
    This specification defines an Identity Event token which may be
-   distributed via a protocol such as HTTP.  An identity event token
-   describes a statement of fact that may be shared by an event
-   publisher with registered subscribers.
+   distributed via a protocol such as HTTP.  An identity event token is
+   based on the JSON Web Token and may be optionally signed and/or
+   encrypted.  It describes a statement of fact that may be shared by an
+   event publisher with registered subscribers.
 
 Status of This Memo
 
@@ -49,7 +50,6 @@ Copyright Notice
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
    to this document.  Code Components extracted from this document must
-   include Simplified BSD License text as described in Section 4.e of
 
 
 
@@ -58,6 +58,7 @@ Hunt, et al.           Expires September 20, 2016               [Page 1]
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
+   include Simplified BSD License text as described in Section 4.e of
    the Trust Legal Provisions and are provided without warranty as
    described in the Simplified BSD License.
 
@@ -66,20 +67,20 @@ Table of Contents
    1.  Introduction and Overview . . . . . . . . . . . . . . . . . .   2
      1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   4
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   4
-   2.  Events  . . . . . . . . . . . . . . . . . . . . . . . . . . .   4
+   2.  Events  . . . . . . . . . . . . . . . . . . . . . . . . . . .   5
      2.1.  Core Event Attributes . . . . . . . . . . . . . . . . . .   6
-     2.2.  Event Token . . . . . . . . . . . . . . . . . . . . . . .   6
-   3.  Security Considerations . . . . . . . . . . . . . . . . . . .   9
-   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   9
-     4.1.  Registration of Event URN Sub-namespace . . . . . . . . .   9
-     4.2.  Event Registry  . . . . . . . . . . . . . . . . . . . . .   9
-   5.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   9
-     5.1.  Normative References  . . . . . . . . . . . . . . . . . .   9
-     5.2.  Informative References  . . . . . . . . . . . . . . . . .  10
-   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .  11
-   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  11
-   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  11
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  11
+     2.2.  Event Token Construction  . . . . . . . . . . . . . . . .   7
+   3.  Security Considerations . . . . . . . . . . . . . . . . . . .  10
+   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  10
+     4.1.  Registration of Event URN Sub-namespace . . . . . . . . .  10
+     4.2.  Event Registry  . . . . . . . . . . . . . . . . . . . . .  10
+   5.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  10
+     5.1.  Normative References  . . . . . . . . . . . . . . . . . .  10
+     5.2.  Informative References  . . . . . . . . . . . . . . . . .  11
+   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .  12
+   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  12
+   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  12
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  12
 
 1.  Introduction and Overview
 
@@ -91,21 +92,20 @@ Table of Contents
    [RFC7516].
 
    For the purpose of this specification an "event" is a statement of
-   fact by a publisher (also known as the issuer) that the state of a
+   fact by a publisher (also known as an issuer) that the state of a
    resource it controls has changed in some way (explicitly or
    implicitly).  Based on some agreed upon criteria for an event feed,
    the publisher distributes the event to the appropriate subscribers.
 
-   At the time of writing of this specifications there are several
-   discussions regarding the need for identity events.  Some of these
-   include:
+   [[Background: to be removed from final specification]]At the time of
+   writing of this specifications there are several discussions
+   regarding the need for identity events.  Some of these include:
 
    o  Events to allow SCIM resource co-ordination between SCIM domains.
 
    o  OAuth Token Revocation (see [RFC7009])
 
    o  OpenID Logout or downstream logout notification.
-
 
 
 
@@ -123,44 +123,44 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
       related events in health-related data sharing APIs.
 
    This specification uses example SCIM events which are intended to be
-   non-normative for the purpose of showing how an event may be extended
-   in typical use.
+   non-normative for the purpose of showing how an event may be used in
+   practice.
 
-   A resource state change event MAY include explicit changes such as: a
-   resource that has been created, modified, removed, or updated.  In
-   addition to explicit changes of state, there may be higher-level
-   conclusions made that describe an effect resulting from a change.
-   For example, a publisher may wish to indicate that a user resource
-   has taken over an email identifier that may have been used in the
-   past.  This hypothetical event is a high-level conclusion that takes
-   into account that another resource had a personal identifier that
-   potentially conflicts with a newer resource.  Because of the
-   potential security impact, the publisher may wish to notify its
-   subscribers of the identifier re-use.  In this way, the event is not
-   describing a particular state change to a resource, it describes a
-   meta-conclusion based on its own business and security rules (this is
-   often called an 'account take-over' event).
+   A resource state change event typically includes explicit operation
+   events such as: a resource has been created, modified, removed, or
+   updated in some way.
 
-   A subscriber having received an event, takes its own independent
-   action, if any.  For example, having been informed of a personal
-   identifier now being associated with a different resource (i.e. is
-   being used by someone-else), the subscriber may choose to ensure that
-   the new user is not granted access to resources associated with the
-   previous user.
+   In addition to explicit operations there may be higher-level
+   statements made that describe an effect resulting from a change.  For
+   example, a publisher may wish to indicate that a user resource has
+   taken over an email identifier that may have been used in the past.
+   This cumulative event is a high-level statement that takes into
+   account that another resource had a personal identifier that
+   potentially conflicts with a newer resource.  Because of the security
+   impact, the publisher wishes to notify its subscribers of the
+   identifier re-use.  In this way, the event is not describing a
+   particular state change to a resource, it describes a meta-conclusion
+   based on its own business and security rules (this scenario is often
+   called an 'account take-over' event).
+
+   A subscriber having received an event, validates and interprets the
+   event and takes its own independent action, if any.  For example,
+   having been informed of a personal identifier now being associated
+   with a different resource (i.e. is being used by someone-else), the
+   subscriber may choose to ensure that the new user is not granted
+   access to resources associated with the previous user.
 
    Events SHOULD NOT be used to convey commands or requests.  To do so
    requires complex bi-directional signaling and error recovery
    mechanisms which fall outside the scope of this specification.  The
-   intent of this specification is to define a way of stating historical
-   statements of fact that subscribers may interpret for their own use.
+   intent of this specification is to define a way of exchanging
+   historical statements of fact that subscribers may interpret for
+   their own use.
 
    This specification is scoped to security and identity related events.
    While event tokens may be used for other purposes, the specification
    only considers security and privacy concerns relevant to identity and
    personal information.
-
-   This specification is intended to be optionally used with the
-   identity event subscription management specification which provides
 
 
 
@@ -170,8 +170,11 @@ Hunt, et al.           Expires September 20, 2016               [Page 3]
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
-   the details of event feeds and how subscribers register for
-   events(see [idevent-subscription]).
+   This specification may be optionally used with the identity event
+   subscription management specification which provides the details of
+   event feeds and how subscribers register for events(see
+   [idevent-subscription]), defines a protocol registry for event
+   transmission methods including transmission using HTTP.
 
 1.1.  Notational Conventions
 
@@ -195,8 +198,37 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 1.2.  Definitions
 
-   This specification uses definitions from the specification
-   [idevent-subscription].
+   The following definitions are used with Identity Events:
+
+   Feed Publisher
+      The Feed Provider publishes events to be distributed to registered
+      subscribers.  In JWT terminology, the Feed Publisher is also known
+      as the issuer "iss").
+
+   Event
+      An event is a resource change statement that is to be distributed
+      to one or more registered subscribers.  An event is constructed as
+      a JWT token and MAY be signed or encrypted using JWS/JWE for
+      authentication and confidentiality reasons.
+
+   Feed
+      A feed is a URI that describes the set of resources and events
+      under which events may be issued.  An interested client registers
+      with the Feed Provider to subscribe to events associated with a
+      feed.  When expressed in a JWT token, a feed is defined as the
+      event's audience ("aud").
+
+
+
+
+Hunt, et al.           Expires September 20, 2016               [Page 4]
+
+Internet-Draft          draft-hunt-idevent-token              March 2016
+
+
+   Subscriber
+      A Subscriber registers to receive event notifications from a Feed
+      Provider using a protocol such as HTTP.
 
 2.  Events
 
@@ -208,28 +240,47 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
    In addition to the JWT attributes "iss" and "aud", an event message
    contains the attribute "eventUris" with at least one value containing
    the URI prefix "urn:ietf:params:event:".  The event URI values
-   indicate what event information and event types are contained in the
-   event message.  The definition of registered events are found in the
-   event registry (see Section 4.2).
+   indicate what event information (attributes) and what type of event
+   (e.g. resource modified) is contained in the event message.  The
+   definition of registered events are found in the event registry (see
+   Section 4.2).
 
    The attribute "resourceUris" specifies one or more affected resources
-   which are the subject of the event. [should resourceUris be
-   required?? Or could it be required as part of an extension schema]
+   which are the subject of the event.
 
    The schema and structure of an event follows the JWT [RFC7519].  An
    event JWT has the following characteristics:
-
-
-
-Hunt, et al.           Expires September 20, 2016               [Page 4]
-
-Internet-Draft          draft-hunt-idevent-token              March 2016
-
 
    o  a common set of attributes common to every event, and
 
    o  one or more event extensions that each contain a set of attributes
       that belonging to an extension.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.           Expires September 20, 2016               [Page 5]
+
+Internet-Draft          draft-hunt-idevent-token              March 2016
+
 
    The following is a non-normative example showing a password change
    event that conveys both a hypothetical RISC event and a SCIM event
@@ -237,7 +288,8 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
    {
      "eventUris":[
-       "urn:ietf:params:event:SCIM:password"
+       "urn:ietf:params:event:SCIM:password",
+       "urn:ietf:params:event:extension:example.com:password"
      ],
      "iss":"https://scim.example.com",
      "aud":[
@@ -249,13 +301,13 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
      ],
      "urn:ietf:params:event:SCIM:password":{
        "id":"44f6142df96bd6ab61e7521d9",
-       "values":{
-         "urn:ietf:params:scim:schemas:extension:account:2.0:Password":{
-           "resetAttempts":5
-         }
-       }
+     },
+     "urn:ietf:params:event:extension:example.com:password":{
+        "resetAttempts":5
      }
    }
+
+                Figure 1: Example SCIM Password Reset Event
 
    The event in the figure above expresses hypothetical password reset
    event for SCIM.  The JWT consists of an "iss" attribute which denotes
@@ -267,25 +319,24 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
    to the "eventUris" attribute.  For each event URI value specified,
    there is a corresponding attribute that has its on JSON object that
    contains the attributes associated with that event (e.g.
-   "urn:ietf:params:event:SCIM:password").  In this example, the SCIM
-   event (see [idevent-scim]) indicates that a password has been updated
+   "urn:ietf:params:event:extension:example.com:password").  In this
+   example, the SCIM event indicates that a password has been updated
    and the current password reset count is 5.  Notice that the value for
    "resetAttempts" is actually part of its own JSON object
-   _urn:ietf:params:event:SCIM:password_.
-
-
-
-
-
-Hunt, et al.           Expires September 20, 2016               [Page 5]
-
-Internet-Draft          draft-hunt-idevent-token              March 2016
-
+   "urn:ietf:params:event:extension:example.com:password".
 
 2.1.  Core Event Attributes
 
    The following are attributes that may be included in an event
    message:
+
+
+
+
+Hunt, et al.           Expires September 20, 2016               [Page 6]
+
+Internet-Draft          draft-hunt-idevent-token              March 2016
+
 
    eventUris
       A multi-valued String that contains the URIs of events contained
@@ -309,11 +360,11 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
       the event must be identical.  For each event extension expressed,
       each extension MUST apply to each resourceUris value.
 
-2.2.  Event Token
+2.2.  Event Token Construction
 
-   An Event Token is a JWT ([RFC7519])that is constructed by building a
-   JSON structure (see [RFC7159]) that constitutes an event "message"
-   and which is then used as the body of a JWT.
+   An Event Token is a JWT [RFC7519] that is constructed by building a
+   JSON structure that constitutes an event object and which is then
+   used as the body of a JWT.
 
    While this specification uses JWT to convey an event message,
    implementers SHALL NOT use these events to convey authentication or
@@ -333,7 +384,12 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 6]
+
+
+
+
+
+Hunt, et al.           Expires September 20, 2016               [Page 7]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
@@ -370,7 +426,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
      }
    }
 
-                     Figure 1: Example Event JSON Data
+                     Figure 2: Example Event JSON Data
 
    When transmitted, the above JSON body must be converted into a JWT as
    per [RFC7519].  In this example, because the event contains attribute
@@ -389,7 +445,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 7]
+Hunt, et al.           Expires September 20, 2016               [Page 8]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
@@ -433,7 +489,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
    ICAibmFtZSI6ewogICAgICAgICJnaXZlbk5hbWUiOiJKb2huIiwKICAgICAgICAi
    ZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9.
 
-                  Figure 2: Example Unsecured Event Token
+                  Figure 3: Example Unsecured Event Token
 
    To create and or validate a signed or encrypted event token follow
    the instructions in section 7 of [RFC7519].
@@ -445,7 +501,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 8]
+Hunt, et al.           Expires September 20, 2016               [Page 9]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
@@ -501,7 +557,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 9]
+Hunt, et al.           Expires September 20, 2016              [Page 10]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
@@ -557,7 +613,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 20, 2016              [Page 10]
+Hunt, et al.           Expires September 20, 2016              [Page 11]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
@@ -613,4 +669,4 @@ Authors' Addresses
 
 
 
-Hunt, et al.           Expires September 20, 2016              [Page 11]
+Hunt, et al.           Expires September 20, 2016              [Page 12]
