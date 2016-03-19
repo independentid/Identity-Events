@@ -17,7 +17,6 @@
 
     <author fullname="Phil Hunt" initials="P." role="editor" surname="Hunt">
       <organization abbrev="Oracle">Oracle Corporation</organization>
-
       <address>
         <email>phil.hunt@yahoo.com</email>
       </address>
@@ -25,7 +24,6 @@
     
     <author fullname="William Denniss" initials="W." surname="Denniss">
       <organization abbrev="Google">Salesforce.com</organization>
-
       <address>
         <email>wdenniss@google.com</email>
       </address>
@@ -34,7 +32,6 @@
 
     <author fullname="Morteza Ansari" initials="M.A." surname="Ansari">
       <organization abbrev="Cisco">Cisco</organization>
-
       <address>
         <email>morteza.ansari@cisco.com</email>
       </address>
@@ -49,14 +46,14 @@
     <keyword>SCIM</keyword>
 
     <abstract>
-      <t>Thie specification extends the Identity Event Token specification
-      to define a set of events to be used with SCIM.</t>
+      <t>Thie specification profiles the Identity Event Token specification
+      to define a set of identity events to be used with SCIM.</t>
     </abstract>
   </front>
 
   <middle>
     <section anchor="intro" title="Introduction and Overview" toc="default">
-      <t>This specification extends the Identity Event Token <xref target="idevent-token"/> to define events
+      <t>This specification profiles the Identity Event Token <xref target="idevent-token"/> to define events
       for SCIM Protocol <xref target="RFC7644"/>.</t>
 
       <section anchor="notat" title="Notational Conventions" toc="default">
@@ -80,51 +77,96 @@
       </section>
 
       <section anchor="defs" title="Definitions" toc="default">
-        <t>This specification uses definitions from the specification <xref target="idevent-subscription"/>.</t>
+        <t>This specification uses definitions from the specification <xref target="idevent-token"/>.</t>
         
       </section>
     </section>
 
       <section anchor="scimEvents" title="SCIM Events">
+        <t>SCIM events JSON objects that are encoded in JWT form as per 
+        <xref target="idevent-token"/>. An event includes a eventUri which
+        indicates the type of event and the event specific attributes. An
+        event also includes standard JWT attributes <spanx style="verb">iss</spanx> and
+        <spanx style="verb">aud</spanx> which indicates the event publisher (issuer) and
+        the event feeds (audience).</t>
+        
+        <figure anchor="exampleJsonEvent" title="Example Event JSON Data">
+            <preamble>The
+            following is an example SCIM Create event message(it has been modified
+            for readability):</preamble>
+            <artwork>{  
+  "eventUris":[
+    "urn:ietf:params:event:SCIM:create"
+  ],
+  "iss":"https://scim.example.com",  
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
+   "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
+  ],  
+  "resourceUris":[
+    "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9"
+  ],
+  "urn:ietf:params:event:SCIM:create":{
+    "attributes":["id","name","userName","password","emails"],
+    "values":{
+      "emails":[
+       {"type":"work","value":"jdoe@example.com"}
+      ],
+      "password":"not4u2no",
+      "userName":"jdoe",
+      "id":"44f6142df96bd6ab61e7521d9",
+      "name":{
+        "givenName":"John",
+        "familyName":"Doe"
+      }
+    }  
+  }
+}</artwork>
+        </figure>
+        <t>In the above example, the user "jdoe" is created with values 
+        an email address, an initial password, and a name. Note that when
+        raw data is sent, it is advisable to protect the event using 
+        JWE (see <xref target="idevent-token">Section 2.2</xref>).</t>
     
         <section anchor="scimSchemaUri" title="Event Schema URIs">
-          <t>The following defines the schema URI for events used by SCIM. <list style="hanging">
-            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:add"><vspace blankLines="0"/>The specified resource
+          <t>The following defines the schema URI for events used by SCIM:
+          <list style="hanging">
+            <t hangText="urn:ietf:params:event:SCIM:add"><vspace blankLines="0"/>The specified resource
             URI was added to the feed. An add does not necessarily indicate a
             resource is new or has been recently created, but rather that it
             has been added to a feed. For example, an existing user has had a
             new role (e.g. CRM_User) added to their profile which has caused
             their resource to join a feed.</t>
 
-            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:create"><vspace blankLines="0"/>The new resource URI
+            <t hangText="urn:ietf:params:event:SCIM:create"><vspace blankLines="0"/>The new resource URI
             has been created at the service provider and has been added to the
             feed. When a CREATE event is sent, a corresponding ADD event is
             not issued. For example, a new user was created via HTTP POST,
             whose attribute profile met the criteria of a current feed. </t>
 
-            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:activate"><vspace blankLines="0"/>The specified
+            <t hangText="urn:ietf:params:event:SCIM:activate"><vspace blankLines="0"/>The specified
             resource (e.g. User) has been activated or is otherwise available
             for use. [TODO: this seems to be a higher level concept that may
             consist of multiple attributes changing - How to differentiate
             between activate and MODIFY events]</t>
 
-            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:modify"><vspace blankLines="0"/>The specified
+            <t hangText="urn:ietf:params:event:SCIM:modify"><vspace blankLines="0"/>The specified
             resource has been updated (e.g. one or more attributes has
             changed).</t>
 
-            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:deactivate"><vspace blankLines="0"/>The specified
+            <t hangText="urn:ietf:params:event:SCIM:deactivate"><vspace blankLines="0"/>The specified
             resource (e.g. User) has been deactivated. [TODO: Is there a
             corresponding MODIFY event?]</t>
 
-            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:delete"><vspace blankLines="0"/>The specified resource has been deleted from
+            <t hangText="urn:ietf:params:event:SCIM:delete"><vspace blankLines="0"/>The specified resource has been deleted from
             the service provider and is also removed from the feed. When a
             DELETE is sent, a corresponding REMOVE is not issued.</t>
 
-            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:remove"><vspace blankLines="0"/>The specified
+            <t hangText="urn:ietf:params:event:SCIM:remove"><vspace blankLines="0"/>The specified
             resource has been removed from the feed. Removal does not indicate
             that the resource was deleted or otherwise deactivated.</t>
 
-            <t hangText="urn:ietf:params:scim:schemas:extension:Event:SCIM:password"><vspace blankLines="0"/>The specified
+            <t hangText="urn:ietf:params:event:SCIM:password"><vspace blankLines="0"/>The specified
             resource (e.g. User) has changed its password. If secure exchange
             is possible with the subscriber, the event may also include the
             raw password update text. A PASSWORD event MUST be transmitted in
@@ -132,11 +174,12 @@
 
           </list></t>
         </section>
+        
         <section anchor="attributes" title="SCIM Event Attributes">
           <t>The following attributes are defined for all of the schema 
           URI defined in <xref target="scimSchemaUri"/> or any schema defined 
           within the uri namespace 
-          <spanx style="verb">urn:ietf:params:scim:schemas:extension:Event:SCIM</spanx>.
+          <spanx style="verb">urn:ietf:params:events:SCIM</spanx>.
           <list style="hanging">
             <t hangText="id"><vspace blankLines="0"/>An optional multi-valued 
             SCIM <spanx style="verb">id</spanx> value of the affected resource(s) 
@@ -179,8 +222,8 @@
 
     <section anchor="IANA" title="IANA Considerations">
        <t>This section registers the schema extensions found in <xref target="scimSchemaUri"/>
-       in the "System for Cross-domain Identity Management(SCIM) Schema URIs" registry as per
-       <xref target="RFC7643">Section 10.3</xref>.<list style="hanging">
+       in the "Event" registry as per
+       <xref target="idevent-token">Section 4.2</xref>.<list style="hanging">
          <t hangText="Schema URI:">See <xref target="scimSchemaUri"/>.</t>
          <t hangText="Schema Name:">See corresponding names under <xref target="scimSchemaUri"/>.</t>
          <t hangText="Intented ResourceType:">N/A. Events are not intended to be persisted in SCIM.</t>
@@ -192,14 +235,14 @@
        <texttable>
        <preamble>Summary of schema URI registrations:</preamble>
        <ttcol>Schema URI</ttcol><ttcol>Name</ttcol><ttcol>Reference</ttcol>
-       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:add</c><c>Resource added to Feed Event</c><c><xref target="scimSchemaUri"/></c>
-       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:remove</c><c>Resource Removal From Feed Event</c><c><xref target="scimSchemaUri"/></c>
-       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:create</c><c>New Resource Event</c><c><xref target="scimSchemaUri"/></c>
-       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:modify</c><c>Resource Modified Event</c><c><xref target="scimSchemaUri"/></c>
-       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:delete</c><c>Resource Deleted Event</c><c><xref target="scimSchemaUri"/></c>
-       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:activate</c><c>Resource Activated Event</c><c><xref target="scimSchemaUri"/></c>
-       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:deactivate</c><c>Resource Deactivated Event</c><c><xref target="scimSchemaUri"/></c>
-       <c>urn:ietf:params:scim:schemas: extension:Event:SCIM:password</c><c>Password Change Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:event:SCIM:add</c><c>Resource added to Feed Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:event:SCIM:remove</c><c>Resource Removal From Feed Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:event:SCIM:create</c><c>New Resource Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:event:SCIM:modify</c><c>Resource Modified Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:event:SCIM:delete</c><c>Resource Deleted Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:event:SCIM:activate</c><c>Resource Activated Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:event:SCIM:deactivate</c><c>Resource Deactivated Event</c><c><xref target="scimSchemaUri"/></c>
+       <c>urn:ietf:params:event:SCIM:password</c><c>Password Change Event</c><c><xref target="scimSchemaUri"/></c>
        </texttable>
       
        
