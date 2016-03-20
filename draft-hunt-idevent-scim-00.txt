@@ -5,10 +5,10 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                              W. Denniss
-Expires: September 20, 2016                                       Google
+Expires: September 21, 2016                                       Google
                                                                M. Ansari
                                                                    Cisco
-                                                          March 19, 2016
+                                                          March 20, 2016
 
 
                           SCIM Event Extension
@@ -34,7 +34,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on September 20, 2016.
+   This Internet-Draft will expire on September 21, 2016.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 1]
+Hunt, et al.           Expires September 21, 2016               [Page 1]
 
 Internet-Draft           draft-hunt-idevent-scim              March 2016
 
@@ -62,19 +62,28 @@ Table of Contents
 
    1.  Introduction and Overview . . . . . . . . . . . . . . . . . .   2
      1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   2
-     1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   2
+     1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   3
    2.  SCIM Events . . . . . . . . . . . . . . . . . . . . . . . . .   3
-     2.1.  Event Schema URIs . . . . . . . . . . . . . . . . . . . .   4
-     2.2.  SCIM Event Attributes . . . . . . . . . . . . . . . . . .   5
-   3.  Security Considerations . . . . . . . . . . . . . . . . . . .   5
-   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   5
-   5.  References  . . . . . . . . . . . . . . . . . . . . . . . . .   6
-     5.1.  Normative References  . . . . . . . . . . . . . . . . . .   6
-     5.2.  Informative References  . . . . . . . . . . . . . . . . .   7
-   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .   7
-   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .   7
-   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .   7
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .   7
+     2.1.  Common Event Attributes . . . . . . . . . . . . . . . . .   3
+     2.2.  Disclosure Profiles . . . . . . . . . . . . . . . . . . .   4
+     2.3.  SCIM Events . . . . . . . . . . . . . . . . . . . . . . .   4
+       2.3.1.  urn:ietf:params:event:SCIM:add  . . . . . . . . . . .   4
+       2.3.2.  urn:ietf:params:event:SCIM:create . . . . . . . . . .   5
+       2.3.3.  urn:ietf:params:event:SCIM:activate . . . . . . . . .   7
+       2.3.4.  urn:ietf:params:event:SCIM:modify . . . . . . . . . .   8
+       2.3.5.  urn:ietf:params:event:SCIM:deactivate . . . . . . . .   8
+       2.3.6.  urn:ietf:params:event:SCIM:delete . . . . . . . . . .   8
+       2.3.7.  urn:ietf:params:event:SCIM:remove . . . . . . . . . .   9
+       2.3.8.  urn:ietf:params:event:SCIM:password . . . . . . . . .   9
+   3.  Security Considerations . . . . . . . . . . . . . . . . . . .  11
+   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
+   5.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  12
+     5.1.  Normative References  . . . . . . . . . . . . . . . . . .  12
+     5.2.  Informative References  . . . . . . . . . . . . . . . . .  13
+   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .  13
+   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  13
+   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  13
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  13
 
 1.  Introduction and Overview
 
@@ -96,6 +105,15 @@ Table of Contents
    Implementers MUST percent encode URLs as described in Section 2.1 of
    [RFC3986].
 
+
+
+
+
+Hunt, et al.           Expires September 21, 2016               [Page 2]
+
+Internet-Draft           draft-hunt-idevent-scim              March 2016
+
+
    Throughout this documents all figures MAY contain spaces and extra
    line-wrapping for readability and space limitations.  Similarly, some
    URI's contained within examples, have been shortened for space and
@@ -106,130 +124,19 @@ Table of Contents
    This specification uses definitions from the specification
    [idevent-token].
 
-
-
-
-Hunt, et al.           Expires September 20, 2016               [Page 2]
-
-Internet-Draft           draft-hunt-idevent-scim              March 2016
-
-
 2.  SCIM Events
 
    SCIM events JSON objects that are encoded in JWT form as per
    [idevent-token].  An event includes a eventUri which indicates the
    type of event and the event specific attributes.  An event also
-   includes standard JWT attributes "iss" and "aud" which indicates the
-   event publisher (issuer) and the event feeds (audience).
+   includes standard JWT attributes "iss", "aud", "jti", and "iat" which
+   indicates the event publisher (issuer), the the event feeds
+   (audience), a token identifier, and the date of issue (iat).
 
-   The following is an example SCIM Create event message(it has been
-   modified for readability):
+2.1.  Common Event Attributes
 
-   {
-     "eventUris":[
-       "urn:ietf:params:event:SCIM:create"
-     ],
-     "iss":"https://scim.example.com",
-     "aud":[
-      "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
-      "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
-     ],
-     "resourceUris":[
-       "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9"
-     ],
-     "urn:ietf:params:event:SCIM:create":{
-       "attributes":["id","name","userName","password","emails"],
-       "values":{
-         "emails":[
-          {"type":"work","value":"jdoe@example.com"}
-         ],
-         "password":"not4u2no",
-         "userName":"jdoe",
-         "id":"44f6142df96bd6ab61e7521d9",
-         "name":{
-           "givenName":"John",
-           "familyName":"Doe"
-         }
-       }
-     }
-   }
-
-                     Figure 1: Example Event JSON Data
-
-   In the above example, the user "jdoe" is created with values an email
-   address, an initial password, and a name.  Note that when raw data is
-   sent, it is advisable to protect the event using JWE (see Section 2.2
-   [idevent-token]).
-
-
-
-
-
-Hunt, et al.           Expires September 20, 2016               [Page 3]
-
-Internet-Draft           draft-hunt-idevent-scim              March 2016
-
-
-2.1.  Event Schema URIs
-
-   The following defines the schema URI for events used by SCIM:
-
-   urn:ietf:params:event:SCIM:add
-      The specified resource URI was added to the feed.  An add does not
-      necessarily indicate a resource is new or has been recently
-      created, but rather that it has been added to a feed.  For
-      example, an existing user has had a new role (e.g.  CRM_User)
-      added to their profile which has caused their resource to join a
-      feed.
-
-   urn:ietf:params:event:SCIM:create
-      The new resource URI has been created at the service provider and
-      has been added to the feed.  When a CREATE event is sent, a
-      corresponding ADD event is not issued.  For example, a new user
-      was created via HTTP POST, whose attribute profile met the
-      criteria of a current feed.
-
-   urn:ietf:params:event:SCIM:activate
-      The specified resource (e.g.  User) has been activated or is
-      otherwise available for use.  [TODO: this seems to be a higher
-      level concept that may consist of multiple attributes changing -
-      How to differentiate between activate and MODIFY events]
-
-   urn:ietf:params:event:SCIM:modify
-      The specified resource has been updated (e.g. one or more
-      attributes has changed).
-
-   urn:ietf:params:event:SCIM:deactivate
-      The specified resource (e.g.  User) has been deactivated.  [TODO:
-      Is there a corresponding MODIFY event?]
-
-   urn:ietf:params:event:SCIM:delete
-      The specified resource has been deleted from the service provider
-      and is also removed from the feed.  When a DELETE is sent, a
-      corresponding REMOVE is not issued.
-
-   urn:ietf:params:event:SCIM:remove
-      The specified resource has been removed from the feed.  Removal
-      does not indicate that the resource was deleted or otherwise
-      deactivated.
-
-   urn:ietf:params:event:SCIM:password
-      The specified resource (e.g.  User) has changed its password.  If
-      secure exchange is possible with the subscriber, the event may
-      also include the raw password update text.  A PASSWORD event MUST
-      be transmitted in encrypted form (see [idevent-token]).
-
-
-
-Hunt, et al.           Expires September 20, 2016               [Page 4]
-
-Internet-Draft           draft-hunt-idevent-scim              March 2016
-
-
-2.2.  SCIM Event Attributes
-
-   The following attributes are defined for all of the schema URI
-   defined in Section 2.1 or any schema defined within the uri namespace
+   The following attributes are defined for all events defined in
+   Section 2.3 or any schema defined within the uri namespace
    "urn:ietf:params:events:SCIM".
 
    id
@@ -256,65 +163,492 @@ Internet-Draft           draft-hunt-idevent-scim              March 2016
       For a password change event, the clear text password attribute
       value MAY be included in the values attribute.  "PASSWORD" event.
 
+
+
+Hunt, et al.           Expires September 21, 2016               [Page 3]
+
+Internet-Draft           draft-hunt-idevent-scim              March 2016
+
+
+2.2.  Disclosure Profiles
+
+   SCIM events are intended to disclose the minimum amount of
+   information required to provide co-ordination between asynchronous
+   systems.  For each event type, the following levels of disclosure are
+   defined, for which different security considerations may apply:
+
+   Minimal
+      In general, the main information content is the event description
+      itself.  The event contents typically includes only REQUIRED
+      attributes.  Because no data content is exchanged, encryption of
+      the event message is not required.
+
+   Default
+      In general the default information is exchanged.  This includes
+      the "sub" attribute and a list of affected SCIM attributes.
+      Typically attribute values are not provided.  Encryption of the
+      event message is typically not required unless otherwise stated.
+
+   Maximal
+      In maximal mode, all data involved in the state change is
+      exchanged.  To prevent leakage of information, implementers SHOULD
+      encrypt events that convey attributes about resources.  This
+      profile should typically be used when co-ordinating information
+      between tightly-coupled systems that are part of a common
+      administrative domain.
+
+   Particularly in the case of "minimal" and "default" disclosures, a
+   subscriber MAY use a follow-up SCIM GET (see Section 3.4 [RFC7644] to
+   obtain the exact state of the resource (sub) following the event.
+   While this may be seen as costly (as a second call), using SCIM GET
+   enables simpler error signaling, access control, distribution
+   enforcement by the event publisher.
+
+2.3.  SCIM Events
+
+2.3.1.  urn:ietf:params:event:SCIM:add
+   The specified resource URI was added to the feed.  An add does not
+   indicate a resource is new or has been recently created.  For
+   example, an existing user has had a new role (e.g.  CRM_User) added
+   to their profile which has caused their resource to join a feed.
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.           Expires September 21, 2016               [Page 4]
+
+Internet-Draft           draft-hunt-idevent-scim              March 2016
+
+
+   The following is an example of a minimal disclosure Add Event
+   message(it has been modified for readability):
+
+{
+  "jti": "6164f3bbf6ff41a88dc94f18cb0620e8",
+  "eventUris":[
+    "urn:ietf:params:event:SCIM:add"
+  ],
+  "iat": 1458505044,
+  "iss":"https://scim.example.com",
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754"
+  ],
+  "sub": "https://scim.example.com/Users/2b2f880af6674ac284bae9381673d462",
+}
+
+                     Figure 1: Example SCIM Add Event
+
+2.3.2.  urn:ietf:params:event:SCIM:create
+   The new resource URI has been created at the service provider and has
+   been added to the feed.  When a CREATE event is sent, a corresponding
+   ADD event is not issued.  In "minimal" disclosure mode, event
+   specific data is returned.  In "default" disclosure, the "attributes"
+   attribute is returned disclosing what attributes were created at the
+   publisher.  In "maximal" disclosure mode, set of values reflecting
+   the final state of the resource at the service provider are provided
+   in the "values" attribute and MUST be encrypted as a JWE (see
+   [idevent-token]).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.           Expires September 21, 2016               [Page 5]
+
+Internet-Draft           draft-hunt-idevent-scim              March 2016
+
+
+   The following is an example SCIM Create event message(it has been
+   modified for readability) and uses maximal disclosure:
+
+   {
+     "jti": "4d3559ec67504aaba65d40b0363faad8",
+     "eventUris":[
+       "urn:ietf:params:event:SCIM:create"
+     ],
+     "iat": 1458496404,
+     "iss":"https://scim.example.com",
+     "aud":[
+      "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
+      "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
+     ],
+     "sub": "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
+     "urn:ietf:params:event:SCIM:create":{
+       "attributes":["id","name","userName","password","emails"],
+       "values":{
+         "emails":[
+          {"type":"work","value":"jdoe@example.com"}
+         ],
+         "password":"not4u2no",
+         "userName":"jdoe",
+         "id":"44f6142df96bd6ab61e7521d9",
+         "name":{
+           "givenName":"John",
+           "familyName":"Doe"
+         }
+       }
+     }
+   }
+
+         Figure 2: Example SCIM Create Event (Maximal Disclosure)
+
+   In the above example, the user "jdoe" is created with values an email
+   address, an initial password, and a name.  Note that when raw data is
+   sent, it is advisable to protect the event using JWE (see Section 2.2
+   [idevent-token]).
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.           Expires September 21, 2016               [Page 6]
+
+Internet-Draft           draft-hunt-idevent-scim              March 2016
+
+
+   The following is an example SCIM Create event message(it has been
+   modified for readability) and uses default disclosure:
+
+   {
+     "jti": "4d3559ec67504aaba65d40b0363faad8",
+     "eventUris":[
+       "urn:ietf:params:event:SCIM:create"
+     ],
+     "iat": 1458496404,
+     "iss":"https://scim.example.com",
+     "aud":[
+      "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
+      "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
+     ],
+     "sub": "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
+     "urn:ietf:params:event:SCIM:create":{
+       "attributes":["id","name","userName","password","emails"],
+     }
+   }
+
+   The event above notifies the subscriber which attributes are
+   available from the SCIM event publisher, but does not convey the
+   actual information.  The subscriber MAY retrieve that information by
+   performing a SCIM GET to the "sub" value specified.
+
+         Figure 3: Example SCIM Create Event (Default Disclosure)
+
+2.3.3.  urn:ietf:params:event:SCIM:activate
+   The specified resource (e.g.  User) has been activated.  This
+   optional event is used to indicate a high-level change in state as
+   agreed between the publisher and subscriber.  For example, an
+   activated resource is one that can now have an active session (may
+   log in) from a security perspective (may log in).  Typically this
+   event discloses only minimal information.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.           Expires September 21, 2016               [Page 7]
+
+Internet-Draft           draft-hunt-idevent-scim              March 2016
+
+
+   The following is an example of a minimal disclosure Activate Event
+   message(it has been modified for readability):
+
+{
+  "jti": "6164f3bbf6ff41a88dc94f18cb0620e8",
+  "eventUris":[
+    "urn:ietf:params:event:SCIM:activate"
+  ],
+  "iat": 1458505044,
+  "iss":"https://scim.example.com",
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754"
+  ],
+  "sub": "https://scim.example.com/Users/2b2f880af6674ac284bae9381673d462",
+}
+
+                   Figure 4: Example SCIM Activate Event
+
+2.3.4.  urn:ietf:params:event:SCIM:modify
+   The specified resource has been updated (e.g. one or more attributes
+   has changed).  As with the create event, this event MAY be expressed
+   in minimal, default, and maximal modes.
+
+2.3.5.  urn:ietf:params:event:SCIM:deactivate
+   The specified resource (e.g.  User) has been deactivated and
+   disabled.  The exact meaning must be agreed to by a SCIM publisher
+   and its corresponding subscriber.  Typically this means the sub may
+   no longer have an active security session.  As with the activate
+   event, this event has minimal disclosure requirements.
+
+2.3.6.  urn:ietf:params:event:SCIM:delete
+   The specified resource has been deleted from the SCIM publisher.  The
+   resource is also removed from the feed.  When a DELETE is sent, a
+   corresponding REMOVE is not issued.  A delete event has minimal
+   disclosure profile only.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.           Expires September 21, 2016               [Page 8]
+
+Internet-Draft           draft-hunt-idevent-scim              March 2016
+
+
+   The following is an example of a minimal disclosure Delete Event
+   message(it has been modified for readability):
+
+{
+  "jti": "6164f3bbf6ff41a88dc94f18cb0620e8",
+  "eventUris":[
+    "urn:ietf:params:event:SCIM:delete"
+  ],
+  "iat": 1458505044,
+  "iss":"https://scim.example.com",
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754"
+  ],
+  "sub": "https://scim.example.com/Users/2b2f880af6674ac284bae9381673d462",
+}
+
+                    Figure 5: Example SCIM Delete Event
+
+2.3.7.  urn:ietf:params:event:SCIM:remove
+   The specified resource has been removed from the feed.  Removal does
+   not indicate that the resource was deleted or otherwise deactivated.
+   This event has minimal disclosure.
+
+   The following is an example of a minimal disclosure Remove Event
+   message(it has been modified for readability):
+
+{
+  "jti": "6164f3bbf6ff41a88dc94f18cb0620e8",
+  "eventUris":[
+    "urn:ietf:params:event:SCIM:remove"
+  ],
+  "iat": 1458505044,
+  "iss":"https://scim.example.com",
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754"
+  ],
+  "sub": "https://scim.example.com/Users/2b2f880af6674ac284bae9381673d462",
+}
+
+                    Figure 6: Example SCIM Remove Event
+
+2.3.8.  urn:ietf:params:event:SCIM:password
+   The specified resource (e.g.  User) has changed its password or the
+   password has been reset.  When the password has changed, the
+   "attributes" attribute is supplied with the value "password".
+
+
+
+
+
+
+Hunt, et al.           Expires September 21, 2016               [Page 9]
+
+Internet-Draft           draft-hunt-idevent-scim              March 2016
+
+
+   The following is a non-normative example showing a password change
+   event using minimal disclosure:
+
+   {
+     "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
+     "eventUris":[
+       "urn:ietf:params:event:SCIM:password"
+     ],
+     "iat": 1458496025,
+     "iss": "https://scim.example.com",
+     "aud":[
+       "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
+       "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
+     ],
+     "sub":
+       "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
+   }
+
+               Figure 7: Example SCIM Password Change Event
+
+   The password event MAY be extended to conveys a password reset, the
+   event MAY include an additional eventUri value of
+   "urn:ietf:params:event:extension:example.com:password" which includes
+   the attribute "resetAttempts".  "resetAttempts" indicates the current
+   number of reset attempts since the last successful login by the
+   subject.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.           Expires September 21, 2016              [Page 10]
+
+Internet-Draft           draft-hunt-idevent-scim              March 2016
+
+
+   The following is a non-normative example showing a password reset
+   event:
+
+   {
+     "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
+     "eventUris":[
+       "urn:ietf:params:event:SCIM:password",
+       "urn:ietf:params:event:extension:example.com:password"
+     ],
+     "iat": 1458496025,
+     "iss": "https://scim.example.com",
+     "aud":[
+       "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
+       "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
+     ],
+     "sub":
+       "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
+     "urn:ietf:params:event:SCIM:password":{
+       "id":"44f6142df96bd6ab61e7521d9",
+     },
+     "urn:ietf:params:event:extension:example.com:password":{
+        "resetAttempts":4
+     }
+   }
+
+                Figure 8: Example SCIM Password Reset Event
+
 3.  Security Considerations
 
    [[TO BE COMPLETED]]
 
 4.  IANA Considerations
 
-   This section registers the schema extensions found in Section 2.1 in
+   This section registers the schema extensions found in Section 2.3 in
    the "Event" registry as per Section 4.2 [idevent-token].
 
-   Schema URI:  See Section 2.1.
+   Schema URI:  See Section 2.3.
 
-   Schema Name:  See corresponding names under Section 2.1.
+   Schema Name:  See corresponding names under Section 2.3.
 
    Intented ResourceType:  N/A.  Events are not intended to be persisted
       in SCIM.
 
-   Purpose:  See each description in Section 2.1.
+   Purpose:  See each description in Section 2.3.
+
+   Single-valued Attributes:  None.
 
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 5]
+
+Hunt, et al.           Expires September 21, 2016              [Page 11]
 
 Internet-Draft           draft-hunt-idevent-scim              March 2016
 
 
-   Single-valued Attributes:  None.
-
    Multi-valued Attributes:  All schemas in this specification share the
-      same attributes.  See Section 2.2.
+      same attributes.  See Section 2.1.
 
                    Summary of schema URI registrations:
 
    +---------------------------------------+-------------+-------------+
    | Schema URI                            | Name        | Reference   |
    +---------------------------------------+-------------+-------------+
-   | urn:ietf:params:event:SCIM:add        | Resource    | Section 2.1 |
+   | urn:ietf:params:event:SCIM:add        | Resource    | Section 2.3 |
    |                                       | added to    |             |
    |                                       | Feed Event  |             |
-   | urn:ietf:params:event:SCIM:remove     | Resource    | Section 2.1 |
+   | urn:ietf:params:event:SCIM:remove     | Resource    | Section 2.3 |
    |                                       | Removal     |             |
    |                                       | From Feed   |             |
    |                                       | Event       |             |
-   | urn:ietf:params:event:SCIM:create     | New         | Section 2.1 |
+   | urn:ietf:params:event:SCIM:create     | New         | Section 2.3 |
    |                                       | Resource    |             |
    |                                       | Event       |             |
-   | urn:ietf:params:event:SCIM:modify     | Resource    | Section 2.1 |
+   | urn:ietf:params:event:SCIM:modify     | Resource    | Section 2.3 |
    |                                       | Modified    |             |
    |                                       | Event       |             |
-   | urn:ietf:params:event:SCIM:delete     | Resource    | Section 2.1 |
+   | urn:ietf:params:event:SCIM:delete     | Resource    | Section 2.3 |
    |                                       | Deleted     |             |
    |                                       | Event       |             |
-   | urn:ietf:params:event:SCIM:activate   | Resource    | Section 2.1 |
+   | urn:ietf:params:event:SCIM:activate   | Resource    | Section 2.3 |
    |                                       | Activated   |             |
    |                                       | Event       |             |
-   | urn:ietf:params:event:SCIM:deactivate | Resource    | Section 2.1 |
+   | urn:ietf:params:event:SCIM:deactivate | Resource    | Section 2.3 |
    |                                       | Deactivated |             |
    |                                       | Event       |             |
-   | urn:ietf:params:event:SCIM:password   | Password    | Section 2.1 |
+   | urn:ietf:params:event:SCIM:password   | Password    | Section 2.3 |
    |                                       | Change      |             |
    |                                       | Event       |             |
    +---------------------------------------+-------------+-------------+
@@ -333,7 +667,9 @@ Internet-Draft           draft-hunt-idevent-scim              March 2016
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 6]
+
+
+Hunt, et al.           Expires September 21, 2016              [Page 12]
 
 Internet-Draft           draft-hunt-idevent-scim              March 2016
 
@@ -389,7 +725,7 @@ Authors' Addresses
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 7]
+Hunt, et al.           Expires September 21, 2016              [Page 13]
 
 Internet-Draft           draft-hunt-idevent-scim              March 2016
 
@@ -445,4 +781,4 @@ Internet-Draft           draft-hunt-idevent-scim              March 2016
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 8]
+Hunt, et al.           Expires September 21, 2016              [Page 14]

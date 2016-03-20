@@ -82,102 +82,18 @@
       </section>
     </section>
 
-      <section anchor="scimEvents" title="SCIM Events">
+    <section anchor="scimEvents" title="SCIM Events">
         <t>SCIM events JSON objects that are encoded in JWT form as per 
         <xref target="idevent-token"/>. An event includes a eventUri which
         indicates the type of event and the event specific attributes. An
-        event also includes standard JWT attributes <spanx style="verb">iss</spanx> and
-        <spanx style="verb">aud</spanx> which indicates the event publisher (issuer) and
-        the event feeds (audience).</t>
+        event also includes standard JWT attributes <spanx style="verb">iss</spanx>, 
+        <spanx style="verb">aud</spanx>, <spanx style="verb">jti</spanx>, 
+        and <spanx style="verb">iat</spanx> which indicates the event 
+        publisher (issuer), the the event feeds (audience), a token identifier,
+        and the date of issue (iat).</t>
         
-        <figure anchor="exampleJsonEvent" title="Example Event JSON Data">
-            <preamble>The
-            following is an example SCIM Create event message(it has been modified
-            for readability):</preamble>
-            <artwork>{  
-  "eventUris":[
-    "urn:ietf:params:event:SCIM:create"
-  ],
-  "iss":"https://scim.example.com",  
-  "aud":[
-   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
-   "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
-  ],  
-  "resourceUris":[
-    "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9"
-  ],
-  "urn:ietf:params:event:SCIM:create":{
-    "attributes":["id","name","userName","password","emails"],
-    "values":{
-      "emails":[
-       {"type":"work","value":"jdoe@example.com"}
-      ],
-      "password":"not4u2no",
-      "userName":"jdoe",
-      "id":"44f6142df96bd6ab61e7521d9",
-      "name":{
-        "givenName":"John",
-        "familyName":"Doe"
-      }
-    }  
-  }
-}</artwork>
-        </figure>
-        <t>In the above example, the user "jdoe" is created with values 
-        an email address, an initial password, and a name. Note that when
-        raw data is sent, it is advisable to protect the event using 
-        JWE (see <xref target="idevent-token">Section 2.2</xref>).</t>
-    
-        <section anchor="scimSchemaUri" title="Event Schema URIs">
-          <t>The following defines the schema URI for events used by SCIM:
-          <list style="hanging">
-            <t hangText="urn:ietf:params:event:SCIM:add"><vspace blankLines="0"/>The specified resource
-            URI was added to the feed. An add does not necessarily indicate a
-            resource is new or has been recently created, but rather that it
-            has been added to a feed. For example, an existing user has had a
-            new role (e.g. CRM_User) added to their profile which has caused
-            their resource to join a feed.</t>
-
-            <t hangText="urn:ietf:params:event:SCIM:create"><vspace blankLines="0"/>The new resource URI
-            has been created at the service provider and has been added to the
-            feed. When a CREATE event is sent, a corresponding ADD event is
-            not issued. For example, a new user was created via HTTP POST,
-            whose attribute profile met the criteria of a current feed. </t>
-
-            <t hangText="urn:ietf:params:event:SCIM:activate"><vspace blankLines="0"/>The specified
-            resource (e.g. User) has been activated or is otherwise available
-            for use. [TODO: this seems to be a higher level concept that may
-            consist of multiple attributes changing - How to differentiate
-            between activate and MODIFY events]</t>
-
-            <t hangText="urn:ietf:params:event:SCIM:modify"><vspace blankLines="0"/>The specified
-            resource has been updated (e.g. one or more attributes has
-            changed).</t>
-
-            <t hangText="urn:ietf:params:event:SCIM:deactivate"><vspace blankLines="0"/>The specified
-            resource (e.g. User) has been deactivated. [TODO: Is there a
-            corresponding MODIFY event?]</t>
-
-            <t hangText="urn:ietf:params:event:SCIM:delete"><vspace blankLines="0"/>The specified resource has been deleted from
-            the service provider and is also removed from the feed. When a
-            DELETE is sent, a corresponding REMOVE is not issued.</t>
-
-            <t hangText="urn:ietf:params:event:SCIM:remove"><vspace blankLines="0"/>The specified
-            resource has been removed from the feed. Removal does not indicate
-            that the resource was deleted or otherwise deactivated.</t>
-
-            <t hangText="urn:ietf:params:event:SCIM:password"><vspace blankLines="0"/>The specified
-            resource (e.g. User) has changed its password. If secure exchange
-            is possible with the subscriber, the event may also include the
-            raw password update text. A PASSWORD event MUST be transmitted in
-            encrypted form (see <xref target="idevent-token"/>).</t>
-
-          </list></t>
-        </section>
-        
-        <section anchor="attributes" title="SCIM Event Attributes">
-          <t>The following attributes are defined for all of the schema 
-          URI defined in <xref target="scimSchemaUri"/> or any schema defined 
+        <section anchor="attributes" title="Common Event Attributes">
+          <t>The following attributes are defined for all events defined in <xref target="scimSchemaUri"/> or any schema defined 
           within the uri namespace 
           <spanx style="verb">urn:ietf:params:events:SCIM</spanx>.
           <list style="hanging">
@@ -210,8 +126,290 @@
           </t>
           
         </section>
-       
-      </section>
+        <section title="Disclosure Profiles">
+          <t>SCIM events are intended to disclose the minimum amount of 
+          information required to provide co-ordination between asynchronous
+          systems. For each event type, the following levels of disclosure
+          are defined, for which different security considerations may apply:
+          <list style="hanging">
+            <t hangText="Minimal"><vspace blankLines="0"/>In general, the
+            main information content is the event description itself. The event
+            contents typically includes only REQUIRED attributes. Because
+            no data content is exchanged, encryption of the event message
+            is not required.</t>
+            
+            <t hangText="Default"><vspace blankLines="0"/>In general the default information is exchanged.
+            This includes the <spanx style="verb">sub</spanx> attribute and a
+            list of affected SCIM attributes. Typically attribute values are
+            not provided. Encryption of the event message is typically not
+            required unless otherwise stated.</t>
+            
+            <t hangText="Maximal"><vspace blankLines="0"/>In maximal mode,
+            all data involved in the state change is exchanged. To prevent
+            leakage of information, implementers SHOULD encrypt events that
+            convey attributes about resources. This profile should typically be used
+            when co-ordinating information between tightly-coupled systems
+            that are part of a common administrative domain.</t>
+          </list>
+          Particularly in the case of <spanx style="verb">minimal</spanx> and 
+          <spanx style="verb">default</spanx> disclosures, a subscriber 
+          MAY use a follow-up SCIM GET (see <xref target="RFC7644">Section 3.4</xref> 
+          to obtain the exact state of the resource (sub) following the 
+          event. While this may be seen as costly (as a second call), using
+          SCIM GET enables simpler error signaling, access control, distribution enforcement 
+          by the event publisher.
+          </t>
+        </section>
+        
+        <section anchor="scimSchemaUri" title="SCIM Events">
+          <section title="urn:ietf:params:event:SCIM:add">
+            <t hangText="urn:ietf:params:event:SCIM:add"><vspace blankLines="0"/>The specified resource
+            URI was added to the feed. An add does not indicate a
+            resource is new or has been recently created. For example, 
+            an existing user has had a new role (e.g. CRM_User) added to 
+            their profile which has caused their resource to join a feed.</t>
+            <figure anchor="exampleAddEvent" title="Example SCIM Add Event">
+              <preamble>The following is an example of a minimal disclosure
+              Add Event message(it has been modified for readability):</preamble>
+              <artwork>{  
+  "jti": "6164f3bbf6ff41a88dc94f18cb0620e8",
+  "eventUris":[
+    "urn:ietf:params:event:SCIM:add"
+  ],
+  "iat": 1458505044,
+  "iss":"https://scim.example.com",  
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754"
+  ],  
+  "sub": "https://scim.example.com/Users/2b2f880af6674ac284bae9381673d462",
+}</artwork>
+            </figure>
+          </section>
+          <section title="urn:ietf:params:event:SCIM:create">
+            <t hangText="urn:ietf:params:event:SCIM:create"><vspace blankLines="0"/>
+            The new resource URI has been created at the service provider 
+            and has been added to the feed. When a CREATE event is sent, 
+            a corresponding ADD event is not issued. In "minimal" disclosure
+            mode, event specific data is returned. In "default" disclosure,
+            the <spanx style="verb">attributes</spanx> attribute is returned
+            disclosing what attributes were created at the publisher. In
+            "maximal" disclosure mode, set of values reflecting the final
+            state of the resource at the service provider are provided
+            in the <spanx style="verb">values</spanx> attribute and MUST
+            be encrypted as a JWE (see <xref target="idevent-token"/>).</t>
+            <figure anchor="exampleCreateEvent" title="Example SCIM Create Event (Maximal Disclosure)">
+              <preamble>The following is an example SCIM Create event 
+              message(it has been modified for readability) and uses 
+              maximal disclosure:</preamble>
+              <artwork>{  
+  "jti": "4d3559ec67504aaba65d40b0363faad8",
+  "eventUris":[
+    "urn:ietf:params:event:SCIM:create"
+  ],
+  "iat": 1458496404,
+  "iss":"https://scim.example.com",  
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
+   "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
+  ],  
+  "sub": "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
+  "urn:ietf:params:event:SCIM:create":{
+    "attributes":["id","name","userName","password","emails"],
+    "values":{
+      "emails":[
+       {"type":"work","value":"jdoe@example.com"}
+      ],
+      "password":"not4u2no",
+      "userName":"jdoe",
+      "id":"44f6142df96bd6ab61e7521d9",
+      "name":{
+        "givenName":"John",
+        "familyName":"Doe"
+      }
+    }  
+  }
+}</artwork>
+            </figure>
+            <t>In the above example, the user "jdoe" is created with values 
+            an email address, an initial password, and a name. Note that when
+            raw data is sent, it is advisable to protect the event using 
+           JWE (see <xref target="idevent-token">Section 2.2</xref>).</t>
+           
+            <figure anchor="exampleCreateEventDef" title="Example SCIM Create Event (Default Disclosure)">
+              <preamble>The following is an example SCIM Create event 
+              message(it has been modified for readability) and uses 
+              default disclosure:</preamble>
+              <artwork>{  
+  "jti": "4d3559ec67504aaba65d40b0363faad8",
+  "eventUris":[
+    "urn:ietf:params:event:SCIM:create"
+  ],
+  "iat": 1458496404,
+  "iss":"https://scim.example.com",  
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
+   "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
+  ],  
+  "sub": "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
+  "urn:ietf:params:event:SCIM:create":{
+    "attributes":["id","name","userName","password","emails"],
+  }
+}</artwork>
+          <postamble>The event above notifies the subscriber which attributes
+          are available from the SCIM event publisher, but does not convey
+          the actual information. The subscriber MAY retrieve that information
+          by performing a SCIM GET to the <spanx style="verb">sub</spanx> value specified.</postamble>
+        </figure>        
+          </section>
+          
+          <section title="urn:ietf:params:event:SCIM:activate">
+            <t hangText="urn:ietf:params:event:SCIM:activate"><vspace blankLines="0"/>The specified
+            resource (e.g. User) has been activated. This optional event
+            is used to indicate a high-level change in state as agreed
+            between the publisher and subscriber. For example, an activated
+            resource is one that can now have an active session (may log in) 
+            from a security perspective (may log in). Typically this event
+            discloses only minimal information.</t>
+            
+            <figure anchor="exampleActivateEvent" title="Example SCIM Activate Event">
+              <preamble>The following is an example of a minimal disclosure
+              Activate Event message(it has been modified for readability):</preamble>
+              <artwork>{  
+  "jti": "6164f3bbf6ff41a88dc94f18cb0620e8",
+  "eventUris":[
+    "urn:ietf:params:event:SCIM:activate"
+  ],
+  "iat": 1458505044,
+  "iss":"https://scim.example.com",  
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754"
+  ],  
+  "sub": "https://scim.example.com/Users/2b2f880af6674ac284bae9381673d462",
+}</artwork>
+            </figure>
+          </section>
+          
+          <section title="urn:ietf:params:event:SCIM:modify">
+            <t hangText="urn:ietf:params:event:SCIM:modify"><vspace blankLines="0"/>The specified
+            resource has been updated (e.g. one or more attributes has
+            changed). As with the create event, this event MAY be expressed
+            in minimal, default, and maximal modes.</t>
+          </section>
+          <section title="urn:ietf:params:event:SCIM:deactivate">
+            <t hangText="urn:ietf:params:event:SCIM:deactivate"><vspace blankLines="0"/>
+            The specified resource (e.g. User) has been deactivated and
+            disabled. The exact meaning must be agreed to by a SCIM publisher
+            and its corresponding subscriber. Typically this means the sub
+            may no longer have an active security session. As with the activate
+            event, this event has minimal disclosure requirements.</t>
+          </section>
+          <section title="urn:ietf:params:event:SCIM:delete">
+            <t hangText="urn:ietf:params:event:SCIM:delete"><vspace blankLines="0"/>
+            The specified resource has been deleted from the SCIM publisher.
+            The resource is also removed from the feed. When a
+            DELETE is sent, a corresponding REMOVE is not issued. A delete
+            event has minimal disclosure profile only.</t>
+            
+            <figure anchor="exampleDeleteEvent" title="Example SCIM Delete Event">
+              <preamble>The following is an example of a minimal disclosure
+              Delete Event message(it has been modified for readability):</preamble>
+              <artwork>{  
+  "jti": "6164f3bbf6ff41a88dc94f18cb0620e8",
+  "eventUris":[
+    "urn:ietf:params:event:SCIM:delete"
+  ],
+  "iat": 1458505044,
+  "iss":"https://scim.example.com",  
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754"
+  ],  
+  "sub": "https://scim.example.com/Users/2b2f880af6674ac284bae9381673d462",
+}</artwork>
+            </figure>
+          </section>
+          <section title="urn:ietf:params:event:SCIM:remove">
+            <t hangText="urn:ietf:params:event:SCIM:remove"><vspace blankLines="0"/>The specified
+            resource has been removed from the feed. Removal does not indicate
+            that the resource was deleted or otherwise deactivated. This 
+            event has minimal disclosure.</t>
+            
+            <figure anchor="exampleRemoveEvent" title="Example SCIM Remove Event">
+              <preamble>The following is an example of a minimal disclosure
+              Remove Event message(it has been modified for readability):</preamble>
+              <artwork>{  
+  "jti": "6164f3bbf6ff41a88dc94f18cb0620e8",
+  "eventUris":[
+    "urn:ietf:params:event:SCIM:remove"
+  ],
+  "iat": 1458505044,
+  "iss":"https://scim.example.com",  
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754"
+  ],  
+  "sub": "https://scim.example.com/Users/2b2f880af6674ac284bae9381673d462",
+}</artwork>
+            </figure>
+            
+          </section>
+          <section title="urn:ietf:params:event:SCIM:password">
+            <t hangText="urn:ietf:params:event:SCIM:password"><vspace blankLines="0"/>The specified
+            resource (e.g. User) has changed its password or the password 
+            has been reset. When the password has changed, the <spanx style="verb">attributes</spanx>
+            attribute is supplied with the value "password". </t>
+            <figure anchor="examplePassword" title="Example SCIM Password Change Event">
+              <preamble>The following is a non-normative example showing a password change event
+              using minimal disclosure:</preamble>
+  <artwork>{ 
+  "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
+  "eventUris":[
+    "urn:ietf:params:event:SCIM:password"
+  ],
+  "iat": 1458496025,
+  "iss": "https://scim.example.com",  
+  "aud":[
+    "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
+    "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
+  ],  
+  "sub": 
+    "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
+}</artwork>
+      </figure>  
+            <t>The password event MAY be extended to conveys a password reset, 
+            the event MAY include an additional eventUri value of 
+            <spanx style="verb">urn:ietf:params:event:extension:example.com:password</spanx>
+            which includes the attribute <spanx style="verb">resetAttempts</spanx>.
+            <spanx style="verb">resetAttempts</spanx> indicates the 
+            current number of reset attempts since the last successful login
+            by the subject.</t>
+            
+            <figure anchor="examplePasswordReset" title="Example SCIM Password Reset Event">
+              <preamble>The following is a non-normative example showing a password reset event:
+              </preamble>
+  <artwork>{ 
+  "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
+  "eventUris":[
+    "urn:ietf:params:event:SCIM:password",
+    "urn:ietf:params:event:extension:example.com:password"
+  ],
+  "iat": 1458496025,
+  "iss": "https://scim.example.com",  
+  "aud":[
+    "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
+    "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
+  ],  
+  "sub": 
+    "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
+  "urn:ietf:params:event:SCIM:password":{
+    "id":"44f6142df96bd6ab61e7521d9",
+  },
+  "urn:ietf:params:event:extension:example.com:password":{
+     "resetAttempts":4
+  }
+}</artwork>
+      </figure>  
+          </section>
+        </section>
+    </section>
 
 
 

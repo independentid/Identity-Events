@@ -201,7 +201,7 @@
       </list> </t>
       <figure anchor="examplePassword" title="Example SCIM Password Reset Event">
         <preamble>The following is a non-normative example showing a password change event
-        that conveys both a hypothetical RISC event and a SCIM event (see <xref target="idevent-scim"/>) in the same message:</preamble>
+        that conveys a SCIM event (see <xref target="idevent-scim"/>):</preamble>
         <artwork>{ 
   "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
   "eventUris":[

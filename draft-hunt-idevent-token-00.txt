@@ -68,7 +68,7 @@ Table of Contents
      1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   4
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   4
    2.  Events  . . . . . . . . . . . . . . . . . . . . . . . . . . .   5
-     2.1.  Core Event Attributes . . . . . . . . . . . . . . . . . .   7
+     2.1.  Core Event Attributes . . . . . . . . . . . . . . . . . .   6
      2.2.  Event Token Construction  . . . . . . . . . . . . . . . .   8
    3.  Security Considerations . . . . . . . . . . . . . . . . . . .  11
    4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
@@ -283,8 +283,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
    The following is a non-normative example showing a password change
-   event that conveys both a hypothetical RISC event and a SCIM event
-   (see [idevent-scim]) in the same message:
+   event that conveys a SCIM event (see [idevent-scim]):
 
    {
      "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
@@ -326,9 +325,10 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
    "resetAttempts" is actually part of its own JSON object
    "urn:ietf:params:event:extension:example.com:password".
 
+2.1.  Core Event Attributes
 
-
-
+   The following are attributes that are based on [RFC7519] claim
+   definitions and are profiled for use in an event message:
 
 
 
@@ -337,11 +337,6 @@ Hunt, et al.           Expires September 21, 2016               [Page 6]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
-
-2.1.  Core Event Attributes
-
-   The following are attributes that are based on [RFC7519] attribute
-   definitions and are profiled for use in an event message:
 
    jti
       As defined by Section 4.1.7 [RFC7519] contains a unique identifier
@@ -386,6 +381,11 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
       attribute is REQUIRED.  [[DISCUSS: DO WE NEED TO DIFFERENTIATE?]]
 
    nbf
+      As defined by Section 4.1.5 [RFC7519], a value containing a
+      NumericDate which represents a future date when the event will
+      occur.  This attribute is OPTIONAL.
+
+   The following are new attributes defined by this specification:
 
 
 
@@ -393,12 +393,6 @@ Hunt, et al.           Expires September 21, 2016               [Page 7]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
-
-      As defined by Section 4.1.5 [RFC7519], a value containing a
-      NumericDate which represents a future date when the event will
-      occur.  This attribute is OPTIONAL.
-
-   The following are new attributes defined by this specification:
 
    eventUris
       A multi-valued String that contains the URIs of events contained
@@ -417,6 +411,12 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
    While this specification uses JWT to convey an event message,
    implementers SHALL NOT use these events to convey authentication or
    authorization assertions.
+
+
+
+
+
+
 
 
 
