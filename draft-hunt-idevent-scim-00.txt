@@ -201,7 +201,7 @@ Internet-Draft           draft-hunt-idevent-scim              March 2016
    subscriber MAY use a follow-up SCIM GET (see Section 3.4 [RFC7644] to
    obtain the exact state of the resource (sub) following the event.
    While this may be seen as costly (as a second call), using SCIM GET
-   enables simpler error signaling, access control, distribution
+   enables simpler error signalling, access control, distribution
    enforcement by the event publisher.
 
 2.3.  SCIM Events

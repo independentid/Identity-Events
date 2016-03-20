@@ -74,8 +74,8 @@ Table of Contents
    4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
      4.1.  Registration of Event URN Sub-namespace . . . . . . . . .  11
      4.2.  Event Registry  . . . . . . . . . . . . . . . . . . . . .  11
-   5.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  11
-     5.1.  Normative References  . . . . . . . . . . . . . . . . . .  11
+   5.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  12
+     5.1.  Normative References  . . . . . . . . . . . . . . . . . .  12
      5.2.  Informative References  . . . . . . . . . . . . . . . . .  12
    Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .  13
    Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  13
@@ -151,7 +151,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
    access to resources associated with the previous user.
 
    Events SHOULD NOT be used to convey commands or requests.  To do so
-   requires complex bi-directional signaling and error recovery
+   requires complex bi-directional signalling and error recovery
    mechanisms which fall outside the scope of this specification.  The
    intent of this specification is to define a way of exchanging
    historical statements of fact that subscribers may interpret for
@@ -233,7 +233,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 2.  Events
 
    An identity event conveys a message (in the form of a JWT token
-   [RFC7519]) about a resource (e.g. a security subject) that may be of
+   [RFC7519]) about a resource (i.e. a security subject) that may be of
    interest to a subscriber or set of subscribers participating in an
    event feed (see [idevent-subscription]).
 
@@ -343,8 +343,8 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
       for an event.  The identifier SHOULD be unique within a particular
       event feed and MAY be used by clients to track whether a
       particular event has already been received.  This attribute is
-      REQUIRED.  [[Do we need a way to detct order of or missing events?
-      Or should this be provided by the subscription spec?]]
+      REQUIRED.  [[Do we need a way to detect order of or missing
+      events?  Or should this be provided by the subscription spec?]]
 
    iss
       A single valued String containing the URI of the service provider
@@ -564,10 +564,24 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 3.  Security Considerations
 
-   [[TO BE COMPLETED - avoid sending raw data when the event itself
-   conveys all that is needed (eg. a subscriber can call back to GET the
-   sub if it needs more information), protect sensitive information,
-   etc.]]
+   [[TO BE COMPLETED ]]
+
+   o  Avoid using Maximal disclosure mode
+
+   o  Use TLS best practices.
+
+   o  Subscribers SHOULD use SCIM GET to obtain full state when not
+      disclosed in the event.
+
+   o  Subscribers MAY use SCIM GET to get the latest state on a resource
+      and discard events with iat and nbf that is older.
+
+   o  Subscribers must authenticae the message using either TLS, and/or
+      validating signed event messages.
+
+   o  Publishers should avoid retaining events except for audit
+      purposes.  Events should not be accessible indefinitely - re: LDAP
+      changelog problems.
 
 4.  IANA Considerations
 
@@ -595,6 +609,15 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
    [[TO BE COMPLETED]]
 
+
+
+
+
+Hunt, et al.           Expires September 21, 2016              [Page 11]
+
+Internet-Draft          draft-hunt-idevent-token              March 2016
+
+
 5.  References
 
 5.1.  Normative References
@@ -607,16 +630,6 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <http://www.rfc-editor.org/info/rfc2119>.
-
-
-
-
-
-
-Hunt, et al.           Expires September 21, 2016              [Page 11]
-
-Internet-Draft          draft-hunt-idevent-token              March 2016
-
 
    [RFC3553]  Mealling, M., Masinter, L., Hardie, T., and G. Klyne, "An
               IETF URN Sub-namespace for Registered Protocol
@@ -654,6 +667,13 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
               Oracle Corporation, "SCIM Event Extensions (work in
               progress)".
 
+
+
+Hunt, et al.           Expires September 21, 2016              [Page 12]
+
+Internet-Draft          draft-hunt-idevent-token              March 2016
+
+
    [RFC7009]  Lodderstedt, T., Ed., Dronia, S., and M. Scurtescu, "OAuth
               2.0 Token Revocation", RFC 7009, DOI 10.17487/RFC7009,
               August 2013, <http://www.rfc-editor.org/info/rfc7009>.
@@ -665,14 +685,6 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
    [RFC7516]  Jones, M. and J. Hildebrand, "JSON Web Encryption (JWE)",
               RFC 7516, DOI 10.17487/RFC7516, May 2015,
               <http://www.rfc-editor.org/info/rfc7516>.
-
-
-
-
-Hunt, et al.           Expires September 21, 2016              [Page 12]
-
-Internet-Draft          draft-hunt-idevent-token              March 2016
-
 
    [RFC7517]  Jones, M., "JSON Web Key (JWK)", RFC 7517,
               DOI 10.17487/RFC7517, May 2015,
@@ -712,6 +724,12 @@ Authors' Addresses
    Email: wdenniss@google.com
 
 
+
+Hunt, et al.           Expires September 21, 2016              [Page 13]
+
+Internet-Draft          draft-hunt-idevent-token              March 2016
+
+
    Morteza Ansari
    Cisco
 
@@ -725,4 +743,42 @@ Authors' Addresses
 
 
 
-Hunt, et al.           Expires September 21, 2016              [Page 13]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.           Expires September 21, 2016              [Page 14]

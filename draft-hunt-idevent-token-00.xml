@@ -107,7 +107,7 @@
       access to resources associated with the previous user.</t>
       
       <t>Events SHOULD NOT be used to convey commands or requests. To do so
-      requires complex bi-directional signaling and error recovery mechanisms which fall
+      requires complex bi-directional signalling and error recovery mechanisms which fall
       outside the scope of this specification. The intent of this specification
       is to define a way of exchanging historical statements of fact that 
       subscribers may interpret for their own use.</t>
@@ -177,7 +177,7 @@
 
     <section anchor="events" title="Events">
       <t>An identity event conveys a message (in the form of a JWT token <xref target="RFC7519"/>) about 
-      a resource (e.g. a security subject) that may be of interest to a 
+      a resource (i.e. a security subject) that may be of interest to a 
       subscriber or set of subscribers participating in an event feed 
       (see <xref target="idevent-subscription"/>).</t>
       
@@ -251,7 +251,7 @@
             identifier for an event. The identifier SHOULD be unique within
             a particular event feed and MAY be used by clients to track
             whether a particular event has already been received. This 
-            attribute is REQUIRED. [[Do we need a way to detct order of
+            attribute is REQUIRED. [[Do we need a way to detect order of
             or missing events? Or should this be provided by the 
             subscription spec?]]</t>
         
@@ -412,10 +412,20 @@ ImZhbWlseU5hbWUiOiJEb2UiCiAgICAgIH0KICAgIH0gIAogIH0KfQ.</artwork>
 
     <section anchor="Security" title="Security Considerations" toc="default">
 
-      <t>[[TO BE COMPLETED - avoid sending raw data when the event itself
-      conveys all that is needed (eg. a subscriber can call back to GET the sub
-      if it needs more information), protect sensitive
-      information, etc.]]</t>
+      <t>[[TO BE COMPLETED ]] <list style="symbols">
+        <t>Avoid using Maximal disclosure mode</t>
+        <t>Use TLS best practices.</t>
+        <t>Subscribers SHOULD use SCIM GET to obtain full state when
+        not disclosed in the event.</t>
+        <t>Subscribers MAY use SCIM GET to get the latest state on a 
+        resource and discard events with iat and nbf that is older.</t>
+        <t>Subscribers must authenticae the message using either TLS, and/or
+        validating signed event messages.</t>
+        <t>Publishers should avoid retaining events except for audit
+        purposes. Events should not be accessible indefinitely - re: LDAP
+        changelog problems.</t>      
+      </list>
+     </t>
     </section>
 
     <section anchor="IANA" title="IANA Considerations">

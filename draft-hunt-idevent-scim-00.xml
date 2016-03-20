@@ -46,7 +46,7 @@
     <keyword>SCIM</keyword>
 
     <abstract>
-      <t>Thie specification profiles the Identity Event Token specification
+      <t>This specification profiles the Identity Event Token specification
       to define a set of identity events to be used with SCIM.</t>
     </abstract>
   </front>
@@ -108,28 +108,34 @@
             in Figure 7 of Section 3.3.2 of <xref
             target="RFC7644"/></t>
 
-            <t hangText="values"><vspace blankLines="0"/>A JSON object
-            structure containing the affected attributes and their associated
-            values. If the "values" attribute is supplied, the event message
-            MUST be encrypted. Service providers SHOULD take care to ensure
-            that eligible subscribers are able to see attribute values.
-            Alternatively, subscribers MAY use the resourceURIs to retrieve
-            the final attribute values. When doing so, the SCIM service
-            provider can then assess the subscribers right to obtain the
-            actual attribute values.</t>
+            <t hangText="values"><vspace blankLines="0"/>
+                A JSON object structure containing the affected
+                attributes and their associated values. If the
+                <spanx style="verb">values</spanx>
+                attribute is supplied, the event message MUST be
+                encrypted. Service providers SHOULD take care to ensure
+                that eligible subscribers are able to see attribute
+                values. Alternatively, subscribers MAY use the
+                resourceURIs to retrieve the final attribute values.
+                When doing so, the SCIM service provider can then assess
+                the subscribers right to obtain the actual attribute
+                values.
+            </t>
 
-            <t>For a password change event, the clear text password attribute
-            value MAY be included in the values attribute. <spanx
-            style="verb">PASSWORD</spanx> event.</t>          
+            <t>For a password change event, in maximal disclosure mode (
+            see <xref target="disclosureMode"/>), the clear text password attribute
+            value MAY be included in the values<spanx style="verb">values</spanx> attribute. </t>          
           </list>
           
           </t>
           
         </section>
-        <section title="Disclosure Profiles">
+        <section anchor="disclosureMode" title="Disclosure Profiles">
           <t>SCIM events are intended to disclose the minimum amount of 
           information required to provide co-ordination between asynchronous
-          systems. For each event type, the following levels of disclosure
+          systems. This has the effect of eliminating most error signaling
+          conditions and simplifies privacy and security considerations.</t>
+          <t>For each event type, the following levels of disclosure
           are defined, for which different security considerations may apply:
           <list style="hanging">
             <t hangText="Minimal"><vspace blankLines="0"/>In general, the
@@ -151,12 +157,12 @@
             when co-ordinating information between tightly-coupled systems
             that are part of a common administrative domain.</t>
           </list>
-          Particularly in the case of <spanx style="verb">minimal</spanx> and 
+          In the case of <spanx style="verb">minimal</spanx> and 
           <spanx style="verb">default</spanx> disclosures, a subscriber 
           MAY use a follow-up SCIM GET (see <xref target="RFC7644">Section 3.4</xref> 
-          to obtain the exact state of the resource (sub) following the 
+          to obtain the current state of the resource (sub) following the 
           event. While this may be seen as costly (as a second call), using
-          SCIM GET enables simpler error signaling, access control, distribution enforcement 
+          SCIM GET enables simpler error signalling, access control, distribution enforcement 
           by the event publisher.
           </t>
         </section>
