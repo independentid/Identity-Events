@@ -202,19 +202,20 @@
       <figure anchor="examplePassword" title="Example SCIM Password Reset Event">
         <preamble>The following is a non-normative example showing a password change event
         that conveys both a hypothetical RISC event and a SCIM event (see <xref target="idevent-scim"/>) in the same message:</preamble>
-        <artwork>{  
+        <artwork>{ 
+  "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
   "eventUris":[
     "urn:ietf:params:event:SCIM:password",
     "urn:ietf:params:event:extension:example.com:password"
   ],
-  "iss":"https://scim.example.com",  
+  "iat": 1458496025,
+  "iss": "https://scim.example.com",  
   "aud":[
-   "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
-   "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
+    "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
+    "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
   ],  
-  "resourceUris":[
-    "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9"
-  ],
+  "sub": 
+    "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
   "urn:ietf:params:event:SCIM:password":{
     "id":"44f6142df96bd6ab61e7521d9",
   },
@@ -242,29 +243,62 @@
       </t>
       
       <section title="Core Event Attributes">
-        <t>The following are attributes that may be included in an event
+        <t>The following are attributes that are based on <xref target="RFC7519"/>
+        claim definitions and are profiled for use in an event
         message:<list style="hanging">
-            <t hangText="eventUris"><vspace blankLines="0"/>A multi-valued String 
-            that contains the URIs of events contained within the JWT.</t>
+            <t hangText="jti"><vspace blankLines="0"/>As defined by 
+            <xref target="RFC7519">Section 4.1.7</xref> contains a unique
+            identifier for an event. The identifier SHOULD be unique within
+            a particular event feed and MAY be used by clients to track
+            whether a particular event has already been received. This 
+            attribute is REQUIRED. [[Do we need a way to detct order of
+            or missing events? Or should this be provided by the 
+            subscription spec?]]</t>
+        
+            <t hangText="iss"><vspace blankLines="0"/>A single valued
+            String containing the URI of the service provider publishing
+            the event (the issuer). For example, in SCIM, this is the 
+            SCIM Service Provider's root endpoint. This attribute is REQUIRED.</t>
 
             <t hangText="aud"><vspace blankLines="0"/>A multi-valued String containing the URIs
             representing the audience of the event. Values are typically URLs of
             the feeds the event is associated with. When an event has
             multiple audiences that go to the same subscriber, the publisher is not
             obligated to deliver repeated events to the same subscriber.
-            </t>
+            This attribute is RECOMMENDED.</t>
 
             <t hangText="iss"><vspace blankLines="0"/>A single valued
             String containing the URI of the service provider publishing
-            the event (the issuer). For example, in SCIM, this is the 
-            SCIM Service Provider's root endpoint.</t>
+            the event (the issuer). For example, in SCIM <xref target="RFC7644"/>, this is the 
+            SCIM Service Provider's root endpoint. This attribute is REQUIRED.</t>
 
-            <t hangText="resourceUris"><vspace blankLines="0"/>A multi-valued
-            String that contains the URIs of one or more affected resources in
-            the event. For each resource URI included, the event must be
-            identical. For each event extension expressed, each extension 
-            MUST apply to each resourceUris value.</t>            
-          </list></t>
+            <t hangText="sub"><vspace blankLines="0"/>A value that identifies
+            the subject of the event. This SHOULD be the URI of the affected
+            resource. Some example resources include: users, tokens, grants,
+            sessions, and any addressable resource about which a change in
+            state may be described. This attribute is REQUIRED.</t>
+            
+            <t hangText="iat"><vspace blankLines="0"/>As defined by <xref target="RFC7519">Section 4.1.6</xref>,
+            a value containing a NumericDate which represents when the 
+            event was issued. Unless otherwise specified,
+            the value SHOULD be interpreted by the subscriber as equivalent 
+            to the actual time of the event. This attribute is REQUIRED. 
+            [[DISCUSS: DO WE NEED TO DIFFERENTIATE?]]</t> 
+            
+            <t hangText="nbf"><vspace blankLines="0"/>As defined by 
+            <xref target="RFC7519">Section 4.1.5</xref>, a value 
+            containing a NumericDate which represents a future date when
+            the event will occur. This attribute is OPTIONAL.</t>           
+          </list>
+        </t>
+        <t>The following are new attributes defined by this specification:<list style="hanging">
+            <t hangText="eventUris"><vspace blankLines="0"/>A multi-valued String 
+            that contains the URIs of events contained within the JWT. Values
+            in this attribute further indicate what other JSON objects are present
+            within the parent JSON event structure. Each OPTIONAL JSON sub-object is
+            denoted by an attribute that matches a value in 
+            <spanx style="verb">eventUris</spanx>.  This attribute is REQUIRED.</t>
+        </list></t>
       </section>
 
       <section anchor="eventMessage" title="Event Token Construction">
@@ -279,17 +313,17 @@
             for readability):</preamble>
 
             <artwork>{  
+  "jti": "4d3559ec67504aaba65d40b0363faad8",
   "eventUris":[
     "urn:ietf:params:event:SCIM:create"
   ],
-  "iss":"https://scim.example.com",  
+  "iat": 1458496404,
+  "iss": "https://scim.example.com",  
   "aud":[
    "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
    "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
   ],  
-  "resourceUris":[
-    "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9"
-  ],
+  "sub": "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
   "urn:ietf:params:event:SCIM:create":{
     "attributes":["id","name","userName","password","emails"],
     "values":{
@@ -329,21 +363,22 @@
             follows:</preamble>
 
             <artwork>
-eyAgCiAgImV2ZW50VXJpcyI6WwogICAgInVybjppZXRmOnBhcmFtczpldmVudDpT
-Q0lNOmNyZWF0ZSIKICBdLAogICJpc3MiOiJodHRwczovL3NjaW0uZXhhbXBsZS5j
-b20iLCAgCiAgImF1ZCI6WwogICAiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0Zl
-ZWRzLzk4ZDUyNDYxZmE1YmJjODc5NTkzYjc3NTQiLAogICAiaHR0cHM6Ly9zY2lt
-LmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIxZDA4NjQxZDc2NzZlZTciCiAg
-XSwgIAogICJyZXNvdXJjZVVyaXMiOlsKICAgICJodHRwczovL3NjaW0uZXhhbXBs
-ZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIKICBdLAogICJ1
-cm46aWV0ZjpwYXJhbXM6ZXZlbnQ6U0NJTTpjcmVhdGUiOnsKICAgICJhdHRyaWJ1
-dGVzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMi
-XSwKICAgICJ2YWx1ZXMiOnsKICAgICAgImVtYWlscyI6WwogICAgICAgeyJ0eXBl
-Ijoid29yayIsInZhbHVlIjoiamRvZUBleGFtcGxlLmNvbSJ9CiAgICAgIF0sCiAg
-ICAgICJwYXNzd29yZCI6Im5vdDR1Mm5vIiwKICAgICAgInVzZXJOYW1lIjoiamRv
-ZSIsCiAgICAgICJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLAogICAg
-ICAibmFtZSI6ewogICAgICAgICJnaXZlbk5hbWUiOiJKb2huIiwKICAgICAgICAi
-ZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9</artwork>
+eyAgCiAgImp0aSI6ICI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIs
+CiAgImV2ZW50VXJpcyI6WwogICAgInVybjppZXRmOnBhcmFtczpldmVudDpTQ0lN
+OmNyZWF0ZSIKICBdLAogICJpYXQiOiAxNDU4NDk2NDA0LAogICJpc3MiOiAiaHR0
+cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwgIAogICJhdWQiOlsKICAgImh0dHBzOi8v
+c2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M2I3NzU0
+IiwKICAgImh0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy81ZDc2MDQ1MTZi
+MWQwODY0MWQ3Njc2ZWU3IgogIF0sICAKICAic3ViIjogImh0dHBzOi8vc2NpbS5l
+eGFtcGxlLmNvbS9Vc2Vycy80NGY2MTQyZGY5NmJkNmFiNjFlNzUyMWQ5IiwKICAi
+dXJuOmlldGY6cGFyYW1zOmV2ZW50OlNDSU06Y3JlYXRlIjp7CiAgICAiYXR0cmli
+dXRlcyI6WyJpZCIsIm5hbWUiLCJ1c2VyTmFtZSIsInBhc3N3b3JkIiwiZW1haWxz
+Il0sCiAgICAidmFsdWVzIjp7CiAgICAgICJlbWFpbHMiOlsKICAgICAgIHsidHlw
+ZSI6IndvcmsiLCJ2YWx1ZSI6Impkb2VAZXhhbXBsZS5jb20ifQogICAgICBdLAog
+ICAgICAicGFzc3dvcmQiOiJub3Q0dTJubyIsCiAgICAgICJ1c2VyTmFtZSI6Impk
+b2UiLAogICAgICAiaWQiOiI0NGY2MTQyZGY5NmJkNmFiNjFlNzUyMWQ5IiwKICAg
+ICAgIm5hbWUiOnsKICAgICAgICAiZ2l2ZW5OYW1lIjoiSm9obiIsCiAgICAgICAg
+ImZhbWlseU5hbWUiOiJEb2UiCiAgICAgIH0KICAgIH0gIAogIH0KfQ</artwork>
 </figure><figure anchor="eventToken"
             title="Example Unsecured Event Token">
             <preamble>The encoded JWS signature is the empty string.
@@ -351,21 +386,22 @@ ZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9</artwork>
 
             <artwork>eyJhbGciOiJub25lIn0
 .
-eyAgCiAgImV2ZW50VXJpcyI6WwogICAgInVybjppZXRmOnBhcmFtczpldmVudDpT
-Q0lNOmNyZWF0ZSIKICBdLAogICJpc3MiOiJodHRwczovL3NjaW0uZXhhbXBsZS5j
-b20iLCAgCiAgImF1ZCI6WwogICAiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0Zl
-ZWRzLzk4ZDUyNDYxZmE1YmJjODc5NTkzYjc3NTQiLAogICAiaHR0cHM6Ly9zY2lt
-LmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIxZDA4NjQxZDc2NzZlZTciCiAg
-XSwgIAogICJyZXNvdXJjZVVyaXMiOlsKICAgICJodHRwczovL3NjaW0uZXhhbXBs
-ZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIKICBdLAogICJ1
-cm46aWV0ZjpwYXJhbXM6ZXZlbnQ6U0NJTTpjcmVhdGUiOnsKICAgICJhdHRyaWJ1
-dGVzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMi
-XSwKICAgICJ2YWx1ZXMiOnsKICAgICAgImVtYWlscyI6WwogICAgICAgeyJ0eXBl
-Ijoid29yayIsInZhbHVlIjoiamRvZUBleGFtcGxlLmNvbSJ9CiAgICAgIF0sCiAg
-ICAgICJwYXNzd29yZCI6Im5vdDR1Mm5vIiwKICAgICAgInVzZXJOYW1lIjoiamRv
-ZSIsCiAgICAgICJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLAogICAg
-ICAibmFtZSI6ewogICAgICAgICJnaXZlbk5hbWUiOiJKb2huIiwKICAgICAgICAi
-ZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9.</artwork>
+eyAgCiAgImp0aSI6ICI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIs
+CiAgImV2ZW50VXJpcyI6WwogICAgInVybjppZXRmOnBhcmFtczpldmVudDpTQ0lN
+OmNyZWF0ZSIKICBdLAogICJpYXQiOiAxNDU4NDk2NDA0LAogICJpc3MiOiAiaHR0
+cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwgIAogICJhdWQiOlsKICAgImh0dHBzOi8v
+c2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M2I3NzU0
+IiwKICAgImh0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy81ZDc2MDQ1MTZi
+MWQwODY0MWQ3Njc2ZWU3IgogIF0sICAKICAic3ViIjogImh0dHBzOi8vc2NpbS5l
+eGFtcGxlLmNvbS9Vc2Vycy80NGY2MTQyZGY5NmJkNmFiNjFlNzUyMWQ5IiwKICAi
+dXJuOmlldGY6cGFyYW1zOmV2ZW50OlNDSU06Y3JlYXRlIjp7CiAgICAiYXR0cmli
+dXRlcyI6WyJpZCIsIm5hbWUiLCJ1c2VyTmFtZSIsInBhc3N3b3JkIiwiZW1haWxz
+Il0sCiAgICAidmFsdWVzIjp7CiAgICAgICJlbWFpbHMiOlsKICAgICAgIHsidHlw
+ZSI6IndvcmsiLCJ2YWx1ZSI6Impkb2VAZXhhbXBsZS5jb20ifQogICAgICBdLAog
+ICAgICAicGFzc3dvcmQiOiJub3Q0dTJubyIsCiAgICAgICJ1c2VyTmFtZSI6Impk
+b2UiLAogICAgICAiaWQiOiI0NGY2MTQyZGY5NmJkNmFiNjFlNzUyMWQ5IiwKICAg
+ICAgIm5hbWUiOnsKICAgICAgICAiZ2l2ZW5OYW1lIjoiSm9obiIsCiAgICAgICAg
+ImZhbWlseU5hbWUiOiJEb2UiCiAgICAgIH0KICAgIH0gIAogIH0KfQ.</artwork>
           </figure></t>
 
         <t>To create and or validate a signed or encrypted event token follow
@@ -374,13 +410,12 @@ ZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9.</artwork>
       </section>
     </section>
 
-   
-
-
-
     <section anchor="Security" title="Security Considerations" toc="default">
 
-      <t>[[TO BE COMPLETED]]</t>
+      <t>[[TO BE COMPLETED - avoid sending raw data when the event itself
+      conveys all that is needed (eg. a subscriber can call back to GET the sub
+      if it needs more information), protect sensitive
+      information, etc.]]</t>
     </section>
 
     <section anchor="IANA" title="IANA Considerations">

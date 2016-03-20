@@ -5,10 +5,10 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                              W. Denniss
-Expires: September 20, 2016                                       Google
+Expires: September 21, 2016                                       Google
                                                                M. Ansari
                                                                    Cisco
-                                                          March 19, 2016
+                                                          March 20, 2016
 
 
                           Identity Event Token
@@ -37,7 +37,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on September 20, 2016.
+   This Internet-Draft will expire on September 21, 2016.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 1]
+Hunt, et al.           Expires September 21, 2016               [Page 1]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
@@ -68,19 +68,19 @@ Table of Contents
      1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   4
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   4
    2.  Events  . . . . . . . . . . . . . . . . . . . . . . . . . . .   5
-     2.1.  Core Event Attributes . . . . . . . . . . . . . . . . . .   6
-     2.2.  Event Token Construction  . . . . . . . . . . . . . . . .   7
-   3.  Security Considerations . . . . . . . . . . . . . . . . . . .  10
-   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  10
-     4.1.  Registration of Event URN Sub-namespace . . . . . . . . .  10
-     4.2.  Event Registry  . . . . . . . . . . . . . . . . . . . . .  10
-   5.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  10
-     5.1.  Normative References  . . . . . . . . . . . . . . . . . .  10
-     5.2.  Informative References  . . . . . . . . . . . . . . . . .  11
-   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .  12
-   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  12
-   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  12
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  12
+     2.1.  Core Event Attributes . . . . . . . . . . . . . . . . . .   7
+     2.2.  Event Token Construction  . . . . . . . . . . . . . . . .   8
+   3.  Security Considerations . . . . . . . . . . . . . . . . . . .  11
+   4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
+     4.1.  Registration of Event URN Sub-namespace . . . . . . . . .  11
+     4.2.  Event Registry  . . . . . . . . . . . . . . . . . . . . .  11
+   5.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  11
+     5.1.  Normative References  . . . . . . . . . . . . . . . . . .  11
+     5.2.  Informative References  . . . . . . . . . . . . . . . . .  12
+   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .  13
+   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  13
+   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  13
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  13
 
 1.  Introduction and Overview
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 2]
+Hunt, et al.           Expires September 21, 2016               [Page 2]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
@@ -165,7 +165,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 3]
+Hunt, et al.           Expires September 21, 2016               [Page 3]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
@@ -221,7 +221,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 4]
+Hunt, et al.           Expires September 21, 2016               [Page 4]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
@@ -277,7 +277,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 5]
+Hunt, et al.           Expires September 21, 2016               [Page 5]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
@@ -287,18 +287,19 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
    (see [idevent-scim]) in the same message:
 
    {
+     "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
      "eventUris":[
        "urn:ietf:params:event:SCIM:password",
        "urn:ietf:params:event:extension:example.com:password"
      ],
-     "iss":"https://scim.example.com",
+     "iat": 1458496025,
+     "iss": "https://scim.example.com",
      "aud":[
-      "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
-      "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
+       "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
+       "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
      ],
-     "resourceUris":[
-       "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9"
-     ],
+     "sub":
+       "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
      "urn:ietf:params:event:SCIM:password":{
        "id":"44f6142df96bd6ab61e7521d9",
      },
@@ -325,40 +326,87 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
    "resetAttempts" is actually part of its own JSON object
    "urn:ietf:params:event:extension:example.com:password".
 
-2.1.  Core Event Attributes
-
-   The following are attributes that may be included in an event
-   message:
 
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 6]
+
+
+
+Hunt, et al.           Expires September 21, 2016               [Page 6]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
-   eventUris
-      A multi-valued String that contains the URIs of events contained
-      within the JWT.
+2.1.  Core Event Attributes
+
+   The following are attributes that are based on [RFC7519] attribute
+   definitions and are profiled for use in an event message:
+
+   jti
+      As defined by Section 4.1.7 [RFC7519] contains a unique identifier
+      for an event.  The identifier SHOULD be unique within a particular
+      event feed and MAY be used by clients to track whether a
+      particular event has already been received.  This attribute is
+      REQUIRED.  [[Do we need a way to detct order of or missing events?
+      Or should this be provided by the subscription spec?]]
+
+   iss
+      A single valued String containing the URI of the service provider
+      publishing the event (the issuer).  For example, in SCIM, this is
+      the SCIM Service Provider's root endpoint.  This attribute is
+      REQUIRED.
 
    aud
       A multi-valued String containing the URIs representing the
       audience of the event.  Values are typically URLs of the feeds the
       event is associated with.  When an event has multiple audiences
       that go to the same subscriber, the publisher is not obligated to
-      deliver repeated events to the same subscriber.
+      deliver repeated events to the same subscriber.  This attribute is
+      RECOMMENDED.
 
    iss
       A single valued String containing the URI of the service provider
-      publishing the event (the issuer).  For example, in SCIM, this is
-      the SCIM Service Provider's root endpoint.
+      publishing the event (the issuer).  For example, in SCIM
+      [RFC7644], this is the SCIM Service Provider's root endpoint.
+      This attribute is REQUIRED.
 
-   resourceUris
-      A multi-valued String that contains the URIs of one or more
-      affected resources in the event.  For each resource URI included,
-      the event must be identical.  For each event extension expressed,
-      each extension MUST apply to each resourceUris value.
+   sub
+      A value that identifies the subject of the event.  This SHOULD be
+      the URI of the affected resource.  Some example resources include:
+      users, tokens, grants, sessions, and any addressable resource
+      about which a change in state may be described.  This attribute is
+      REQUIRED.
+
+   iat
+      As defined by Section 4.1.6 [RFC7519], a value containing a
+      NumericDate which represents when the event was issued.  Unless
+      otherwise specified, the value SHOULD be interpreted by the
+      subscriber as equivalent to the actual time of the event.  This
+      attribute is REQUIRED.  [[DISCUSS: DO WE NEED TO DIFFERENTIATE?]]
+
+   nbf
+
+
+
+Hunt, et al.           Expires September 21, 2016               [Page 7]
+
+Internet-Draft          draft-hunt-idevent-token              March 2016
+
+
+      As defined by Section 4.1.5 [RFC7519], a value containing a
+      NumericDate which represents a future date when the event will
+      occur.  This attribute is OPTIONAL.
+
+   The following are new attributes defined by this specification:
+
+   eventUris
+      A multi-valued String that contains the URIs of events contained
+      within the JWT.  Values in this attribute further indicate what
+      other JSON objects are present within the parent JSON event
+      structure.  Each OPTIONAL JSON sub-object is denoted by an
+      attribute that matches a value in "eventUris".  This attribute is
+      REQUIRED.
 
 2.2.  Event Token Construction
 
@@ -389,7 +437,15 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 7]
+
+
+
+
+
+
+
+
+Hunt, et al.           Expires September 21, 2016               [Page 8]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
@@ -398,17 +454,17 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
    readability):
 
    {
+     "jti": "4d3559ec67504aaba65d40b0363faad8",
      "eventUris":[
        "urn:ietf:params:event:SCIM:create"
      ],
-     "iss":"https://scim.example.com",
+     "iat": 1458496404,
+     "iss": "https://scim.example.com",
      "aud":[
       "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
       "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
      ],
-     "resourceUris":[
-       "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9"
-     ],
+     "sub": "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
      "urn:ietf:params:event:SCIM:create":{
        "attributes":["id","name","userName","password","emails"],
        "values":{
@@ -445,49 +501,51 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 20, 2016               [Page 8]
+Hunt, et al.           Expires September 21, 2016               [Page 9]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
    The example JSON Event Data is encoded as follows:
 
-   eyAgCiAgImV2ZW50VXJpcyI6WwogICAgInVybjppZXRmOnBhcmFtczpldmVudDpT
-   Q0lNOmNyZWF0ZSIKICBdLAogICJpc3MiOiJodHRwczovL3NjaW0uZXhhbXBsZS5j
-   b20iLCAgCiAgImF1ZCI6WwogICAiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0Zl
-   ZWRzLzk4ZDUyNDYxZmE1YmJjODc5NTkzYjc3NTQiLAogICAiaHR0cHM6Ly9zY2lt
-   LmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIxZDA4NjQxZDc2NzZlZTciCiAg
-   XSwgIAogICJyZXNvdXJjZVVyaXMiOlsKICAgICJodHRwczovL3NjaW0uZXhhbXBs
-   ZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIKICBdLAogICJ1
-   cm46aWV0ZjpwYXJhbXM6ZXZlbnQ6U0NJTTpjcmVhdGUiOnsKICAgICJhdHRyaWJ1
-   dGVzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMi
-   XSwKICAgICJ2YWx1ZXMiOnsKICAgICAgImVtYWlscyI6WwogICAgICAgeyJ0eXBl
-   Ijoid29yayIsInZhbHVlIjoiamRvZUBleGFtcGxlLmNvbSJ9CiAgICAgIF0sCiAg
-   ICAgICJwYXNzd29yZCI6Im5vdDR1Mm5vIiwKICAgICAgInVzZXJOYW1lIjoiamRv
-   ZSIsCiAgICAgICJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLAogICAg
-   ICAibmFtZSI6ewogICAgICAgICJnaXZlbk5hbWUiOiJKb2huIiwKICAgICAgICAi
-   ZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
+   eyAgCiAgImp0aSI6ICI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIs
+   CiAgImV2ZW50VXJpcyI6WwogICAgInVybjppZXRmOnBhcmFtczpldmVudDpTQ0lN
+   OmNyZWF0ZSIKICBdLAogICJpYXQiOiAxNDU4NDk2NDA0LAogICJpc3MiOiAiaHR0
+   cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwgIAogICJhdWQiOlsKICAgImh0dHBzOi8v
+   c2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M2I3NzU0
+   IiwKICAgImh0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy81ZDc2MDQ1MTZi
+   MWQwODY0MWQ3Njc2ZWU3IgogIF0sICAKICAic3ViIjogImh0dHBzOi8vc2NpbS5l
+   eGFtcGxlLmNvbS9Vc2Vycy80NGY2MTQyZGY5NmJkNmFiNjFlNzUyMWQ5IiwKICAi
+   dXJuOmlldGY6cGFyYW1zOmV2ZW50OlNDSU06Y3JlYXRlIjp7CiAgICAiYXR0cmli
+   dXRlcyI6WyJpZCIsIm5hbWUiLCJ1c2VyTmFtZSIsInBhc3N3b3JkIiwiZW1haWxz
+   Il0sCiAgICAidmFsdWVzIjp7CiAgICAgICJlbWFpbHMiOlsKICAgICAgIHsidHlw
+   ZSI6IndvcmsiLCJ2YWx1ZSI6Impkb2VAZXhhbXBsZS5jb20ifQogICAgICBdLAog
+   ICAgICAicGFzc3dvcmQiOiJub3Q0dTJubyIsCiAgICAgICJ1c2VyTmFtZSI6Impk
+   b2UiLAogICAgICAiaWQiOiI0NGY2MTQyZGY5NmJkNmFiNjFlNzUyMWQ5IiwKICAg
+   ICAgIm5hbWUiOnsKICAgICAgICAiZ2l2ZW5OYW1lIjoiSm9obiIsCiAgICAgICAg
+   ImZhbWlseU5hbWUiOiJEb2UiCiAgICAgIH0KICAgIH0gIAogIH0KfQ
 
    The encoded JWS signature is the empty string.  Concatenating the
    parts yields:
 
    eyJhbGciOiJub25lIn0
    .
-   eyAgCiAgImV2ZW50VXJpcyI6WwogICAgInVybjppZXRmOnBhcmFtczpldmVudDpT
-   Q0lNOmNyZWF0ZSIKICBdLAogICJpc3MiOiJodHRwczovL3NjaW0uZXhhbXBsZS5j
-   b20iLCAgCiAgImF1ZCI6WwogICAiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0Zl
-   ZWRzLzk4ZDUyNDYxZmE1YmJjODc5NTkzYjc3NTQiLAogICAiaHR0cHM6Ly9zY2lt
-   LmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIxZDA4NjQxZDc2NzZlZTciCiAg
-   XSwgIAogICJyZXNvdXJjZVVyaXMiOlsKICAgICJodHRwczovL3NjaW0uZXhhbXBs
-   ZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIKICBdLAogICJ1
-   cm46aWV0ZjpwYXJhbXM6ZXZlbnQ6U0NJTTpjcmVhdGUiOnsKICAgICJhdHRyaWJ1
-   dGVzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMi
-   XSwKICAgICJ2YWx1ZXMiOnsKICAgICAgImVtYWlscyI6WwogICAgICAgeyJ0eXBl
-   Ijoid29yayIsInZhbHVlIjoiamRvZUBleGFtcGxlLmNvbSJ9CiAgICAgIF0sCiAg
-   ICAgICJwYXNzd29yZCI6Im5vdDR1Mm5vIiwKICAgICAgInVzZXJOYW1lIjoiamRv
-   ZSIsCiAgICAgICJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLAogICAg
-   ICAibmFtZSI6ewogICAgICAgICJnaXZlbk5hbWUiOiJKb2huIiwKICAgICAgICAi
-   ZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9.
+   eyAgCiAgImp0aSI6ICI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIs
+   CiAgImV2ZW50VXJpcyI6WwogICAgInVybjppZXRmOnBhcmFtczpldmVudDpTQ0lN
+   OmNyZWF0ZSIKICBdLAogICJpYXQiOiAxNDU4NDk2NDA0LAogICJpc3MiOiAiaHR0
+   cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwgIAogICJhdWQiOlsKICAgImh0dHBzOi8v
+   c2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M2I3NzU0
+   IiwKICAgImh0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy81ZDc2MDQ1MTZi
+   MWQwODY0MWQ3Njc2ZWU3IgogIF0sICAKICAic3ViIjogImh0dHBzOi8vc2NpbS5l
+   eGFtcGxlLmNvbS9Vc2Vycy80NGY2MTQyZGY5NmJkNmFiNjFlNzUyMWQ5IiwKICAi
+   dXJuOmlldGY6cGFyYW1zOmV2ZW50OlNDSU06Y3JlYXRlIjp7CiAgICAiYXR0cmli
+   dXRlcyI6WyJpZCIsIm5hbWUiLCJ1c2VyTmFtZSIsInBhc3N3b3JkIiwiZW1haWxz
+   Il0sCiAgICAidmFsdWVzIjp7CiAgICAgICJlbWFpbHMiOlsKICAgICAgIHsidHlw
+   ZSI6IndvcmsiLCJ2YWx1ZSI6Impkb2VAZXhhbXBsZS5jb20ifQogICAgICBdLAog
+   ICAgICAicGFzc3dvcmQiOiJub3Q0dTJubyIsCiAgICAgICJ1c2VyTmFtZSI6Impk
+   b2UiLAogICAgICAiaWQiOiI0NGY2MTQyZGY5NmJkNmFiNjFlNzUyMWQ5IiwKICAg
+   ICAgIm5hbWUiOnsKICAgICAgICAiZ2l2ZW5OYW1lIjoiSm9obiIsCiAgICAgICAg
+   ImZhbWlseU5hbWUiOiJEb2UiCiAgICAgIH0KICAgIH0gIAogIH0KfQ.
 
                   Figure 3: Example Unsecured Event Token
 
@@ -499,16 +557,17 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-
-
-Hunt, et al.           Expires September 20, 2016               [Page 9]
+Hunt, et al.           Expires September 21, 2016              [Page 10]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 3.  Security Considerations
 
-   [[TO BE COMPLETED]]
+   [[TO BE COMPLETED - avoid sending raw data when the event itself
+   conveys all that is needed (eg. a subscriber can call back to GET the
+   sub if it needs more information), protect sensitive information,
+   etc.]]
 
 4.  IANA Considerations
 
@@ -549,18 +608,20 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
               DOI 10.17487/RFC2119, March 1997,
               <http://www.rfc-editor.org/info/rfc2119>.
 
+
+
+
+
+
+Hunt, et al.           Expires September 21, 2016              [Page 11]
+
+Internet-Draft          draft-hunt-idevent-token              March 2016
+
+
    [RFC3553]  Mealling, M., Masinter, L., Hardie, T., and G. Klyne, "An
               IETF URN Sub-namespace for Registered Protocol
               Parameters", BCP 73, RFC 3553, DOI 10.17487/RFC3553, June
               2003, <http://www.rfc-editor.org/info/rfc3553>.
-
-
-
-
-Hunt, et al.           Expires September 20, 2016              [Page 10]
-
-Internet-Draft          draft-hunt-idevent-token              March 2016
-
 
    [RFC3986]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
               Resource Identifier (URI): Generic Syntax", STD 66,
@@ -605,18 +666,17 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
               RFC 7516, DOI 10.17487/RFC7516, May 2015,
               <http://www.rfc-editor.org/info/rfc7516>.
 
-   [RFC7517]  Jones, M., "JSON Web Key (JWK)", RFC 7517,
-              DOI 10.17487/RFC7517, May 2015,
-              <http://www.rfc-editor.org/info/rfc7517>.
 
 
 
-
-
-Hunt, et al.           Expires September 20, 2016              [Page 11]
+Hunt, et al.           Expires September 21, 2016              [Page 12]
 
 Internet-Draft          draft-hunt-idevent-token              March 2016
 
+
+   [RFC7517]  Jones, M., "JSON Web Key (JWK)", RFC 7517,
+              DOI 10.17487/RFC7517, May 2015,
+              <http://www.rfc-editor.org/info/rfc7517>.
 
    [RFC7644]  Hunt, P., Ed., Grizzle, K., Ansari, M., Wahlstroem, E.,
               and C. Mortimore, "System for Cross-domain Identity
@@ -665,8 +725,4 @@ Authors' Addresses
 
 
 
-
-
-
-
-Hunt, et al.           Expires September 20, 2016              [Page 12]
+Hunt, et al.           Expires September 21, 2016              [Page 13]
