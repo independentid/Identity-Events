@@ -1,0 +1,1312 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type='text/xsl' href='http://xml.resource.org/authoring/rfc2629.xslt' ?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<?rfc toc="yes"?>
+<?rfc tocompact="yes"?>
+<?rfc tocdepth="3"?>
+<?rfc tocindent="yes"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc comments="yes"?>
+<?rfc inline="yes"?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+<rfc category="std" docName="draft-hunt-idevent-subscription-00"
+	ipr="trust200902">
+	<front>
+		<title abbrev="draft-hunt-idevent-subscription">
+			Identity Event Subscription Protocol</title>
+
+		<author fullname="Phil Hunt" initials="P." role="editor"
+			surname="Hunt">
+			<organization abbrev="Oracle">Oracle Corporation</organization>
+
+			<address>
+				<email>phil.hunt@yahoo.com</email>
+			</address>
+		</author>
+
+		<author fullname="Morteza Ansari" initials="M.A." surname="Ansari">
+			<organization abbrev="Cisco">Cisco</organization>
+
+			<address>
+				<email>morteza.ansari@cisco.com</email>
+			</address>
+		</author>
+
+		<date year="2016" />
+
+		<keyword>Internet-Draft</keyword>
+
+		<abstract>
+			<t>
+				This specification defines an event feed service to manage and distribute
+				events to registered subscribers. The feed service defines:
+				<list style="symbols">
+					<t>How subscribers may query the Feed Provider for available feeds.
+					</t>
+
+					<t>How a subscriber registers for a feed using a specified
+						delivery method.
+					</t>
+
+					<t>How the feed subscription is confirmed.</t>
+
+					<t>
+						The methods by which events may be delivered such as through
+						a registered web callback using HTTP POST, polling using
+						HTTP GET, or via a push notification service such as WebPUSH
+						<xref target="I-D.ietf-webpush-protocol" />
+						. And,
+					</t>
+					<t>Event handling, scalability, and security issues.</t>
+				</list>
+			</t>
+		</abstract>
+	</front>
+
+	<middle>
+		<section anchor="intro" title="Introduction and Overview" toc="default">
+			<t>
+				Many service providers have a requirement to co-ordinate state
+        of entities and services between each other. Each service provider
+        often tracks different information about entities and thus positive
+        update commands such as HTTP POST or PATCH may not be possible as this 
+        would introduce complex error and signal requirements. In contrast,
+        when one service provider notifies another of an event, the subscriber
+        is free to take local action as it has access to the relevant local
+        state information.
+       </t>
+      <t>
+        This specification defines a set of capabilities that can be used
+        by publishers to distribute identity event tokens (see <xref target="idevent-token"/>)
+        to subscribers as well as an HTTP based approach for registering
+        and managing subscriptions.</t>
+       
+      <t>While this specification defines a method of using HTTP POST or GET
+        to deliver events, there are many protocols to perform this function.
+        Accordingly, this  specification defines a registry
+				for profiling existing messaging protocols that may be used for 
+        event delivery by a particular subscriber. 
+			</t>
+
+			<figure anchor="notificationArch" title="Subscription Management">
+          <preamble>The following diagram shows a typical Identity Feed
+        Provider and its event notification Subscribers:</preamble>
+					<artwork align="center">
++------------+                        +-------------+
+|            |Feeds Catalog           |             |
+|            +------------------------>             |
+|  Identity  |                        |  Identity   |
+|    Feed    |Subscription Request    |    Feed     |
+|  Provider  &lt;------------------------+  Subscriber |
+|            |Subscription Confirm    |             |
+|            +------------------------>             |
+|            |                        |             |
+|            |                        |             |
+|            +------------------------>             |
+|            |Event Delivery          |             |
+|            |                        |             |
++------------+                        +-------------+
+</artwork>
+			</figure>
+
+			<t>An Identity Feed Provider may be directly integrated into a source
+				service that generates events, or it may be a separate service entity 
+        that off-loads event distribution from the event generator to act 
+        as its publisher. For the purposes of this specification, while event
+				distribution may be handled separately, this specification will 
+        consider the definition of those exchanges out of scope.
+			</t>
+
+			<section anchor="notat" title="Notational Conventions" toc="default">
+				<t>
+					The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+					"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in
+					this
+					document are to be interpreted as described in
+					<xref target="RFC2119" />
+					. These keywords are capitalized when used to
+					unambiguously specify requirements of the protocol or application
+					features and behavior that affect the inter-operability and security of
+					implementations. When these words are not capitalized, they are
+					meant
+					in their natural-language sense.
+				</t>
+
+				<t>
+					For purposes of readability examples are not URL encoded.
+					Implementers MUST percent encode URLs as described in
+					<xref target="RFC3986">Section 2.1 of</xref>
+					.
+				</t>
+
+				<t>Throughout this documents all figures MAY contain spaces and
+					extra
+					line-wrapping for readability and space limitations. Similarly, some
+					URI's contained within examples, have been shortened for space and
+					readability reasons.
+				</t>
+			</section>
+
+			<section anchor="defs" title="Definitions" toc="default">
+				<t>
+					The following definitions are specific to Identity Event
+					publishing:
+					<list style="hanging">
+						<t hangText="Feed Provider">The Feed Provider publishes
+							events to be distributed to registered subscribers.
+						</t>
+
+						<t hangText="Event">An event is an identify event [[id-event ref TBD]]
+							that is to be
+							distributed to one or more registered subscribers. An event is
+							encapsulated as a JWT token and MAY be signed or encrypted using
+							JWS/JWE for authentication and confidentiality reasons.
+						</t>
+
+						<t hangText="Feed">A feed is a URI that describes the set of
+							resources and events under which events may be issued. An
+							interested client registers with the Feed Provider to subscribe
+							to events associated with a feed.
+						</t>
+
+						<t hangText="Notification Mechanism">
+							A URI that describes the
+							chosen event notification mechanism. When subscribing to a feed, a
+							client may choose a specific mechanism by which it wishes to
+							receive notification events. Examples of possible delivery
+							mechanisms include:
+							<list>
+								<t>Registered Callback - The Feed Provider will deliver
+									events by using HTTP POST to a registered endpoint.
+								</t>
+
+								<t>Polling - The subscriber will periodically poll the
+									Feed Provider for one or more events by performing an HTTP
+									GET to a specified URI (mailbox endpoint).
+								</t>
+
+								<t>Platform/Mobile Notification Services (e.g. Apple Push
+									Notification Service, Google Cloud Messaging, and Windows
+									Notification Services). Future profiles that support delivery
+									of SCIM events vis platform specific messaging services.
+								</t>
+							</list>
+						</t>
+
+						<t hangText="Subscriber">A Subscriber registers to receive event
+							notifications from a Feed Provider.
+						</t>
+					</list>
+				</t>
+			</section>
+		</section>
+
+		<section anchor="process" title="Event Notification Process">
+			<t>When an event occurs, the Feed Provider constructs a JWT based
+				Identity Event token <xref target="idevent-token"/> that describes the
+				event. The Feed Provider determines the
+				feeds that the event should be published to, and determines
+				which subscribers are effected. The process by which events are
+				categorized and selected for subscribers is out of scope of this
+				specification.
+			</t>
+
+			<t>
+				When an event is available for a subscriber, the Feed Provider
+				attempts to deliver the event based on the subscribers registered
+				delivery mechanism. For example,
+				<list style="symbols">
+					<t>The subscriber provided a web-callback endpoint, the
+						publisher uses an HTTP/1.1 POST to the endpoint to deliver the
+						event to the registered subscriber;
+					</t>
+
+					<t>For subscribers electing to poll for events, the feed
+						publisher retains the events for a period of time or until the 
+            registered subscriber retrieves all pending events via HTTP/1.1 GET to the
+						subscriber's assigned retrieval endpoint by the feed publisher; or,
+					</t>
+
+					<t>The subscriber elected to use an alternate delivery method
+						(e.g. WebPUSH, Apple APNS, Google GMS), delivery is facilitated
+						via the registered delivery profile for that method.
+					</t>
+				</list>
+			</t>
+
+			<t>After an event is delivered to all subscribers, Feed Providers
+				will not typically maintain event records or histories. As such,
+				published events SHOULD be self-validating (e.g. signed).
+			</t>
+
+			<t>
+				If delivery to any particular subscriber has been delayed for
+				an extended period of time, the Feed Provider MAY suspend the
+				subscription and even stop maintaining outstanding events for
+				the subscriber at its discretion and available resources. See subscription
+				<spanx style="verb">state</spanx> in <xref target="subscribeMetadata" />.
+			</t>
+
+			<t>
+				Upon receiving an event token (or tokens in the case of multiple
+				events), the subscriber reads the token and validates it. Based 
+        on the content of the token, the subscriber decides what if
+				any action it needs to take in response to the event. For example,
+				in response to a SCIM event <xref target="idevent-scim"/> indicating 
+        a changed resource, the subscriber might perform a SCIM GET request (see
+				<xref target="RFC7644">Section 3.4</xref>
+				) to the affected resource URI in order to confidentially obtain 
+        the current state of the affected resource. The receiver of the 
+        event then determines what action, if any, needs to be taken within 
+        the subscriber's domain.</t>
+      <t>
+        The action a receiver takes may be substantially different than 
+        merely copying the action of the publisher. A single publisher event
+        MAY trigger multiple receiver actions. For example, upon receiving notification that
+        a user resource has been added to a group, the receiver may first determine
+        that the user does not exist in the subscriber's domain. The receiver
+        translates the event into two actions. Retrieve the user (e.g. using 
+        SCIM GET) and then provisions the user locally. After enabling 
+        the user, the receiver then enables the user for the application 
+        associated with membership in the publisher's group.
+			</t>
+		</section>
+
+		<section title="Discovery">
+			<section title="Using Event Publisher Resource Link Headers">
+				<t>
+					A service provider that publishes events MAY optionally provide
+					resource
+					link headers per
+					<xref target="RFC5988" />
+					for the purpose of
+					feed and endpoint discovery. When querying a service provider,
+					the following resource link headers are defined:
+					<list style="hanging">
+						<t hangText="rel=event">The URI provided is the base URI for a
+							feed pbulisher and its associated HTTP services.
+						</t>
+
+						<t hangText="rel=oauth">The URI provides is for an OAuth
+							authorization endpoint that will authorize access to a Feed Provider service.
+							When requesting authorization, clients should request an OAuth
+							scope of "eventFeed". This allows the client to register and
+							request access to specific feeds. [TBD is this needed?]
+						</t>
+
+						<t hangText="rel=idfeed">The URI provided is for an identity feed for
+							a resource (e.g. a SCIM resource). The feed URI might be specific
+							to the
+							current resource, or for a larger set of resources (e.g. /Users).
+							There may be more than one feed for any particular resource or set
+							of resources.
+						</t>
+					</list>
+				</t>
+			</section>
+			<section title="Using the Feed Provider">
+				<t>
+					A Feed Provider may advertise available feeds by listing them
+					at its
+					<spanx style="verb">/Feeds</spanx>
+					endpoint (see
+					<xref target="feeds" />
+					).
+				</t>
+			</section>
+		</section>
+
+		<section title="Publisher Services">
+			<t>
+	      A <spanx style="verb">Feed</spanx>
+				is a series of events made available by a publisher that a 
+				client (known as the "subscriber") MAY subscribe to. If offered, 
+				subscribers MAY discover available feeds using the 
+				<spanx style="verb">Feeds</spanx> endpoint (see
+				<xref target="feeds" />).
+			</t>
+
+			<t>
+				A
+				<spanx style="verb">Subscription</spanx>
+				contains the information
+				about a particular client and their subscription to a particular
+				<spanx style="verb">feedUri</spanx>
+				. It describes the client that
+				has subscribed, the current delivery status indicating whether
+				all events are delivered, pending, or whether delivery has failed.
+				The subscription also describes the method of event delivery and
+				any associated configuration information (see
+				<xref target="subscriptions" />
+				).
+			</t>
+
+			<t>
+				A Feed Provider may be deployed as a separate but trusted
+				server (in the same security domain) in relation to an identity
+				service or it may be fully integrated. The Feed Provider's service follows
+				the SCIM Protocol
+				<xref target="RFC7644" />
+				specification unless
+				otherwise indicated.
+			</t>
+
+			<section anchor="feeds" title="Feed Management">
+				<section anchor="feedtypes" title="Feed Types">
+					<t>
+						A Feed Provider MAY define feeds based on a number of
+						criteria. This specification does not specify or limit the basis for
+						which a service provider defines a feed or how feed URIs should be
+						specified. Some possible methods for defining feeds include:
+						<list style="hanging">
+							<t hangText="By Resource">Each resource might have its own event
+								notification feed. For example, a User's mobile application may
+								require notification of changes or rights defined in a SCIM User
+								resource associated with the mobile user.
+							</t>
+
+							<t hangText="By Endpoint">A feed might be defined by an endpoint
+								where any event relating to a resource within an endpoint is
+								transmitted to subscriber. This type of feed is likely to have
+								many
+								notifications as the number of resources in an endpoint grows (e.g.
+								a SCIM "/Users"). Typically only privileged partners would be
+								allowed to use
+								this type of feed. For example an enterprise wishes to be notified
+								of all events to any of its Users assuming all Users within the
+								endpoint are related to the subscribing enterprise.
+							</t>
+
+							<t hangText="By Filter">A feed might define a collection of
+								resources based on a filter that describes a set of matching
+								criteria a resource may be included in a feed. Note that this type
+								of feed may require extra processing by the service provider to
+								determine if any particular resource event matches the filter
+								criteria. It may also be difficult for the service provider to
+								notify subscribers of Feed additions and deletions as these will
+								occur dynamically based on the filter.
+							</t>
+
+							<t hangText="By Group">For example, all resources within a
+								SCIM Group could be used to
+								define the resources within a particular feed. [TODO define a FEED
+								Group extensions that define the attributes and events included
+								within a particular Feed Group]
+							</t>
+						</list>
+
+						How feeds are defined or implemented is out of the scope of this
+						specification. The above are examples about how feeds might be
+						defined.
+					</t>
+
+				</section>
+				<section anchor="feedResource" title="Feed Resource Schema">
+					<t>
+						The Feed Provider MAY provide an endpoint (e.g.
+						<spanx style="verb">/Feeds</spanx>
+						) where
+						all feeds available to a subscriber may be listed. If the
+						feed endpoint is not offered, it is assumed that subscribers
+						are informed of the available
+						<spanx style="verb">feedUri</spanx>
+						values
+						(defined below) through an external administrative process.
+					</t>
+
+					<t>
+						A Feed has a schema of
+						<spanx style="verb">urn:ietf:params:scim:schemas:event:2.0:Feed</spanx>
+						and has the following schema definition:
+					</t>
+
+					<t>
+						A feed description consists of the following singular
+						attributes:
+						<list style="hanging">
+							<t hangText="feedName">
+								<vspace />
+								A required string value
+								containing a name for the feed. May be used in administrative
+								user interfaces to assist subscribers in feed selection. The
+								value MUST be unique within a given administrative domain. This is a
+								required attribute.
+							</t>
+
+							<t hangText="feedUri">
+								<vspace />
+								An attribute of type
+								<spanx style="verb">String</spanx>
+								that is a
+								unique URI identifying the feed. This attribute characteristic
+								<spanx style="verb">mutability</spanx>
+								is
+								<spanx style="verb">immutable</spanx>
+								and SHALL NOT change once assigned. This is a required
+								attribute.
+							</t>
+
+							<t hangText="description">
+								<vspace />
+								A
+								<spanx style="verb">String</spanx>
+								attribute that describes the purpose of the feed in human
+								readable form. This is an optional attribute.
+							</t>
+
+							<t hangText="type">
+								<vspace />
+								A
+								<spanx style="verb">Reference</spanx>
+								attribute that is one of the following canonical values:
+								<list style="hanging">
+									<t hangText="resource">
+										Indicates that the feed is for
+										events related to a specific resource. In such cases,
+										the value of the attribute
+										<spanx style="verb">filter</spanx>
+										is set to a specific
+										resource URI or
+										<spanx style="verb">/Me</spanx>
+										.
+									</t>
+									<t hangText="endpoint">
+										Indicates that the feed is for all
+										events that occur for resources within a specific endpoint.
+										In such cases,
+										<spanx style="verb">filter</spanx>
+										is set to
+										an endpoint container for a group of resources (e.g.
+										<spanx style="verb">/Users</spanx>
+										).
+									</t>
+									<t hangText="filter">
+										Indicates that events for a feed
+										will be selected based on events relating to the set of
+										resources described by a filter. The value of the attribute
+										<spanx style="verb">filter</spanx>
+										is a SCIM filter that
+										describes a condition that selects a set of resources that
+										match before or after a resource state change.
+									</t>
+									<t hangText="group">
+										Indicates that events for a feed
+										will be based on events relating to the set of resources
+										listed in a SCIM Group. The value of the attribute
+										<spanx style="verb">filter</spanx>
+										is a URI that
+										corresponds to a SCIM Group containing a set of members
+										to be monitored.
+									</t>
+									<t>
+										hangText="publisher">Indicates a group whose definition
+										is specific to the service provider publisher.The value of the
+										attribute
+										<spanx style="verb">filter</spanx>
+										if used, is defined
+										by the service provider.[[SHOULD THERE BE AN EXTENSION POINT?]]
+									</t>
+								</list>
+							</t>
+
+							<t hangText="filter">
+								<vspace />
+								A String value containing a SCIM
+								filter (see Section 3.4.2.2
+								<xref target="RFC7644" />
+								),
+								a resource, or a SCIM endpoint URI. The contents of the value is
+								indicated by the feed
+								<spanx style="verb">type</spanx>
+								attribute.
+							</t>
+
+						</list>
+					</t>
+
+					<t>
+						The following multi-valued attributes are defined:
+						<list style="hanging">
+							<t hangText="events">One or more String values that contain
+								the Event URIs supported[[TBD]]. By default, all available events
+								MAY be published.
+							</t>
+							<t hangText="deliveryModes">One or more URIs representing the methods of
+								delivery
+								supported by the feed. By default, all delivery modes are supported.
+							</t>
+
+						</list>
+					</t>
+      </section>  
+      <section anchor="feedType" title="Feed ResourceType">
+            <t>The <spanx style="verb">ResourceType</spanx> definition 
+            for a Feed is defined as follows:
+            <figure>
+            <artwork>
+ {
+   "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
+   "id": "Feed",
+   "name": "Feed",
+   "endpoint": "/Feeds",
+   "description": "Event Feeds",
+   "schema": "urn:ietf:params:scim:schemas:event:2.0:Feed",
+   "schemaExtensions": []
+ }
+            </artwork>
+            </figure>
+            </t>
+            
+      </section>
+      <section title="Retrieving Available Feeds">
+         <t>The feeds available to a particular client MAY be discovered
+         by querying the <spanx style="verb">/Feeds</spanx> endpoint 
+         using the SCIM GET command (see Section 3.4 of <xref target="RFC7644"></xref>).</t>
+         <t><figure anchor="feedGetRequest" title="Example Feed GET Request">
+           <preamble>The example below retrieves a specific Feed resource whose 
+           <spanx style="verb">id</spanx>id is <spanx style="verb">548b7c3f77c8bab33a4fef40</spanx>.</preamble>
+           <artwork>
+GET /Feeds/88bc00de776d49d5b535ede882d98f74
+Host: example.com
+Accept: application/scim+json
+Authorization: Bearer h480djs93hd8         
+           </artwork>
+         </figure></t>
+         <t><figure anchor="feedGetResponse" title="Example Feed GET Response">
+              <preamble>The response below shows an example Feed resource
+              that describes an available feed.</preamble>
+              <artwork>HTTP/1.1 201 Created
+Content-Type: application/scim+json
+Location: 
+ https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74
+ETag: 9d1c124149f522472e7a511c85b3a31b
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:Feed"],
+  "id":"88bc00de776d49d5b535ede882d98f74",
+  "feedName":"bjensenFeed",
+  "feedUri":"https://example.com/events/bjensen",
+  "description":"Feed for changes related to bjensen",
+  "type":"resource",
+  "filter":"https://example.com/v2/Users/453a-919d-413861904646",
+  "events":[
+    "to","be","defined!"
+  ]
+  "meta":{
+     ...
+  }
+}</artwork>
+            </figure></t>
+      </section>
+      <section title="Feed Update Operations">
+		       <t>A Feed Provider MAY optionally choose to support some or
+		       all SCIM update operations (PUT, POST, PATCH, DELETE). However
+		       it is not expected that most Subscribers will need access to
+		       these operations [[DISCUSS]].</t>
+		  </section>
+		</section>
+   
+    <section anchor="subscriptions" title="Subscription Management">
+        <t>Subscribers MAY manage their subscriptions using the Feed Provider's
+        <spanx style="verb">/Subscriptions</spanx> endpoint. Feed Provider services
+        follow the same message format and protocol guidelines
+        as per the SCIM Protocol specification (see <xref
+        target="RFC7644"/>). The subscriptions endpoint supports
+        HTTP GET, POST, PUT, PATCH and DELETE to manage the full life cycle of a
+        subscription.</t>
+
+        <section anchor="subscribeMetadata" title="Subscription Schema">
+          <t>The Feed Provider MAY provide an endpoint (e.g.
+            <spanx style="verb">/Subscriptions</spanx>
+            ) where
+            the defined subscriptions may be listed. Note that typically a particular
+            subscriber SHOULD only be able to see subscriptions that are assigned 
+            to a particular subscriber subject entity.
+          </t>
+
+          <t>
+            A <spanx style="verb">Subscription</spanx> has a schema of
+            <spanx style="verb">urn:ietf:params:scim:schemas:event:2.0:Subscription</spanx>
+            and has the following attributes:
+            <list style="hanging">
+              <t hangText="feedUri"><vspace/>A string value containing the URI
+              for a feed supported by the Feed Provider. REQUIRED.</t>
+
+              <t hangText="mode"><vspace/>A REQUIRED single-valued string
+              which is a URI with one of the following values:<list>
+                  <t><spanx style="verb">urn:ietf:params:scimnotify:api:messages:2.0:webCallback</spanx>
+                  - The Feed Provider will pass SCIM Events using HTTP POST
+                  to the callback URI specified in the attribute <spanx
+                  style="verb">subUri</spanx>.</t>
+
+                  <t><spanx style="verb">urn:ietf:params:scimnotify:api:messages:2.0:poll</spanx>
+                  - The subscriber will poll for SCIM Events using HTTP GET at
+                  the URI specified in the attribute <spanx style="verb">subUri</spanx></t>
+                </list></t>
+
+              <t hangText="subUri"><vspace/>When <spanx style="verb">mode</spanx>
+              is set to <spanx style="verb">urn:ietf:params:scimnotify:api:messages:2.0:poll</spanx>,
+              <spanx style="verb">subUri</spanx> specifies the endpoint
+              where the subscriber will retrieve pending events. When set to
+              <spanx style="verb">urn:ietf:params:scimnotify:api:messages:2.0:webCallback</spanx>,
+              it contains the URI where the Feed Provider will POST
+              events.</t>
+
+              <t hangText="feedJwk"><vspace/>AN OPTIONAL JSON Web Key (see
+              <xref target="RFC7517"/>) that will be used
+              to sign published events. If present, the subscriber can
+              authenticate events relayed from the Feed Provider.</t>
+
+              <t hangText="confidentialJwk"><vspace/>The subscriber may
+              provide a public JSON Web Key (see <xref
+              target="RFC7517"/>) that may be used by the
+              Feed Provider to encrypt event messages for the
+              subscriber.</t>
+
+              <t hangText="pollInterval"><vspace/>The optional period in
+              seconds between event polls when the subscriber plans to poll
+              for events from the Feed Provider. The interval is used by
+              the hub to determine if a subscriber is offline or has otherwise
+              failed over a number of intervals. The hub MAY then change the
+              state of the feed and/or perform some out-of-band administrative
+              alert.</t>
+
+              <t hangText="state" ><vspace/>An optional value which indicates
+              the current state of the feed which is:<list>
+                  <t><spanx style="verb">on</spanx> - the default setting
+                  indicates the Feed Provider processing events and will
+                  pass them to the subscriber.</t>
+
+                  <t><spanx style="verb">verify</spanx> - the subscription is
+                  pending verification. While in "verify", published events
+                  SHALL NOT be stored or delivered to the subscriber.</t>
+
+                  <t><spanx style="verb">paused</spanx> - indicates the
+                  Feed Provider is temporarily suspending delivery to
+                  subscriber. While in <spanx style="verb">paused</spanx>
+                  events MAY be posted and will be delivered when state
+                  returns to <spanx style="verb">on</spanx>.</t>
+
+                  <t><spanx style="verb">off</spanx> - indicates that the
+                  subscription is no longer passing events. While in off mode,
+                  the subscription is maintained, but new events are ignored
+                  and not processed.</t>
+
+                  <t><spanx style="verb">fail</spanx> - Indicates that the
+                  Feed Provider was unable to deliver events to the
+                  subscriber for an extended period of time, or due to a call
+                  failure to the registered web call back URI.</t>
+                </list></t>
+            </list></t>
+        </section>
+        <section anchor="subscriptionType" title="Subscription ResourceType">
+          <t>The <spanx style="verb">ResourceType</spanx> definition 
+          for a Subscription is defined as follows:
+          <figure>
+          <artwork>
+ {
+   "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
+   "id": "Subscription",
+   "name": "Subscription",
+   "endpoint": "/Subscriptions",
+   "description": "Feed Subscription",
+   "schema": "urn:ietf:params:scim:schemas:event:2.0:Subscription",
+   "schemaExtensions": []
+ }
+          </artwork>
+          </figure>
+          </t>
+            
+        </section>
+        
+
+        <section title="Create Subscription">
+          <t>To request a subscription, a client performs a SCIM POST to the
+          /Subscriptions endpoint with a HTTP Body consisting of a JSON object
+          based on the attributes described in <xref
+          target="subscribeMetadata"/>. The request MUST include the <spanx
+          style="verb">schemas</spanx> attribute with a value of: <spanx
+          style="verb">urn:ietf:params:scim:schemas:notify:2.0:Subscription</spanx>.</t>
+
+          <t><figure anchor="subscriptionRequest"
+              title="Example Subscription Creation Request">
+              <preamble>The following is a non-normative example subscription
+              creation request.</preamble>
+
+              <artwork align="left">POST /Subscriptions  HTTP/1.1
+Host: notify.example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+Content-Length: ...
+
+{
+  "schemas":
+    ["urn:ietf:params:scim:schemas:notify:2.0:Subscription"],
+  "feedUri":"https://example.com/v2/Feeds/548b7c3f77c8bab33a4fef40",
+  "mode":"urn:ietf:params:scimnotify:api:messages:2.0:webCallback",
+  "subUri":"https://subscriber.com/Events",
+  "state":"verify",
+  "feedJwk":{
+      "kty":"EC",
+      "crv":"P-256",
+      "x":"f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU",
+      "y":"x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0",
+      "kid":"Public key for Example.com SCIM Publisher"
+     }
+}</artwork>
+            </figure></t>
+
+          <t><figure>
+              <preamble>In response to a successful subscription creation
+              request, the server responds with HTTP Status 200 and a
+              representation of the completed subscription. The following is a
+              non-normative example response that has been formatted for
+              display purposes:</preamble>
+
+              <artwork align="left">HTTP/1.1 201 Created
+Content-Type: application/scim+json
+Location: 
+ https://example.com/v2/Subscriptions/548b7c3f77c8bab33a4fef40
+
+{
+  "schemas":
+    ["urn:ietf:params:scim:schemas:notify:2.0:Subscription"],
+  "feedUri":"https://example.com/v2/Feeds/548b7c3f77c8bab33a4fef40",
+  "mode":"urn:ietf:params:scimnotify:api:messages:2.0:webCallback",
+  "subUri":"https://subscriber.com/Events",
+  "feedJwk":{
+      "kty":"EC",
+      "crv":"P-256",
+      "x":"f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU",
+      "y":"x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0",
+      "kid":"Public key for Example.com SCIM Publisher"
+     }
+}</artwork>
+            </figure>Upon receiving a successful subscription response, the
+          subscribing client SHOULD check the subscription <spanx
+          style="verb">state</spanx>. If set to <spanx style="verb">verify</spanx>
+    ,
+    the client needs to complete the subscription verification process
+    in the following section.</t>
+        </section>
+
+        <section title="Subscription Verification">
+          <t>In order to avoid ongoing communication issues and to minimize
+          requirements for Feed Providers to maintain events indefinitely,
+          a verification process is used to confirm that the requested event
+          distribution endpoints are correct and that an event may be
+          successfully delivered.</t>
+
+          <section title="Verifying 'Push' Style Subscriptions">
+            <t>When using the WebCallback mode, or any other
+            "push"-style communication scheme, the verification process also
+            serves to verify that the identified endpoint consents to receiving
+            events. This prevents a notification server from flooding an endpoint
+            which did not actually request an event subscription.</t>
+
+            <t>To confirm a subscription, the Feed Provider SHALL POST (or
+            otherwise send) an event to the endpoint identified by subUri or
+            as specified by the registered push extension. The event contains
+            the following attributes:<list style="hanging">
+              <t hangText="type">Set to the value of "CONFIRMATION"</t>
+
+              <t hangText="publisherUri">Set to the URI used to identify the
+              Feed Provider.</t>
+
+              <t hangText="feedUris">MUST be set to a value that matches the
+              subscription <spanx style="verb">feedUri</spanx> requested.</t>
+
+              <t hangText="confirmChallenge">A random String value that the
+              subscriber SHALL echo back in its response.</t>
+
+              <t hangText="expires">A SCIM DateTime value that indicates the
+              time the verification request will expire. Once expired, the
+              server will set the subscription state to <spanx style="verb">fail</spanx>.</t>
+            </list>
+            If a confidential JWK was supplied, then the event SHOULD
+            be encrypted with the provided key. Successful parsing of the
+            message confirms that both the endpoint is valid and the subscribers
+            ability to parse the message.</t>
+
+            <figure>
+              <preamble>A non-normative JSON representation of an event to be
+              sent to a subscriber as a subscription confirmation. Note the
+              event is not yet encoded as a JWT token.</preamble>
+
+              <artwork>{  
+  "schemas":["urn:ietf:params:scim:schemas:notify:2.0:Event"],
+  "publisherUri":"https://scim.example.com",  
+  "feedUris":[
+   "https://notify.example.com/Feeds/98d52461fa5bbc879593b7754"
+   
+  ],
+  "type":"CONFIRMATION",
+  "confirmChallenge":"ca2179f4-8936-479a-a76d-5486e2baacd7",
+  "expires":""
+  
+}</artwork>
+            </figure>
+
+            <figure>
+              <preamble>Upon receiving a subscription confirmation request, a
+              confirming subscriber responds with a confirmation that includes the
+              original "confirmChallenge" value. If the request is received via HTTP/1.1 POST, then the 
+              HTTP "response" is used. A non-normative example of the
+              response is:</preamble>
+
+              <artwork>HTTP/1.1 200 OK
+Content-Type: application/scim+json
+
+{  
+  "schemas":["urn:ietf:params:scim:schemas:notify:2.0:Confirm"],
+  "challengeResponse":"ca2179f4-8936-479a-a76d-5486e2baacd7"
+  }
+}</artwork>
+            </figure>
+
+            <t>As per the above figure, upon receiving and parsing a
+            confirmation event, the subscriber MUST respond by returning a JSON
+            structure that includes the attribute <spanx style="verb">challengeResponse</spanx>
+            with a matching value to <spanx style="verb">confirmChallenge</spanx>
+            that was sent in the event. The response is not formatted as an
+            event token but rather a JSON object with schemas set to <spanx
+            style="verb">urn:ietf:params:scim:schemas:notify:2.0:Confirm</spanx>.
+            If the subscriber returns a non-matching value or an HTTP status
+            other than a 200 series response, the subscription <spanx
+            style="verb">state</spanx> SHALL be set to <spanx style="verb">fail</spanx>.
+            A declining subscriber MAY simply respond with any 400 series HTTP
+            error (e.g. 404).</t>
+          
+          </section>
+          <section title="Verifying 'Polling' Style Subscriptions">
+            <t>For clients that use a subscription mode (e.g. <spanx style="verb">
+            urn:ietf:params:scimnotify:api:messages:2.0:poll</spanx>) that pick up events from a 
+            subscription endpoint, the client MAY confirm the subscription
+            by simply reading the event using an HTTP GET at the endpoint specified by
+            the attribute <spanx style="verb">subUri</spanx> in the subscription. Once the
+            confirmation event has been retrieved, the service provider MAY mark the 
+            subscription as confirmed.</t>
+            <figure>
+              <preamble>A non-normative example of a client, having previously subscribed,
+              picking up the initial subscription confirmation message.</preamble>
+              <artwork>GET /Events/548b7c3f77c8bab33a4fef40/
+Host: example.com
+Accept: application/scim+json
+Authorization: Bearer h480djs93hd8
+Content-Length: ...
+              </artwork>
+            </figure>
+            <figure>
+              <preamble>To which the event provider responds with the available events
+              which SHOULD include a confirmation event (non-normative example):</preamble>
+              <artwork>{  
+  "schemas":["urn:ietf:params:scim:schemas:notify:2.0:Event"],
+  "publisherUri":"https://scim.example.com",  
+  "feedUris":[
+   "https://notify.example.com/Feeds/98d52461fa5bbc879593b7754"
+   
+  ],
+  "type":"CONFIRMATION",
+  "confirmChallenge":"ca2179f4-8936-479a-a76d-5486e2baacd7",
+  "expires":""
+  
+}
+              </artwork>
+            </figure>
+          </section>
+        </section>
+
+        <section title="Cancel A Subscription">
+          <t>To cancel a subscription, the subscriber MAY perform a SCIM
+          DELETE against the resource URI for the subscription. In the event
+          the subscriber wants to temporarily suspend the subscription, it may
+          modify the <spanx style="verb">state</spanx> attribute to a value of
+          <spanx style="verb">off</spanx>.</t>
+        </section>
+      </section>
+
+      <section title="Publisher Services">
+        <t>With the exception of the PATCH operation (which is not used), the
+        endpoints within the Feed Provider follow the same message format
+        and API guidelines as per the SCIM API specification (see <xref
+        target="RFC7644"/>). Feed Registration supports HTTP GET,
+        POST, PUT, and DELETE to manage the full life cycle of a Feed.</t>
+
+        <section title="Feed Registration">
+          <t>To register a feed, a SCIM Service Provider makes a call to the
+          Notify Hub's registration endpoint (<spanx style="verb">&lt;Notification_base&gt;/Feeds</spanx>)
+          by performing an HTTP POST containing a JSON structure based on the
+          parameters defined in the following section. In response, the server
+          will return a feed location and an optional public key which the
+          publisher may use to encrypt posted events to the Notification
+          Hub.</t>
+
+          <t>In the registration request, the <spanx style="verb">schemas</spanx>
+          attribute MUST be included in the registration request and be set
+          to: <spanx style="verb">urn:ietf:params:scim:schemas:notify:2.0:Feed</spanx>.
+          The following is a non-normative example of a request to create a
+          new SCIM Feed. Note that additional spacing has been introduced for
+          clarity.</t>
+
+          <t><figure anchor="feedCreateRequest"
+              title="Example Feed Creation Request">
+              <artwork>POST /Feeds  HTTP/1.1
+Host: notify.example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+Content-Length: ...
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:notify:2.0:Feed"],
+  "feedName":"bjensen",
+  "feedDescription":"Feed for changes related to bjensen",
+  "feedData":{
+    "$ref":
+      "https://example.com/v2/Users/453a-919d-413861904646"
+  }
+  "mode":"post",
+  "publisherJwk":{
+      "kty":"EC",
+      "crv":"P-256",
+      "x":"f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU",
+      "y":"x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0",
+      "kid":"Public key for Example.com SCIM Publisher"
+     }
+}</artwork>
+            </figure></t>
+
+          <t>In response to a successful registration request, the
+          Feed Provider SHALL respond with the location of the created feed
+          in the HTTP Location header, and the HTTP body SHALL contain a JSON
+          structure with the accepted registration parameters and MAY include
+          in its response, the following additional parameter:<list
+              style="hanging">
+              <t hangText="confidentialJwk"><vspace/>In its response, the
+              Feed Provider may provide a public JSON Web Key (see <xref
+              target="RFC7517"/>) that may be used by the
+              client to encrypt event messages for the Feed Provider. The
+              key might be the Feed Provider's general public key, or it
+              may be generated per registered feed. Accordingly, registering
+              SCIM Service Providers should assume that each key returned MAY
+              be specific to the corresponding registered feed.</t>
+            </list></t>
+
+          <t><figure anchor="feedCreateResponse"
+              title="Example Feed Creation Response">
+              <artwork>HTTP/1.1 201 Created
+Content-Type: application/scim+json
+Location: 
+ https://example.com/v2/Feeds/548b7c3f77c8bab33a4fef40
+ETag: 9d1c124149f522472e7a511c85b3a31b
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:notify:2.0:Feed"],
+  "id":"548b7c3f77c8bab33a4fef40",
+  "feedName":"bjensen",
+  "feedDescription":"Feed for changes related to bjensen",
+  "feedData":{
+    "type":"resource",
+    "$ref":
+      "https://example.com/v2/Users/453a-919d-413861904646"
+  }
+  "mode":"post",
+  "state":"on",
+  "publisherJwk":{
+      "kty":"EC",
+      "crv":"P-256",
+      "x":"f83OJ3D2xF1Bg8vub9tLe1gHMzV76e8Tus9uPHvRVEU",
+      "y":"x_FEzRu9m36HLN_tue659LNpXW6pCyStikYjKIWI5a0",
+      "kid":"Public key for Example.com SCIM Publisher"
+     }
+  "confidentialJwk":{
+     ...&lt;feed public crypto key&gt;...
+  }
+}</artwork>
+            </figure></t>
+
+          <section title="Feed Request Parameters">
+            <t>To create a feed, the following parameters are used by the SCIM
+            Service Provider to register a feed:<list style="hanging">
+                
+
+                <t hangText="feedDescription"><vspace/>An optional string
+                value containing text that describes the content of the feed.
+                May be used in administrative user interfaces to assist
+                subscribers in feed selection.</t>
+
+               
+
+                
+
+                <t hangText="feedPollUri"><vspace/>When <spanx style="verb">mode</spanx>
+                is set to <spanx style="verb">poll</spanx>, <spanx
+                style="verb">feedPollUri</spanx> specifies the endpoint where
+                the Feed Provider will retrieve pending updates from the
+                publishing SCIM Service Provider.</t>
+
+                <t hangText="publisherJwk"><vspace/>The publishers optional
+                JSON Web Key (see <xref target="RFC7517"/>)
+                that will be used to publish events. By registering a key, the
+                Feed Provider can authenticate events from SCIM Service
+                Provider.</t>
+
+                <t hangText="pollInterval"><vspace/>The optional period in
+                seconds between event polls when the Feed Provider is set
+                to poll for events from the SCIM Service Provider.</t>
+
+                <t hangText="state"><vspace/>An optional value which indicates
+                the current state of the feed which is:<list>
+                    <t>"on" - the default setting indicates the notification
+                    hub is receiving events and will forward them to current
+                    feed subscribers. If no subscribers exist or all
+                    subscribers have been notified, the events are
+                    deleted.</t>
+
+                    <t>"pending" - indicates the Feed Provider is
+                    temporarily suspending delivery to subscribers. While in
+                    "pending" events may be posted and will be held for
+                    delivery by the hub until state returns to "on" (when
+                    events are subsequently delivered) or "fail".</t>
+
+                    <t>"off" - indicates an administrator or publisher has
+                    requested the feed to stop delivery. While in off mode,
+                    the subscribers are maintained, but new events shall be
+                    ignored.</t>
+
+                    <t>"fail" - usually used in connection with "polling"
+                    feeds. Indicates that the Feed Provider has been unable
+                    to retrieve events from the service provider for an
+                    extended period of time, or due to a call failure to the
+                    registered polling call back URI. [TODO: discuss whether a
+                    hub should continue to queue events in failed mode]</t>
+                  </list></t>
+              </list></t>
+          </section>
+        </section>
+
+        <section title="Feed Definition Operations">
+          <t>As with any SCIM resource, a notification Feed MAY be:<list
+              style="symbols">
+              <t>Queried by using a SCIM HTTP GET request. In particular,
+              subscribers may perform a GET to the "/Feeds" endpoint to
+              discover available feeds.</t>
+
+              <t>Updated by using a SCIM PUT request.</t>
+
+              <t>Deleted using a SCIM DELETE request. Upon receiving a delete
+              request, all corresponding notification subscriptions SHALL also
+              be deleted. For this reason, instead of deletion, setting feed
+              status to "off" is recommended.</t>
+            </list></t>
+        </section>
+
+        <section title="Event POSTing">
+          <t>To create an event, a SCIM Event Publisher, simply performs an
+          HTTP POST "/Events" appended to the Feed location URI. The body of
+          the request includes a JSON object with the following
+          attributes:<list style="hanging">
+              <t hangText="schemas">A multi-valued string containing the value
+              "</t>
+            </list> A non-normative example is as follows:<figure align="left">
+              <artwork align="left">POST /Feeds/548b7c3f77c8bab33a4fef40/Events  HTTP/1.1
+Host: notify.example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Content-Length: ...
+
+{
+"schemas":["urn:ietf:params:scim:schemas:notify:2.0:Feed"]
+"eventToken":
+  "eyJhbGciOiJub25lIn0
+  .
+  eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+  kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+  FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+  WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+  WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+  hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+  VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+  SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+  b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+  tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+  1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+  ."
+}
+</artwork>
+            </figure></t>
+
+          <t>In response, if the event token is validated, the server SHALL
+          indicate successful submission by responding with:<figure>
+              <artwork>HTTP/1.1 204 No Content</artwork>
+            </figure></t>
+
+          <t>Since the normal operation of the Feed Provider is to forward
+          events to registered subscribers, the Feed Provider is not
+          obligated to inform the publisher of a permanent event URI that was
+          created. Servers MAY allow HTTP clients to check for undelivered
+          events by performing a GET against the same endpoint as the Event
+          submission endpoint described above.</t>
+
+          <t>[TODO: Describe the error conditions and responses]</t>
+
+          <t>A SCIM Event Publisher MAY publish an event of type
+          "CONFIRMATION" to the provided publication endpoint to confirm
+          successful configuration. "CONFIRMATION" events SHALL NOT be passed
+          on to subscribers.</t>
+        </section>
+
+        <section title="Polling for Publisher Events">
+          <t>When a publisher registers a feed with a <spanx style="verb">mode</spanx>
+          of <spanx style="verb">poll</spanx>, the Feed Provider SHALL
+          confirm configuration by performing an HTTP GET to the <spanx
+          style="verb">feedPollUri</spanx> provided by the publisher during
+          registration of the feed. On the first GET, the notification server
+          should receive an event of type "CONFIRMATION". The confirmation
+          event should contain an event with the <spanx style="verb">resourceUris</spanx>
+          attribute set to a value that corresponds to the URI of the feed
+          registration.</t>
+
+          <t>In its response to the notification polling for events by
+          performing an HTTP Get to the <spanx style="verb">feedPollUri</spanx>,
+          the server shall construct a JSON message, with a schemas attribute
+          consisting of the value: <spanx style="verb">urn:ietf:params:scim:api:messages:2.0:EventList</spanx>
+          and a multivalued attribute of <spanx style="verb">eventTokens</spanx>
+          containing one or more event tokens. The following non-normative
+          example has been modified for brevity and readability:<figure
+              align="left">
+              <artwork align="left">HTTP/1.1 200 OK
+Content-Type: application/scim+json
+Location: https://example.com/FeedPoll/548b7c3f77c8bab33a4fef40
+{
+"schemas":["urn:ietf:params:scim:api:messages:2.0:EventList"],
+"eventTokens":[
+  "eyJhbGciOiJub25lIn0
+  .
+  eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+  kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+  FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+  WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+  WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+  hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+  VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+  SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+  b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+  tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+  1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+  ."]
+}</artwork>
+            </figure></t>
+        </section>
+      </section>
+
+      <section title="Event Delivery">
+        <t>[TODO: Detail the event delivery extension point and define the
+        following 3 methods]</t>
+
+        <section title="Web Callback"/>
+
+        <section title="Polling"/>
+
+        <section title="Push Notification Extensions"/>
+      </section>
+    </section>
+
+  <section anchor="Security" title="Security Considerations" toc="default">
+      <t>The synchronizing of User passwords between administrative domains is
+      to be handled with great care. From a security perspective the re-use of
+      passwords across service providers is to be highly discouraged. However,
+      in the enterprise user experience, if the perception of the user is that
+      service providers from multiple domains are part of a single corporate
+      application environment, then password synchronization MAY be
+      appropriate as part of an overall identity management and governance
+      mechanism.</t>
+
+      <t>[TO BE COMPLETED]</t>
+    </section>
+
+    <section anchor="IANA" title="IANA Considerations">
+      <section anchor="notifyMechRegistry"
+               title="SCIM Event Notification Mechanism Registry">
+        <t>TODO: Registration for Notification Mechanisms</t>
+      </section>
+
+      <section anchor="eventTypeRegistry" title="SCIM Event Type Registry">
+        <t>TODO: Registration of Event Types</t>
+      </section>
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml' ?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5988.xml' ?>
+      
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml' ?><!-- SCIM API -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml' ?><!-- SCIM Schema -->
+
+      <reference anchor="idevent-token">
+        
+        <front>
+          <title>Identity Event Token (work in progress)</title>
+          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
+          <date/>
+        </front>  
+        <format type="TXT" target="draft-hunt-idevent-token-00.txt"/>    
+      </reference>
+
+    </references>
+
+    <references title="Informative References">
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7517.xml' ?><!-- JWK -->
+      
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.draft-ietf-webpush-protocol-02.xml'?>
+ 
+      <reference anchor="idevent-scim">
+        
+        <front>
+          <title>SCIM Event Extensions (work in progress)</title>
+          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
+          <date/>
+        </front>  
+        <format type="TXT" target="draft-hunt-idevent-scim-00.txt"/>    
+      </reference>
+
+     <!-- 
+      <reference anchor="Order-Operations">
+        <front>
+          <title>Order of Operations: Programming Languages</title>
+
+          <author>
+            <organization>Wikipedia</organization>
+          </author>
+
+          <date/>
+        </front>
+
+        <format target="http://en.wikipedia.org/wiki/Order_of_operations#Programming_languages"
+                type="HTML"/>
+      </reference>
+       -->
+    </references>
+
+    <section title="Contributors"/>
+
+    <section title="Acknowledgments">
+      <t>The editor would like to thank the participants in the the SCIM
+      working group for their support of this specification.</t>
+    </section>
+
+    <section title="Change Log">
+      <t>Draft 00 - PH - First Draft</t>
+    </section>
+  </back>
+</rfc>

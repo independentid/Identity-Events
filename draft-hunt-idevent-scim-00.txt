@@ -16,7 +16,7 @@ Expires: September 21, 2016                                       Google
 
 Abstract
 
-   Thie specification profiles the Identity Event Token specification to
+   This specification profiles the Identity Event Token specification to
    define a set of identity events to be used with SCIM.
 
 Status of This Memo
@@ -160,8 +160,8 @@ Internet-Draft           draft-hunt-idevent-scim              March 2016
       so, the SCIM service provider can then assess the subscribers
       right to obtain the actual attribute values.
 
-      For a password change event, the clear text password attribute
-      value MAY be included in the values attribute.  "PASSWORD" event.
+
+
 
 
 
@@ -170,12 +170,19 @@ Hunt, et al.           Expires September 21, 2016               [Page 3]
 Internet-Draft           draft-hunt-idevent-scim              March 2016
 
 
+      For a password change event, in maximal disclosure mode ( see
+      Section 2.2), the clear text password attribute value MAY be
+      included in the values"values" attribute.
+
 2.2.  Disclosure Profiles
 
    SCIM events are intended to disclose the minimum amount of
    information required to provide co-ordination between asynchronous
-   systems.  For each event type, the following levels of disclosure are
-   defined, for which different security considerations may apply:
+   systems.  This has the effect of eliminating most error signaling
+   conditions and simplifies privacy and security considerations.
+
+   For each event type, the following levels of disclosure are defined,
+   for which different security considerations may apply:
 
    Minimal
       In general, the main information content is the event description
@@ -197,12 +204,12 @@ Internet-Draft           draft-hunt-idevent-scim              March 2016
       between tightly-coupled systems that are part of a common
       administrative domain.
 
-   Particularly in the case of "minimal" and "default" disclosures, a
-   subscriber MAY use a follow-up SCIM GET (see Section 3.4 [RFC7644] to
-   obtain the exact state of the resource (sub) following the event.
-   While this may be seen as costly (as a second call), using SCIM GET
-   enables simpler error signalling, access control, distribution
-   enforcement by the event publisher.
+   In the case of "minimal" and "default" disclosures, a subscriber MAY
+   use a follow-up SCIM GET (see Section 3.4 [RFC7644] to obtain the
+   current state of the resource (sub) following the event.  While this
+   may be seen as costly (as a second call), using SCIM GET enables
+   simpler error signalling, access control, distribution enforcement by
+   the event publisher.
 
 2.3.  SCIM Events
 
@@ -211,13 +218,6 @@ Internet-Draft           draft-hunt-idevent-scim              March 2016
    indicate a resource is new or has been recently created.  For
    example, an existing user has had a new role (e.g.  CRM_User) added
    to their profile which has caused their resource to join a feed.
-
-
-
-
-
-
-
 
 
 
