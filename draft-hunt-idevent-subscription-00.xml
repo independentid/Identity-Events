@@ -34,13 +34,13 @@
 			</address>
 		</author>
 
-		<date year="2015" />
+		<date year="2016" />
 
 		<keyword>Internet-Draft</keyword>
 
 		<abstract>
 			<t>
-				This specification defines an event feed service which distributes
+				This specification defines an event feed service to manage and distribute
 				events to registered subscribers. The feed service defines:
 				<list style="symbols">
 					<t>How subscribers may query the Feed Provider for available feeds.
@@ -68,89 +68,55 @@
 	<middle>
 		<section anchor="intro" title="Introduction and Overview" toc="default">
 			<t>
-				Many security and identity management systems have a need to publish
-				events to both internal systems and external
-				subscribers in an asynchronous fashion. Some examples include:
-				<list style="symbols">
-					<t>OpenID Connect
-						[http://openid.net/specs/openid-connect-backchannel-1_0.html],
-						upon
-						receiving a logout request at an OP service provider would like to
-						let down-stream relying parties know about the cancellation of user
-						sessions.
-					</t>
-
-					<t>OAuth 2 [RFC6749] authorization servers providers would like to
-						issue token revocation events to resource servers. In the OAuth
-						case, issuing a revocation event can serve to be much less costly
-						that requiring resource servers to do per-request token
-						introspection [RFC7662].
-					</t>
-
-					<t>SCIM [RFC7643] service providers would like to co-ordinate
-						recently processed resource state changes to subscribers in other
-						domains with a need to know. Often the purpose is for
-						synchronizing
-						employee entitlements across administrative domains based on the
-						requirements of a customer organization.
-					</t>
-
-					<t>The RISC WG [http://openid.net/wg/risc/] is a new initiative
-						intending to share information about important security events in
-						order to thwart attackers from leveraging compromised accounts
-						from
-						one service provider to gain access to accounts on another service
-						provider.
-					</t>
-				</list>
+				Many service providers have a requirement to co-ordinate state
+        of entities and services between each other. Each service provider
+        often tracks different information about entities and thus positive
+        update commands such as HTTP POST or PATCH may not be possible as this 
+        would introduce complex error and signal requirements. In contrast,
+        when one service provider notifies another of an event, the subscriber
+        is free to take local action as it has access to the relevant local
+        state information.
+       </t>
+      <t>
+        This specification defines a set of capabilities that can be used
+        by publishers to distribute identity event tokens (see <xref target="idevent-token"/>)
+        to subscribers as well as an HTTP based approach for registering
+        and managing subscriptions.</t>
+       
+      <t>While this specification defines a method of using HTTP POST or GET
+        to deliver events, there are many protocols to perform this function.
+        Accordingly, this  specification defines a registry
+				for profiling existing messaging protocols that may be used for 
+        event delivery by a particular subscriber. 
 			</t>
 
-			<t>
-				This specification defines an HTTP based subscription management
-				protocol
-				enabling publishers provide feed discovery and subscription
-				management. This specification is not intended as an event publication protocol
-				or messaging service. Instead this specification defines a registry
-				for
-				profiling existing messaging protocols that may be used for event delivery by
-				a particular subscriber. For example, this specification defines how
-				subscribers
-				may receive events by distribution mechanisms such as HTTP/1.1 POST
-				or GET or other extension protocol such as HTTP/2 WebPush
-				<xref target="I-D.ietf-webpush-protocol" />
-				[TO BE CONFIRMED].
-			</t>
-
-			<t>
-				The following diagram shows a typical Identity Feed
-				Provider and its event notification Subscribers:
-				<figure anchor="notificationArch" title="Notification Architecture">
-					<artwork align="center"> +------------+ +-------------+
-						| |Feeds Catalog | |
-						| +----------------------->| |
-						| Identity | | Identity |
-						| Feed |Subscription Request | Feed |
-						| Provider -------------------------+ Subscriber |
-						| |Subscription Confirm | |
-						| +----------------------->| |
-						| | | |
-						| | | |
-						| +----------------------->| |
-						| |Event Delivery | |
-						| | | |
-						+------------+ +-------------+</artwork>
-				</figure>
-			</t>
+			<figure anchor="notificationArch" title="Subscription Management">
+          <preamble>The following diagram shows a typical Identity Feed
+        Provider and its event notification Subscribers:</preamble>
+					<artwork align="center">
++------------+                        +-------------+
+|            |Feeds Catalog           |             |
+|            +------------------------>             |
+|  Identity  |                        |  Identity   |
+|    Feed    |Subscription Request    |    Feed     |
+|  Provider  &lt;------------------------+  Subscriber |
+|            |Subscription Confirm    |             |
+|            +------------------------>             |
+|            |                        |             |
+|            |                        |             |
+|            +------------------------>             |
+|            |Event Delivery          |             |
+|            |                        |             |
++------------+                        +-------------+
+</artwork>
+			</figure>
 
 			<t>An Identity Feed Provider may be directly integrated into a source
-				service, or
-				it may be a separate service entity that off-loads event distribution
-				from
-				the publisher. For the purposes of this specification, while event
-				distribution may
-				be handled separately, this specification will consider the definition
-				of those
-				exchanges out of scope.
+				service that generates events, or it may be a separate service entity 
+        that off-loads event distribution from the event generator to act 
+        as its publisher. For the purposes of this specification, while event
+				distribution may be handled separately, this specification will 
+        consider the definition of those exchanges out of scope.
 			</t>
 
 			<section anchor="notat" title="Notational Conventions" toc="default">
@@ -162,7 +128,7 @@
 					<xref target="RFC2119" />
 					. These keywords are capitalized when used to
 					unambiguously specify requirements of the protocol or application
-					features and behavior that affect the interoperability and security of
+					features and behavior that affect the inter-operability and security of
 					implementations. When these words are not capitalized, they are
 					meant
 					in their natural-language sense.
@@ -209,8 +175,7 @@
 							A URI that describes the
 							chosen event notification mechanism. When subscribing to a feed, a
 							client may choose a specific mechanism by which it wishes to
-							receive notification events. [This specification will define a
-							delivery extension point.] Examples of possible delivery
+							receive notification events. Examples of possible delivery
 							mechanisms include:
 							<list>
 								<t>Registered Callback - The Feed Provider will deliver
@@ -220,10 +185,6 @@
 								<t>Polling - The subscriber will periodically poll the
 									Feed Provider for one or more events by performing an HTTP
 									GET to a specified URI (mailbox endpoint).
-								</t>
-
-								<t>WebPush - An HTTP/2 based method for delivering realtime
-									events. https://tools.ietf.org/wg/webpush/
 								</t>
 
 								<t>Platform/Mobile Notification Services (e.g. Apple Push
@@ -244,36 +205,28 @@
 
 		<section anchor="process" title="Event Notification Process">
 			<t>When an event occurs, the Feed Provider constructs a JWT based
-				Identity Event token [see ID-Event Draft TBD] that describes the
-				event.
-				The Feed Provider then determines the
-				feeds that the event should be published to, and in turn decides
+				Identity Event token <xref target="idevent-token"/> that describes the
+				event. The Feed Provider determines the
+				feeds that the event should be published to, and determines
 				which subscribers are effected. The process by which events are
 				categorized and selected for subscribers is out of scope of this
 				specification.
 			</t>
 
-			<t>[TBD - should this be part of the ID-Event spec?]If an event
-				contains raw attribute values, the Feed Provider SHOULD encrypt
-				the JWT so that only the registered subscriber(s) may
-				receive the event.
-			</t>
-
 			<t>
 				When an event is available for a subscriber, the Feed Provider
 				attempts to deliver the event based on the subscribers registered
-				delivery
-				mechanism. For example,
+				delivery mechanism. For example,
 				<list style="symbols">
 					<t>The subscriber provided a web-callback endpoint, the
 						publisher uses an HTTP/1.1 POST to the endpoint to deliver the
 						event to the registered subscriber;
 					</t>
 
-					<t>The subscriber elected to poll for events, the feed
-						publisher holds the events until the registered subscriber
-						retrieves all pending events via HTTP/1.1 GET to the
-						subscriber's assigned retrieval endpoint by the fedd publisher; or,
+					<t>For subscribers electing to poll for events, the feed
+						publisher retains the events for a period of time or until the 
+            registered subscriber retrieves all pending events via HTTP/1.1 GET to the
+						subscriber's assigned retrieval endpoint by the feed publisher; or,
 					</t>
 
 					<t>The subscriber elected to use an alternate delivery method
@@ -284,36 +237,40 @@
 			</t>
 
 			<t>After an event is delivered to all subscribers, Feed Providers
-				may not typically maintain event records or histories. As such,
-				published
-				events SHOULD be self-validating (e.g. signed).
+				will not typically maintain event records or histories. As such,
+				published events SHOULD be self-validating (e.g. signed).
 			</t>
 
 			<t>
 				If delivery to any particular subscriber has been delayed for
 				an extended period of time, the Feed Provider MAY suspend the
 				subscription and even stop maintaining outstanding events for
-				the subscriber. See subscription
-				<spanx style="verb">state</spanx>
-				in
-				<xref target="subscribeMetadata" />
-				. An event publisher SHALL NOT be
-				obliged to maintain undelivered events indefinitely.
+				the subscriber at its discretion and available resources. See subscription
+				<spanx style="verb">state</spanx> in <xref target="subscribeMetadata" />.
 			</t>
 
 			<t>
 				Upon receiving an event token (or tokens in the case of multiple
-				events), the
-				subscriber reads the token and validates it.. Based on the content of the JWT,
-				the subscriber decides what if
+				events), the subscriber reads the token and validates it. Based 
+        on the content of the token, the subscriber decides what if
 				any action it needs to take in response to the event. For example,
-				In response to a SCIM event indicating a changed resource, the
-				subscriber might perform a SCIM GET request (see
-				<xref target="RFC7644" />
-				) to the affected resource URI in order to
-				confidentially obtain the current state of the affected resource.
-				The receiver of the event (subscriber) then determines what action,
-				if any, needs to be taken within the subscriber's domain.
+				in response to a SCIM event <xref target="idevent-scim"/> indicating 
+        a changed resource, the subscriber might perform a SCIM GET request (see
+				<xref target="RFC7644">Section 3.4</xref>
+				) to the affected resource URI in order to confidentially obtain 
+        the current state of the affected resource. The receiver of the 
+        event then determines what action, if any, needs to be taken within 
+        the subscriber's domain.</t>
+      <t>
+        The action a receiver takes may be substantially different than 
+        merely copying the action of the publisher. A single publisher event
+        MAY trigger multiple receiver actions. For example, upon receiving notification that
+        a user resource has been added to a group, the receiver may first determine
+        that the user does not exist in the subscriber's domain. The receiver
+        translates the event into two actions. Retrieve the user (e.g. using 
+        SCIM GET) and then provisions the user locally. After enabling 
+        the user, the receiver then enables the user for the application 
+        associated with membership in the publisher's group.
 			</t>
 		</section>
 
@@ -843,7 +800,7 @@ Location:
           distribution endpoints are correct and that an event may be
           successfully delivered.</t>
 
-          <section title="Verifying \"Push\" Style Subscriptions">
+          <section title="Verifying 'Push' Style Subscriptions">
             <t>When using the WebCallback mode, or any other
             "push"-style communication scheme, the verification process also
             serves to verify that the identified endpoint consents to receiving
@@ -924,7 +881,7 @@ Content-Type: application/scim+json
             error (e.g. 404).</t>
           
           </section>
-          <section title="Verifying \"Polling\" Style Subscriptions">
+          <section title="Verifying 'Polling' Style Subscriptions">
             <t>For clients that use a subscription mode (e.g. <spanx style="verb">
             urn:ietf:params:scimnotify:api:messages:2.0:poll</spanx>) that pick up events from a 
             subscription endpoint, the client MAY confirm the subscription
@@ -1293,6 +1250,16 @@ Location: https://example.com/FeedPoll/548b7c3f77c8bab33a4fef40
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml' ?><!-- SCIM API -->
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml' ?><!-- SCIM Schema -->
 
+      <reference anchor="idevent-token">
+        
+        <front>
+          <title>Identity Event Token (work in progress)</title>
+          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
+          <date/>
+        </front>  
+        <format type="TXT" target="draft-hunt-idevent-token-00.txt"/>    
+      </reference>
+
     </references>
 
     <references title="Informative References">
@@ -1302,6 +1269,16 @@ Location: https://example.com/FeedPoll/548b7c3f77c8bab33a4fef40
       
 
       <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.draft-ietf-webpush-protocol-02.xml'?>
+ 
+      <reference anchor="idevent-scim">
+        
+        <front>
+          <title>SCIM Event Extensions (work in progress)</title>
+          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
+          <date/>
+        </front>  
+        <format type="TXT" target="draft-hunt-idevent-scim-00.txt"/>    
+      </reference>
 
      <!-- 
       <reference anchor="Order-Operations">
