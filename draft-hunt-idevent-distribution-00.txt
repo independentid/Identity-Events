@@ -5,8 +5,8 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                               M. Ansari
-Expires: October 2, 2016                                           Cisco
-                                                          March 31, 2016
+Expires: October 3, 2016                                           Cisco
+                                                           April 1, 2016
 
 
                   Identity Event Subscription Protocol
@@ -35,7 +35,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on October 2, 2016.
+   This Internet-Draft will expire on October 3, 2016.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Hunt & Ansari            Expires October 2, 2016                [Page 1]
+Hunt & Ansari            Expires October 3, 2016                [Page 1]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
    the Trust Legal Provisions and are provided without warranty as
@@ -86,22 +86,22 @@ Table of Contents
        5.2.5.  Failure Conditions  . . . . . . . . . . . . . . . . .  17
      5.3.  HTTP Polling  . . . . . . . . . . . . . . . . . . . . . .  17
        5.3.1.  Description . . . . . . . . . . . . . . . . . . . . .  17
-       5.3.2.  Delivery Message Format . . . . . . . . . . . . . . .  17
-       5.3.3.  Subscription Verification . . . . . . . . . . . . . .  17
-       5.3.4.  Delivery Procedure  . . . . . . . . . . . . . . . . .  17
-       5.3.5.  Failure Conditions  . . . . . . . . . . . . . . . . .  18
-     5.4.  Push Notification Extensions  . . . . . . . . . . . . . .  18
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  18
-   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  18
-     7.1.  SCIM Event Notification Mechanism Registry  . . . . . . .  18
-     7.2.  SCIM Event Type Registry  . . . . . . . . . . . . . . . .  18
-   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  18
-     8.1.  Normative References  . . . . . . . . . . . . . . . . . .  18
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .  19
-   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .  19
-   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  19
-   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  20
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  20
+       5.3.2.  Delivery Message Format . . . . . . . . . . . . . . .  18
+       5.3.3.  Subscription Verification . . . . . . . . . . . . . .  18
+       5.3.4.  Delivery Procedure  . . . . . . . . . . . . . . . . .  18
+       5.3.5.  Failure Conditions  . . . . . . . . . . . . . . . . .  20
+     5.4.  Push Notification Extensions  . . . . . . . . . . . . . .  20
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  20
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  20
+     7.1.  SCIM Event Notification Mechanism Registry  . . . . . . .  20
+     7.2.  SCIM Event Type Registry  . . . . . . . . . . . . . . . .  20
+   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  20
+     8.1.  Normative References  . . . . . . . . . . . . . . . . . .  20
+     8.2.  Informative References  . . . . . . . . . . . . . . . . .  21
+   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .  21
+   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  21
+   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  22
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  22
 
 
 
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Hunt & Ansari            Expires October 2, 2016                [Page 2]
+Hunt & Ansari            Expires October 3, 2016                [Page 2]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
 1.  Introduction and Overview
@@ -165,9 +165,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016                [Page 3]
+Hunt & Ansari            Expires October 3, 2016                [Page 3]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
 1.1.  Notational Conventions
@@ -221,9 +221,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016                [Page 4]
+Hunt & Ansari            Expires October 3, 2016                [Page 4]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
          Polling - The subscriber will periodically poll the feed
@@ -277,9 +277,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016                [Page 5]
+Hunt & Ansari            Expires October 3, 2016                [Page 5]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
    Upon receiving an event token (or tokens in the case of multiple
@@ -333,9 +333,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016                [Page 6]
+Hunt & Ansari            Expires October 3, 2016                [Page 6]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
       subscriber.  This type of feed is likely to have many
@@ -389,9 +389,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016                [Page 7]
+Hunt & Ansari            Expires October 3, 2016                [Page 7]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
       resource  Indicates that the feed is for events related to a
@@ -445,9 +445,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016                [Page 8]
+Hunt & Ansari            Expires October 3, 2016                [Page 8]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
    delivery are specified a set of parameters called subscription
@@ -501,9 +501,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016                [Page 9]
+Hunt & Ansari            Expires October 3, 2016                [Page 9]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
          "verify" - the subscription is pending verification.  While in
@@ -557,9 +557,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016               [Page 10]
+Hunt & Ansari            Expires October 3, 2016               [Page 10]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
    to "on".  If however verification fails due to a hard failure, or the
@@ -613,9 +613,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016               [Page 11]
+Hunt & Ansari            Expires October 3, 2016               [Page 11]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
    A non-normative JSON representation of an event to be sent to a
@@ -669,9 +669,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016               [Page 12]
+Hunt & Ansari            Expires October 3, 2016               [Page 12]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
    A non-normative example of a client, having previously subscribed,
@@ -725,9 +725,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016               [Page 13]
+Hunt & Ansari            Expires October 3, 2016               [Page 13]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
       A description of the failure conditions that might occur and the
@@ -781,9 +781,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016               [Page 14]
+Hunt & Ansari            Expires October 3, 2016               [Page 14]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
    {
@@ -837,9 +837,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016               [Page 15]
+Hunt & Ansari            Expires October 3, 2016               [Page 15]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
    POST /Events  HTTP/1.1
@@ -893,9 +893,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016               [Page 16]
+Hunt & Ansari            Expires October 3, 2016               [Page 16]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
    HTTP/1.1 202 Accepted
@@ -923,7 +923,6 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
      ]
    }
 
-
    Since the normal operation of the Feed Provider is to forward events
    to registered subscribers, the Feed Provider is not obligated to
    inform the publisher of a permanent event URI that was created.
@@ -933,25 +932,138 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 5.2.5.  Failure Conditions
 
+   [[TO BE COMPLETED]]
+
 5.3.  HTTP Polling
 
 5.3.1.  Description
 
+   This method allows a subscriber to use HTTP GET to poll for events to
+   the "subUri" provided to the subscriber by the publisher.  The
+   "deliveryUri"value for this method is
+   "urn:ietf:params:event:delivery:HTTP:poll".
+
+   Depending on the settings for the subscription metadata, this
+   delivery method is capable of delivering multiple signed events in a
+   single delivery poll request.
+
+
+
+Hunt & Ansari            Expires October 3, 2016               [Page 17]
+
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
+
+
 5.3.2.  Delivery Message Format
+
+   The delivery message is the same as Section 5.2.2.
 
 5.3.3.  Subscription Verification
 
+   Subscription verification is described in Section 4.3.2.
+
 5.3.4.  Delivery Procedure
 
+   To deliver an event, the publisher places the event in a queue/buffer
+   associated with the client subscription that will be requested at
+   some future time by the subscriber using the URI specified in
+   "subUri".
+
+   To pick up any events, the subscriber issues an HTTP GET to the URI
+   provided by the event publisher in "subUri".
+
+   In response to the HTTP GET request, the feed publisher responds with
+   a body that corresponds to the event delivery message format (see
+   Section 5.2.2).
+
+   An example polling request by a subscriber.  The example has been
+   formatted for readability:
+
+   GET /subscriber/66444423ab24430fb06cf0de1ab75247
+      Host: pub.example.com
+      Accept: application/json
+      Authorization: Bearer h480djs93hd8
 
 
 
 
 
 
-Hunt & Ansari            Expires October 2, 2016               [Page 17]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt & Ansari            Expires October 3, 2016               [Page 18]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
+
+
+   An example poll response (formatted for readability):
+
+   HTTP/1.1 200 OK
+   Content-Type: application/json
+   Location:
+     https://pub.example.com/subscriber/66444423ab24430fb06cf0de1ab75247
+   {
+   "eventTkns":[
+     "eyJhbGciOiJub25lIn0
+     .
+     eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+     kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+     FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+     WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+     WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+     hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+     VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+     SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+     b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+     tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+     1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+     .",
+     "eyJhbGciOiJub25lIn0
+     .
+     eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+     kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+     FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+     WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+     WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+     hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+     VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+     SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+     b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+     tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+     1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+     ."
+     ],
+   "eventCnt":2
+   }
+
+   [[TO BE DISCUSSED: Should the subscriber be able to request events
+   based on an event id (e.g. since), by date, etc.  How does a client
+   know it got them all?  Should we use ETags to signal whether there
+   are new events?]]
+
+
+
+
+
+
+
+Hunt & Ansari            Expires October 3, 2016               [Page 19]
+
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
 5.3.5.  Failure Conditions
@@ -1005,9 +1117,9 @@ Internet-Draft       draft-hunt-idevent-distribution          March 2016
 
 
 
-Hunt & Ansari            Expires October 2, 2016               [Page 18]
+Hunt & Ansari            Expires October 3, 2016               [Page 20]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
    [RFC5988]  Nottingham, M., "Web Linking", RFC 5988,
@@ -1061,9 +1173,9 @@ Appendix B.  Acknowledgments
 
 
 
-Hunt & Ansari            Expires October 2, 2016               [Page 19]
+Hunt & Ansari            Expires October 3, 2016               [Page 21]
 
-Internet-Draft       draft-hunt-idevent-distribution          March 2016
+Internet-Draft       draft-hunt-idevent-distribution          April 2016
 
 
 Appendix C.  Change Log
@@ -1117,4 +1229,4 @@ Authors' Addresses
 
 
 
-Hunt & Ansari            Expires October 2, 2016               [Page 20]
+Hunt & Ansari            Expires October 3, 2016               [Page 22]

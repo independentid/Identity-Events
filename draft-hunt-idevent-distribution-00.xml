@@ -712,7 +712,7 @@ Content-Length: ...
             in a single delivery.</t>
        </section>
           
-       <section title="Delivery Message Format">
+       <section anchor="httpMessageFormat" title="Delivery Message Format">
             <t>The content-type for this method is <spanx style="verb">application/json</spanx>
             and consists of a JSON object containing the following attributes:<list style="hanging">
               <t hangText="eventTkns"><vspace/>A multi-valued String with each value containing
@@ -827,9 +827,7 @@ Content-Type: application/json
   ."
     }
   ]
-}
-            
-            </artwork>
+}</artwork>
             
             </figure> </t>
 
@@ -844,6 +842,7 @@ Content-Type: application/json
        </section>
 
        <section title="Failure Conditions">
+         <t>[[TO BE COMPLETED]]</t>
        </section>
           
      </section>
@@ -851,18 +850,94 @@ Content-Type: application/json
      <section anchor="httpGet" title="HTTP Polling">
         
        <section title="Description">
+         <t>This method allows a subscriber to use HTTP GET to poll for
+            events to the <spanx style="verb">subUri</spanx> provided to the subscriber by the publisher. 
+            The <spanx style="verb">deliveryUri</spanx>value for this method 
+            is <spanx style="verb">urn:ietf:params:event:delivery:HTTP:poll</spanx>.</t>
+            
+            <t>Depending on the settings for the subscription metadata, this
+            delivery method is capable of delivering multiple signed events
+            in a single delivery poll request.</t>
        </section>
 
        <section title="Delivery Message Format">
+        <t>The delivery message is the same as <xref target="httpMessageFormat"/>.</t>
        </section>
 
        <section title="Subscription Verification">
+        <t>Subscription verification is described in <xref target="pollVerify"/>.</t>
        </section>
 
        <section title="Delivery Procedure">
+        <t>To deliver an event, the publisher places the event in a queue/buffer
+        associated with the client subscription that will be requested at some
+        future time by the subscriber using the URI specified in <spanx style="verb">subUri</spanx>.</t>
+        <t>To pick up any events, the subscriber issues an HTTP GET to the URI
+        provided by the event publisher in <spanx style="verb">subUri</spanx>.</t>
+        <t>In response to the HTTP GET request, the feed publisher responds with
+        a body that corresponds to the event delivery message format (see <xref target="httpMessageFormat"/>).</t>
+        <figure>
+        <preamble>An example polling request by a subscriber. The example
+        has been formatted for readability:</preamble>
+        <artwork>GET /subscriber/66444423ab24430fb06cf0de1ab75247
+   Host: pub.example.com
+   Accept: application/json
+   Authorization: Bearer h480djs93hd8    
+        </artwork>
+        </figure>
+        <figure><preamble>An example poll response (formatted 
+        for readability):</preamble>
+        <artwork>
+HTTP/1.1 200 OK
+Content-Type: application/json
+Location: 
+  https://pub.example.com/subscriber/66444423ab24430fb06cf0de1ab75247
+{
+"eventTkns":[
+  "eyJhbGciOiJub25lIn0
+  .
+  eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+  kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+  FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+  WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+  WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+  hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+  VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+  SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+  b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+  tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+  1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+  .",
+  "eyJhbGciOiJub25lIn0
+  .
+  eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+  kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+  FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+  WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+  WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+  hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+  VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+  SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+  b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+  tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+  1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+  ."
+  ],  
+"eventCnt":2
+}        
+        </artwork>
+        </figure>
+        <t>[[TO BE DISCUSSED: Should the subscriber be able to request 
+        events based on an event id (e.g. since), by date, etc. How does 
+        a client know it got them all?  Should we use ETags to signal
+        whether there are new events?]]</t>
        </section>
 
        <section title="Failure Conditions">
+       <t>[[TO BE DISCUSSED: The polling mode provides no way for a subscriber to indicate
+       parsing validation errors directly in response to a delivery. When 
+       errors occur, subscriber administrators must re-confirm the subscription
+       configuration.]]</t>
        </section>
         
      </section>
