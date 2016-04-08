@@ -5,14 +5,14 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                              W. Denniss
-Expires: September 21, 2016                                       Google
+Expires: October 10, 2016                                         Google
                                                                M. Ansari
                                                                    Cisco
-                                                          March 20, 2016
+                                                           April 8, 2016
 
 
                           Identity Event Token
-                      draft-hunt-idevent-token-00
+                      draft-hunt-idevent-token-01
 
 Abstract
 
@@ -37,7 +37,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on September 21, 2016.
+   This Internet-Draft will expire on October 10, 2016.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Hunt, et al.           Expires September 21, 2016               [Page 1]
+Hunt, et al.            Expires October 10, 2016                [Page 1]
 
-Internet-Draft          draft-hunt-idevent-token              March 2016
+Internet-Draft          draft-hunt-idevent-token              April 2016
 
 
    include Simplified BSD License text as described in Section 4.e of
@@ -68,7 +68,7 @@ Table of Contents
      1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   4
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   4
    2.  Events  . . . . . . . . . . . . . . . . . . . . . . . . . . .   5
-     2.1.  Core Event Attributes . . . . . . . . . . . . . . . . . .   6
+     2.1.  Core Event Attributes . . . . . . . . . . . . . . . . . .   7
      2.2.  Event Token Construction  . . . . . . . . . . . . . . . .   8
    3.  Security Considerations . . . . . . . . . . . . . . . . . . .  11
    4.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  11
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Hunt, et al.           Expires September 21, 2016               [Page 2]
+Hunt, et al.            Expires October 10, 2016                [Page 2]
 
-Internet-Draft          draft-hunt-idevent-token              March 2016
+Internet-Draft          draft-hunt-idevent-token              April 2016
 
 
    o  Session Cancellation
@@ -165,9 +165,9 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 21, 2016               [Page 3]
+Hunt, et al.            Expires October 10, 2016                [Page 3]
 
-Internet-Draft          draft-hunt-idevent-token              March 2016
+Internet-Draft          draft-hunt-idevent-token              April 2016
 
 
    This specification may be optionally used with the identity event
@@ -221,9 +221,9 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 21, 2016               [Page 4]
+Hunt, et al.            Expires October 10, 2016                [Page 4]
 
-Internet-Draft          draft-hunt-idevent-token              March 2016
+Internet-Draft          draft-hunt-idevent-token              April 2016
 
 
    Subscriber
@@ -238,15 +238,12 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
    event feed (see [idevent-subscription]).
 
    In addition to the JWT attributes "iss" and "aud", an event message
-   contains the attribute "eventUris" with at least one value containing
-   the URI prefix "urn:ietf:params:event:".  The event URI values
-   indicate what event information (attributes) and what type of event
-   (e.g. resource modified) is contained in the event message.  The
-   definition of registered events are found in the event registry (see
-   Section 4.2).
-
-   The attribute "resourceUris" specifies one or more affected resources
-   which are the subject of the event.
+   contains the attribute "events" with at least one value.  The event
+   URI values indicate what event information (attributes) and what type
+   of event (e.g. resource modified) is contained in the event message.
+   The definition of registered events are found in the event registry
+   (see Section 4.2), and implementers are free to define their own
+   event types.
 
    The schema and structure of an event follows the JWT [RFC7519].  An
    event JWT has the following characteristics:
@@ -277,9 +274,12 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 21, 2016               [Page 5]
+
+
+
+Hunt, et al.            Expires October 10, 2016                [Page 5]
 
-Internet-Draft          draft-hunt-idevent-token              March 2016
+Internet-Draft          draft-hunt-idevent-token              April 2016
 
 
    The following is a non-normative example showing a password change
@@ -287,9 +287,9 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
    {
      "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
-     "eventUris":[
+     "events":[
        "urn:ietf:params:event:SCIM:password",
-       "urn:ietf:params:event:extension:example.com:password"
+       "https://example.com/event/password"
      ],
      "iat": 1458496025,
      "iss": "https://scim.example.com",
@@ -302,7 +302,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
      "urn:ietf:params:event:SCIM:password":{
        "id":"44f6142df96bd6ab61e7521d9",
      },
-     "urn:ietf:params:event:extension:example.com:password":{
+     "https://example.com/scim/event/password":{
         "resetAttempts":5
      }
    }
@@ -316,27 +316,52 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
    for the event feed that a client has subscribed to.
 
    Additional extensions to an event may be added by adding more values
-   to the "eventUris" attribute.  For each event URI value specified,
-   there is a corresponding attribute that has its on JSON object that
+   to the "events" attribute.  For each event URI value specified, there
+   is a corresponding attribute that has its on JSON object that
    contains the attributes associated with that event (e.g.
-   "urn:ietf:params:event:extension:example.com:password").  In this
-   example, the SCIM event indicates that a password has been updated
-   and the current password reset count is 5.  Notice that the value for
-   "resetAttempts" is actually part of its own JSON object
-   "urn:ietf:params:event:extension:example.com:password".
+   "https://example.com/scim/event/password").  In this example, the
+   SCIM event indicates that a password has been updated and the current
+   password reset count is 5.  Notice that the value for "resetAttempts"
+   is actually part of its own JSON object
+   "https://example.com/scim/event/password".
+
+
+
+
+
+
+
+
+
+Hunt, et al.            Expires October 10, 2016                [Page 6]
+
+Internet-Draft          draft-hunt-idevent-token              April 2016
+
+
+   Here is another example event message, this one for a Back-Channel
+   Logout Token:
+
+   {
+     "iss": "https://server.example.com",
+     "aud": "s6BhdRkqt3",
+     "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
+     "sub": "248289761001",
+     "iat": 1458668180,
+     "exp": 1458668580,
+     "events": [
+       "https://specs.openid.net/logout"
+     ],
+     "https://specs.openid.net/logout": {
+       "sid": "08a5019c-17e1-4977-8f42-65a12843ea02"
+     }
+   }
+
+                   Figure 2: Example OpenID Logout Event
 
 2.1.  Core Event Attributes
 
    The following are attributes that are based on [RFC7519] claim
    definitions and are profiled for use in an event message:
-
-
-
-
-Hunt, et al.           Expires September 21, 2016               [Page 6]
-
-Internet-Draft          draft-hunt-idevent-token              March 2016
-
 
    jti
       As defined by Section 4.1.7 [RFC7519] contains a unique identifier
@@ -361,6 +386,14 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
       RECOMMENDED.
 
    iss
+
+
+
+Hunt, et al.            Expires October 10, 2016                [Page 7]
+
+Internet-Draft          draft-hunt-idevent-token              April 2016
+
+
       A single valued String containing the URI of the service provider
       publishing the event (the issuer).  For example, in SCIM
       [RFC7644], this is the SCIM Service Provider's root endpoint.
@@ -387,19 +420,12 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
    The following are new attributes defined by this specification:
 
-
-
-Hunt, et al.           Expires September 21, 2016               [Page 7]
-
-Internet-Draft          draft-hunt-idevent-token              March 2016
-
-
-   eventUris
+   events
       A multi-valued String that contains the URIs of events contained
       within the JWT.  Values in this attribute further indicate what
       other JSON objects are present within the parent JSON event
       structure.  Each OPTIONAL JSON sub-object is denoted by an
-      attribute that matches a value in "eventUris".  This attribute is
+      attribute that matches a value in "events".  This attribute is
       REQUIRED.
 
 2.2.  Event Token Construction
@@ -419,35 +445,9 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.           Expires September 21, 2016               [Page 8]
+Hunt, et al.            Expires October 10, 2016                [Page 8]
 
-Internet-Draft          draft-hunt-idevent-token              March 2016
+Internet-Draft          draft-hunt-idevent-token              April 2016
 
 
    The following is an example event message(it has been modified for
@@ -455,9 +455,6 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
    {
      "jti": "4d3559ec67504aaba65d40b0363faad8",
-     "eventUris":[
-       "urn:ietf:params:event:SCIM:create"
-     ],
      "iat": 1458496404,
      "iss": "https://scim.example.com",
      "aud":[
@@ -465,6 +462,9 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
       "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
      ],
      "sub": "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
+     "events":[
+       "urn:ietf:params:event:SCIM:create"
+     ],
      "urn:ietf:params:event:SCIM:create":{
        "attributes":["id","name","userName","password","emails"],
        "values":{
@@ -482,7 +482,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
      }
    }
 
-                     Figure 2: Example Event JSON Data
+                     Figure 3: Example Event JSON Data
 
    When transmitted, the above JSON body must be converted into a JWT as
    per [RFC7519].  In this example, because the event contains attribute
@@ -501,9 +501,9 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 21, 2016               [Page 9]
+Hunt, et al.            Expires October 10, 2016                [Page 9]
 
-Internet-Draft          draft-hunt-idevent-token              March 2016
+Internet-Draft          draft-hunt-idevent-token              April 2016
 
 
    The example JSON Event Data is encoded as follows:
@@ -547,7 +547,7 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
    ICAgIm5hbWUiOnsKICAgICAgICAiZ2l2ZW5OYW1lIjoiSm9obiIsCiAgICAgICAg
    ImZhbWlseU5hbWUiOiJEb2UiCiAgICAgIH0KICAgIH0gIAogIH0KfQ.
 
-                  Figure 3: Example Unsecured Event Token
+                  Figure 4: Example Unsecured Event Token
 
    To create and or validate a signed or encrypted event token follow
    the instructions in section 7 of [RFC7519].
@@ -557,9 +557,9 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 21, 2016              [Page 10]
+Hunt, et al.            Expires October 10, 2016               [Page 10]
 
-Internet-Draft          draft-hunt-idevent-token              March 2016
+Internet-Draft          draft-hunt-idevent-token              April 2016
 
 
 3.  Security Considerations
@@ -613,9 +613,9 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 21, 2016              [Page 11]
+Hunt, et al.            Expires October 10, 2016               [Page 11]
 
-Internet-Draft          draft-hunt-idevent-token              March 2016
+Internet-Draft          draft-hunt-idevent-token              April 2016
 
 
 5.  References
@@ -669,9 +669,9 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 21, 2016              [Page 12]
+Hunt, et al.            Expires October 10, 2016               [Page 12]
 
-Internet-Draft          draft-hunt-idevent-token              March 2016
+Internet-Draft          draft-hunt-idevent-token              April 2016
 
 
    [RFC7009]  Lodderstedt, T., Ed., Dronia, S., and M. Scurtescu, "OAuth
@@ -725,9 +725,9 @@ Authors' Addresses
 
 
 
-Hunt, et al.           Expires September 21, 2016              [Page 13]
+Hunt, et al.            Expires October 10, 2016               [Page 13]
 
-Internet-Draft          draft-hunt-idevent-token              March 2016
+Internet-Draft          draft-hunt-idevent-token              April 2016
 
 
    Morteza Ansari
@@ -781,4 +781,4 @@ Internet-Draft          draft-hunt-idevent-token              March 2016
 
 
 
-Hunt, et al.           Expires September 21, 2016              [Page 14]
+Hunt, et al.            Expires October 10, 2016               [Page 14]
