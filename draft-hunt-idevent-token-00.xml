@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-hunt-idevent-token-00" ipr="trust200902">
+<rfc category="std" docName="draft-hunt-idevent-token-01" ipr="trust200902">
   <front>
     <title abbrev="draft-hunt-idevent-token">Identity Event Token</title>
 
@@ -97,7 +97,7 @@
       notify its subscribers of the identifier re-use. In this way, the event
       is not describing a particular state change to a resource, it describes
       a meta-conclusion based on its own business and security rules (this
-      scenario is often called an 'account take-over' event).</t>
+      scenario is often called an 'account takeover' event).</t>
       
       <t>A subscriber having received an event, validates and interprets the
       event and takes its own independent action, if any. For example, 
@@ -107,7 +107,7 @@
       access to resources associated with the previous user.</t>
       
       <t>Events SHOULD NOT be used to convey commands or requests. To do so
-      requires complex bi-directional signalling and error recovery mechanisms which fall
+      requires complex bidirectional signalling and error recovery mechanisms which fall
       outside the scope of this specification. The intent of this specification
       is to define a way of exchanging historical statements of fact that 
       subscribers may interpret for their own use.</t>
@@ -183,15 +183,12 @@
       
       <t>In addition to the JWT attributes <spanx style="verb">iss</spanx> and 
       <spanx style="verb">aud</spanx>, an event message contains the attribute 
-      <spanx style="verb">eventUris</spanx> with at least one value 
-      containing the URI prefix <spanx style="verb">urn:ietf:params:event:</spanx>. 
+      <spanx style="verb">events</spanx> with at least one value. 
       The event URI values indicate what event information (attributes) 
       and what type of event (e.g. resource modified) is contained in the 
       event message. The definition of registered events are found in the 
-      event registry (see <xref target="registry"/>).</t>
-
-      <t>The attribute <spanx style="verb">resourceUris</spanx> specifies
-      one or more affected resources which are the subject of the event.</t>
+      event registry (see <xref target="registry"/>), and implementers are free to
+      define their own event types.</t>
 
       <t>The schema and structure of an event follows the JWT <xref target="RFC7519"/>. 
       An event JWT has the following characteristics:<list style="symbols">
@@ -204,9 +201,9 @@
         that conveys a SCIM event (see <xref target="idevent-scim"/>):</preamble>
         <artwork>{ 
   "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
-  "eventUris":[
+  "events":[
     "urn:ietf:params:event:SCIM:password",
-    "urn:ietf:params:event:extension:example.com:password"
+    "https://example.com/event/password"
   ],
   "iat": 1458496025,
   "iss": "https://scim.example.com",  
@@ -219,7 +216,7 @@
   "urn:ietf:params:event:SCIM:password":{
     "id":"44f6142df96bd6ab61e7521d9",
   },
-  "urn:ietf:params:event:extension:example.com:password":{
+  "https://example.com/scim/event/password":{
      "resetAttempts":5
   }
 }</artwork>
@@ -232,15 +229,35 @@
       subscribed to.</t>
       
       <t>Additional extensions to an event may be added by adding more values
-      to the <spanx style="verb">eventUris</spanx> attribute. For each event URI
+      to the <spanx style="verb">events</spanx> attribute. For each event URI
       value specified, there is a corresponding attribute that has its on JSON
       object that contains the attributes associated with that event (e.g. 
-      <spanx style="verb">urn:ietf:params:event:extension:example.com:password</spanx>).
+      <spanx style="verb">https://example.com/scim/event/password</spanx>).
       In this example, the SCIM event indicates that a password has been updated 
       and the current password reset count is 5. Notice that the value for 
       "resetAttempts" is actually part of its own JSON object 
-      <spanx style="verb">urn:ietf:params:event:extension:example.com:password</spanx>.  
+      <spanx style="verb">https://example.com/scim/event/password</spanx>.  
       </t>
+
+              <t><figure anchor="exampleBackLogoutEvent" title="Example OpenID Logout Event">
+            <preamble>Here is another example event message, this one
+              for a Back-Channel Logout Token:</preamble>
+
+            <artwork>{
+  "iss": "https://server.example.com",
+  "aud": "s6BhdRkqt3",
+  "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
+  "sub": "248289761001",
+  "iat": 1458668180,
+  "exp": 1458668580,
+  "events": [
+    "https://specs.openid.net/logout"
+  ],
+  "https://specs.openid.net/logout": {
+    "sid": "08a5019c-17e1-4977-8f42-65a12843ea02"
+  }
+}</artwork>
+          </figure></t>
       
       <section title="Core Event Attributes">
         <t>The following are attributes that are based on <xref target="RFC7519"/>
@@ -292,12 +309,12 @@
           </list>
         </t>
         <t>The following are new attributes defined by this specification:<list style="hanging">
-            <t hangText="eventUris"><vspace blankLines="0"/>A multi-valued String 
+            <t hangText="events"><vspace blankLines="0"/>A multi-valued String 
             that contains the URIs of events contained within the JWT. Values
             in this attribute further indicate what other JSON objects are present
             within the parent JSON event structure. Each OPTIONAL JSON sub-object is
             denoted by an attribute that matches a value in 
-            <spanx style="verb">eventUris</spanx>.  This attribute is REQUIRED.</t>
+            <spanx style="verb">events</spanx>.  This attribute is REQUIRED.</t>
         </list></t>
       </section>
 
@@ -307,6 +324,7 @@
         object and which is then used as the body of a JWT.</t>
         <t>While this specification uses JWT to convey an event message, implementers
         SHALL NOT use these events to convey authentication or authorization assertions.</t>
+
         <t><figure anchor="exampleJsonEvent" title="Example Event JSON Data">
             <preamble>The
             following is an example event message(it has been modified
@@ -314,9 +332,6 @@
 
             <artwork>{  
   "jti": "4d3559ec67504aaba65d40b0363faad8",
-  "eventUris":[
-    "urn:ietf:params:event:SCIM:create"
-  ],
   "iat": 1458496404,
   "iss": "https://scim.example.com",  
   "aud":[
@@ -324,6 +339,9 @@
    "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
   ],  
   "sub": "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
+  "events":[
+    "urn:ietf:params:event:SCIM:create"
+  ],
   "urn:ietf:params:event:SCIM:create":{
     "attributes":["id","name","userName","password","emails"],
     "values":{
