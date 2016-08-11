@@ -5,10 +5,10 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                              W. Denniss
-Expires: February 11, 2017                                        Google
+Expires: February 12, 2017                                        Google
                                                                M. Ansari
                                                                    Cisco
-                                                         August 10, 2016
+                                                         August 11, 2016
 
 
                        Security Event Token (SET)
@@ -37,7 +37,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on February 11, 2017.
+   This Internet-Draft will expire on February 12, 2017.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hunt, et al.            Expires February 11, 2017               [Page 1]
+Hunt, et al.            Expires February 12, 2017               [Page 1]
 
 Internet-Draft          draft-hunt-idevent-token             August 2016
 
@@ -68,18 +68,18 @@ Table of Contents
      1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   4
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   4
    2.  Events  . . . . . . . . . . . . . . . . . . . . . . . . . . .   5
-     2.1.  Core Event Attributes . . . . . . . . . . . . . . . . . .   7
-     2.2.  Security Event Token Construction . . . . . . . . . . . .   8
-   3.  Security Considerations . . . . . . . . . . . . . . . . . . .  11
-   4.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  11
-   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  12
-   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  12
-     6.1.  Normative References  . . . . . . . . . . . . . . . . . .  12
-     6.2.  Informative References  . . . . . . . . . . . . . . . . .  13
-   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .  13
-   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  13
-   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  13
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  14
+     2.1.  Core Event Attributes . . . . . . . . . . . . . . . . . .   8
+     2.2.  Security Event Token Construction . . . . . . . . . . . .   9
+   3.  Security Considerations . . . . . . . . . . . . . . . . . . .  12
+   4.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  12
+   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  13
+   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  13
+     6.1.  Normative References  . . . . . . . . . . . . . . . . . .  13
+     6.2.  Informative References  . . . . . . . . . . . . . . . . .  14
+   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .  14
+   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  14
+   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  14
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  15
 
 1.  Introduction and Overview
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Hunt, et al.            Expires February 11, 2017               [Page 2]
+Hunt, et al.            Expires February 12, 2017               [Page 2]
 
 Internet-Draft          draft-hunt-idevent-token             August 2016
 
@@ -165,7 +165,7 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
 
 
 
-Hunt, et al.            Expires February 11, 2017               [Page 3]
+Hunt, et al.            Expires February 12, 2017               [Page 3]
 
 Internet-Draft          draft-hunt-idevent-token             August 2016
 
@@ -221,7 +221,7 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
 
 
 
-Hunt, et al.            Expires February 11, 2017               [Page 4]
+Hunt, et al.            Expires February 12, 2017               [Page 4]
 
 Internet-Draft          draft-hunt-idevent-token             August 2016
 
@@ -244,18 +244,15 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
       including an events attribute describing the type of event, and
 
    o  one or more JSON sub-objects that attributes associated with an
-      event URI value.
+      event URI value.  The attributes to be included with any
+      particular event are to be defined by the event as specified by
+      the event URI value in the "events" attribute.
 
    In addition to the JWT attributes "iss" and "aud", an SET contains
    the attribute "events" with at least one URI value used to indicate
    the type of event that has occurred and what information (attributes)
    may be present in the event token.  and what type of event (e.g.
    resource modified) is contained in the event token.
-
-   So that an event token cannot be confused with a security token, an
-   event token JWT SHALL NOT contain a "sub" attribute at the top level
-   of the JWT JSON object structure and MUST contain an "events"
-   attribute.
 
    An event MAY contain an attribute for each value of "events" whose
    value is a JSON object (also known as an event extension object) that
@@ -277,7 +274,10 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
 
 
 
-Hunt, et al.            Expires February 11, 2017               [Page 5]
+
+
+
+Hunt, et al.            Expires February 12, 2017               [Page 5]
 
 Internet-Draft          draft-hunt-idevent-token             August 2016
 
@@ -333,7 +333,7 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
 
 
 
-Hunt, et al.            Expires February 11, 2017               [Page 6]
+Hunt, et al.            Expires February 12, 2017               [Page 6]
 
 Internet-Draft          draft-hunt-idevent-token             August 2016
 
@@ -367,6 +367,67 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
    of a user session identified in the event extension by "jti" that was
    issued by "https://token.example.com".
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.            Expires February 12, 2017               [Page 7]
+
+Internet-Draft          draft-hunt-idevent-token             August 2016
+
+
+   In the following example, a fictional medical service collects
+   consent for medical actions and notifies other parties.  The
+   individual for whom consent is identified was originally
+   authenticated via OpenID Connect.  In this case, the issuer of the
+   SET event is an application rather than the OpenID provider:
+
+   {
+     "jti": "fb4e75b5411e4e19b6c0fe87950f7749",
+     "events":[
+       "https://openid.net/heart/consent.html"
+     ],
+     "iat": 1458496025,
+     "iss": "https://my.examplemed.com",
+     "aud":[
+       "https://examplemedlab/Feeds/98d52461fa5bbc879593b7754"
+     ],
+     "https://openid.net/heart/consent":{
+       "iss": "https://token.example.com",
+       "sub": "248289761001",
+       "consentUri":[
+         "https://terms.examplemed.com/labdisclosure.html#Agree"
+       ]
+     }
+   }
+
+                      Figure 3: Example Consent Event
+
+   In the above example "iss" and "sub" contained within the attribute
+   "https://openid.net/heart/consent", refer to the subject and issuer
+   of the original OpendID Provider.  They are distinct from the top
+   level value of "iss" which always refers to the issuer of the event;
+   a medical consent service that is a relying party to the OpenID
+   Provider.
+
 2.1.  Core Event Attributes
 
    The following are attributes that are based on [RFC7519] claim
@@ -380,20 +441,21 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
       REQUIRED.
 
    iss
+
+
+
+
+Hunt, et al.            Expires February 12, 2017               [Page 8]
+
+Internet-Draft          draft-hunt-idevent-token             August 2016
+
+
       A single valued String containing the URI of the service provider
       publishing the event (the issuer).  This attribute is REQUIRED.
 
    aud
       A multi-valued String containing the URIs representing the
       audience of the event.  Values are typically URLs of the feeds the
-
-
-
-Hunt, et al.            Expires February 11, 2017               [Page 7]
-
-Internet-Draft          draft-hunt-idevent-token             August 2016
-
-
       event is associated with.  When an event has multiple audiences
       that go to the same subscriber, the publisher is not obligated to
       deliver repeated events to the same subscriber.  This attribute is
@@ -439,13 +501,7 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
 
 
 
-
-
-
-
-
-
-Hunt, et al.            Expires February 11, 2017               [Page 8]
+Hunt, et al.            Expires February 12, 2017               [Page 9]
 
 Internet-Draft          draft-hunt-idevent-token             August 2016
 
@@ -483,7 +539,7 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
     }
   }
 
-                     Figure 3: Example Event JSON Data
+                     Figure 4: Example Event JSON Data
 
    When transmitted, the above JSON body must be converted into a JWT as
    per [RFC7519].  In this example, because the event contains attribute
@@ -501,7 +557,7 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
 
 
 
-Hunt, et al.            Expires February 11, 2017               [Page 9]
+Hunt, et al.            Expires February 12, 2017              [Page 10]
 
 Internet-Draft          draft-hunt-idevent-token             August 2016
 
@@ -551,13 +607,13 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
    ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
    .
 
-                  Figure 4: Example Unsecured Event Token
+                  Figure 5: Example Unsecured Event Token
 
 
 
 
 
-Hunt, et al.            Expires February 11, 2017              [Page 10]
+Hunt, et al.            Expires February 12, 2017              [Page 11]
 
 Internet-Draft          draft-hunt-idevent-token             August 2016
 
@@ -613,7 +669,7 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
 
 
 
-Hunt, et al.            Expires February 11, 2017              [Page 11]
+Hunt, et al.            Expires February 12, 2017              [Page 12]
 
 Internet-Draft          draft-hunt-idevent-token             August 2016
 
@@ -669,7 +725,7 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
 
 
 
-Hunt, et al.            Expires February 11, 2017              [Page 12]
+Hunt, et al.            Expires February 12, 2017              [Page 13]
 
 Internet-Draft          draft-hunt-idevent-token             August 2016
 
@@ -725,7 +781,7 @@ Appendix C.  Change Log
 
 
 
-Hunt, et al.            Expires February 11, 2017              [Page 13]
+Hunt, et al.            Expires February 12, 2017              [Page 14]
 
 Internet-Draft          draft-hunt-idevent-token             August 2016
 
@@ -781,4 +837,4 @@ Authors' Addresses
 
 
 
-Hunt, et al.            Expires February 11, 2017              [Page 14]
+Hunt, et al.            Expires February 12, 2017              [Page 15]

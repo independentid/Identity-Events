@@ -195,7 +195,10 @@
         <t>a common set of attributes common to every event at the top level
         including an events attribute describing the type of event, and</t>
         <t>one or more JSON sub-objects 
-        that attributes associated with an event URI value.</t>
+        that attributes associated with an event URI value. The attributes
+        to be included with any particular event are to be defined by the event
+        as specified by the event URI value in the <spanx style="verb">events</spanx>
+        attribute.</t>
       </list>
       In addition to the JWT attributes <spanx style="verb">iss</spanx> 
       and <spanx style="verb">aud</spanx>, an SET contains the 
@@ -204,11 +207,6 @@
       information (attributes) may be present in the event token. 
       and what type of event (e.g. resource modified) is contained in the 
       event token.</t>
-      
-      <t>So that an event token cannot be confused with a security token,
-      an event token JWT SHALL NOT contain a <spanx style="verb">sub</spanx>
-      attribute at the top level of the JWT JSON object structure and MUST
-      contain an <spanx style="verb">events</spanx> attribute.</t>
       
       <t>An event MAY contain an attribute for each value of <spanx style="verb">events</spanx>
       whose value is a JSON object (also known as an event extension object)
@@ -296,6 +294,40 @@
           about the logging out of a user session identified in the event
           extension by <spanx style="verb">jti</spanx>
           that was issued by <spanx style="verb">https://token.example.com</spanx>.
+          </t>
+          <t>
+          
+          <figure anchor="exampleConsent" title="Example Consent Event">
+        <preamble>In the following example, a fictional medical service collects 
+          consent for medical actions and notifies other parties. The individual
+          for whom consent is identified was originally authenticated via
+          OpenID Connect.  In this case, the issuer of the SET event is an
+          application rather than the OpenID provider:</preamble>
+        <artwork>{ 
+  "jti": "fb4e75b5411e4e19b6c0fe87950f7749",
+  "events":[
+    "https://openid.net/heart/consent.html"
+  ],
+  "iat": 1458496025,
+  "iss": "https://my.examplemed.com",  
+  "aud":[
+    "https://examplemedlab/Feeds/98d52461fa5bbc879593b7754"
+  ],  
+  "https://openid.net/heart/consent":{
+    "iss": "https://token.example.com",
+    "sub": "248289761001",
+    "consentUri":[
+      "https://terms.examplemed.com/labdisclosure.html#Agree"
+    ]
+  }
+}</artwork>
+      </figure>  
+      In the above example <spanx style="verb">iss</spanx> and <spanx style="verb">sub</spanx>
+      contained within the attribute <spanx style="verb">https://openid.net/heart/consent</spanx>, refer
+      to the subject and issuer of the original OpendID Provider. They are
+      distinct from the top level value of <spanx style="verb">iss</spanx>
+      which always refers to the issuer of the event; a medical consent
+      service that is a relying party to the OpenID Provider.
           </t>
       
       <section title="Core Event Attributes">
