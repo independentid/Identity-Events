@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml-stylesheet type='text/xsl' href='http://xml.resource.org/authoring/rfc2629.xslt' ?>
+<?xml-stylesheet type='text/xsl' href='http://xml2rfc.tools.ietf.org/authoring/rfc2629.xslt' ?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd">
 <?rfc toc="yes"?>
 <?rfc tocompact="yes"?>
@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-hunt-idevent-token-01" ipr="trust200902">
+<rfc category="std" docName="draft-hunt-idevent-token-02" ipr="trust200902">
   <front>
     <title abbrev="draft-hunt-idevent-token">Identity Event Token</title>
 
@@ -40,7 +40,14 @@
       </address>
     </author>
 
-    
+    <author fullname="Michael B. Jones" initials="M.B." surname="Jones">
+      <organization abbrev="Microsoft">Microsoft</organization>
+      <address>
+        <email>mbj@microsoft.com</email>
+	<uri>http://self-issued.info/</uri>
+      </address>
+    </author>
+
     <date year="2016"/>
     <keyword>Identity</keyword>
     <keyword>Event</keyword>
@@ -48,40 +55,40 @@
     <keyword>Internet-Draft</keyword>
 
     <abstract>
-      <t>This specification defines an Identity Event token which may
+      <t>This specification defines an Identity Event token, which may
       be distributed via a protocol such as HTTP. An identity event token 
-      is based on the JSON Web Token and may be optionally signed and/or encrypted. It 
+      is a JSON Web Token (JWT) and may be optionally signed and/or encrypted. It 
       describes a statement of fact that may be shared by an event publisher
-      with registered subscribers.</t>
+      with event subscribers.</t>
     </abstract>
   </front>
 
   <middle>
     <section anchor="intro" title="Introduction and Overview" toc="default">
-      <t>This specification defines an extensible event token format which may
+      <t>This specification defines an extensible event token format, which may
       be exchanged using protocols such as HTTP. The specification builds
-      on the JSON Web Token format <xref target="RFC7519"/> in order to provide a self-contained 
+      on the JSON Web Token (JWT) format <xref target="RFC7519"/> to provide a self-contained 
       message "token" that can be optionally signed using JSON Web Signature <xref target="RFC7515"/>
       and/or encrypted using JSON Web Encryption <xref target="RFC7516"/>.</t>
       
-      <t>For the purpose of this specification an "event" is a statement
+      <t>For the purpose of this specification, an "event" is a statement
       of fact by a publisher (also known as an issuer) that the state of 
       a resource it controls has changed in some way (explicitly or 
       implicitly). Based on some agreed upon criteria for an event feed, 
       the publisher distributes the event to the appropriate subscribers.</t>
       
-      <t>[[Background: to be removed from final specification]]At the time 
-      of writing of this specifications there are several discussions regarding the need 
+      <t>[[ Background: to be removed from final specification ]] At the time 
+      of writing of this specification, there are several discussions regarding the need 
       for identity events. Some of these include:<list style="symbols">
         <t>Events to allow SCIM resource co-ordination between SCIM domains.</t>
         <t>OAuth Token Revocation (see <xref target="RFC7009"/>)</t>
         <t>OpenID Logout or downstream logout notification.</t>
         <t>Session Cancellation</t>
         <t>OpenID Risk Incident Sharing and Coordination (RISC) Events. See <xref target="RISC"/></t>
-        <t>The HEART WG <xref target="HEART"/> which intends to define privacy and security related events
+        <t>The HEART WG <xref target="HEART"/>, which intends to define privacy and security related events
         in health-related data sharing APIs.</t>
-      </list>This specification uses example SCIM events which are intended
-      to be non-normative for the purpose of showing how an event may be 
+      </list>This specification uses example SCIM events, which are intended
+      to be non-normative for the purpose of showing how an event might be 
       used in practice.</t>
       
       <t>A resource state change event typically includes explicit operation events such as:
@@ -95,19 +102,20 @@
       had a personal identifier that potentially conflicts with a newer resource.
       Because of the security impact, the publisher wishes to
       notify its subscribers of the identifier re-use. In this way, the event
-      is not describing a particular state change to a resource, it describes
-      a meta-conclusion based on its own business and security rules (this
-      scenario is often called an 'account takeover' event).</t>
+      is not describing a particular state change to a resource; it describes
+      a meta-conclusion based on its own business and security rules.
+      (This scenario is often called an "account takeover" event.)
+      </t>
       
       <t>A subscriber having received an event, validates and interprets the
       event and takes its own independent action, if any. For example, 
       having been informed of a personal identifier now being associated 
-      with a different resource (i.e. is being used by someone-else), the 
+      with a different resource (i.e., is being used by someone else), the 
       subscriber may choose to ensure that the new user is not granted 
       access to resources associated with the previous user.</t>
       
       <t>Events SHOULD NOT be used to convey commands or requests. To do so
-      requires complex bidirectional signalling and error recovery mechanisms which fall
+      requires complex bidirectional signaling and error recovery mechanisms that fall
       outside the scope of this specification. The intent of this specification
       is to define a way of exchanging historical statements of fact that 
       subscribers may interpret for their own use.</t>
@@ -118,8 +126,8 @@
       and personal information.</t>
       
       <t>This specification may be optionally used with the identity
-      event subscription management specification which provides the details 
-      of event feeds and how subscribers register for events(see 
+      event subscription management specification, which provides the details 
+      of event feeds and how subscribers register for events (see 
       <xref target="idevent-subscription"/>), defines a protocol registry for
       event transmission methods including transmission using HTTP.</t>
 
@@ -151,19 +159,19 @@
             <t hangText="Feed Publisher"><vspace blankLines="0"/>The Feed Provider publishes
               events to be distributed to registered subscribers. In JWT
               terminology, the Feed Publisher is also known as the issuer
-              <spanx style="verb">iss</spanx>).
+              <spanx style="verb">iss</spanx>.
             </t>
 
             <t hangText="Event"><vspace blankLines="0"/>An event is a resource change statement that is to be
               distributed to one or more registered subscribers. An event is
-              constructed as a JWT token and MAY be signed or encrypted using
+              constructed as a JWT and MAY be signed or encrypted using
               JWS/JWE for authentication and confidentiality reasons.
             </t>
 
             <t hangText="Feed"><vspace blankLines="0"/>A feed is a URI that describes the set of
               resources and events under which events may be issued. An
               interested client registers with the Feed Provider to subscribe
-              to events associated with a feed. When expressed in a JWT token,
+              to events associated with a feed. When expressed in a JWT,
               a feed is defined as the event's audience (<spanx style="verb">aud</spanx>).
             </t>
             <t hangText="Subscriber"><vspace blankLines="0"/>A Subscriber registers to receive event
@@ -176,8 +184,8 @@
     </section>
 
     <section anchor="events" title="Events">
-      <t>An identity event conveys a message (in the form of a JWT token <xref target="RFC7519"/>) about 
-      a resource (i.e. a security subject) that may be of interest to a 
+      <t>An identity event conveys a message (in the form of a JWT <xref target="RFC7519"/>) about 
+      a resource (i.e., a security subject) that may be of interest to a 
       subscriber or set of subscribers participating in an event feed 
       (see <xref target="idevent-subscription"/>).</t>
       
@@ -185,9 +193,9 @@
       <spanx style="verb">aud</spanx>, an event message contains the attribute 
       <spanx style="verb">events</spanx> with at least one value. 
       The event URI values indicate what event information (attributes) 
-      and what type of event (e.g. resource modified) is contained in the 
-      event message. The definition of registered events are found in the 
-      event registry (see <xref target="registry"/>), and implementers are free to
+      and what type of event (e.g., resource modified) is contained in the 
+      event message. The definition of registered events is found in the 
+      ID Event registry (see <xref target="registry"/>), and implementers are free to
       define their own event types.</t>
 
       <t>The schema and structure of an event follows the JWT <xref target="RFC7519"/>. 
@@ -199,10 +207,11 @@
       <figure anchor="examplePassword" title="Example SCIM Password Reset Event">
         <preamble>The following is a non-normative example showing a password change event
         that conveys a SCIM event (see <xref target="idevent-scim"/>):</preamble>
-        <artwork>{ 
+        <artwork>
+{ 
   "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
   "events":[
-    "urn:ietf:params:event:SCIM:password",
+    "urn:ietf:params:id-event:scim:password",
     "https://example.com/event/password"
   ],
   "iat": 1458496025,
@@ -213,25 +222,26 @@
   ],  
   "sub": 
     "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
-  "urn:ietf:params:event:SCIM:password":{
+  "urn:ietf:params:id-event:scim:password":{
     "id":"44f6142df96bd6ab61e7521d9",
   },
   "https://example.com/scim/event/password":{
      "resetAttempts":5
   }
-}</artwork>
+}
+</artwork>
       </figure>      
       <t>The event in the figure above expresses hypothetical password
       reset event for SCIM. The JWT consists of an <spanx style="verb">iss</spanx>
-      attribute which denotes the event publisher. The <spanx style="verb">aud</spanx>
+      attribute, which denotes the event publisher. The <spanx style="verb">aud</spanx>
       attribute specifies the intended audience for the event. In practical 
-      terms this MAY be the the URI for the event feed that a client has 
+      terms, this MAY be the URI for the event feed that a client has 
       subscribed to.</t>
       
       <t>Additional extensions to an event may be added by adding more values
       to the <spanx style="verb">events</spanx> attribute. For each event URI
-      value specified, there is a corresponding attribute that has its on JSON
-      object that contains the attributes associated with that event (e.g. 
+      value specified, there is a corresponding attribute that has its own JSON
+      object that contains the attributes associated with that event (e.g.,
       <spanx style="verb">https://example.com/scim/event/password</spanx>).
       In this example, the SCIM event indicates that a password has been updated 
       and the current password reset count is 5. Notice that the value for 
@@ -243,7 +253,8 @@
             <preamble>Here is another example event message, this one
               for a Back-Channel Logout Token:</preamble>
 
-            <artwork>{
+            <artwork>
+{
   "iss": "https://server.example.com",
   "aud": "s6BhdRkqt3",
   "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
@@ -256,10 +267,11 @@
   "https://specs.openid.net/logout": {
     "sid": "08a5019c-17e1-4977-8f42-65a12843ea02"
   }
-}</artwork>
+}
+</artwork>
           </figure></t>
       
-      <section title="Core Event Attributes">
+      <section anchor="EventContents" title="Core Event Attributes">
         <t>The following are attributes that are based on <xref target="RFC7519"/>
         claim definitions and are profiled for use in an event
         message:<list style="hanging">
@@ -268,9 +280,9 @@
             identifier for an event. The identifier SHOULD be unique within
             a particular event feed and MAY be used by clients to track
             whether a particular event has already been received. This 
-            attribute is REQUIRED. [[Do we need a way to detect order of
+            attribute is REQUIRED. [[ Do we need a way to detect order of
             or missing events? Or should this be provided by the 
-            subscription spec?]]</t>
+            subscription spec? ]]</t>
         
             <t hangText="iss"><vspace blankLines="0"/>A single valued
             String containing the URI of the service provider publishing
@@ -296,15 +308,15 @@
             state may be described. This attribute is REQUIRED.</t>
             
             <t hangText="iat"><vspace blankLines="0"/>As defined by <xref target="RFC7519">Section 4.1.6</xref>,
-            a value containing a NumericDate which represents when the 
+            a value containing a NumericDate, which represents when the 
             event was issued. Unless otherwise specified,
             the value SHOULD be interpreted by the subscriber as equivalent 
             to the actual time of the event. This attribute is REQUIRED. 
-            [[DISCUSS: DO WE NEED TO DIFFERENTIATE?]]</t> 
+            [[ DISCUSS: DO WE NEED TO DIFFERENTIATE? ]]</t> 
             
             <t hangText="nbf"><vspace blankLines="0"/>As defined by 
             <xref target="RFC7519">Section 4.1.5</xref>, a value 
-            containing a NumericDate which represents a future date when
+            containing a NumericDate, which represents a future date when
             the event will occur. This attribute is OPTIONAL.</t>           
           </list>
         </t>
@@ -327,10 +339,11 @@
 
         <t><figure anchor="exampleJsonEvent" title="Example Event JSON Data">
             <preamble>The
-            following is an example event message(it has been modified
+            following is an example event message (which has been formatted
             for readability):</preamble>
 
-            <artwork>{  
+            <artwork>
+{  
   "jti": "4d3559ec67504aaba65d40b0363faad8",
   "iat": 1458496404,
   "iss": "https://scim.example.com",  
@@ -340,10 +353,10 @@
   ],  
   "sub": "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
   "events":[
-    "urn:ietf:params:event:SCIM:create"
+    "urn:ietf:params:id-event:scim:create"
   ],
-  "urn:ietf:params:event:SCIM:create":{
-    "attributes":["id","name","userName","password","emails"],
+  "urn:ietf:params:id-event:scim:create":{
+    "attributes":["id", "name", "userName", "password", "emails"],
     "values":{
       "emails":[
        {"type":"work","value":"jdoe@example.com"}
@@ -357,7 +370,8 @@
       }
     }  
   }
-}</artwork>
+}
+</artwork>
           </figure></t>
 
         <t>When transmitted, the above JSON body must be converted into a JWT
@@ -368,7 +382,7 @@
      
         <t><figure>
             <preamble>The following is an example of a SCIM Event expressed in
-            an unsecured JWT token. The JWT header of:</preamble>
+            an unsecured JWT. The JWT header of:</preamble>
 
             <artwork>{"alg":"none"}</artwork>
           </figure><figure>
@@ -396,13 +410,16 @@ ZSI6IndvcmsiLCJ2YWx1ZSI6Impkb2VAZXhhbXBsZS5jb20ifQogICAgICBdLAog
 ICAgICAicGFzc3dvcmQiOiJub3Q0dTJubyIsCiAgICAgICJ1c2VyTmFtZSI6Impk
 b2UiLAogICAgICAiaWQiOiI0NGY2MTQyZGY5NmJkNmFiNjFlNzUyMWQ5IiwKICAg
 ICAgIm5hbWUiOnsKICAgICAgICAiZ2l2ZW5OYW1lIjoiSm9obiIsCiAgICAgICAg
-ImZhbWlseU5hbWUiOiJEb2UiCiAgICAgIH0KICAgIH0gIAogIH0KfQ</artwork>
-</figure><figure anchor="eventToken"
+ImZhbWlseU5hbWUiOiJEb2UiCiAgICAgIH0KICAgIH0gIAogIH0KfQ
+</artwork>
+	  </figure>
+	  <figure anchor="eventToken"
             title="Example Unsecured Event Token">
             <preamble>The encoded JWS signature is the empty string.
             Concatenating the parts yields:</preamble>
 
-            <artwork>eyJhbGciOiJub25lIn0
+            <artwork>
+eyJhbGciOiJub25lIn0
 .
 eyAgCiAgImp0aSI6ICI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIs
 CiAgImV2ZW50VXJpcyI6WwogICAgInVybjppZXRmOnBhcmFtczpldmVudDpTQ0lN
@@ -419,59 +436,157 @@ ZSI6IndvcmsiLCJ2YWx1ZSI6Impkb2VAZXhhbXBsZS5jb20ifQogICAgICBdLAog
 ICAgICAicGFzc3dvcmQiOiJub3Q0dTJubyIsCiAgICAgICJ1c2VyTmFtZSI6Impk
 b2UiLAogICAgICAiaWQiOiI0NGY2MTQyZGY5NmJkNmFiNjFlNzUyMWQ5IiwKICAg
 ICAgIm5hbWUiOnsKICAgICAgICAiZ2l2ZW5OYW1lIjoiSm9obiIsCiAgICAgICAg
-ImZhbWlseU5hbWUiOiJEb2UiCiAgICAgIH0KICAgIH0gIAogIH0KfQ.</artwork>
+ImZhbWlseU5hbWUiOiJEb2UiCiAgICAgIH0KICAgIH0gIAogIH0KfQ.
+</artwork>
           </figure></t>
 
-        <t>To create and or validate a signed or encrypted event token follow
-        the instructions in section 7 of <xref
+        <t>To create and or validate a signed or encrypted event token, follow
+        the instructions in Section 7 of <xref
         target="RFC7519"/>.</t>
       </section>
     </section>
 
     <section anchor="Security" title="Security Considerations" toc="default">
 
-      <t>[[TO BE COMPLETED ]] <list style="symbols">
+      <t>
+	[[ TO BE COMPLETED ]]	<!-- TBD -->
+	<list style="symbols">
         <t>Avoid using Maximal disclosure mode</t>
         <t>Use TLS best practices.</t>
         <t>Subscribers SHOULD use SCIM GET to obtain full state when
         not disclosed in the event.</t>
         <t>Subscribers MAY use SCIM GET to get the latest state on a 
         resource and discard events with iat and nbf that is older.</t>
-        <t>Subscribers must authenticae the message using either TLS, and/or
+        <t>Subscribers must authenticate the message using either TLS, and/or
         validating signed event messages.</t>
         <t>Publishers should avoid retaining events except for audit
         purposes. Events should not be accessible indefinitely - re: LDAP
         changelog problems.</t>      
-      </list>
+	</list>
      </t>
     </section>
 
     <section anchor="IANA" title="IANA Considerations">
-      <section anchor="eventParam" title="Registration of Event URN Sub-namespace">
-       <t>IANA has added an entry to the "IETF URN Sub-namespace for Registered
-       Protocol Parameter Identifiers" registry and created a sub-namespace
-       for the Registered Parameter Identifier as per <xref
+      <section anchor="eventParam" title="Registration of ID Event URN Sub-namespace">
+       <t>This specification adds an entry to the IANA "IETF URN Sub-namespace for Registered
+       Protocol Parameter Identifiers" registry and creates a sub-namespace
+       for this Registered Parameter Identifier, as per <xref
         target="RFC3553"/>: 
-       <spanx style="verb">urn:ietf:params:event</spanx>.</t>
+       <spanx style="verb">urn:ietf:params:id-event</spanx>.</t>
        
-       <t>To manage this sub-namespace, IANA is requested to create the
-        "Event" Registry which shall be used to manage entries within the
-        <spanx style="verb">urn:ietf:params:scim</spanx> namespace. The
+       <t>To manage this sub-namespace, this specification establishes the IANA
+        "ID Event" Registry, which is used to manage entries within the
+        <spanx style="verb">urn:ietf:params:id-event</spanx> namespace. The
         registry description is as follows:</t>
 
         <t><list style="symbols">
-            <t>Registry name: Event</t>
+            <t>Registry Name: ID Event</t>
 
-            <t>Specification: [this document]</t>
+            <t>Specification: [[ this specification ]]</t>
 
-            <t>Repository: [see <xref target="registry"/>]</t>
+            <t>Repository: The registry established in  <xref target="registry"/>] of [[ this specification ]]</t>
 
-            <t>Index value: values [see <xref target="registry"/>]</t>
+            <t>
+	      Index Value:
+	      Values subordinate to urn:ietf:params:id-event are of
+	      the form urn:ietf:params:id-event:&lt;value&gt;,
+	      with &lt;value&gt; as the index value.
+	      It is suggested that &lt;value&gt; include both a "class"
+	      and an "identifier-within-class" component,
+	      with the two components being separated by a colon (':') character;
+	      other compositions of the &lt;value&gt; may also be used.
+	    </t>
           </list></t>
       </section>
       
-      <section anchor="registry" title="Event Registry">
-      <t>[[TO BE COMPLETED]]</t>
+      <section anchor="registry" title="ID Event Registry">
+	<t>
+	  This specification establishes the IANA "ID Event" registry.
+	</t>
+
+	<section anchor="Template" title="Registration Template">
+	  <t>
+	    If a registrant wishes to have an ID Event URI registered,
+	    then a URN of the form urn:ietf:params:id-event:&lt;value&gt;
+	    will be requested, where &lt;value&gt; is a suitable representation
+	    of the functionality or concept being registered.
+	  </t>
+	  <t>
+	    The registration procedure for new entries requires a request in the
+	    form of the following template and is "Specification Required",
+	    per <xref target="RFC5226">RFC 5226</xref>.
+	  </t>
+	  <t>
+	    <list style="hanging">
+
+              <t hangText="URN:">
+		<vspace/>
+		URI that identifies the registered functionality
+	      </t>
+
+	      <t hangText="Common Name:">
+		<vspace/>
+		Name by which the functionality being registered is generally known
+	      </t>
+
+	      <t hangText="Change Controller:">
+		<vspace/>
+		For Standards Track RFCs, state "IESG".
+		For others, give the name of the responsible party.
+		Other details (e.g., postal address, email address,
+		and home page URI) may also be included.
+	      </t>
+
+	      <t hangText="Specification Document(s):">
+		<vspace/>
+		Reference to the document that specifies the URI,
+		preferably including a URI that can be used to retrieve a
+		copy of the document.
+		An indication of the relevant sections may also be included,
+		but is not required.
+	      </t>
+
+	    </list>
+	  </t>
+	</section>
+
+	
+        <section title="Initial Registry Contents" anchor="HdrContents">
+	  <t>
+	    This specification does not register any ID Events.
+	    The registry is established with no initial entries.
+	  </t>
+	</section>
+
+      </section>
+
+      <section anchor="ClaimsRegistry" title="JSON Web Token Claims Registration">
+	<t>
+	  This specification registers the <spanx style="verb">events</spanx>
+	  claim in the IANA
+	  "JSON Web Token Claims" registry <xref target="IANA.JWT.Claims"/>
+	  established by <xref target="RFC7519"/>.
+	</t>
+
+	<section anchor='ClaimsContents' title='Registry Contents'>
+	  <t> <?rfc subcompact="yes"?>
+	  <list style='symbols'>
+	    <t>
+	      Claim Name: <spanx style="verb">events</spanx>
+	    </t>
+	    <t>
+	      Claim Description: ID Events
+	    </t>
+	    <t>
+	      Change Controller: IESG
+	    </t>
+	    <t>
+	      Specification Document(s): <xref target="events"/> of [[ this specification ]]
+	    </t>
+	  </list>
+	  </t>
+	</section>
+	<?rfc subcompact="no"?>
       </section>
       
     </section>
@@ -480,73 +595,90 @@ ImZhbWlseU5hbWUiOiJEb2UiCiAgICAgIH0KICAgIH0gIAogIH0KfQ.</artwork>
   <back>
     <references title="Normative References">
 
-      <reference anchor="idevent-subscription">
+      <reference anchor="idevent-subscription" target="draft-hunt-idevent-subscription-00.txt">
         
         <front>
           <title>Identity Event Subscription Protocol (work in progress)</title>
           <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
           <date/>
         </front>  
-        <format type="TXT" target="draft-hunt-idevent-subscription-00.txt"/>    
       </reference>
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml' ?><!-- Keywords -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml' ?><!-- Keywords -->
 
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3553.xml'?><!-- URN Sub-namespace -->
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml'?><!-- URIs -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3553.xml'?><!-- URN Sub-namespace -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3986.xml'?><!-- URIs -->
 
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5988.xml'?><!-- Web Linking -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5226.xml'?><!-- Guidelines for Writing an IANA Considerations Section in RFCs -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5988.xml'?><!-- Web Linking -->
 
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7159.xml'?><!-- JSON -->
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml'?><!-- JWT -->
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml'?><!-- SCIM Schema -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7159.xml'?><!-- JSON -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml'?><!-- JWT -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7643.xml'?><!-- SCIM Schema -->
+
+      <reference anchor="IANA.JWT.Claims" target="http://www.iana.org/assignments/jwt">
+        <front>
+          <title>JSON Web Token Claims</title>
+          <author>
+            <organization>IANA</organization>
+          </author>
+	  <date/>
+        </front>
+      </reference>
+
     </references>
  
     <references title="Informative References">
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7009.xml'?><!-- OAuth Revocation -->
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml'?><!-- JWS -->
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml'?><!-- JWE -->
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7517.xml'?><!-- JWK -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7009.xml'?><!-- OAuth Revocation -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7515.xml'?><!-- JWS -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7516.xml'?><!-- JWE -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7517.xml'?><!-- JWK -->
 
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml'?><!-- SCIM Protocl -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7644.xml'?><!-- SCIM Protocl -->
     
-       <reference anchor="idevent-scim">
+       <reference anchor="idevent-scim" target="draft-hunt-idevent-scim-00.txt">
         
         <front>
           <title>SCIM Event Extensions (work in progress)</title>
           <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
           <date/>
         </front>  
-        <format type="TXT" target="draft-hunt-idevent-scim-00.txt"/>    
       </reference>
  
-      <reference anchor="RISC">
+      <reference anchor="RISC" target="http://openid.net/wg/risc/">
         <front>
-          <title>RISC (Risk and Incident Sharing and Coordination) Working Group (work in progress)</title>
-          <author> <organization>The OpenId Foundation</organization></author>
+          <title>OpenID Risk and Incident Sharing and Coordination (RISC) Working Group</title>
+          <author> <organization>OpenID Foundation</organization></author>
           <date/>
         </front>
-        <format type="HTML" target="http://openid.net/wg/risc/"/>
       </reference>
 
-      <reference anchor="HEART">
+      <reference anchor="HEART" target="http://openid.net/wg/heart/">
         <front>
-          <title>HEART Working Group (work in progress)</title>
-          <author> <organization>The OpenId Foundation</organization></author>
+          <title>OpenID Health Relationship Trust (HEART) Working Group</title>
+          <author> <organization>OpenID Foundation</organization></author>
           <date/>
         </front>
-        <format type="HTML" target="http://openid.net/wg/heart/"/>
       </reference>
 
     </references>
 
-    <section title="Contributors"/>
+    <!-- <section anchor="Contributors" title="Contributors"/> Uncomment if and when this section is non-empty -->
 
-    <section title="Acknowledgments">
-      <t>The editor would like to thank the participants in the id-events
+    <section anchor="Acknowledgments" title="Acknowledgments">
+      <t>The editors would like to thank the participants in the IETF id-events
       mailing list and related working groups for their support of this specification.</t>
     </section>
 
-    <section title="Change Log">
+    <section anchor="History" title="Change Log">
+      <t>
+	Draft 02 - mbj -
+	Registered <spanx style="verb">events</spanx> claim.
+	Fleshed out the ID Event registry.
+	Renamed <spanx style="verb">urn:ietf:params:event</spanx>
+	to <spanx style="verb">urn:ietf:params:id-event</spanx>.
+	Applied proofreading corrections.
+      </t>
+      <t>Draft 01 - PH - Renamed eventUris to events</t>
       <t>Draft 00 - PH - First Draft</t>
     </section>
   </back>
