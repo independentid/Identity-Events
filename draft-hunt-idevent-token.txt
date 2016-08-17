@@ -206,7 +206,7 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
 
    Feed
       A Feed is a logical grouping of SETs or a context under which SETs
-      may be issued.  An Subscriber registers with the Feed Publisher to
+      may be issued.  A Subscriber registers with the Feed Publisher to
       subscribe to SETs associated with a Feed.  How a Feed is defined
       or the method for subscription is out-of-scope of this
       specification.
@@ -214,7 +214,7 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
    Subscriber
       A Subscriber registers to receive SETs from a Feed Publisher using
       a protocol such as HTTP.  The method of registration and delivery
-      is out of scope of this specification.
+      is out-of-scope of this specification.
 
    Security Subject
 
@@ -239,7 +239,7 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
    a Feed Publisher.
 
    The schema and structure of a SET follows the JWT [RFC7519]
-   specification.  An SET has the following characteristics:
+   specification.  A SET has the following characteristics:
 
    o  An outer JSON structure that acts as the event envelope.  The
       envelope contains a set of attributes common to every SET.  The
@@ -285,14 +285,14 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
    The following is a non-normative example showing a hypothetical SCIM
    password reset SET.  The example also shows an example where the
    issuer has provided an extension ("https://example.com/scim/event/
-   passwordReset") that is used to convey additional information such as
-   the current count of reset attempts:
+   passwordResetExt") that is used to convey additional information such
+   as the current count of reset attempts:
 
    {
      "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
      "events":[
        "urn:ietf:params:scim:event:passwordReset",
-       "https://example.com/scim/event/passwordReset"
+       "https://example.com/scim/event/passwordResetExt"
      ],
      "iat": 1458496025,
      "iss": "https://scim.example.com",
@@ -305,7 +305,7 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
        "id":"44f6142df96bd6ab61e7521d9",
        "sub":"/Users/44f6142df96bd6ab61e7521d9"
      },
-     "https://example.com/scim/event/password":{
+     "https://example.com/scim/event/passwordResetExt":{
         "resetAttempts":5
      }
    }
@@ -318,7 +318,7 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
    o  An _events_ attribute specifying the hypothetical SCIM urn
       ("urn:ietf:params:scim:event:passwordReset") for a password reset,
       and a custom extension, "https://example.com/scim/event/
-      passwordReset", that is used to provide additional event
+      passwordResetExt", that is used to provide additional event
       information presumably specified by the location URI provided.
 
    o  An "iss" attribute, denotes the event publisher in the envelope
@@ -342,11 +342,11 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
    to the "events" attribute.  For each event URI value specified, there
    MAY be a corresponding attribute that has a JSON object that contains
    the attributes associated with that event (e.g.,
-   "https://example.com/scim/event/password").  In this example, the
-   SCIM event indicates that a password has been updated and the current
-   password reset count is 5.  Notice that the value for "resetAttempts"
-   is actually part of its own JSON object
-   "https://example.com/scim/event/password".
+   "https://example.com/scim/event/passwordResetExt").  In this example,
+   the SCIM event indicates that a password has been updated and the
+   current password reset count is 5.  Notice that the value for
+   "resetAttempts" is actually part of its own JSON object
+   "https://example.com/scim/event/passwordResetExt".
 
    Here is another example event token, this one for a Logout Token:
 

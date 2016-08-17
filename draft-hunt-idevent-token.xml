@@ -175,14 +175,14 @@
 
             <t hangText="Feed"><vspace blankLines="0"/>A Feed is a logical
               grouping of SETs or a context under which SETs may be issued. 
-              An Subscriber registers with the Feed Publisher to subscribe
+              A Subscriber registers with the Feed Publisher to subscribe
               to SETs associated with a Feed. How a Feed is defined or
               the method for subscription is out-of-scope of this specification.
             </t>
             
             <t hangText="Subscriber"><vspace blankLines="0"/>A Subscriber 
               registers to receive SETs from a Feed Publisher using a protocol 
-              such as  HTTP. The method of registration and delivery is out of scope
+              such as  HTTP. The method of registration and delivery is out-of-scope
               of this specification.
             </t>
             
@@ -204,7 +204,7 @@
       a Feed Publisher.</t>
       
       <t>The schema and structure of a SET follows the JWT <xref target="RFC7519"/>
-      specification. An SET has the following characteristics:
+      specification. A SET has the following characteristics:
       <list style="symbols">
         <t>An outer JSON structure that acts as the event envelope. The envelope 
         contains a set of attributes common to every SET. The attributes 
@@ -234,7 +234,7 @@
         <preamble>The following is a non-normative example showing a hypothetical 
         SCIM password reset SET. The example also shows an example where the 
         issuer has provided an extension 
-        (<spanx style="verb">https://example.com/scim/event/passwordReset</spanx>)
+        (<spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>)
         that is used to convey additional information such as the current
         count of reset attempts:</preamble>
         <artwork>
@@ -242,7 +242,7 @@
   "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
   "events":[
     "urn:ietf:params:scim:event:passwordReset",
-    "https://example.com/scim/event/passwordReset"
+    "https://example.com/scim/event/passwordResetExt"
   ],
   "iat": 1458496025,
   "iss": "https://scim.example.com",  
@@ -255,7 +255,7 @@
     "id":"44f6142df96bd6ab61e7521d9",
     "sub":"/Users/44f6142df96bd6ab61e7521d9"
   },
-  "https://example.com/scim/event/password":{
+  "https://example.com/scim/event/passwordResetExt":{
      "resetAttempts":5
   }
 }
@@ -266,7 +266,7 @@
         <t>An <spanx>events</spanx> attribute specifying the hypothetical 
         SCIM urn (<spanx style="verb">urn:ietf:params:scim:event:passwordReset</spanx>) 
         for a password reset, and a custom extension, 
-        <spanx style="verb">https://example.com/scim/event/passwordReset</spanx>, 
+        <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>, 
         that is used to provide additional event information presumably 
         specified by the location URI provided.</t>
         <t>An <spanx style="verb">iss</spanx>
@@ -284,11 +284,11 @@
       each event URI value specified, there MAY be a corresponding 
       attribute that has a JSON object that contains the attributes 
       associated with that event (e.g.,
-      <spanx style="verb">https://example.com/scim/event/password</spanx>).
+      <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>).
       In this example, the SCIM event indicates that a password has been updated 
       and the current password reset count is 5. Notice that the value for 
       "resetAttempts" is actually part of its own JSON object 
-      <spanx style="verb">https://example.com/scim/event/password</spanx>.  
+      <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>.  
       </t>
 
       <t><figure anchor="exampleBackLogoutEvent" title="Example OpenID Logout Event">
