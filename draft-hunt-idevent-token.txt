@@ -243,9 +243,9 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
 
    o  An outer JSON structure that acts as the event envelope.  The
       envelope contains a set of attributes common to every SET.  The
-      attributes used to validate the event and determine the event data
-      included.  The envelope includes an "events" attribute describing
-      the type of event, and
+      attributes are used to validate the event and determine the event
+      data included.  The envelope includes an "events" attribute
+      describing the type of event, and
 
    o  One or more JSON [RFC7159] sub-objects (payloads) that contain one
       or more attributes associated with the event URIs values provided
@@ -647,7 +647,7 @@ Internet-Draft          draft-hunt-idevent-token             August 2016
    If a SET needs to be retained for audit purposes, JWS MAY be used to
    provide verification of its authenticity.
 
-   Event Publishers should attempt to specialize Feeds so that the
+   Event Publishers SHOULD attempt to specialize Feeds so that the
    content is targeted to the specific business and protocol needs of
    subscribers.
 

@@ -208,7 +208,7 @@
       <list style="symbols">
         <t>An outer JSON structure that acts as the event envelope. The envelope 
         contains a set of attributes common to every SET. The attributes 
-        used to validate the event and determine the event data included. 
+        are used to validate the event and determine the event data included. 
         The envelope includes an <spanx style="verb">events</spanx> 
         attribute describing the type of event, and</t> 
         <t>One or more JSON <xref target="RFC7159"/> sub-objects (payloads)
@@ -548,7 +548,7 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
       <t>If a SET needs to be retained for audit purposes, JWS MAY 
       be used to provide verification of its authenticity.</t>
       
-      <t>Event Publishers should attempt to specialize Feeds so that the content
+      <t>Event Publishers SHOULD attempt to specialize Feeds so that the content
       is targeted to the specific business and protocol needs of subscribers.</t>
       
       <t>When sharing personally identifiable information or information
