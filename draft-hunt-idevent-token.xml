@@ -211,8 +211,8 @@
         are used to validate the event and determine the event data included. 
         The envelope includes an <spanx style="verb">events</spanx> 
         attribute describing the type of event, and</t> 
-        <t>One or more JSON <xref target="RFC7159"/> sub-objects (payloads)
-        that contain one or more attributes associated with the event 
+        <t>JSON <xref target="RFC7159"/> sub-objects, that act as event payload,
+        that contain attributes associated with the event 
         URIs values provided in the envelope <spanx style="verb">events</spanx> 
         attribute. </t>
         <t>While a SET may have more than one URI value for <spanx style="verb">events</spanx>,
