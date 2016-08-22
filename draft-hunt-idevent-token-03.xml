@@ -1,0 +1,699 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type='text/xsl' href='http://xml2rfc.tools.ietf.org/authoring/rfc2629.xslt' ?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+
+<?rfc toc="yes"?>
+<?rfc tocompact="yes"?>
+<?rfc tocdepth="3"?>
+<?rfc tocindent="yes"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc comments="yes"?>
+<?rfc inline="yes"?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+
+<rfc category="std" docName="draft-hunt-idevent-token-03" ipr="trust200902">
+  <front>
+    <title abbrev="draft-hunt-idevent-token">Security Event Token (SET)</title>
+
+    <author fullname="Phil Hunt" initials="P." role="editor" surname="Hunt">
+      <organization abbrev="Oracle">Oracle Corporation</organization>
+
+      <address>
+        <email>phil.hunt@yahoo.com</email>
+      </address>
+    </author>
+    
+    <author fullname="William Denniss" initials="W." surname="Denniss">
+      <organization abbrev="Google">Google</organization>
+
+      <address>
+        <email>wdenniss@google.com</email>
+      </address>
+    </author>
+    
+
+    <author fullname="Morteza Ansari" initials="M.A." surname="Ansari">
+      <organization abbrev="Cisco">Cisco</organization>
+
+      <address>
+        <email>morteza.ansari@cisco.com</email>
+      </address>
+    </author>
+
+    <author fullname="Michael B. Jones" initials="M.B." surname="Jones">
+      <organization abbrev="Microsoft">Microsoft</organization>
+      <address>
+        <email>mbj@microsoft.com</email>
+	<uri>http://self-issued.info/</uri>
+      </address>
+    </author>
+
+    <date year="2016"/>
+
+    <area>Security</area>
+
+    <keyword>Identity</keyword>
+    <keyword>Event</keyword>
+    <keyword>Token</keyword>
+    <keyword>Internet-Draft</keyword>
+
+    <abstract>
+      <t>This specification defines the Security Event token, which may
+      be distributed via a protocol such as HTTP. The Security Event Token 
+      (SET) specification profiles the JSON Web Token (JWT) and may be optionally signed 
+      and/or encrypted. A SET describes a statement of fact that may be 
+      shared by an event publisher with event subscribers.</t>
+    </abstract>
+  </front>
+
+  <middle>
+    <section anchor="intro" title="Introduction and Overview" toc="default">
+      <t>This specification defines an extensible Security Event Token 
+      (SET) format which may be exchanged using protocols such as HTTP. 
+      The specification builds on the JSON Web Token (JWT) format <xref target="RFC7519"/> 
+      in order to provide a self-contained token that can be optionally 
+      signed using JSON Web Signature (JWS) <xref target="RFC7515"/>
+      and/or encrypted using JSON Web Encryption (JWE) <xref target="RFC7516"/>.</t>
+      
+      <t>For the purpose of this specification, an event is a statement
+      of fact by a publisher (also known as the event issuer) that the state of 
+      a security subject (e.g., a web resource, token, IP address) it 
+      controls or is aware of, has changed in some way (explicitly or 
+      implicitly). A security subject may be permanent (e.g., a user account) or 
+      temporary (e.g., a login session) in nature. A state change 
+      may include direct changes of entity state, implicit changes to state 
+      or other higher-level security statements such as:
+      <list style="symbols">
+        <t>The creation, modification, removal of a resource.</t>
+        <t>The resetting or suspension of an account.</t>
+        <t>The revocation of a security token prior to its expiry.</t>
+        <t>The logout of a user session. Or, </t>
+        <t>A cumulative conclusion such as to indicate that a user has 
+        taken over an email identifier that may have been used in the 
+        past by another user.</t>
+      </list>
+      </t>
+      
+      <t>Based on some agreed upon criteria for an event Feed, 
+      the publisher distributes events to the appropriate subscribers.
+      While an event may be delivered via synchronous means (e.g., HTTP POST),
+      the distribution of the event often happens asynchronously to the 
+      change of state which generated the security event. As an example, 
+      an OAuth2 Authorization Server <xref target="RFC6749"/>, 
+      having received a token revocation request <xref target="RFC7009"/>, 
+      may issue a token revocation event to downstream web resource
+      providers. Having been informed of a token revocation, the OAuth2 web
+      resource service provider may add the token identifier to its 
+      local revocation list assuming the token has not already expired.</t>
+      
+      <t>A subscriber having received an event, validates and interprets the
+      event and takes its own independent action, if any. For example, 
+      having been informed of a personal identifier now being associated 
+      with a different security subject (i.e., is being used by someone else), the 
+      subscriber may choose to ensure that the new user is not granted 
+      access to resources associated with the previous user. Or it may
+      not have any relationship with the subject, and no action is taken.</t>
+      
+      <t>While subscribers will often take actions upon receiving one
+      or more events, events MUST NOT be assumed to be commands or requests. 
+      To do so requires complex bi-directional signals and error recovery 
+      mechanisms that fall outside the scope of this specification. 
+      The intent of this specification is to define a way of exchanging 
+      statements of fact that subscribers may interpret for their own
+      purposes. Since events are typically historical statements by a publisher
+      and are not commands, idempotency or lack thereof, does not apply.</t>
+      
+      <t>Unless otherwise specified, this specification uses example 
+      events intended as non-normative examples showing how an event may be 
+      used. It is expected that other specifications will use
+      this specification to define normative events.</t>
+      
+      <t>This specification is scoped to security and identity related events.
+      While event tokens may be used for other purposes, the specification
+      only considers security and privacy concerns relevant to identity 
+      and personal information.</t>
+
+      <section anchor="notat" title="Notational Conventions" toc="default">
+        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+        document are to be interpreted as described in <xref
+        target="RFC2119"/>. These keywords are capitalized when used to
+        unambiguously specify requirements of the protocol or application
+        features and behavior that affect the inter-operability and security of
+        implementations. When these words are not capitalized, they are meant
+        in their natural-language sense.</t>
+
+        <t>For purposes of readability, examples are not URL encoded.
+        Implementers MUST percent encode URLs as described in <xref
+        target="RFC3986">Section 2.1 of</xref>.</t>
+
+        <t>Throughout this document, all figures MAY contain spaces and extra
+        line-wrapping for readability and space limitations. Similarly, some
+        URIs contained within examples have been shortened for space and
+        readability reasons.</t>
+      </section>
+
+      <section anchor="defs" title="Definitions" toc="default">
+        
+        <t>
+          The following definitions are used with SETs:
+          <list style="hanging">
+            <t hangText="Feed Publisher"><vspace blankLines="0"/>The Feed Publisher creates
+              SETs to be distributed to registered subscribers. In JWT
+              terminology, the Feed Publisher is also known as the issuer
+              (<spanx style="verb">iss</spanx>).
+            </t>
+
+            <t hangText="Security Event Token (SET)"><vspace blankLines="0"/>An SET is a 
+              JWT that is to be
+              distributed to one or more registered subscribers. A SET MAY
+              be signed or encrypted using JWS and/or JWE for authentication 
+              and confidentiality reasons.
+            </t>
+
+            <t hangText="Feed"><vspace blankLines="0"/>A Feed is a logical
+              grouping of SETs or a context under which SETs may be issued. 
+              A Subscriber registers with the Feed Publisher to subscribe
+              to SETs associated with a Feed. How a Feed is defined or
+              the method for subscription is out-of-scope of this specification.
+            </t>
+            
+            <t hangText="Subscriber"><vspace blankLines="0"/>A Subscriber 
+              registers to receive SETs from a Feed Publisher using a protocol 
+              such as  HTTP. The method of registration and delivery is out-of-scope
+              of this specification.
+            </t>
+            
+            <t hangText="Security Subject"><vspace blankLines="0"/>A 
+            Security Subject is the entity to which a SET refers. A 
+            Security Subject may be a principle (e.g., 
+            <xref target="RFC7519">Section 4.1.2</xref>), a web resource,
+            or other thing such as an IP address that a SET might reference.</t>
+          </list>
+        </t>
+      </section>
+    </section>
+
+    <section anchor="events" title="The Security Event Token (SET)">
+      <t>A SET conveys a statement (in the form of a JWT
+      <xref target="RFC7519"/>) about a single security event in relation
+      to a Security Subject that may be of 
+      interest to a Subscriber or set of Subscribers receiving SETs from
+      a Feed Publisher.</t>
+      
+      <t>The schema and structure of a SET follows the JWT <xref target="RFC7519"/>
+      specification. A SET has the following characteristics:
+      <list style="symbols">
+        <t>An outer JSON structure that acts as the event envelope. The envelope 
+        contains a set of attributes common to every SET. The attributes 
+        are used to validate the event and determine the event data included. 
+        The envelope includes an <spanx style="verb">events</spanx> 
+        attribute describing the type of event, and</t> 
+        <t>JSON <xref target="RFC7159"/> sub-objects, that act as event payload,
+        that contain attributes associated with the event 
+        URIs values provided in the envelope <spanx style="verb">events</spanx> 
+        attribute. </t>
+        <t>While a SET may have more than one URI value for <spanx style="verb">events</spanx>,
+        the intent is that the additional URIs are to provide 
+        additional attributes related to the same event in the form of extensions
+        to the primary event.</t>
+      </list>
+      </t>
+      
+      <t>SET payload objects are added to the envelope by adding an
+      attribute to the top-level JSON object (the envelope) whose name
+      corresponds to a value from <spanx style="verb">events</spanx>.
+      The payload object contains the attributes relevant to the specified event URI.
+      For example, SET event payloads may include <spanx style="verb">iss</spanx> 
+      attribute to distinguish between the issuer of the event and the issuer
+      of a Security Subject or <spanx style="verb">sub</spanx>.</t>
+
+      <figure anchor="examplePassword" title="Example SCIM Password Reset Event">
+        <preamble>The following is a non-normative example showing a hypothetical 
+        SCIM password reset SET. The example also shows an example where the 
+        issuer has provided an extension 
+        (<spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>)
+        that is used to convey additional information such as the current
+        count of reset attempts:</preamble>
+        <artwork>
+{ 
+  "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
+  "events":[
+    "urn:ietf:params:scim:event:passwordReset",
+    "https://example.com/scim/event/passwordResetExt"
+  ],
+  "iat": 1458496025,
+  "iss": "https://scim.example.com",  
+  "aud":[
+    "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
+    "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
+  ],  
+  "urn:ietf:params:scim:event:passwordReset":{
+    "iss":"https://scim.example.com",
+    "id":"44f6142df96bd6ab61e7521d9",
+    "sub":"/Users/44f6142df96bd6ab61e7521d9"
+  },
+  "https://example.com/scim/event/passwordResetExt":{
+     "resetAttempts":5
+  }
+}
+</artwork>
+      </figure>      
+      <t>The event in the figure above expresses hypothetical password
+      reset event for SCIM <xref target="RFC7644"/>. The JWT consists of:<list style="symbols">
+        <t>An <spanx>events</spanx> attribute specifying the hypothetical 
+        SCIM urn (<spanx style="verb">urn:ietf:params:scim:event:passwordReset</spanx>) 
+        for a password reset, and a custom extension, 
+        <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>, 
+        that is used to provide additional event information presumably 
+        specified by the location URI provided.</t>
+        <t>An <spanx style="verb">iss</spanx>
+        attribute, denotes the event publisher in the envelope while the
+        <spanx style="verb">iss</spanx> in the event payload specifies
+        the SCIM service provider for the account that was reset.</t>
+        <t>The <spanx style="verb">aud</spanx> attribute specifies the 
+        intended audience for the event. In practical terms, this MAY be 
+        the URI for the event Feed that a client has subscribed to.
+        </t>
+      </list></t>
+      
+      <t>Additional extensions to an event may be added by adding more 
+      values to the <spanx style="verb">events</spanx> attribute. For 
+      each event URI value specified, there MAY be a corresponding 
+      attribute that has a JSON object that contains the attributes 
+      associated with that event (e.g.,
+      <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>).
+      In this example, the SCIM event indicates that a password has been updated 
+      and the current password reset count is 5. Notice that the value for 
+      "resetAttempts" is actually part of its own JSON object 
+      <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>.  
+      </t>
+
+      <t><figure anchor="exampleBackLogoutEvent" title="Example OpenID Logout Event">
+            <preamble>Here is another example event token, this one
+              for a Logout Token:</preamble>
+
+            <artwork>
+{
+  "iss": "https://server.example.com",
+  "aud": "https://rp.example.com",
+  "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
+  "iat": 1458668180,
+  "exp": 1458668580,
+  "events": [
+    "https://specs.openid.net/logout"
+  ],
+  "https://specs.openid.net/logout": {
+    "iss": "https://token.example.com",
+    "sub": "248289761001",
+    "jti": "08a5019c-17e1-4977-8f42-65a12843ea02"
+  }
+}
+</artwork>
+          </figure>In the above example, the event has its own issuer, 
+          <spanx style="verb">https://server.example.com</spanx> while the event is
+          about the logging out of a user session identified in the event
+          extension by <spanx style="verb">jti</spanx>
+          that was issued by <spanx style="verb">https://token.example.com</spanx>.
+          </t>
+          <t>
+          
+          <figure anchor="exampleConsent" title="Example Consent Event">
+        <preamble>In the following example, a fictional medical service collects 
+          consent for medical actions and notifies other parties. The individual
+          for whom consent is identified was originally authenticated via
+          OpenID Connect.  In this case, the issuer of the SET event is an
+          application rather than the OpenID provider:</preamble>
+        <artwork>
+{ 
+  "jti": "fb4e75b5411e4e19b6c0fe87950f7749",
+  "events":[
+    "https://openid.net/heart/consent.html"
+  ],
+  "iat": 1458496025,
+  "iss": "https://my.examplemed.com",  
+  "aud":[
+    "https://rp.example.com"
+  ],  
+  "https://openid.net/heart/consent":{
+    "iss": "https://token.example.com",
+    "sub": "248289761001",
+    "consentUri":[
+      "https://terms.examplemed.com/labdisclosure.html#Agree"
+    ]
+  }
+}
+</artwork>
+      </figure>  
+      In the above example <spanx style="verb">iss</spanx> and <spanx style="verb">sub</spanx>
+      contained within the attribute <spanx style="verb">https://openid.net/heart/consent</spanx>, refer
+      to the subject and issuer of the original OpendID Provider. They are
+      distinct from the top level value of <spanx style="verb">iss</spanx>
+      which always refers to the issuer of the event - a medical consent
+      service that is a relying party to the OpenID Provider.
+          </t>
+      
+      <section anchor="EventContents" title="Core SET Attributes">
+        <t>The following are attributes that are based on <xref target="RFC7519"/>
+        claim definitions and are profiled for use in an event
+        token:<list style="hanging">
+            <t hangText="jti"><vspace blankLines="0"/>As defined by 
+            <xref target="RFC7519">Section 4.1.7</xref> contains a unique
+            identifier for an event. The identifier SHOULD be unique within
+            a particular event Feed and MAY be used by clients to track
+            whether a particular event has already been received. This 
+            attribute is REQUIRED.</t>
+
+            <t hangText="iss"><vspace blankLines="0"/>A single valued
+            String containing the URI of the service provider publishing
+            the SET (the issuer). This attribute is REQUIRED.</t>
+ 
+            <t hangText="aud"><vspace blankLines="0"/>A multi-valued String containing the URIs
+            representing the audience of the event. Values are typically URLs of
+            the Feeds the event is associated with. When an event has
+            multiple audiences that go to the same subscriber, the publisher is not
+            obligated to deliver repeated events to the same subscriber.
+            This attribute is RECOMMENDED.</t>
+            
+            <t hangText="iat"><vspace blankLines="0"/>As defined by <xref target="RFC7519">Section 4.1.6</xref>,
+            a value containing a NumericDate, which represents when the 
+            event was issued. Unless otherwise specified,
+            the value SHOULD be interpreted by the subscriber as equivalent 
+            to the actual time of the event. This attribute is REQUIRED. 
+            </t> 
+            
+            <t hangText="nbf"><vspace blankLines="0"/>As defined by 
+            <xref target="RFC7519">Section 4.1.5</xref>, a value 
+            containing a NumericDate, which represents a future date when
+            the event will occur. This attribute is OPTIONAL.</t>           
+          </list>
+        </t>
+        <t>The following is a new attribute defined by this specification:<list style="hanging">
+            <t hangText="events" anchor="eventDef"><vspace blankLines="0"/>A multi-valued 
+            String that contains one or more URIs representing the type 
+            of event being expressed and the attributes that MAY be available
+            within the JWT. Each value in this attribute indicates 
+            what other JSON sub-objects MAY present within the parent JSON 
+            SET structure. Each JSON sub-object is denoted 
+            by an attribute that matches a value in 
+            <spanx style="verb">events</spanx>.  This attribute is 
+            REQUIRED.</t>
+        </list></t>
+      </section>
+
+      <section anchor="eventMessage" title="Security Event Token Construction">
+        <t>A SET is a JWT <xref target="RFC7519"/> that is 
+        constructed by building a JSON structure that constitutes an event 
+        object and which is then used as the body of a JWT.</t>
+        <t>While this specification uses JWT to convey a SET, implementers
+        SHALL NOT use SETs to convey authentication or authorization assertions.</t>
+
+        <t><figure anchor="exampleJsonEvent" title="Example Event JSON Data">
+            <preamble>The
+            following is an example event token (which has been formatted
+            for readability):</preamble>
+
+            <artwork>
+{  
+  "jti": "4d3559ec67504aaba65d40b0363faad8",
+  "iat": 1458496404,
+  "iss": "https://scim.example.com",  
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
+   "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
+  ],  
+  
+  "events":[
+    "urn:ietf:params:scim:event:create"
+  ],
+  "urn:ietf:params:scim:event:create":{
+    "ref": "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
+    "attributes":["id", "name", "userName", "password", "emails"],
+    "values":{
+      "emails":[
+       {"type":"work", "value":"jdoe@example.com"}
+      ],
+      "password":"not4u2no",
+      "userName":"jdoe",
+      "id":"44f6142df96bd6ab61e7521d9",
+      "name":{
+        "givenName":"John",
+        "familyName":"Doe"
+      }
+    }  
+  }
+}
+</artwork>
+          </figure></t>
+
+        <t>When transmitted, the above JSON body must be converted into a JWT
+        as per <xref target="RFC7519"/>. In this
+        example, because the event contains attribute values, the token MUST
+        be encrypted per JWE (see <xref
+        target="RFC7516"/>) before transmission.</t>
+     
+        <t><figure>
+            <preamble>The following is an example of a SCIM Event expressed as
+            an unsecured JWT. The JWT header of:</preamble>
+
+            <artwork>{"alg":"none"}</artwork>
+          </figure><figure>
+            <preamble>Base64url encoding of the octets of the UTF-8
+            representation of the header yields:</preamble>
+
+            <artwork>eyJhbGciOiJub25lIn0</artwork>
+          </figure>
+	  <figure>
+            <preamble>The example JSON Event Data is encoded as
+            follows:</preamble>
+
+            <artwork>
+eyAgCiAgImp0aSI6ICI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIsCiAg
+ImlhdCI6IDE0NTg0OTY0MDQsCiAgImlzcyI6ICJodHRwczovL3NjaW0uZXhhbXBsZS5j
+b20iLCAgCiAgImF1ZCI6WwogICAiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0ZlZWRz
+Lzk4ZDUyNDYxZmE1YmJjODc5NTkzYjc3NTQiLAogICAiaHR0cHM6Ly9zY2ltLmV4YW1w
+bGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIxZDA4NjQxZDc2NzZlZTciCiAgXSwgIAogIAog
+ICJldmVudHMiOlsKICAgICJ1cm46aWV0ZjpwYXJhbXM6c2NpbTpldmVudDpjcmVhdGUi
+CiAgXSwKICAidXJuOmlldGY6cGFyYW1zOnNjaW06ZXZlbnQ6Y3JlYXRlIjp7CiAgICAi
+cmVmIjogImh0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9Vc2Vycy80NGY2MTQyZGY5NmJk
+NmFiNjFlNzUyMWQ5IiwKICAgICJhdHRyaWJ1dGVzIjpbImlkIiwibmFtZSIsInVzZXJO
+YW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiXSwKICAgICJ2YWx1ZXMiOnsKICAgICAgImVt
+YWlscyI6WwogICAgICAgeyJ0eXBlIjoid29yayIsInZhbHVlIjoiamRvZUBleGFtcGxl
+LmNvbSJ9CiAgICAgIF0sCiAgICAgICJwYXNzd29yZCI6Im5vdDR1Mm5vIiwKICAgICAg
+InVzZXJOYW1lIjoiamRvZSIsCiAgICAgICJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3
+NTIxZDkiLAogICAgICAibmFtZSI6ewogICAgICAgICJnaXZlbk5hbWUiOiJKb2huIiwK
+ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
+</artwork>
+          </figure>
+          <figure anchor="eventToken"
+            title="Example Unsecured Event Token">
+            <preamble>The encoded JWS signature is the empty string.
+            Concatenating the parts yields:</preamble>
+
+            <artwork>
+eyJhbGciOiJub25lIn0
+.
+eyAgCiAgImp0aSI6ICI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIsCiAg
+ImlhdCI6IDE0NTg0OTY0MDQsCiAgImlzcyI6ICJodHRwczovL3NjaW0uZXhhbXBsZS5j
+b20iLCAgCiAgImF1ZCI6WwogICAiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0ZlZWRz
+Lzk4ZDUyNDYxZmE1YmJjODc5NTkzYjc3NTQiLAogICAiaHR0cHM6Ly9zY2ltLmV4YW1w
+bGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIxZDA4NjQxZDc2NzZlZTciCiAgXSwgIAogIAog
+ICJldmVudHMiOlsKICAgICJ1cm46aWV0ZjpwYXJhbXM6c2NpbTpldmVudDpjcmVhdGUi
+CiAgXSwKICAidXJuOmlldGY6cGFyYW1zOnNjaW06ZXZlbnQ6Y3JlYXRlIjp7CiAgICAi
+cmVmIjogImh0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9Vc2Vycy80NGY2MTQyZGY5NmJk
+NmFiNjFlNzUyMWQ5IiwKICAgICJhdHRyaWJ1dGVzIjpbImlkIiwibmFtZSIsInVzZXJO
+YW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiXSwKICAgICJ2YWx1ZXMiOnsKICAgICAgImVt
+YWlscyI6WwogICAgICAgeyJ0eXBlIjoid29yayIsInZhbHVlIjoiamRvZUBleGFtcGxl
+LmNvbSJ9CiAgICAgIF0sCiAgICAgICJwYXNzd29yZCI6Im5vdDR1Mm5vIiwKICAgICAg
+InVzZXJOYW1lIjoiamRvZSIsCiAgICAgICJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3
+NTIxZDkiLAogICAgICAibmFtZSI6ewogICAgICAgICJnaXZlbk5hbWUiOiJKb2huIiwK
+ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
+.
+</artwork>
+          </figure></t>
+
+        <t>To create and or validate a signed or encrypted SET, follow
+        the instructions in section 7 of <xref
+        target="RFC7519"/>.</t>
+      </section>
+    </section>
+
+    <section anchor="Security" title="Security Considerations" toc="default">
+
+      <t>SETs may often contain sensitive information. Therefore,
+      methods for distribution of events SHOULD require the use of a 
+      transport-layer security mechanism when distributing events. 
+      Parties MUST support TLS 1.2 <xref target="RFC5246"/> and MAY support
+      additional transport-layer mechanisms meeting its security
+      requirements. When using TLS, the client MUST perform a TLS/SSL server
+      certificate check, per <xref target="RFC6125"/>. Implementation
+      security considerations for TLS can be found in "Recommendations for
+      Secure Use of TLS and DTLS" <xref target="RFC7525"/>.</t>
+      
+      <t>Security Events distributed through third-parties or that carry personally
+      identifiable information, SHOULD be encrypted using JWE <xref target="RFC7516"/>
+      or secured for confidentiality by other means.
+      </t>
+      <t>Security Events distributed without authentication over the channel, such
+      as via TLS (<xref target="RFC5246"/> and <xref target="RFC6125"/>), 
+      and/or OAuth2 <xref target="RFC6749"/>, or Basic Authentication <xref target="RFC7617"/>,
+      MUST be signed using JWS <xref target="RFC7515"></xref> so
+      that individual events MAY be authenticated and validated by the subscriber.</t>
+      
+    </section>
+    <section title="Privacy Considerations">
+    
+      <t>If a SET needs to be retained for audit purposes, JWS MAY 
+      be used to provide verification of its authenticity.</t>
+      
+      <t>Event Publishers SHOULD attempt to specialize Feeds so that the content
+      is targeted to the specific business and protocol needs of subscribers.</t>
+      
+      <t>When sharing personally identifiable information or information
+      that is otherwise considered confidential to affected users, the 
+      publishers and subscribers MUST have the appropriate legal agreements
+      and user consent in place.</t>
+      
+      <t>The propagation of subject identifiers can be perceived as personally
+      identifiable information. Where possible, publishers and subscribers
+      should devise approaches that prevent propagation -- for example, the
+      passing of a hash value that requires the subscriber to already know
+      the subject.</t>
+    </section>
+
+    <section anchor="IANA" title="IANA Considerations">
+
+      <section anchor="ClaimsRegistry" title="JSON Web Token Claims Registration">
+	<t>
+	  This specification registers the <spanx style="verb">events</spanx>
+	  claim in the IANA
+	  "JSON Web Token Claims" registry <xref target="IANA.JWT.Claims"/>
+	  established by <xref target="RFC7519"/>.
+	</t>
+
+	<section anchor='ClaimsContents' title='Registry Contents'>
+	  <t>
+	    <?rfc subcompact="yes"?>
+	    <list style='symbols'>
+	      <t>
+		Claim Name: <spanx style="verb">events</spanx>
+	      </t>
+	      <t>
+		Claim Description: Security Events
+	      </t>
+	      <t>
+		Change Controller: IESG
+	      </t>
+	      <t>
+		Specification Document(s): <xref target="events"/> of [[ this specification ]]
+	      </t>
+	    </list>
+	  </t>
+	</section>
+	<?rfc subcompact="no"?>
+      </section>
+      
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+
+    <!-- 
+      <reference anchor="idevent-subscription">
+        
+        <front>
+          <title>Identity Event Subscription Protocol (work in progress)</title>
+          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
+          <date/>
+        </front>  
+      </reference>
+       -->
+       
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml' ?><!-- Keywords -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3986.xml'?><!-- URIs -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml'?><!-- TLS 1.2 -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6125.xml'?><!-- TLS Cert-->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6749.xml'?><!-- OAuth 2 -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7159.xml'?><!-- JSON -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml'?><!-- JWT -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7525.xml'?><!-- TLS BCP -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7617.xml'?><!-- Basic Auth -->
+
+      <reference anchor="IANA.JWT.Claims" target="http://www.iana.org/assignments/jwt">
+        <front>
+          <title>JSON Web Token Claims</title>
+          <author>
+            <organization>IANA</organization>
+          </author>
+	  <date/>
+        </front>
+      </reference>
+
+    </references>
+ 
+    <references title="Informative References">
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7009.xml'?><!-- OAuth Revocation -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7515.xml'?><!-- JWS -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7516.xml'?><!-- JWE -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7517.xml'?><!-- JWK -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7644.xml'?><!-- SCIM Protocl -->
+    
+      <reference anchor="idevent-scim" target="draft-hunt-idevent-scim-00.txt">
+        <front>
+          <title>SCIM Event Extensions (work in progress)</title>
+          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
+          <date/>
+        </front>  
+      </reference>
+ 
+ <!-- 
+      <reference anchor="RISC">
+        <front>
+          <title>OpenID Risk and Incident Sharing and Coordination (RISC) Working Group</title>
+          <author> <organization>OpenID Foundation</organization></author>
+          <date/>
+        </front>
+      </reference>
+
+      <reference anchor="HEART" target="http://openid.net/wg/heart/">
+        <front>
+          <title>OpenID Health Relationship Trust (HEART) Working Group</title>
+          <author> <organization>OpenID Foundation</organization></author>
+          <date/>
+        </front>
+      </reference>
+      
+       -->
+
+    </references>
+
+    <!-- <section anchor="Contributors" title="Contributors"/> Uncomment if and when this section is non-empty -->
+
+    <section anchor="Acknowledgments" title="Acknowledgments">
+      <t>The editors would like to thank the participants in the IETF id-event
+      mailing list and related working groups for their support of this specification.</t>
+    </section>
+
+    <section anchor="History" title="Change Log">
+      <t>Draft 01 - PH - Renamed eventUris to events</t>
+      <t>Draft 00 - PH - First Draft</t>
+      <t>Draft 01 - PH - Fixed some alignment issues with JWT. Remove event type attribute.</t>
+      <t>Draft 02 - PH - Renamed to Security Events, Removed questions, clarified examples and intro text, and added security and privacy section.</t>
+      <t>Draft 03 - PH <list style="symboles">
+        <t>General edit corrections from Sarah Squire</t>
+        <t>Changed "event" term to "SET"</t>
+        <t>Corrected author organization for William Dennis to Google</t>
+        <t>Changed definition of SET to be 2 parts, an envelope and 1 or more payloads.</t>
+        <t>Clarified that the intent is to express a single event with optional extensions only.</t>
+      </list></t>
+      <t>
+	Draft 03 - mbj -
+	Registered <spanx style="verb">events</spanx> claim.
+	Applied proofreading corrections.
+      </t>
+    </section>
+  </back>
+</rfc>
