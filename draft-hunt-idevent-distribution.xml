@@ -1,0 +1,1010 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type='text/xsl' href='http://xml.resource.org/authoring/rfc2629.xslt' ?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<?rfc toc="yes"?>
+<?rfc tocompact="yes"?>
+<?rfc tocdepth="3"?>
+<?rfc tocindent="yes"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc comments="yes"?>
+<?rfc inline="yes"?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+<rfc category="std" docName="draft-hunt-idevent-distribution-01"
+	ipr="trust200902">
+	<front>
+		<title abbrev="draft-hunt-idevent-distribution">
+			Identity Event Subscription Protocol</title>
+
+		<author fullname="Phil Hunt" initials="P." role="editor"
+			surname="Hunt">
+			<organization abbrev="Oracle">Oracle Corporation</organization>
+
+			<address>
+				<email>phil.hunt@yahoo.com</email>
+			</address>
+		</author>
+    
+    <author fullname="Marius Scurtescu" initials="M.S." surname="Scurtescu">
+      <organization abbrev="Google">Google</organization>
+
+      <address>
+        <email>mscurtescu@google.com</email>
+      </address>
+    </author>
+    
+
+		<author fullname="Morteza Ansari" initials="M.A." surname="Ansari">
+			<organization abbrev="Cisco">Cisco</organization>
+
+			<address>
+				<email>morteza.ansari@cisco.com</email>
+			</address>
+		</author>
+
+		<date year="2016" />
+
+		<keyword>Internet-Draft</keyword>
+
+		<abstract>
+			<t>
+				The specification defines how a subscriber to a feed of security 
+        events may query for and subscribe to a feed. The specification defines
+        a single mandatory-to-implement method using HTTP Post to deliver 
+        events to registered subscribers. </t>
+		</abstract>
+	</front>
+
+	<middle>
+		<section anchor="intro" title="Introduction and Overview" toc="default">
+			
+      <t>
+        This specification defines a set of capabilities that can be used
+        by publishers to distribute security event tokens or SETs (see <xref target="idevent-token"/>)
+        to subscribers of a SET event feed. These capabilities include
+        using HTTP <xref target="RFC7231"/> to query for available feeds, subscribing to a feed, and
+        receiving SET events via HTTP POST.
+			</t>
+
+			<figure anchor="notificationArch" title="Subscription Management">
+          <preamble>The following diagram shows a typical SET Feed
+        Provider and the services provided to Subscribers:</preamble>
+					<artwork align="center">
++------------+                        +-------------+
+|            |Feeds Catalog           |             |
+|            +------------------------>             |
+|    SET     |                        |    SET      |
+|    Feed    |Subscription Request    |    Feed     |
+|  Provider  &lt;------------------------+  Subscriber |
+|            |Subscription Confirm    |             |
+|            +------------------------>             |
+|            |                        |             |
+|            |                        |             |
+|            +------------------------>             |
+|            |SET Delivery            |             |
+|            |                        |             |
++------------+                        +-------------+
+</artwork>
+			</figure>
+
+			<t>A SET feed provider MAY be directly integrated into a source
+				service that generates events, or it may be a separate service entity 
+        that off-loads event distribution from the event generator to act 
+        as its delegated publisher. For the purposes of this specification, 
+        while SET	distribution may be handled separately, this specification will 
+        consider the method for how event generators send events to publishers
+        as out-of-scope.
+			</t>
+     
+
+			<section anchor="notat" title="Notational Conventions" toc="default">
+				<t>
+					The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+					"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in
+					this
+					document are to be interpreted as described in
+					<xref target="RFC2119" />
+					. These keywords are capitalized when used to
+					unambiguously specify requirements of the protocol or application
+					features and behavior that affect the inter-operability and security of
+					implementations. When these words are not capitalized, they are
+					meant
+					in their natural-language sense.
+				</t>
+
+				<t>
+					For purposes of readability examples are not URL encoded.
+					Implementers MUST percent encode URLs as described in
+					<xref target="RFC3986">Section 2.1 of</xref>
+					.
+				</t>
+
+				<t>Throughout this documents all figures MAY contain spaces and
+					extra
+					line-wrapping for readability and space limitations. Similarly, some
+					URI's contained within examples, have been shortened for space and
+					readability reasons.
+				</t>
+			</section>
+
+			<section anchor="defs" title="Definitions" toc="default">
+        <t>This specification assumes terminology defined in the Security
+        Event Token specification<xref target="idevent-token"/>.</t>
+				<t>
+					The following definitions are specific to Identity Event
+					publishing:
+					<list style="hanging">
+						<t hangText="Feed Provider">The Feed Provider publishes
+							SETs to be distributed to registered subscribers.
+						</t>
+
+						<t hangText="Feed">A Feed is a URI that describes the set of
+							resources and events under which events may be issued. An
+							interested subscriber registers with the feed provider to subscribe
+							to an event uri to receive SETs associated with a Feed.
+						</t>
+
+						<t hangText="Notification Mechanism">
+							A URI that describes the
+							chosen event notification mechanism. When subscribing to a feed, a
+							client may choose a specific mechanism by which it wishes to
+							receive notification events. 
+						</t>
+
+						<t hangText="Subscriber">A Subscriber registers to receive SETs
+              from a feed provider that are part of a Feed.
+						</t>
+					</list>
+				</t>
+			</section>
+		</section>
+
+		<section anchor="process" title="Event Notification Process">
+			<t>When a Security Event occurs, the Feed Provider constructs a SET
+      token <xref target="idevent-token"/> that describes the	event. 
+      The feed provider determines the feeds that the event should be 
+      distributed to, and determines which Subscribers need to be notified.</t>
+      <t> 
+      How Feeds are defined and the process by which events are identified for 
+      subscribers is out-of-scope of this	specification.
+			</t>
+
+			<t>
+			When a SET is available for a subscriber, the Feed Provider
+			attempts to deliver the SET based on the Subscriber's registered
+			delivery mechanism:
+			<list style="symbols">
+				<t>The subscriber provided a web-callback endpoint, the
+				publisher uses an HTTP/1.1 POST to the endpoint to deliver the
+				event to the registered subscriber;
+			  </t>
+
+			  <t>Or, the Feed Provider delivers the event through a different
+        not defined by this specification.
+			  </t>
+			</list>
+			</t>
+
+			<t>After a SET is delivered to all subscribers, Feed Providers
+				do not typically maintain SETs or histories. As such,
+				published SETs SHOULD be self-validating (e.g. signed).
+			</t>
+
+			<t>
+				If delivery to any particular subscriber has been delayed for
+				an extended period of time, the Feed Provider MAY suspend the
+				subscription and even stop maintaining outstanding SETs for
+				the Subscriber at its discretion and available resources. See subscription
+				<spanx style="verb">state</spanx> in <xref target="subscribeMetadata" />.
+			</t>
+
+			<t>
+				Upon receiving a SET, the Subscriber reads the token and validates 
+        it. Based on the content of the token, the subscriber decides what 
+        if any action it needs to take in response to the SET. For 
+        example, in response to a SCIM event <xref target="idevent-scim"/> 
+        indicating a changed resource, the subscriber might perform a 
+        SCIM GET request (see <xref target="RFC7644">Section 3.4</xref>)
+				to the affected resource URI in order to confidentially obtain 
+        the current state of the affected SCIM resource. 
+      </t>
+        
+      <t>
+        The action a Subscriber takes in response to a SET MAY be substantially 
+        different than merely copying the action of the publisher. A single 
+        SET MAY trigger multiple receiver actions. For example, upon receiving 
+        notification that a user resource has been added to a group, the 
+        Subscriber may first determine that the user does not exist in the 
+        Subscriber's domain. The Subscriber translates the event into two 
+        actions:<list style="index">
+          <t>Retrieve the user (e.g. using SCIM GET) and then provisions 
+          the user locally. After enabling the user,</t>
+          <t>The Subscriber then enables the user for the application 
+        associated with membership in the Feed Publisher's group.</t>
+        </list>  
+			</t>
+		</section>
+
+		
+
+		<section title="Event Feeds">
+			<t>
+	      An Feed is defined by a <spanx style="verb">feedUri</spanx>. The 
+        Feed provides a series of event in the form of SETS that are made 
+        available to Subscribers. An individual Subscription contains the 
+        metadata about a particular client and their subscription 
+        to a particular <spanx style="verb">feedUri</spanx>. Subscription
+        metadata describes the client that has subscribed, the current 
+        delivery status indicating whether all events are delivered, pending, 
+        or whether delivery has failed. Subscription metadata also describes the 
+        method of event delivery and any associated configuration information (see
+				<xref target="subscribeMetadata" />
+				).
+			</t>
+
+      <section anchor="feedtypes" title="Feed Types">
+          <t>
+            A Feed Provider MAY define Feeds based on a number of
+            criteria. This specification does not specify or limit the basis for
+            which a service provider defines a Feed or how feed URIs should be
+            specified. Some possible methods for defining feeds include:
+            <list style="hanging">
+              <t hangText="By Resource"><vspace blankLines="0"/>Each resource might have its own event
+                notification Feed. For example, a User's mobile application may
+                require notification of changes or rights defined in a SCIM User
+                resource associated with the mobile user.
+              </t>
+
+              <t hangText="By Endpoint"><vspace blankLines="0"/>A Feed might be defined by an endpoint
+                where any event relating to a resource within an endpoint is
+                delivered to a subscriber. This type of feed is likely to have
+                many notifications as the number of resources in an endpoint 
+                grows (e.g. a SCIM "/Users") and SHOULD be used with caution. 
+                Typically only privileged partners would be allowed to use
+                this type of feed. For example, an enterprise wishes to be 
+                notified of all change events to any of its users assuming all 
+                users within the endpoint are related to the subscribing 
+                enterprise.
+              </t>
+
+              <t hangText="By Filter"><vspace blankLines="0"/>A Feed might define a collection of
+                resources based on a filter that describes a set of matching
+                criteria a resource may be included in a Feed. Note that 
+                this type of Feed may require extra processing by the Feed 
+                Provider to determine if any particular SET event matches 
+                the filter criteria. It may also be difficult for the Feed
+                Provider to notify Subscribers of additions and deletions
+                of resources to the Feed as the resources in the Feed MAY change
+                based on the filter itself.
+              </t>
+
+              <t hangText="By Group"><vspace blankLines="0"/>For example, all resources within a
+                SCIM Group could be used to define the resources within 
+                a particular Feed. 
+              </t>
+            </list>
+
+            The list above is intended to show common use cases for defining
+            Feeds. How Feeds are defined is out-of-scope of this
+            specification. 
+          </t>
+
+        </section>
+				
+				<section anchor="feedResource" title="Feed Metadata">
+					
+					<t>
+						Feed metadata consists of the following singular
+						attributes:
+						<list style="hanging">
+							<t hangText="feedName">
+								<vspace />
+								A required string value
+								containing a name for the feed. May be used in administrative
+								user interfaces to assist subscribers in Feed selection. The
+								value MUST be unique within a given administrative domain. This is a
+								required attribute.
+							</t>
+
+							<t hangText="feedUri">
+								<vspace />
+								An attribute of type
+								<spanx style="verb">String</spanx>
+								that is a
+								unique URI identifying the feed. This attribute characteristic
+								<spanx style="verb">mutability</spanx>
+								is
+								<spanx style="verb">immutable</spanx>
+								and SHALL NOT change once assigned. This is a REQUIRED
+								attribute.
+							</t>
+
+							<t hangText="description">
+								<vspace />
+								A
+								<spanx style="verb">String</spanx>
+								attribute that describes the purpose of the feed in human
+								readable form. This is an OPTIONAL attribute.
+							</t>
+
+							<t hangText="type">
+								<vspace />
+								A
+								<spanx style="verb">Reference</spanx>
+								attribute that is one of the following canonical values:
+								<list style="hanging">
+									<t hangText="resource">
+										Indicates that the Feed is for
+										events related to a specific resource. In such cases,
+										the value of the attribute
+										<spanx style="verb">filter</spanx>
+										is set to a specific
+										resource URI or
+										<spanx style="verb">/Me</spanx>
+										.
+									</t>
+									<t hangText="endpoint">
+										Indicates that the Feed is for all
+										events that occur for resources within a specific endpoint.
+										In such cases,
+										<spanx style="verb">filter</spanx>
+										is set to
+										an endpoint container for a group of resources (e.g.
+										<spanx style="verb">/Users</spanx>
+										).
+									</t>
+									<t hangText="filter">
+										Indicates that events for a Feed
+										will be selected based on events relating to the set of
+										resources described by a filter. For example, the value of the attribute
+										<spanx style="verb">filter</spanx>
+										is a SCIM filter <xref target="RFC7644">Section 3.4.2</xref> that
+										describes a condition that selects a set of resources that
+										match before or after a resource state change.
+									</t>
+									<t hangText="group">
+										Indicates that events for a Feed
+										will be based on events relating to the set of resources
+										listed in a group such as a SCIM Group<xref target="RFC7643">Section 4.2</xref>. 
+									</t>
+									
+								</list>
+							</t>
+
+							<t hangText="filter">
+								<vspace />
+								A String value containing a filter defined by the Feed Publisher.
+                For example in SCIM, a filter MAY be a filter (see Section 3.4.2.2
+								<xref target="RFC7644" />),
+								a resource, or a SCIM endpoint URI. The contents of the value is
+								indicated by the feed
+								<spanx style="verb">type</spanx>
+								attribute and the profiling SET Event specification and 
+                is out-of-scope of this specification.
+							</t>
+
+						</list>
+					</t>
+
+					<t>
+						The following multi-valued attributes are defined:
+						<list style="hanging">
+							<t hangText="events">One or more String values that contain
+								the Event URIs supported by a Feed.
+							</t>
+							<t hangText="deliveryModes">One or more URIs representing the methods of
+								delivery
+								supported by the feed. By default, all delivery modes are supported.
+                [[DO we need a registry for this, or just remove it??]]
+							</t>
+
+						</list>
+					</t>
+      </section>  
+	</section>	
+  <section title="Subscriptions">
+   
+    <section title="Overview">
+    
+      <t>A subscription represents an agreement to deliver events from a
+      specified feed of events from a feed provider to an individual subscriber
+      entity. The method of delivery and the parameters for delivery are 
+      specified a set of parameters called subscription metadata (see <xref target="subscribeMetadata"/>).
+      </t>
+    </section>
+    
+    <section anchor="subscribeMetadata" title="Subscription Metadata">
+          <t>
+            A subscription is defined by the following metadata:
+            <list style="hanging">
+              <t hangText="feedUri"><vspace />A string value containing the URI
+              for a feed supported by the feed provider. It describes the 
+              content of the feed and MAY also be a resolvable URI where the
+              feed meta data may be returned as a JSON object. REQUIRED.</t>
+
+              <t hangText="deliveryUri"><vspace />A REQUIRED single-valued string
+              which is a URI with a prefix of <spanx style="verb">urn:ietf:params:event:delivery</spanx>.
+              The following are defined in <xref target="delivery"/>:<list>
+                  <t hangText="urn:ietf:params:event:delivery:HTTP:webCallback">
+                  <vspace blankLines="0"/>The feed provider delivers events 
+                  using HTTP POST to a specified callback URI.</t>
+
+                  <t hangText="urn:ietf:params:event:delivery:HTTP:poll">
+                  <vspace blankLines="0"/>The subscriber will poll for events 
+                  using HTTP GET.</t>
+                </list></t>
+
+              <t hangText="subUri"><vspace blankLines="0"/>A URI representing the unique
+              identifier for a single subscriber of a feed. It MAY also 
+              be an actual event polling endpoint which the subscriber MAY 
+              use to receive such as with <spanx style="verb">deliveryUri</spanx>
+              method of <spanx style="verb">urn:ietf:params:event:delivery:HTTP:poll</spanx>.
+              </t>
+
+              <t hangText="feedJwk"><vspace blankLines="0"/>AN OPTIONAL JSON Web Key (see
+              <xref target="RFC7517" />) that will be used
+              to sign published events. If present, the subscriber can
+              authenticate events relayed from the feed provider.</t>
+
+              <t hangText="confidentialJwk"><vspace blankLines="0"/>An OPTIONAL subscriber 
+              provided public JSON Web Key (see <xref target="RFC7517" />) 
+              that may be used by the feed provider to encrypt event messages 
+              for the subscriber.</t>
+
+              <t hangText="subStatus"><vspace blankLines="0"/>An optional value which indicates
+              the current status of a subscription:<list>
+                  <t><spanx style="verb">on</spanx> - the default setting
+                  indicates the feed provider processing events and will
+                  pass them to the subscriber.</t>
+
+                  <t><spanx style="verb">verify</spanx> - the subscription is
+                  pending verification. While in "verify", published events
+                  SHALL NOT be stored or delivered to the subscriber.</t>
+
+                  <t><spanx style="verb">paused</spanx> - indicates the
+                  feed provider is temporarily suspending delivery to
+                  subscriber. While in <spanx style="verb">paused</spanx>
+                  events SHOULD be retained and delivered when state
+                  returns to <spanx style="verb">on</spanx>.</t>
+
+                  <t><spanx style="verb">off</spanx> - indicates that the
+                  subscription is no longer passing events. While in off mode,
+                  the subscription metadata is maintained, but new events are ignored
+                  and not processed or retained.</t>
+
+                  <t><spanx style="verb">fail</spanx> - Indicates that the
+                  feed provider was unable to deliver events to the
+                  subscriber for an extended period of time, or due to a call
+                  failure to the registered web call back URI. Unlike paused
+                  status, a failed subscription is no longer receiving events
+                  nor are they retained by the feed provider.</t>
+                </list></t>
+                
+              <t hangText="maxRetries"><vspace blankLines="0"/>An OPTIONAL number indicating the 
+              maximum number of attempts to deliver an event. A value of '0'
+              indicates there is no maximum. Upon reaching the maximum, the 
+              subscription <spanx style="verb">subStatus</spanx> is set
+              to <spanx style="verb">failed</spanx> [[or "paused"?]].</t>
+              
+              <t hangText="maxDeliveryTime"><vspace blankLines="0"/>An OPTIONAL number indicating
+              the maximum amount of time an event MAY wait before delivery.
+              Upon reaching the maximum, the 
+              subscription <spanx style="verb">subStatus</spanx> is set
+              to <spanx style="verb">failed</spanx> [[or "paused"?]]. </t>
+              
+              <t hangText="minDeliveryInterval"><vspace blankLines="0"/>An OPTIONAL
+              integer that represents the minimum interval in seconds between deliveries. A value of '0'
+              indicates delivery should happen immediately. When delivery is
+              a polling method (e.g. HTTP GET), it is the expected time between subscriber attempts.
+              When in push mode (e.g. HTTP POST), it is the interval the server
+              will wait before sending a new event or events.</t>
+            </list></t>
+        </section>
+        <section title="Subscription Verification">
+          <t>In order to avoid ongoing communication issues and to minimize
+          requirements for feed providers to maintain events indefinitely,
+          a verification process is used to confirm that the requested event
+          distribution endpoints are correct and that events may be
+          successfully delivered. When a subscription is created or modified, the feed
+          provider SHALL set the subscription state (<spanx style="verb">subStatus</spanx>)
+          to <spanx style="verb">verify</spanx> and send a test event message to the subscriber. If the event is
+          delivered successfully, the subscription state MAY be turned to 
+          <spanx style="verb">on</spanx>. If however verification fails due
+          to a hard failure, or the client fails to retrieve the event within
+          a [reasonable?] period, the subscription status SHALL be set to 
+          <spanx style="verb">fail</spanx>.</t>
+
+          <section anchor="verifyPush" title="Verifying 'Push' Style Subscriptions">
+            <t>When using the WebCallback mode, or any other
+            'push'-style communication scheme, the verification process 
+            serves to verify that the identified endpoint consents to receiving
+            events and is valid. This prevents a notification server from 
+            flooding an endpoint which did not actually request an event 
+            subscription.</t>
+
+            <t>To confirm a subscription, the feed provider SHALL send a
+            verification event to the subscriber using the registered 
+            <spanx style="emph">deliveryUri</spanx> mechanism. The event contains
+            the following attributes:<list style="hanging">
+              <t hangText="eventUris">Set with a value of 
+              <spanx style="verb">urn:ietf:params:event:event:verify</spanx>.</t>
+
+              <t hangText="iss">Set to the URI of the feed publisher (see 
+              <xref target="idevent-token"/>).</t>
+
+              <t hangText="aud">MUST be set to a value that matches the
+              subscription <spanx style="verb">feedUri</spanx> requested.</t>
+
+              <t hangText="confirmChallenge">A String value that the
+              subscriber SHALL echo back in its response. See deliveryUri
+              method profile for usage details.</t>
+
+              <t hangText="exp">A value that indicates the
+              time the verification request will expire. Once expired, the
+              server will set the subscription state to <spanx style="verb">fail</spanx>.</t>
+            </list>
+            If a confidential JWK was supplied, then the event SHOULD
+            be encrypted with the provided key. Successful parsing of the
+            message confirms that both the endpoint is valid including 
+            confirmation of keys.</t>
+
+            <figure>
+              <preamble>A non-normative JSON representation of an event to be
+              sent to a subscriber as a subscription confirmation. Note the
+              event is not yet encoded as a JWT token.</preamble>
+
+              <artwork>{  
+  "jti": "4d3559ec67504aaba65d40b0363faad8",
+  "eventUris":["urn:ietf:params:event:event:verify"],
+  "iat": 1458496404,
+  "iss": "https://scim.example.com",  
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
+   "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
+  ], 
+  "confirmChallenge":"ca2179f4-8936-479a-a76d-5486e2baacd7",
+  "exp": 1458497000
+  
+}</artwork>
+            </figure>
+
+            <figure>
+              <preamble>
+ Upon receiving a subscription confirmation request, a confirming
+ subscriber responds with a confirmation using the method described in
+ the deliveryUri profile. The response includes a
+ <spanx style="verb">challengeResponse</spanx>
+ value. For example, depending on the deliveryUri profile used, the
+ subscriber might respond with the value of
+ <spanx style="verb">confirmChallenge</spanx>
+ . For example, if the request is received via HTTP/1.1 POST, then the 
+ following HTTP response is used to confirm. A non-normative example of 
+ the response is:
+              </preamble>
+
+              <artwork>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{  
+  "challengeResponse":"ca2179f4-8936-479a-a76d-5486e2baacd7"
+}</artwork>
+            </figure>
+
+            <t>
+            If the subscriber returns a non-matching value or an HTTP status
+            other than a 200 series response, the subscription 
+            <spanx style="verb">state</spanx> SHALL be set to <spanx style="verb">fail</spanx>.
+            A declining subscriber MAY simply respond with any 400 series HTTP
+            error (e.g. 404).</t>
+          
+          </section>
+          <section anchor="pollVerify" title="Verifying 'Polling' Style Subscriptions">
+            <t>For clients that use a subscription mode (e.g. <spanx style="verb">
+            urn:ietf:params:scimnotify:api:messages:2.0:poll</spanx>) that pick up events from a 
+            subscription endpoint, the client MAY confirm the subscription
+            by simply reading the event using an HTTP GET at the endpoint specified by
+            the attribute <spanx style="verb">subUri</spanx> in the subscription. Once the
+            confirmation event has been retrieved, the service provider MAY mark the 
+            subscription as confirmed.</t>
+            <figure>
+              <preamble>A non-normative example of a client, having previously subscribed,
+              picking up the initial subscription confirmation message.</preamble>
+              <artwork>GET /Events/548b7c3f77c8bab33a4fef40/
+Host: example.com
+Accept: application/scim+json
+Authorization: Bearer h480djs93hd8
+Content-Length: ...
+              </artwork>
+            </figure>
+            <figure>
+              <preamble>To which the event provider responds with the available events
+              which SHOULD include a confirmation event (non-normative example):</preamble>
+              <artwork>{  
+  "schemas":["urn:ietf:params:scim:schemas:notify:2.0:Event"],
+  "publisherUri":"https://scim.example.com",  
+  "feedUris":[
+   "https://notify.example.com/Feeds/98d52461fa5bbc879593b7754"
+   
+  ],
+  "type":"CONFIRMATION",
+  "confirmChallenge":"ca2179f4-8936-479a-a76d-5486e2baacd7",
+  "expires":""
+  
+}
+              </artwork>
+            </figure>
+          </section>
+        </section>
+  </section>
+    
+  <section anchor="delivery" title="Event Delivery">
+     <section anchor="deliveryDefinition" title="Introduction to Event Delivery Methods">
+        <t>Each event delivery method SHALL have the following information:<list style="hanging">
+          <t hangText="Description"><vspace/>The <spanx>deliveryUri</spanx> URI value
+          for the delivery method and a description of the method.</t>
+          <t hangText="Subscription Verification Procedure"><vspace/>The procedure
+          that the configuration for a subscription is confirmed causing the
+          subscription status to be set to <spanx style="verb">on</spanx>.</t>
+          <t hangText="Delivery Message Format"><vspace/>A description of an event delivery
+          message and how to locate the event token(s) as well as any additional
+          signaling parameters.</t>
+          <t hangText="Delivery Procedure"><vspace/>The protocol procedure for a delivery
+          request (push or poll), and the expected successful response.</t>
+          <t hangText="Failure Conditions"><vspace/>A description of the failure
+          conditions that might occur and the impact on the subscriptions
+          operational status (<spanx style="verb">subStatus</spanx>) if any.</t>
+          <t hangText="Multi-Event Message Considerations"><vspace/>A description of
+          any special considerations when passing multiple events in a single
+          delivery.[[is this needed?]]</t>
+        </list> </t>
+     </section> 
+     <section anchor="httpPost" title="HTTP Web Callback Method">
+        
+       <section title="Description">
+            <t>This method allows a feed provider to use HTTP POST to deliver
+            events to a registered web callback URL. The <spanx style="verb">deliveryUri</spanx>
+            value for this method is <spanx style="verb">urn:ietf:params:event:delivery:HTTP:webCallback</spanx>.</t>
+            
+            <t>Depending on the settings for the subscription metadata, this
+            delivery method is capable of delivering multiple signed events
+            in a single delivery.</t>
+       </section>
+          
+       <section anchor="httpMessageFormat" title="Delivery Message Format">
+            <t>The content-type for this method is <spanx style="verb">application/json</spanx>
+            and consists of a JSON object containing the following attributes:<list style="hanging">
+              <t hangText="eventTkns"><vspace/>A multi-valued String with each value containing
+              an identity event token (<xref target="idevent-token"/>). Each value
+              MAY represent an unsigned, signed, or encrypted token. At least one
+              value MUST be present in a delivery request. </t>
+              <t hangText="eventCnt"><vspace/>An integer representing the number of events
+              present in the message. REQUIRED.</t>
+              <t hangText="eventPend"><vspace/>An boolean indicating more deliveries
+              are pending. The default value is false.</t>
+              <t hangText="invalidEvents"><vspace/>An optional multi-valued set of JSON objects containing events
+              that could not be accepted or failed. Used in a delivery response, a subscriber MAY return
+              an event that failed to validate or was unparseable.</t>
+            </list></t>
+            <figure align="left" title="Example Web Callback POST Message">
+              <artwork align="left">{
+"eventTkns":[
+  "eyJhbGciOiJub25lIn0
+  .
+  eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+  kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+  FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+  WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+  WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+  hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+  VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+  SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+  b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+  tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+  1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+  ."],
+"eventCnt":1,
+"eventPend":false
+}
+</artwork>
+            </figure>
+          </section>
+
+          <section title="Subscription Verification">
+            <t>See <xref target="verifyPush"/>.</t>
+          </section>
+
+          <section title="Delivery Procedure">
+            <t>To deliver an event, the publisher generates an event delivery message
+            and uses HTTP POST to the registered endpoint.</t>
+            
+            <figure align="left" title="Example Web Callback POST Request">
+              <artwork align="left">POST /Events  HTTP/1.1
+Host: notify.example.com
+Accept: application/json
+Content-Type: application/json
+{
+"eventTkns":[
+  "eyJhbGciOiJub25lIn0
+  .
+  eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+  kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+  FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+  WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+  WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+  hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+  VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+  SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+  b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+  tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+  1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+  .",
+  "eyJhbGciOiJub25lIn0
+  .
+  eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+  kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+  FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+  WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+  WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+  hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+  VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+  SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+  b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+  tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+  1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+  ."
+  ],  
+"eventCnt":2
+}
+</artwork>
+            </figure>
+            <t>In response, if the event token is validated, the server SHALL
+            indicate successful submission by responding with:<figure>
+              <artwork>HTTP/1.1 202 Accepted</artwork>
+            </figure> or to indicate errors it MAY respond with <figure>
+            <artwork>
+HTTP/1.1 202 Accepted
+Content-Type: application/json
+
+{
+  "invalidEvents":[
+    {"err":"duplicate",
+     "description":"Event already received. Ignored.",
+     "value":"eyJhbGciOiJub25lIn0
+  .
+  eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+  kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+  FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+  WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+  WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+  hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+  VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+  SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+  b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+  tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+  1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+  ."
+    }
+  ]
+}</artwork>
+            
+            </figure> </t>
+
+          <t>Since the normal operation of the Feed Provider is to forward
+          events to registered subscribers, the Feed Provider is not
+          obligated to inform the publisher of a permanent event URI that was
+          created. Servers MAY allow HTTP clients to check for undelivered
+          events by performing a GET against the same endpoint as the Event
+          submission endpoint described above.</t>
+            
+            <t></t>
+       </section>
+
+       <section title="Failure Conditions">
+         <t>[[TO BE COMPLETED]]</t>
+       </section>
+          
+     </section>
+
+     <section anchor="httpGet" title="HTTP Polling">
+        
+       <section title="Description">
+         <t>This method allows a subscriber to use HTTP GET to poll for
+            events to the <spanx style="verb">subUri</spanx> provided to the subscriber by the publisher. 
+            The <spanx style="verb">deliveryUri</spanx>value for this method 
+            is <spanx style="verb">urn:ietf:params:event:delivery:HTTP:poll</spanx>.</t>
+            
+            <t>Depending on the settings for the subscription metadata, this
+            delivery method is capable of delivering multiple signed events
+            in a single delivery poll request.</t>
+       </section>
+
+       <section title="Delivery Message Format">
+        <t>The delivery message is the same as <xref target="httpMessageFormat"/>.</t>
+       </section>
+
+       <section title="Subscription Verification">
+        <t>Subscription verification is described in <xref target="pollVerify"/>.</t>
+       </section>
+
+       <section title="Delivery Procedure">
+        <t>To deliver an event, the publisher places the event in a queue/buffer
+        associated with the client subscription that will be requested at some
+        future time by the subscriber using the URI specified in <spanx style="verb">subUri</spanx>.</t>
+        <t>To pick up any events, the subscriber issues an HTTP GET to the URI
+        provided by the event publisher in <spanx style="verb">subUri</spanx>.</t>
+        <t>In response to the HTTP GET request, the feed publisher responds with
+        a body that corresponds to the event delivery message format (see <xref target="httpMessageFormat"/>).</t>
+        <figure>
+        <preamble>An example polling request by a subscriber. The example
+        has been formatted for readability:</preamble>
+        <artwork>GET /subscriber/66444423ab24430fb06cf0de1ab75247
+   Host: pub.example.com
+   Accept: application/json
+   Authorization: Bearer h480djs93hd8    
+        </artwork>
+        </figure>
+        <figure><preamble>An example poll response (formatted 
+        for readability):</preamble>
+        <artwork>
+HTTP/1.1 200 OK
+Content-Type: application/json
+Location: 
+  https://pub.example.com/subscriber/66444423ab24430fb06cf0de1ab75247
+{
+"eventTkns":[
+  "eyJhbGciOiJub25lIn0
+  .
+  eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+  kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+  FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+  WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+  WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+  hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+  VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+  SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+  b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+  tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+  1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+  .",
+  "eyJhbGciOiJub25lIn0
+  .
+  eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+  kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+  FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+  WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+  WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+  hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+  VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+  SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+  b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+  tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+  1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+  ."
+  ],  
+"eventCnt":2
+}        
+        </artwork>
+        </figure>
+        <t>[[TO BE DISCUSSED: Should the subscriber be able to request 
+        events based on an event id (e.g. since), by date, etc. How does 
+        a client know it got them all?  Should we use ETags to signal
+        whether there are new events?]]</t>
+       </section>
+
+       <section title="Failure Conditions">
+       <t>[[TO BE DISCUSSED: The polling mode provides no way for a subscriber to indicate
+       parsing validation errors directly in response to a delivery. When 
+       errors occur, subscriber administrators must re-confirm the subscription
+       configuration.]]</t>
+       </section>
+        
+     </section>
+
+
+     <section anchor="webPush" title="Push Notification Extensions">
+        <t>[[TO BE COMPLETED]]</t>
+     </section>
+  </section>
+
+  <section anchor="Security" title="Security Considerations" toc="default">
+      <t>The synchronizing of User passwords between administrative domains is
+      to be handled with great care. From a security perspective the re-use of
+      passwords across service providers is to be highly discouraged. However,
+      in the enterprise user experience, if the perception of the user is that
+      service providers from multiple domains are part of a single corporate
+      application environment, then password synchronization MAY be
+      appropriate as part of an overall identity management and governance
+      mechanism.</t>
+
+      <t>[TO BE COMPLETED]</t>
+    </section>
+
+    <section anchor="IANA" title="IANA Considerations">
+      <section anchor="notifyMechRegistry"
+               title="SCIM Event Notification Mechanism Registry">
+        <t>TODO: Registration for Notification Mechanisms</t>
+      </section>
+
+      <section anchor="eventTypeRegistry" title="SCIM Event Type Registry">
+        <t>TODO: Registration of Event Types</t>
+      </section>
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml' ?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5988.xml' ?>
+      
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml' ?><!-- SCIM API -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml' ?><!-- SCIM Schema -->
+
+      <reference anchor="idevent-token">
+        
+        <front>
+          <title>Security Event Token (work in progress)</title>
+          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
+          <date/>
+        </front>  
+        <format type="TXT" target="draft-hunt-idevent-token-03.txt"/>    
+      </reference>
+
+    </references>
+
+    <references title="Informative References">
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7517.xml' ?><!-- JWK -->
+      
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.draft-ietf-webpush-protocol-02.xml'?>
+ 
+      <reference anchor="idevent-scim">
+        
+        <front>
+          <title>SCIM Event Extensions (work in progress)</title>
+          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
+          <date/>
+        </front>  
+        <format type="TXT" target="draft-hunt-idevent-scim-00.txt"/>    
+      </reference>
+
+     <!-- 
+      <reference anchor="Order-Operations">
+        <front>
+          <title>Order of Operations: Programming Languages</title>
+
+          <author>
+            <organization>Wikipedia</organization>
+          </author>
+
+          <date/>
+        </front>
+
+        <format target="http://en.wikipedia.org/wiki/Order_of_operations#Programming_languages"
+                type="HTML"/>
+      </reference>
+       -->
+    </references>
+
+    <section title="Contributors"/>
+
+    <section title="Acknowledgments">
+      <t>The editor would like to thank the participants in the the SCIM
+      working group for their support of this specification.</t>
+    </section>
+
+    <section title="Change Log">
+      <t>Draft 00 - PH - First Draft</t>
+      <t>Draft 01 - PH - <list style="symbols">
+        <t>Removed the version from filename in GITHUB version</t>
+        <t>Aligned document with new SET terminology from idevent-token</t>
+        <t>Simplified draft to only define HTTP POST profile (TBD)</t>
+      </list> </t>
+    </section>
+  </back>
+</rfc>
