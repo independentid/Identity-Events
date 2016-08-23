@@ -697,15 +697,12 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
         <t>Corrected author organization for William Dennis to Google</t>
         <t>Changed definition of SET to be 2 parts, an envelope and 1 or more payloads.</t>
         <t>Clarified that the intent is to express a single event with optional extensions only.</t>
-      </list></t>
+      </list>
+                  - mbj - Registered <spanx style="verb">events</spanx> claim, and proofreading corrections.</t> 
       <t>Draft 04 - PH - <list style="symbols">
         <t>Re-added the "sub" claim with clarifications that any SET type may use it.</t>
       </list></t>
-      <t>
-	Draft 03 - mbj -
-	Registered <spanx style="verb">events</spanx> claim.
-	Applied proofreading corrections.
-      </t>
+  
     </section>
   </back>
 </rfc>
