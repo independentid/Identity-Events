@@ -387,19 +387,28 @@
             <t hangText="nbf"><vspace blankLines="0"/>As defined by 
             <xref target="RFC7519">Section 4.1.5</xref>, a value 
             containing a NumericDate, which represents a future date when
-            the event will occur. This attribute is OPTIONAL.</t>           
+            the event will occur. This attribute is OPTIONAL.</t> 
+            
+            <t hangText="sub">As defined by <xref target="RFC7519">Section 4.1.2</xref>,
+            a String or URI value representing the principle or the subject of the SET. 
+            This is usually the entity whose "state" was changed. For example,
+            an IP Address was added to a black list. A URI representing a
+            user resource that was modified. A token identifier for a revoked 
+            token. If used, the profile specification SHOULD
+            define the content and format semantics for the value. </t>          
           </list>
         </t>
         <t>The following is a new attribute defined by this specification:<list style="hanging">
             <t hangText="events" anchor="eventDef"><vspace blankLines="0"/>A multi-valued 
             String that contains one or more URIs representing the type 
             of event being expressed and the attributes that MAY be available
-            within the JWT. Each value in this attribute indicates 
-            what other JSON sub-objects MAY present within the parent JSON 
-            SET structure. Each JSON sub-object is denoted 
-            by an attribute that matches a value in 
+            within the JWT. The first value SHALL indicate the type of SET event
+            and following values represent extensions to that event. 
+            For each value present, there MAY be an associated JSON sub-objects
+            present in the SET. Each JSON sub-object is denoted 
+            by an attribute whose name matches a value in 
             <spanx style="verb">events</spanx>.  This attribute is 
-            REQUIRED.</t>
+            REQUIRED to have at least one value.</t>
         </list></t>
       </section>
 
@@ -688,6 +697,9 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
         <t>Corrected author organization for William Dennis to Google</t>
         <t>Changed definition of SET to be 2 parts, an envelope and 1 or more payloads.</t>
         <t>Clarified that the intent is to express a single event with optional extensions only.</t>
+      </list></t>
+      <t>Draft 04 - PH - <list style="symbols">
+        <t>Re-added the "sub" claim with clarifications that any SET type may use it.</t>
       </list></t>
       <t>
 	Draft 03 - mbj -
