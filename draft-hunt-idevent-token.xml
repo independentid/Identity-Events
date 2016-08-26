@@ -160,6 +160,15 @@
         <t>
           The following definitions are used with SETs:
           <list style="hanging">
+            <t hangText="Attribute"><vspace/>The term <spanx style="verb">attribute</spanx> is used synonymously
+              with the term <spanx style="verb">claim</spanx> as defined by <xref target="RFC7519">Section 2</xref>.
+              However, where <spanx style="verb">claim</spanx> is traditionally used in JWT Tokens to 
+              indicate that a value's accuracy may be in debate, the use of
+              the term <spanx style="verb">attribute</spanx> is intended to signify that data values are
+              a statement of historical fact. While a SET might be speculative
+              (e.g. account is under attack), it normally signifies a simple 
+              change in state that has actually occurred (e.g. a token
+              was revoked). </t>
             <t hangText="Feed Publisher"><vspace blankLines="0"/>The Feed Publisher creates
               SETs to be distributed to registered subscribers. In JWT
               terminology, the Feed Publisher is also known as the issuer
@@ -204,31 +213,42 @@
       a Feed Publisher.</t>
       
       <t>The schema and structure of a SET follows the JWT <xref target="RFC7519"/>
-      specification. A SET has the following characteristics:
+      specification. A SET has the following structure:
       <list style="symbols">
-        <t>An outer JSON structure that acts as the event envelope. The envelope 
-        contains a set of attributes common to every SET. The attributes 
-        are used to validate the event and determine the event data included. 
-        The envelope includes an <spanx style="verb">events</spanx> 
-        attribute describing the type of event, and</t> 
-        <t>JSON <xref target="RFC7159"/> sub-objects, that act as event payload,
-        that contain attributes associated with the event 
-        URIs values provided in the envelope <spanx style="verb">events</spanx> 
-        attribute. </t>
-        <t>While a SET may have more than one URI value for <spanx style="verb">events</spanx>,
-        the intent is that the additional URIs are to provide 
-        additional attributes related to the same event in the form of extensions
-        to the primary event.</t>
+        <t>An outer JSON structure that acts as the SET envelope. The envelope 
+        contains a set of attributes (JWT claims) typically common to every 
+        SET or common to a number of different Security Events within a 
+        single profiling specification or a related series of specifications. 
+        Attributes in the envelope SHOULD be registered in the JWT Token 
+        Claims Registry <xref target="RFC7519">Section 10.1</xref>.</t>
+        
+        <t>Envelope attributes (JWT claims) that are profiled and defined 
+        in this specification are used to validate the SET and determine 
+        the event data included. The attribute (claim) 
+        <spanx style="verb">events</spanx> describes the type of SET event 
+        and indicates the data that MAY be present in the SET. While a SET 
+        contains a single event, it MAY have multiple extensions providing 
+        additional data about the same event. The primary event is the first 
+        value in the <spanx style="verb">events</spanx> array, while event 
+        extensions are the 2nd, 3rd, etc.</t> 
+        
+        <t>For each value of <spanx style="verb">events</spanx>, a JSON 
+        attribute, whose value is a JSON object, MAY be added known as an 
+        event "payload". The payload object contains attributes
+        typically unique to the events URI value and SHALL NOT be
+        registered as JWT claims. These attributes are defined
+        within their associated event specification. Event extensions can 
+        be used for many purposes. Some examples include but are not limited 
+        to:<list style="symbols">
+          <t>A categorization extension applied to multiple event types 
+          in order to provide classification information (e.g. threat type or level).</t>
+          <t>Enhancement of an existing specifications the arise over time.</t>
+          <t>Correlation extensions needed to link a potential series of events.</t>
+          <t>Localized contextual extensions needed between a publisher and subscriber.</t>
+        </list></t>
+        
       </list>
       </t>
-      
-      <t>SET payload objects are added to the envelope by adding an
-      attribute to the top-level JSON object (the envelope) whose name
-      corresponds to a value from <spanx style="verb">events</spanx>.
-      The payload object contains the attributes relevant to the specified event URI.
-      For example, SET event payloads may include <spanx style="verb">iss</spanx> 
-      attribute to distinguish between the issuer of the event and the issuer
-      of a Security Subject or <spanx style="verb">sub</spanx>.</t>
 
       <figure anchor="examplePassword" title="Example SCIM Password Reset Event">
         <preamble>The following is a non-normative example showing a hypothetical 
@@ -250,10 +270,9 @@
     "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
     "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
   ],  
+  "sub":"https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
   "urn:ietf:params:scim:event:passwordReset":{
-    "iss":"https://scim.example.com",
-    "id":"44f6142df96bd6ab61e7521d9",
-    "sub":"/Users/44f6142df96bd6ab61e7521d9"
+    "id":"44f6142df96bd6ab61e7521d9"
   },
   "https://example.com/scim/event/passwordResetExt":{
      "resetAttempts":5
@@ -263,16 +282,16 @@
       </figure>      
       <t>The event in the figure above expresses hypothetical password
       reset event for SCIM <xref target="RFC7644"/>. The JWT consists of:<list style="symbols">
-        <t>An <spanx>events</spanx> attribute specifying the hypothetical 
+        <t>An <spanx style="verb">events</spanx> attribute specifying the hypothetical 
         SCIM urn (<spanx style="verb">urn:ietf:params:scim:event:passwordReset</spanx>) 
         for a password reset, and a custom extension, 
         <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>, 
-        that is used to provide additional event information presumably 
-        specified by the location URI provided.</t>
+        that is used to provide additional event information such as the 
+        current count of resets.</t>
         <t>An <spanx style="verb">iss</spanx>
-        attribute, denotes the event publisher in the envelope while the
-        <spanx style="verb">iss</spanx> in the event payload specifies
-        the SCIM service provider for the account that was reset.</t>
+        attribute, denotes the event publisher.</t>
+        <t>The <spanx style="verb">sub</spanx> attribute specifies the SCIM 
+        resource URI that was affected.</t>
         <t>The <spanx style="verb">aud</spanx> attribute specifies the 
         intended audience for the event. In practical terms, this MAY be 
         the URI for the event Feed that a client has subscribed to.
@@ -302,13 +321,13 @@
   "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
   "iat": 1458668180,
   "exp": 1458668580,
+  "sub": "248289761001",
   "events": [
     "https://specs.openid.net/logout"
   ],
   "https://specs.openid.net/logout": {
     "iss": "https://token.example.com",
-    "sub": "248289761001",
-    "jti": "08a5019c-17e1-4977-8f42-65a12843ea02"
+    "sid": "08a5019c-17e1-4977-8f42-65a12843ea02"
   }
 }
 </artwork>
@@ -332,14 +351,13 @@
   "events":[
     "https://openid.net/heart/consent.html"
   ],
+  "sub": "248289761001",
   "iat": 1458496025,
   "iss": "https://my.examplemed.com",  
   "aud":[
     "https://rp.example.com"
   ],  
   "https://openid.net/heart/consent":{
-    "iss": "https://token.example.com",
-    "sub": "248289761001",
     "consentUri":[
       "https://terms.examplemed.com/labdisclosure.html#Agree"
     ]
@@ -531,6 +549,8 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
 
     <section anchor="Security" title="Security Considerations" toc="default">
 
+      
+      <section title="Confidentiality and Integrity">
       <t>SETs may often contain sensitive information. Therefore,
       methods for distribution of events SHOULD require the use of a 
       transport-layer security mechanism when distributing events. 
@@ -549,9 +569,31 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
       as via TLS (<xref target="RFC5246"/> and <xref target="RFC6125"/>), 
       and/or OAuth2 <xref target="RFC6749"/>, or Basic Authentication <xref target="RFC7617"/>,
       MUST be signed using JWS <xref target="RFC7515"></xref> so
-      that individual events MAY be authenticated and validated by the subscriber.</t>
+      that individual events MAY be authenticated and validated by the subscriber.</t>      
+      </section>
       
+      <section title="Timing Issues">
+        <t>When SETs are delivered asynchronously and/or out-of-band with respect to
+        the original action that incurred the security event, it is important
+        to consider that a SET might be delivered to a Subscriber in advance
+        or well behind the process that caused the event. For example, a 
+        user having been required to logout and then log back in again, may
+        cause a logout SET to be issued that may arrive at the same time 
+        as the user-agent accesses a web site having just logged-in. If
+        timing is not handled properly, the effect would be to erroneously
+        treat the new user session as logged out. Profiling specifications 
+        SHOULD be careful to anticipate timing and subject selection information. 
+        For example, it might be more appropriate to cancel a "session" 
+        rather than a "user". Alternatively, the specification could use timestamps
+        that allows new sessions to be started immediately after a stated 
+        logout event time.</t>
+      </section>
+      
+      <section title="Distinguishing SETs from Access Tokens">
+      
+      </section>
     </section>
+    
     <section title="Privacy Considerations">
     
       <t>If a SET needs to be retained for audit purposes, JWS MAY 
@@ -701,6 +743,10 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
                   - mbj - Registered <spanx style="verb">events</spanx> claim, and proofreading corrections.</t> 
       <t>Draft 04 - PH - <list style="symbols">
         <t>Re-added the "sub" claim with clarifications that any SET type may use it.</t>
+        <t>Added additional clarification on the use of envelope vs. paylaod attributes</t>
+        <t>Added security consideration for event timing.</t>
+        <t>Added definition of "attribute" to clarify relation to term "claim".</t>
+        <t>Revised examples to put "sub" claim back in the top level.</t>
       </list></t>
   
     </section>
