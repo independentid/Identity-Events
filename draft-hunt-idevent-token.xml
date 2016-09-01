@@ -13,7 +13,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="std" docName="draft-hunt-idevent-token-03" ipr="trust200902">
+<rfc category="std" docName="draft-hunt-idevent-token-04" ipr="trust200902">
   <front>
     <title abbrev="draft-hunt-idevent-token">Security Event Token (SET)</title>
 
@@ -160,15 +160,7 @@
         <t>
           The following definitions are used with SETs:
           <list style="hanging">
-            <t hangText="Attribute"><vspace/>The term <spanx style="verb">attribute</spanx> is used synonymously
-              with the term <spanx style="verb">claim</spanx> as defined by <xref target="RFC7519">Section 2</xref>.
-              However, where <spanx style="verb">claim</spanx> is traditionally used in JWT Tokens to 
-              indicate that a value's accuracy may be in debate, the use of
-              the term <spanx style="verb">attribute</spanx> is intended to signify that data values are
-              a statement of historical fact. While a SET might be speculative
-              (e.g. account is under attack), it normally signifies a simple 
-              change in state that has actually occurred (e.g. a token
-              was revoked). </t>
+            
             <t hangText="Feed Publisher"><vspace blankLines="0"/>The Feed Publisher creates
               SETs to be distributed to registered subscribers. In JWT
               terminology, the Feed Publisher is also known as the issuer
@@ -216,16 +208,17 @@
       specification. A SET has the following structure:
       <list style="symbols">
         <t>An outer JSON structure that acts as the SET envelope. The envelope 
-        contains a set of attributes (JWT claims) typically common to every 
+        contains a set of JSON attributes, called JWT claims, typically common to every 
         SET or common to a number of different Security Events within a 
         single profiling specification or a related series of specifications. 
-        Attributes in the envelope SHOULD be registered in the JWT Token 
-        Claims Registry <xref target="RFC7519">Section 10.1</xref>.</t>
+        Claims in the envelope SHOULD be registered in the JWT Token 
+        Claims Registry <xref target="RFC7519">Section 10.1</xref> or be
+        Public Claims or Private Claims as also defined in <xref target="RFC7519"/>.</t>
         
-        <t>Envelope attributes (JWT claims) that are profiled and defined 
+        <t>Envelope claims that are profiled and defined 
         in this specification are used to validate the SET and determine 
-        the event data included. The attribute (claim) 
-        <spanx style="verb">events</spanx> describes the type of SET event 
+        the event data included. The claim <spanx style="verb">events</spanx>
+        describes the type of SET event 
         and indicates the data that MAY be present in the SET. While a SET 
         contains a single event, it MAY have multiple extensions providing 
         additional data about the same event. The primary event is the first 
@@ -234,9 +227,9 @@
         
         <t>For each value of <spanx style="verb">events</spanx>, a JSON 
         attribute, whose value is a JSON object, MAY be added known as an 
-        event "payload". The payload object contains attributes
-        typically unique to the events URI value and SHALL NOT be
-        registered as JWT claims. These attributes are defined
+        event "payload". The payload object contains claimcs
+        typically unique to the events URI value and are not
+        registered as JWT claims. These claimcs are defined
         within their associated event specification. Event extensions can 
         be used for many purposes. Some examples include but are not limited 
         to:<list style="symbols">
@@ -282,26 +275,26 @@
       </figure>      
       <t>The event in the figure above expresses hypothetical password
       reset event for SCIM <xref target="RFC7644"/>. The JWT consists of:<list style="symbols">
-        <t>An <spanx style="verb">events</spanx> attribute specifying the hypothetical 
+        <t>An <spanx style="verb">events</spanx> claim specifying the hypothetical 
         SCIM urn (<spanx style="verb">urn:ietf:params:scim:event:passwordReset</spanx>) 
         for a password reset, and a custom extension, 
         <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>, 
         that is used to provide additional event information such as the 
         current count of resets.</t>
         <t>An <spanx style="verb">iss</spanx>
-        attribute, denotes the event publisher.</t>
-        <t>The <spanx style="verb">sub</spanx> attribute specifies the SCIM 
+        claimc, denotes the event publisher.</t>
+        <t>The <spanx style="verb">sub</spanx> claimc specifies the SCIM 
         resource URI that was affected.</t>
-        <t>The <spanx style="verb">aud</spanx> attribute specifies the 
+        <t>The <spanx style="verb">aud</spanx> claimc specifies the 
         intended audience for the event. In practical terms, this MAY be 
         the URI for the event Feed that a client has subscribed to.
         </t>
       </list></t>
       
       <t>Additional extensions to an event may be added by adding more 
-      values to the <spanx style="verb">events</spanx> attribute. For 
+      values to the <spanx style="verb">events</spanx> claimc. For 
       each event URI value specified, there MAY be a corresponding 
-      attribute that has a JSON object that contains the attributes 
+      claimc that has a JSON object that contains the claimcs 
       associated with that event (e.g.,
       <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>).
       In this example, the SCIM event indicates that a password has been updated 
@@ -366,15 +359,15 @@
 </artwork>
       </figure>  
       In the above example <spanx style="verb">iss</spanx> and <spanx style="verb">sub</spanx>
-      contained within the attribute <spanx style="verb">https://openid.net/heart/consent</spanx>, refer
+      contained within the claimc <spanx style="verb">https://openid.net/heart/consent</spanx>, refer
       to the subject and issuer of the original OpendID Provider. They are
       distinct from the top level value of <spanx style="verb">iss</spanx>
       which always refers to the issuer of the event - a medical consent
       service that is a relying party to the OpenID Provider.
           </t>
       
-      <section anchor="EventContents" title="Core SET Attributes">
-        <t>The following are attributes that are based on <xref target="RFC7519"/>
+      <section anchor="EventContents" title="Core SET Claims">
+        <t>The following are claimcs that are based on <xref target="RFC7519"/>
         claim definitions and are profiled for use in an event
         token:<list style="hanging">
             <t hangText="jti"><vspace blankLines="0"/>As defined by 
@@ -382,50 +375,59 @@
             identifier for an event. The identifier SHOULD be unique within
             a particular event Feed and MAY be used by clients to track
             whether a particular event has already been received. This 
-            attribute is REQUIRED.</t>
+            claimc is REQUIRED.</t>
 
             <t hangText="iss"><vspace blankLines="0"/>A single valued
             String containing the URI of the service provider publishing
-            the SET (the issuer). This attribute is REQUIRED.</t>
+            the SET (the issuer). This claimc is REQUIRED.</t>
  
             <t hangText="aud"><vspace blankLines="0"/>A multi-valued String containing the URIs
             representing the audience of the event. Values are typically URLs of
             the Feeds the event is associated with. When an event has
             multiple audiences that go to the same subscriber, the publisher is not
             obligated to deliver repeated events to the same subscriber.
-            This attribute is RECOMMENDED.</t>
+            This claimc is RECOMMENDED.</t>
             
             <t hangText="iat"><vspace blankLines="0"/>As defined by <xref target="RFC7519">Section 4.1.6</xref>,
             a value containing a NumericDate, which represents when the 
             event was issued. Unless otherwise specified,
             the value SHOULD be interpreted by the subscriber as equivalent 
-            to the actual time of the event. This attribute is REQUIRED. 
+            to the actual time of the event. This claimc is REQUIRED. 
             </t> 
             
             <t hangText="nbf"><vspace blankLines="0"/>As defined by 
             <xref target="RFC7519">Section 4.1.5</xref>, a value 
             containing a NumericDate, which represents a future date when
-            the event will occur. This attribute is OPTIONAL.</t> 
+            the event will occur. This claimc is OPTIONAL.</t> 
             
             <t hangText="sub">As defined by <xref target="RFC7519">Section 4.1.2</xref>,
-            a String or URI value representing the principle or the subject of the SET. 
+            a String or URI value representing the principal or the subject of the SET. 
             This is usually the entity whose "state" was changed. For example,
             an IP Address was added to a black list. A URI representing a
             user resource that was modified. A token identifier for a revoked 
             token. If used, the profile specification SHOULD
-            define the content and format semantics for the value. </t>          
+            define the content and format semantics for the value. This claim
+            is OPTIONAL, as the principal for any given profile may already be
+            identified without the inclusion of a subject claim.</t>   
+            
+            <t hangText="exp">As defined by <xref target="RFC7519"/>, this claim
+            is time on which the JWT MUST NOT be accepted for processing. In 
+            the context of a SET however, this notion does not apply since
+            a SET reflects something that has already been processed and is
+            historical in nature. While some specifications MAY have a need
+            for this claim, its use in general cases is NOT RECOMMENDED.</t>       
           </list>
         </t>
-        <t>The following is a new attribute defined by this specification:<list style="hanging">
+        <t>The following is a new claim defined by this specification:<list style="hanging">
             <t hangText="events" anchor="eventDef"><vspace blankLines="0"/>A multi-valued 
             String that contains one or more URIs representing the type 
-            of event being expressed and the attributes that MAY be available
+            of event being expressed and the claims that MAY be available
             within the JWT. The first value SHALL indicate the type of SET event
             and following values represent extensions to that event. 
             For each value present, there MAY be an associated JSON sub-objects
             present in the SET. Each JSON sub-object is denoted 
-            by an attribute whose name matches a value in 
-            <spanx style="verb">events</spanx>.  This attribute is 
+            by an claim whose name matches a value in 
+            <spanx style="verb">events</spanx>.  This claim is 
             REQUIRED to have at least one value.</t>
         </list></t>
       </section>
@@ -590,7 +592,26 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
       </section>
       
       <section title="Distinguishing SETs from Access Tokens">
-      
+        <t>Because <xref target="RFC7519"/> states that <spanx style="verb">all claims that are not understood
+        by implementations MUST be ignored.</spanx>, there is a consideration that 
+        a SET token might be confused as an access or authorization token in 
+        the case where a SET is mistakenly or intentionally intercepted and 
+        presented as an access token. To avoid this it is recommended that
+        implementers consider one or more of the following:<list style="symbols">
+          <t>Avoid use of the JWT claim <spanx style="verb">exp</spanx> within the
+          envelope.</t>
+          <t>Where possible, use a separate <spanx style="verb">aud</spanx>
+          claim value to distinguish between the SET subscriber and the 
+          audience of an access token. For example, a Logout while itended
+          for the same relying party could use a different audience to 
+          distinguish between normal access and logout notification.</t>
+          <t>Modify access validation systems to check for the presence of 
+          the <spanx style="verb">events</spanx> claim as a means to detect
+          SET event tokens. This is particularly useful if the same endpoint
+          may receive both types of tokens.</t>
+          <t>Consider avoiding use of the <spanx style="verb">sub</spanx>
+          claim at the top level.</t>
+        </list></t>
       </section>
     </section>
     
@@ -745,8 +766,10 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
         <t>Re-added the "sub" claim with clarifications that any SET type may use it.</t>
         <t>Added additional clarification on the use of envelope vs. paylaod attributes</t>
         <t>Added security consideration for event timing.</t>
-        <t>Added definition of "attribute" to clarify relation to term "claim".</t>
+        <t>Switched use of "attribute" to "claim" for consistency.</t>
         <t>Revised examples to put "sub" claim back in the top level.</t>
+        <t>Added clarification that SETs typically do not use "exp".</t>
+        <t>Added security consideration for distinguishing Access Tokens and SETs.</t>
       </list></t>
   
     </section>
