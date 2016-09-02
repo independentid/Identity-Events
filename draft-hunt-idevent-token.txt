@@ -5,16 +5,16 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                              W. Denniss
-Expires: March 5, 2017                                            Google
+Expires: March 6, 2017                                            Google
                                                                M. Ansari
                                                                    Cisco
                                                                 M. Jones
                                                                Microsoft
-                                                       September 1, 2016
+                                                       September 2, 2016
 
 
                        Security Event Token (SET)
-                      draft-hunt-idevent-token-04
+                      draft-hunt-idevent-token-05
 
 Abstract
 
@@ -39,7 +39,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 5, 2017.
+   This Internet-Draft will expire on March 6, 2017.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hunt, et al.              Expires March 5, 2017                 [Page 1]
+Hunt, et al.              Expires March 6, 2017                 [Page 1]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Hunt, et al.              Expires March 5, 2017                 [Page 2]
+Hunt, et al.              Expires March 6, 2017                 [Page 2]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -165,7 +165,7 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.              Expires March 5, 2017                 [Page 3]
+Hunt, et al.              Expires March 6, 2017                 [Page 3]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -221,7 +221,7 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.              Expires March 5, 2017                 [Page 4]
+Hunt, et al.              Expires March 6, 2017                 [Page 4]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -262,8 +262,8 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
    o  For each value of "events", a JSON attribute, whose value is a
       JSON object, MAY be added known as an event "payload".  The
-      payload object contains claimcs typically unique to the events URI
-      value and are not registered as JWT claims.  These claimcs are
+      payload object contains claims typically unique to the events URI
+      value and are not registered as JWT claims.  These claims are
       defined within their associated event specification.  Event
       extensions can be used for many purposes.  Some examples include
       but are not limited to:
@@ -277,7 +277,7 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.              Expires March 5, 2017                 [Page 5]
+Hunt, et al.              Expires March 6, 2017                 [Page 5]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -326,26 +326,26 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
       passwordResetExt", that is used to provide additional event
       information such as the current count of resets.
 
-   o  An "iss" claimc, denotes the event publisher.
+   o  An "iss" claims, denotes the event publisher.
 
-   o  The "sub" claimc specifies the SCIM resource URI that was
+   o  The "sub" claims specifies the SCIM resource URI that was
       affected.
 
 
 
-Hunt, et al.              Expires March 5, 2017                 [Page 6]
+Hunt, et al.              Expires March 6, 2017                 [Page 6]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
-   o  The "aud" claimc specifies the intended audience for the event.
+   o  The "aud" claims specifies the intended audience for the event.
       In practical terms, this MAY be the URI for the event Feed that a
       client has subscribed to.
 
    Additional extensions to an event may be added by adding more values
-   to the "events" claimc.  For each event URI value specified, there
-   MAY be a corresponding claimc that has a JSON object that contains
-   the claimcs associated with that event (e.g.,
+   to the "events" claims.  For each event URI value specified, there
+   MAY be a corresponding claim that has a JSON object that contains the
+   claims associated with that event (e.g.,
    "https://example.com/scim/event/passwordResetExt").  In this example,
    the SCIM event indicates that a password has been updated and the
    current password reset count is 5.  Notice that the value for
@@ -389,7 +389,7 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.              Expires March 5, 2017                 [Page 7]
+Hunt, et al.              Expires March 6, 2017                 [Page 7]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -420,7 +420,7 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
                       Figure 3: Example Consent Event
 
-   In the above example "iss" and "sub" contained within the claimc
+   In the above example "iss" and "sub" contained within the claim
    "https://openid.net/heart/consent", refer to the subject and issuer
    of the original OpendID Provider.  They are distinct from the top
    level value of "iss" which always refers to the issuer of the event -
@@ -429,23 +429,23 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 2.1.  Core SET Claims
 
-   The following are claimcs that are based on [RFC7519] claim
+   The following are claims that are based on [RFC7519] claim
    definitions and are profiled for use in an event token:
 
    jti
       As defined by Section 4.1.7 [RFC7519] contains a unique identifier
       for an event.  The identifier SHOULD be unique within a particular
       event Feed and MAY be used by clients to track whether a
-      particular event has already been received.  This claimc is
+      particular event has already been received.  This claim is
       REQUIRED.
 
    iss
       A single valued String containing the URI of the service provider
-      publishing the SET (the issuer).  This claimc is REQUIRED.
+      publishing the SET (the issuer).  This claim is REQUIRED.
 
 
 
-Hunt, et al.              Expires March 5, 2017                 [Page 8]
+Hunt, et al.              Expires March 6, 2017                 [Page 8]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -455,7 +455,7 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
       audience of the event.  Values are typically URLs of the Feeds the
       event is associated with.  When an event has multiple audiences
       that go to the same subscriber, the publisher is not obligated to
-      deliver repeated events to the same subscriber.  This claimc is
+      deliver repeated events to the same subscriber.  This claim is
       RECOMMENDED.
 
    iat
@@ -463,12 +463,12 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
       NumericDate, which represents when the event was issued.  Unless
       otherwise specified, the value SHOULD be interpreted by the
       subscriber as equivalent to the actual time of the event.  This
-      claimc is REQUIRED.
+      claim is REQUIRED.
 
    nbf
       As defined by Section 4.1.5 [RFC7519], a value containing a
       NumericDate, which represents a future date when the event will
-      occur.  This claimc is OPTIONAL.
+      occur.  This claim is OPTIONAL.
 
    sub  As defined by Section 4.1.2 [RFC7519], a String or URI value
       representing the principal or the subject of the SET.  This is
@@ -501,7 +501,7 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.              Expires March 5, 2017                 [Page 9]
+Hunt, et al.              Expires March 6, 2017                 [Page 9]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -557,7 +557,7 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.              Expires March 5, 2017                [Page 10]
+Hunt, et al.              Expires March 6, 2017                [Page 10]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -613,7 +613,7 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.              Expires March 5, 2017                [Page 11]
+Hunt, et al.              Expires March 6, 2017                [Page 11]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -669,7 +669,7 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.              Expires March 5, 2017                [Page 12]
+Hunt, et al.              Expires March 6, 2017                [Page 12]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -725,7 +725,7 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.              Expires March 5, 2017                [Page 13]
+Hunt, et al.              Expires March 6, 2017                [Page 13]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -781,7 +781,7 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.              Expires March 5, 2017                [Page 14]
+Hunt, et al.              Expires March 6, 2017                [Page 14]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -837,7 +837,7 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.              Expires March 5, 2017                [Page 15]
+Hunt, et al.              Expires March 6, 2017                [Page 15]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -882,7 +882,7 @@ Appendix B.  Change Log
 
       General edit corrections from Sarah Squire
       Changed "event" term to "SET"
-      Corrected author organization for William Dennis to Google
+      Corrected author organization for William Denniss to Google
       Changed definition of SET to be 2 parts, an envelope and 1 or more
       payloads.
       Clarified that the intent is to express a single event with
@@ -893,7 +893,7 @@ Appendix B.  Change Log
 
 
 
-Hunt, et al.              Expires March 5, 2017                [Page 16]
+Hunt, et al.              Expires March 6, 2017                [Page 16]
 
 Internet-Draft          draft-hunt-idevent-token          September 2016
 
@@ -910,6 +910,9 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
    o  Added clarification that SETs typically do not use "exp".
    o  Added security consideration for distinguishing Access Tokens and
       SETs.
+
+   Draft 05 - PH - Fixed find/replace error that resulted in claim being
+   spelled claimc
 
 Authors' Addresses
 
@@ -946,7 +949,4 @@ Authors' Addresses
 
 
 
-
-
-
-Hunt, et al.              Expires March 5, 2017                [Page 17]
+Hunt, et al.              Expires March 6, 2017                [Page 17]

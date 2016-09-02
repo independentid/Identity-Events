@@ -13,7 +13,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="std" docName="draft-hunt-idevent-token-05" ipr="trust200902">
+<rfc category="std" docName="draft-hunt-idevent-token-06" ipr="trust200902">
   <front>
     <title abbrev="draft-hunt-idevent-token">Security Event Token (SET)</title>
 
@@ -426,7 +426,7 @@
             and following values represent extensions to that event. 
             For each value present, there MAY be an associated JSON sub-objects
             present in the SET. Each JSON sub-object is denoted 
-            by an claim whose name matches a value in 
+            by a claim whose name matches a value in 
             <spanx style="verb">events</spanx>.  This claim is 
             REQUIRED to have at least one value.</t>
         </list></t>
@@ -602,7 +602,7 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
           envelope.</t>
           <t>Where possible, use a separate <spanx style="verb">aud</spanx>
           claim value to distinguish between the SET subscriber and the 
-          audience of an access token. For example, a Logout while itended
+          audience of an access token. For example, a Logout while intended
           for the same relying party could use a different audience to 
           distinguish between normal access and logout notification.</t>
           <t>Modify access validation systems to check for the presence of 
@@ -757,14 +757,14 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
       <t>Draft 03 - PH <list style="symboles">
         <t>General edit corrections from Sarah Squire</t>
         <t>Changed "event" term to "SET"</t>
-        <t>Corrected author organization for William Dennis to Google</t>
+        <t>Corrected author organization for William Denniss to Google</t>
         <t>Changed definition of SET to be 2 parts, an envelope and 1 or more payloads.</t>
         <t>Clarified that the intent is to express a single event with optional extensions only.</t>
       </list>
-                  - mbj - Registered <spanx style="verb">events</spanx> claim, and proofreading corrections.</t> 
+                  - mbj - Registered <spanx style="verb">events</spanx> claim, and proof-reading corrections.</t> 
       <t>Draft 04 - PH - <list style="symbols">
         <t>Re-added the "sub" claim with clarifications that any SET type may use it.</t>
-        <t>Added additional clarification on the use of envelope vs. paylaod attributes</t>
+        <t>Added additional clarification on the use of envelope vs. payload attributes</t>
         <t>Added security consideration for event timing.</t>
         <t>Switched use of "attribute" to "claim" for consistency.</t>
         <t>Revised examples to put "sub" claim back in the top level.</t>
