@@ -13,7 +13,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="std" docName="draft-hunt-idevent-token-04" ipr="trust200902">
+<rfc category="std" docName="draft-hunt-idevent-token-05" ipr="trust200902">
   <front>
     <title abbrev="draft-hunt-idevent-token">Security Event Token (SET)</title>
 
@@ -227,9 +227,9 @@
         
         <t>For each value of <spanx style="verb">events</spanx>, a JSON 
         attribute, whose value is a JSON object, MAY be added known as an 
-        event "payload". The payload object contains claimcs
+        event "payload". The payload object contains claims
         typically unique to the events URI value and are not
-        registered as JWT claims. These claimcs are defined
+        registered as JWT claims. These claims are defined
         within their associated event specification. Event extensions can 
         be used for many purposes. Some examples include but are not limited 
         to:<list style="symbols">
@@ -282,19 +282,19 @@
         that is used to provide additional event information such as the 
         current count of resets.</t>
         <t>An <spanx style="verb">iss</spanx>
-        claimc, denotes the event publisher.</t>
-        <t>The <spanx style="verb">sub</spanx> claimc specifies the SCIM 
+        claims, denotes the event publisher.</t>
+        <t>The <spanx style="verb">sub</spanx> claims specifies the SCIM 
         resource URI that was affected.</t>
-        <t>The <spanx style="verb">aud</spanx> claimc specifies the 
+        <t>The <spanx style="verb">aud</spanx> claims specifies the 
         intended audience for the event. In practical terms, this MAY be 
         the URI for the event Feed that a client has subscribed to.
         </t>
       </list></t>
       
       <t>Additional extensions to an event may be added by adding more 
-      values to the <spanx style="verb">events</spanx> claimc. For 
+      values to the <spanx style="verb">events</spanx> claims. For 
       each event URI value specified, there MAY be a corresponding 
-      claimc that has a JSON object that contains the claimcs 
+      claim that has a JSON object that contains the claims 
       associated with that event (e.g.,
       <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>).
       In this example, the SCIM event indicates that a password has been updated 
@@ -359,7 +359,7 @@
 </artwork>
       </figure>  
       In the above example <spanx style="verb">iss</spanx> and <spanx style="verb">sub</spanx>
-      contained within the claimc <spanx style="verb">https://openid.net/heart/consent</spanx>, refer
+      contained within the claim <spanx style="verb">https://openid.net/heart/consent</spanx>, refer
       to the subject and issuer of the original OpendID Provider. They are
       distinct from the top level value of <spanx style="verb">iss</spanx>
       which always refers to the issuer of the event - a medical consent
@@ -367,7 +367,7 @@
           </t>
       
       <section anchor="EventContents" title="Core SET Claims">
-        <t>The following are claimcs that are based on <xref target="RFC7519"/>
+        <t>The following are claims that are based on <xref target="RFC7519"/>
         claim definitions and are profiled for use in an event
         token:<list style="hanging">
             <t hangText="jti"><vspace blankLines="0"/>As defined by 
@@ -375,30 +375,30 @@
             identifier for an event. The identifier SHOULD be unique within
             a particular event Feed and MAY be used by clients to track
             whether a particular event has already been received. This 
-            claimc is REQUIRED.</t>
+            claim is REQUIRED.</t>
 
             <t hangText="iss"><vspace blankLines="0"/>A single valued
             String containing the URI of the service provider publishing
-            the SET (the issuer). This claimc is REQUIRED.</t>
+            the SET (the issuer). This claim is REQUIRED.</t>
  
             <t hangText="aud"><vspace blankLines="0"/>A multi-valued String containing the URIs
             representing the audience of the event. Values are typically URLs of
             the Feeds the event is associated with. When an event has
             multiple audiences that go to the same subscriber, the publisher is not
             obligated to deliver repeated events to the same subscriber.
-            This claimc is RECOMMENDED.</t>
+            This claim is RECOMMENDED.</t>
             
             <t hangText="iat"><vspace blankLines="0"/>As defined by <xref target="RFC7519">Section 4.1.6</xref>,
             a value containing a NumericDate, which represents when the 
             event was issued. Unless otherwise specified,
             the value SHOULD be interpreted by the subscriber as equivalent 
-            to the actual time of the event. This claimc is REQUIRED. 
+            to the actual time of the event. This claim is REQUIRED. 
             </t> 
             
             <t hangText="nbf"><vspace blankLines="0"/>As defined by 
             <xref target="RFC7519">Section 4.1.5</xref>, a value 
             containing a NumericDate, which represents a future date when
-            the event will occur. This claimc is OPTIONAL.</t> 
+            the event will occur. This claim is OPTIONAL.</t> 
             
             <t hangText="sub">As defined by <xref target="RFC7519">Section 4.1.2</xref>,
             a String or URI value representing the principal or the subject of the SET. 
@@ -771,6 +771,8 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
         <t>Added clarification that SETs typically do not use "exp".</t>
         <t>Added security consideration for distinguishing Access Tokens and SETs.</t>
       </list></t>
+      
+      <t>Draft 05 - PH - Fixed find/replace error that resulted in claim being spelled claimc</t>
   
     </section>
   </back>
