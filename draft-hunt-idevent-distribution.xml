@@ -73,16 +73,19 @@
 					<artwork align="center">
 +------------+                        +-------------+
 |            |Feeds Catalog           |             |
-|            +------------------------>             |
+|            &lt;------------------------+             |
 |    SET     |                        |    SET      |
 |    Feed    |Subscription Request    |    Feed     |
 |  Provider  &lt;------------------------+  Subscriber |
-|            |Subscription Confirm    |             |
+|            |                        |             |
+|            |Subscription Verify     |             |
 |            +------------------------>             |
 |            |                        |             |
+|            |Subscription Mgmt       |             |
+|            &lt;------------------------+             |
 |            |                        |             |
-|            +------------------------>             |
 |            |SET Delivery            |             |
+|            +------------------------>             |
 |            |                        |             |
 +------------+                        +-------------+
 </artwork>
