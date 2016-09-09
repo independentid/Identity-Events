@@ -67,9 +67,10 @@
         receiving SET events via HTTP POST.
 			</t>
 
-			<figure anchor="notificationArch" title="Subscription Management">
+			<figure anchor="notificationArch" title="Subscription Management and Delivery">
           <preamble>The following diagram shows a typical SET Feed
-        Provider and the services provided to Subscribers:</preamble>
+        Provider and the services provided to Subscribers. Arrow heads point
+        to the service provider (the direction of an HTTP request):</preamble>
 					<artwork align="center">
 +------------+                        +-------------+
 |            |Feeds Catalog           |             |
@@ -220,7 +221,7 @@
         notification that a user resource has been added to a group, the 
         Subscriber may first determine that the user does not exist in the 
         Subscriber's domain. The Subscriber translates the event into two 
-        actions:<list style="index">
+        actions:<list style="numbers">
           <t>Retrieve the user (e.g. using SCIM GET) and then provisions 
           the user locally. After enabling the user,</t>
           <t>The Subscriber then enables the user for the application 
@@ -422,6 +423,73 @@
 						</list>
 					</t>
       </section>  
+      <section anchor="feedMgmt" title="SCIM Feed Management">
+        
+        <t>When Feeds are managed within a SCIM service provider <xref target="RFC7644"/>,
+        Feed resources use schema defined in <xref target="feedMetadata"/>
+        and use a schema value of <spanx style="verb">urn:ietf:params:scim:schemas:event:2.0:Feed</spanx>.
+        The SCIM <spanx style="verb">ResourceType</spanx> definition defines 
+        the location of the SCIM service provider Feeds endpoint. </t>
+        
+        <t>
+        The Feed <spanx style="verb">ResourceType</spanx> definition 
+        is typically defined as follows:<figure>
+<artwork>{
+  "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
+  "id": "Feed",
+  "name": "Feed",
+  "endpoint": "/Feeds",
+  "description": "Event Feeds",
+  "schema": "urn:ietf:params:scim:schemas:event:2.0:Feed",
+  "schemaExtensions": []
+}</artwork>
+        </figure>
+        </t>
+        <t>To retrieve information about a feed or a number of feeds, subscribers
+        or management clients MAY query the Feeds endpoint as defined in <xref target="RFC7644">Section 3.4</xref>.</t>
+        
+         <t><figure anchor="feedGetRequest" title="Example Feed GET Request">
+           <preamble>The example below retrieves a specific Feed resource whose 
+           <spanx style="verb">id</spanx> is <spanx style="verb">548b7c3f77c8bab33a4fef40</spanx>.</preamble>
+           <artwork>
+GET /Feeds/88bc00de776d49d5b535ede882d98f74
+Host: example.com
+Accept: application/scim+json
+Authorization: Bearer h480djs93hd8         
+           </artwork>
+         </figure></t>
+         <t><figure anchor="feedGetResponse" title="Example Feed GET Response">
+              <preamble>The response below shows an example Feed resource
+              that describes an available feed.</preamble>
+              <artwork>HTTP/1.1 200 OK
+Content-Type: application/scim+json
+Location: 
+ https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74
+ETag: 9d1c124149f522472e7a511c85b3a31b
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:Feed"],
+  "id":"88bc00de776d49d5b535ede882d98f74",
+  "feedName":"OIDCLogoutFeed",
+  "feedUri":"https://oidc.example.com/",
+  "description":"Logout events from oidc.example.com",
+  "type":"resource",
+  "events":[
+    "https://specs.openid.net/logout":[]
+  ]
+  "meta":{
+     ... SCIM meta attributes ...
+  }
+}</artwork>
+        </figure></t>
+        <t>In the above example (<xref target="feedGetResponse"/>) we can
+        observe that the Feed has only one event type, 
+        <spanx style="verb">https://specs.openid.net/logout</spanx> and
+        has no extensions defined for the event (see empty square brackets).
+        Note also, that no value for <spanx style="verb">filter</spanx> has been specified
+        suggesting that the Feed will return events about all subjects of
+        the publisher.</t>
+      </section>
 	</section>	
   <section title="Subscriptions">
    
@@ -538,12 +606,13 @@
           Subscription status SHALL be set to <spanx style="verb">fail</spanx>.
           </t>
           
-          <section anchor="verifyPush" title="Verifying 'Push' Style Subscriptions">
-            <t>When using the WebCallback mode, or any other
-            'push'-style communication scheme, the verification process 
-            serves to verify that the identified Subscriber consents to receiving
-            SETs and is correctly configured. Verification also prevents 
-            a notification server from flooding an endpoint which did not 
+          <section anchor="verifyPush" title="Verifying Subscriptions">
+            <t>The verification process 
+            serves to verify that the identified Subscriber is willing to receive
+            SETs and is correctly configured. In the case of push style
+            subscriptions, where the publisher initates the action to deliver
+            a SET, Verification can also serve to prevent
+            a Feed Publication server from flooding an endpoint which did not 
             actually request a Subscription.</t>
             
             <t>
@@ -568,72 +637,34 @@
               time the verification request will expire. Once expired, the
               server will set the subscription state to <spanx style="verb">fail</spanx>.</t>
               
-              <t hangText="confirmChallenge">A payload attribute consisting
-              of a String value that the
-              subscriber SHALL echo back in its response. See methodUri
-              method profile for usage details. The intent is to confirm
-              that the Subscriber has successfully parsed the SET and is
-              not just echoing back HTTP success.</t>
             </list>
-            If a confidential JWK was supplied, then the event SHOULD
+            
+            In the SET payload area, a specific delivery method MAY include
+            an attribute that can be used to confirm the subscriber has 
+            successfully received and parsed the SET (e.g. such as the 
+            inclusion of a challenge attribute, see <xref target="CallbackVerify"/>).
+            
+            If a confidential JWK was supplied, then the SET SHOULD
             be encrypted with the provided key. Successful parsing of the
-            message confirms that both the endpoint is valid including 
-            confirmation of keys.</t>
+            message confirms that provides confirmation of correct 
+            configuration and possession of keys.</t>
             
             <t>Note that the verification event URI 
             (<spanx style="verb">urn:ietf:params:set:method:verify</spanx>) 
             type is not normally listed as part of the definition of a 
-            Feed as it is not part of the normal information flow of a Feed.</t>
-
-            <figure>
-              <preamble>A non-normative JSON representation of an event to be
-              sent to a subscriber as a subscription confirmation. Note the
-              event is not yet encoded as a JWT token.</preamble>
-
-              <artwork>{  
-  "jti": "4d3559ec67504aaba65d40b0363faad8",
-  "events":["urn:ietf:params:set:method:verify"],
-  "iat": 1458496404,
-  "iss": "https://scim.example.com",  
-  "exp": 1458497000,
-  "aud":[
-   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
-   "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
-  ], 
-  "urn:ietf:params:set:method:verify":{
-    "confirmChallenge":"ca2179f4-8936-479a-a76d-5486e2baacd7"
-  }  
-}</artwork>
-            </figure>
-
-            <figure>
-              <preamble>
- Upon receiving a subscription confirmation request, a confirming
- subscriber responds with a confirmation using the method described in
- the methodUri profile. The response includes a
- <spanx style="verb">challengeResponse</spanx>
- value. For example, depending on the methodUri profile used, the
- subscriber might respond with the value of
- <spanx style="verb">confirmChallenge</spanx>
- . For example, if the request is received via HTTP/1.1 POST, then the 
- following HTTP response is used to confirm. A non-normative example of 
- the response is:
-              </preamble>
-
-              <artwork>HTTP/1.1 200 OK
-Content-Type: application/json
-
-{  
-  "challengeResponse":"ca2179f4-8936-479a-a76d-5486e2baacd7"
-}</artwork>
-            </figure>
+            Feed as it is not part of the normal information flow of a Feed.
+            Any Feed MAY include a SET verification event whether listed or
+            not in the Feed event metadata.</t>
 
             <t>
-            If the subscriber returns a non-matching value or an HTTP status
-            other than a 200 series response, the subscription 
-            <spanx style="verb">state</spanx> SHALL be set to <spanx style="verb">fail</spanx>.
-            A declining subscriber MAY simply respond with any 400 series HTTP
-            error (e.g. 404).</t>
+            Upon receiving the SET, the subscriber acknowledges receipt as 
+            defined by the method profile (for example, see <xref target="CallbackVerify"/>).</t>
+            
+            <t>
+            If the subscriber is unable to parse the verification SET, fails 
+            to return the correct challenge, or the SET is not delivered after
+            a period of time. The Feed Publisher will set <spanx style="verb">subStatus</spanx>
+            to <spanx style="verb">failed</spanx>. </t>
           
           </section>
         </section>
@@ -678,8 +709,8 @@ Content-Type: application/json
        <section anchor="httpMessageFormat" title="Delivery Message Format">
             <t>The content-type for this method is <spanx style="verb">application/jwt</spanx>
             and consists of a single SET token (see <xref target="idevent-token"/>).</t>
-            <figure align="left" title="Example Web Callback POST Message">
-              <artwork align="left">
+            <figure anchor="messageSet" title="Example Web Callback POST Message">
+              <artwork>
   eyJhbGciOiJub25lIn0
   .
   eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
@@ -699,15 +730,82 @@ Content-Type: application/json
             
           </section>
 
-          <section title="Subscription Verification">
-            <t>See <xref target="verifyPush"/>.</t>
+          <section anchor="CallbackVerify" title="Subscription Verification">
+            
+            <t>This profile specifies the verification method for HTTP POST 
+            and is based on the general verification method described in
+            <xref target="verifyPush"/>.</t>
+
+            <t>To confirm a subscription, the Feed Provider SHALL send a
+            verification SET to the subscriber using the registered 
+            <spanx style="verb">methodUri</spanx> mechanism which in this case
+            is <spanx style="verb">urn:ietf:params:set:method:HTTP:webCallback</spanx>. 
+            The Verify SET contains the attributes listed in <xref target="verifyPush"/>.</t>
+              
+            <t>A payload attribute <spanx style="verb">confirmChallenge</spanx>
+            is provided with a String value that the subscriber SHALL echo 
+            back in its response. The intent is to confirm that the Subscriber 
+            has successfully parsed the SET and is not just echoing back 
+            HTTP success.</t>
+
+            <figure anchor="verifyPostEvent" title="Example Verification SET with Challenge">
+            <preamble>A non-normative JSON representation of an event to be
+            sent to a subscriber as a subscription confirmation. Note the
+            event is not yet encoded as a JWT token:</preamble>
+<artwork>{  
+  "jti": "4d3559ec67504aaba65d40b0363faad8",
+  "events":["urn:ietf:params:set:method:verify"],
+  "iat": 1458496404,
+  "iss": "https://scim.example.com",  
+  "exp": 1458497000,
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
+   "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
+  ], 
+  "urn:ietf:params:set:method:verify":{
+    "confirmChallenge":"ca2179f4-8936-479a-a76d-5486e2baacd7"
+  }  
+}</artwork>
+            </figure>
+            
+            <t>The above SET is encoded as a JWT and transmitted to the 
+            Subscriber as shown in <xref target="postSet"/>.</t>
+
+            <t>Upon receiving a subscription verify SET, a confirming
+            subscriber SHALL respond with a JSON object that includes a 
+            <spanx style="verb">challengeResponse</spanx> attribute and 
+            the value that was provided in <spanx style="verb">confirmChallenge</spanx>.
+            The content type header is set to <spanx style="verb">application/json</spanx>.</t>
+            
+            <figure anchor="verifyPostResponse" title="Example Response to Verify SET with Challenge">
+              <preamble>
+The following is a non-normative example response to a Verify SET 
+received via HTTP/1.1 POST and includes a JSON object containing the 
+confirmation attribue and value.</preamble>
+<artwork>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{  
+  "challengeResponse":"ca2179f4-8936-479a-a76d-5486e2baacd7"
+}</artwork>
+            </figure>
+
+            <t>
+            If the subscriber returns a non-matching value or an HTTP status
+            other than a 200 series response, the subscription 
+            <spanx style="verb">state</spanx> SHALL be set to <spanx style="verb">fail</spanx>.
+            A declining subscriber MAY simply respond with any 400 series HTTP
+            error (e.g. 404).</t>
+          
           </section>
 
           <section title="Delivery Procedure">
             <t>To deliver an event, the publisher generates an event delivery message
-            and uses HTTP POST to the registered endpoint.</t>
+            and uses HTTP POST to the registered endpoint. The content-type of the
+            message is <spanx style="verb">application/jwt</spanx> and the expected
+            response type (accept) is <spanx style="verb">application/json</spanx>.</t>
             
-            <figure align="left" title="Example Web Callback POST Request">
+            <figure align="left" anchor="postSet" title="Example Web Callback POST Request">
               <artwork align="left">POST /Events  HTTP/1.1
 Host: notify.example.com
 Accept: application/json
@@ -727,34 +825,62 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
 1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
 .</artwork>
             </figure>
-            <t>In response, if the event token is validated, the server SHALL
-            indicate successful submission by responding with:<figure>
+            <t>Upon receipt of the request, the Subscriber SHALL validate the 
+            JWT structure of the SET as defined in <xref target="RFC7519">Section 7.2</xref>.
+            The Subscriber SHALL also validate the SET information as described
+            in <xref target="idevent-token">Section 2</xref>.</t>
+            <t>If the SET is determined to be valid, the Susbscriber SHALL
+            indicate successful submission by responding with HTTP Status
+            202 as <spanx style="verb">Accepted</spanx> (see <xref target="RFC7231">Section 6.3.3</xref>).</t>
+            
+            <t>If SET or JWT is invalid, or there is an HTTP error, the Subscriber
+            SHALL respond with the appropriate HTTP error or an HTTP Status
+            400 Bad Request error as follows:</t>
+            <texttable anchor="reqErrors" title="HTTP Status 400 Errors">
+              <ttcol>Err Value</ttcol><ttcol>Description</ttcol>
+              <c>jwtErr</c><c>The payload did not contain a valid JWT.</c>
+              <c>jwtHdr</c><c>In invalid JWT header was detected.</c>
+              <c>jwtCypto</c><c>Unable to parse due to unsupported algorithm.</c>
+              <c>jws</c><c>Signature was not validated.</c>
+              <c>jwe</c><c>Unable to decrypt JWE encoded data.</c>
+              <c>setEvent</c><c>An unexpected event type was received.</c>
+              <c>setData</c><c>SET event claims information was incomplete or invalid.</c>
+              <c>dup</c><c>A duplicate SET was received and has been ignored.</c>
+            </texttable>
+            
+            <figure anchor="goodPostResponse" title="Example Successful Delivery Response">
+            <preamble>The following is a non-normative example of a successful
+            receipt of a SET.</preamble>
               <artwork>HTTP/1.1 202 Accepted</artwork>
-            </figure> or to indicate errors it MAY respond with an
-            appropriate HTTP error status (e.g. such as 400). <figure>
+            </figure> 
+            
+            <t>An HTTP Status 400 Bad Request response includes a JSON
+            object which provides details about the error. The JSON object
+            includes the JSON attributes: <list style="hanging">
+              <t hangText="err"><vspace/>A value which is a keyword that 
+              describes the error (see <xref target="reqErrors"/>).</t>
+              <t hangText="description"><vspace/>A human-readable text that provides
+              additional diagnostic information.</t>
+            </list> </t>
+            <figure anchor="badPostResponse" title="Example Bad Request Response">
             <preamble>The following is an example non-normative Bad
             Request error.</preamble>
-            <artwork>
-HTTP/1.1 400 Bad Request
+            <artwork>HTTP/1.1 400 Bad Request
 Content-Type: application/json
 
 {
-  "err":"duplicate",
-  "description":"Event already received. Ignored."
+  "err":"dup",
+  "description":"SET already received. Ignored."
 
 }</artwork>
-            
-            </figure> </t>
+            </figure>
 
           
             
             <t></t>
        </section>
 
-       <section title="Failure Conditions">
-         <t>[[TO BE COMPLETED]]</t>
-       </section>
-          
+      
      </section>
   </section>
 
@@ -856,6 +982,9 @@ Content-Type: application/json
         <t>Aligned document with new SET terminology from idevent-token</t>
         <t>Simplified draft to only define HTTP POST profile (TBD)</t>
         <t>Removed webpush and polling modes (can be re-added later).</t>
+        <t>Added SCIM management definitions for Feeds</t>
+        <t>Added delivery information including errors</t>
+        <t>TBD: Add subscription management information (e.g. how to subscribe)</t>
       </list> </t>
     </section>
   </back>
