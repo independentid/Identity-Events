@@ -5,10 +5,10 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                            M. Scurtescu
-Expires: February 23, 2017                                        Google
+Expires: March 14, 2017                                           Google
                                                                M. Ansari
                                                                    Cisco
-                                                         August 22, 2016
+                                                      September 10, 2016
 
 
                   Identity Event Subscription Protocol
@@ -36,7 +36,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on February 23, 2017.
+   This Internet-Draft will expire on March 14, 2017.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Hunt, et al.            Expires February 23, 2017               [Page 1]
+Hunt, et al.             Expires March 14, 2017                 [Page 1]
 
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
    the Trust Legal Provisions and are provided without warranty as
@@ -63,84 +63,83 @@ Internet-Draft       draft-hunt-idevent-distribution         August 2016
 
 Table of Contents
 
-   1.  Introduction and Overview . . . . . . . . . . . . . . . . . .   3
+   1.  Introduction and Overview . . . . . . . . . . . . . . . . . .   2
      1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   3
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   4
    2.  Event Notification Process  . . . . . . . . . . . . . . . . .   4
    3.  Event Feeds . . . . . . . . . . . . . . . . . . . . . . . . .   5
      3.1.  Feed Types  . . . . . . . . . . . . . . . . . . . . . . .   6
      3.2.  Feed Metadata . . . . . . . . . . . . . . . . . . . . . .   7
-   4.  Subscriptions . . . . . . . . . . . . . . . . . . . . . . . .   8
-     4.1.  Overview  . . . . . . . . . . . . . . . . . . . . . . . .   8
-     4.2.  Subscription Metadata . . . . . . . . . . . . . . . . . .   8
-     4.3.  Subscription Verification . . . . . . . . . . . . . . . .  10
-       4.3.1.  Verifying 'Push' Style Subscriptions  . . . . . . . .  10
-       4.3.2.  Verifying 'Polling' Style Subscriptions . . . . . . .  12
-   5.  Event Delivery  . . . . . . . . . . . . . . . . . . . . . . .  12
-     5.1.  Introduction to Event Delivery Methods  . . . . . . . . .  12
-     5.2.  HTTP Web Callback Method  . . . . . . . . . . . . . . . .  13
-       5.2.1.  Description . . . . . . . . . . . . . . . . . . . . .  13
-       5.2.2.  Delivery Message Format . . . . . . . . . . . . . . .  13
-       5.2.3.  Subscription Verification . . . . . . . . . . . . . .  14
-       5.2.4.  Delivery Procedure  . . . . . . . . . . . . . . . . .  14
-       5.2.5.  Failure Conditions  . . . . . . . . . . . . . . . . .  16
-     5.3.  HTTP Polling  . . . . . . . . . . . . . . . . . . . . . .  16
-       5.3.1.  Description . . . . . . . . . . . . . . . . . . . . .  16
-       5.3.2.  Delivery Message Format . . . . . . . . . . . . . . .  17
-       5.3.3.  Subscription Verification . . . . . . . . . . . . . .  17
-       5.3.4.  Delivery Procedure  . . . . . . . . . . . . . . . . .  17
-       5.3.5.  Failure Conditions  . . . . . . . . . . . . . . . . .  19
-     5.4.  Push Notification Extensions  . . . . . . . . . . . . . .  19
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  19
-   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  19
-     7.1.  SCIM Event Notification Mechanism Registry  . . . . . . .  19
-     7.2.  SCIM Event Type Registry  . . . . . . . . . . . . . . . .  19
-   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  19
-     8.1.  Normative References  . . . . . . . . . . . . . . . . . .  19
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .  20
-   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .  21
-   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  21
-   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  21
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  21
-
-
-
-
-
-
-
-Hunt, et al.            Expires February 23, 2017               [Page 2]
-
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
-
+     3.3.  SCIM Feed Management  . . . . . . . . . . . . . . . . . .   8
+   4.  Subscriptions . . . . . . . . . . . . . . . . . . . . . . . .  10
+     4.1.  Overview  . . . . . . . . . . . . . . . . . . . . . . . .  10
+     4.2.  Subscription Metadata . . . . . . . . . . . . . . . . . .  10
+     4.3.  SCIM Subscription Management  . . . . . . . . . . . . . .  12
+       4.3.1.  SCIM Subscription Resource Type . . . . . . . . . . .  12
+       4.3.2.  New Subscription Requests . . . . . . . . . . . . . .  14
+       4.3.3.  Updating Subscriptions  . . . . . . . . . . . . . . .  16
+     4.4.  Subscription Verification . . . . . . . . . . . . . . . .  17
+       4.4.1.  Verifying Subscriptions . . . . . . . . . . . . . . .  17
+   5.  Event Delivery  . . . . . . . . . . . . . . . . . . . . . . .  18
+     5.1.  Introduction to Event Delivery Methods  . . . . . . . . .  18
+     5.2.  Delivery Processing . . . . . . . . . . . . . . . . . . .  19
+     5.3.  HTTP Web Callback Method  . . . . . . . . . . . . . . . .  20
+       5.3.1.  Description . . . . . . . . . . . . . . . . . . . . .  20
+       5.3.2.  Delivery Message Format . . . . . . . . . . . . . . .  20
+       5.3.3.  Subscription Verification . . . . . . . . . . . . . .  21
+       5.3.4.  Delivery Procedure  . . . . . . . . . . . . . . . . .  23
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  25
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  25
+     7.1.  SCIM Event Notification Mechanism Registry  . . . . . . .  25
+     7.2.  SCIM Event Type Registry  . . . . . . . . . . . . . . . .  25
+   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  25
+     8.1.  Normative References  . . . . . . . . . . . . . . . . . .  25
+     8.2.  Informative References  . . . . . . . . . . . . . . . . .  26
+   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .  27
+   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  27
+   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  27
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  27
 
 1.  Introduction and Overview
 
    This specification defines a set of capabilities that can be used by
    publishers to distribute security event tokens or SETs (see
    [idevent-token]) to subscribers of a SET event feed.  These
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                 [Page 2]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
    capabilities include using HTTP [RFC7231] to query for available
    feeds, subscribing to a feed, and receiving SET events via HTTP POST.
 
    The following diagram shows a typical SET Feed Provider and the
-   services provided to Subscribers:
+   services provided to Subscribers.  Arrow heads point to the service
+   provider (the direction of an HTTP request):
 
            +------------+                        +-------------+
            |            |Feeds Catalog           |             |
-           |            +------------------------>             |
+           |            <------------------------+             |
            |    SET     |                        |    SET      |
            |    Feed    |Subscription Request    |    Feed     |
            |  Provider  <------------------------+  Subscriber |
-           |            |Subscription Confirm    |             |
+           |            |                        |             |
+           |            |Subscription Verify     |             |
            |            +------------------------>             |
            |            |                        |             |
+           |            |Subscription Mgmt       |             |
+           |            <------------------------+             |
            |            |                        |             |
-           |            +------------------------>             |
            |            |SET Delivery            |             |
+           |            +------------------------>             |
            |            |                        |             |
            +------------+                        +-------------+
 
-                     Figure 1: Subscription Management
+              Figure 1: Subscription Management and Delivery
 
    A SET feed provider MAY be directly integrated into a source service
    that generates events, or it may be a separate service entity that
@@ -165,9 +164,10 @@ Internet-Draft       draft-hunt-idevent-distribution         August 2016
 
 
 
-Hunt, et al.            Expires February 23, 2017               [Page 3]
+
+Hunt, et al.             Expires March 14, 2017                 [Page 3]
 
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
    For purposes of readability examples are not URL encoded.
@@ -221,9 +221,9 @@ Internet-Draft       draft-hunt-idevent-distribution         August 2016
 
 
 
-Hunt, et al.            Expires February 23, 2017               [Page 4]
+Hunt, et al.             Expires March 14, 2017                 [Page 4]
 
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
    o  The subscriber provided a web-callback endpoint, the publisher
@@ -260,11 +260,11 @@ Internet-Draft       draft-hunt-idevent-distribution         August 2016
    does not exist in the Subscriber's domain.  The Subscriber translates
    the event into two actions:
 
-      Retrieve the user (e.g. using SCIM GET) and then provisions the
-      user locally.  After enabling the user,
+   1.  Retrieve the user (e.g. using SCIM GET) and then provisions the
+       user locally.  After enabling the user,
 
-      The Subscriber then enables the user for the application
-      associated with membership in the Feed Publisher's group.
+   2.  The Subscriber then enables the user for the application
+       associated with membership in the Feed Publisher's group.
 
 3.  Event Feeds
 
@@ -277,9 +277,9 @@ Internet-Draft       draft-hunt-idevent-distribution         August 2016
 
 
 
-Hunt, et al.            Expires February 23, 2017               [Page 5]
+Hunt, et al.             Expires March 14, 2017                 [Page 5]
 
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
    pending, or whether delivery has failed.  Subscription metadata also
@@ -333,9 +333,9 @@ Internet-Draft       draft-hunt-idevent-distribution         August 2016
 
 
 
-Hunt, et al.            Expires February 23, 2017               [Page 6]
+Hunt, et al.             Expires March 14, 2017                 [Page 6]
 
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 3.2.  Feed Metadata
@@ -357,9 +357,42 @@ Internet-Draft       draft-hunt-idevent-distribution         August 2016
       A "String" attribute that describes the purpose of the feed in
       human readable form.  This is an OPTIONAL attribute.
 
+   events
+      Is OPTIONAL and has a value which is a JSON object consisting of
+      multi-valued JSON attributes where each attribute is the name of a
+      primary event URI and each value represents an event extension to
+      the primary event.  An empty array SHALL indicate there are no
+      extensions.  When set, Feeds SHALL only provide the primary events
+      defined.  However, a Feed Provider MAY provide additional
+      extensions that are not declared.
+
+      The following is an example events claim:
+
+   "events":{
+     "urn:ietf:params:scim:event:passwordReset":[
+         "https://example.com/scim/event/passwordResetExt"],
+     "https://specs.openid.net/logout":[]
+   }
+
+                      Figure 2: Example Events Claim
+
+      In the above example, the feed has two events defined.  The first
+      is a hypothetical password reset, and the second is a hypothetical
+      OpenID Connect logout.  The password reset event has one extension
+      defined which is "https://example.com/scim/event/
+      passwordResetExt".
+
    type
-      A "Reference" attribute that is one of the following canonical
-      values:
+      An OPTIONAL String attribute that is one of the following
+      canonical values:
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                 [Page 7]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
 
       resource  Indicates that the Feed is for events related to a
          specific resource.  In such cases, the value of the attribute
@@ -382,133 +415,230 @@ Internet-Draft       draft-hunt-idevent-distribution         August 2016
          SCIM GroupSection 4.2 [RFC7643].
 
    filter
-      A String value containing a filter defined by the Feed Publisher.
-      For example in SCIM, a filter MAY be a filter (see Section 3.4.2.2
-      [RFC7644]), a resource, or a SCIM endpoint URI.  The contents of
-      the value is indicated by the feed "type" attribute and the
-
-
-
-Hunt, et al.            Expires February 23, 2017               [Page 7]
-
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
-
-
-      profiling SET Event specification and is out-of-scope of this
-      specification.
+      An OPTIONAL String value containing a filter defined by the Feed
+      Publisher.  For example in SCIM, a filter MAY be a filter
+      Section 3.4.2.2 [RFC7644]), a resource, or a SCIM endpoint URI
+      depending on the value of "type".  For example, if the Feed is
+      issuing SCIM events, and the type is "resource", than the filter
+      value is a URI for a SCIM resource.
 
    The following multi-valued attributes are defined:
 
-   events  One or more String values that contain the Event URIs
-      supported by a Feed.
-
    deliveryModes  One or more URIs representing the methods of delivery
       supported by the feed.  By default, all delivery modes are
-      supported.  [[DO we need a registry for this, or just remove
-      it??]]
+      supported.  [[DO we need this??]]
+
+3.3.  SCIM Feed Management
+
+   When Feeds are managed within a SCIM service provider [RFC7644], Feed
+   resources use schema defined in Section 3.2 and use a schema value of
+   "urn:ietf:params:scim:schemas:event:2.0:Feed".  The SCIM
+   "ResourceType" definition defines the location of the SCIM service
+   provider endpoint for "Feed" resources.
+
+   The Feed "ResourceType" definition is typically defined as follows:
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                 [Page 8]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+   {
+     "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
+     "id": "Feed",
+     "name": "Feed",
+     "endpoint": "/Feeds",
+     "description": "Event Feeds",
+     "schema": "urn:ietf:params:scim:schemas:event:2.0:Feed",
+     "schemaExtensions": []
+   }
+
+                Figure 3: SCIM Feed ResourceType Definition
+
+   To retrieve information about a "Feed" or a number of feeds,
+   subscribers or management clients MAY query the "/Feeds" endpoint as
+   defined in Section 3.4 [RFC7644].
+
+   The example below retrieves a specific Feed resource whose "id" is
+   "548b7c3f77c8bab33a4fef40".
+
+   GET /Feeds/88bc00de776d49d5b535ede882d98f74
+   Host: example.com
+   Accept: application/scim+json
+   Authorization: Bearer h480djs93hd8
+
+                    Figure 4: Example Feed GET Request
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                 [Page 9]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+   The response below shows an example Feed resource that describes an
+   available feed.
+
+   HTTP/1.1 200 OK
+   Content-Type: application/scim+json
+   Location:
+    https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74
+   ETag: 9d1c124149f522472e7a511c85b3a31b
+
+   {
+     "schemas":["urn:ietf:params:scim:schemas:event:2.0:Feed"],
+     "id":"88bc00de776d49d5b535ede882d98f74",
+     "feedName":"OIDCLogoutFeed",
+     "feedUri":"https://oidc.example.com/",
+     "description":"Logout events from oidc.example.com",
+     "type":"resource",
+     "events":[
+       "https://specs.openid.net/logout":[]
+     ]
+     "meta":{
+        ... SCIM meta attributes ...
+     }
+   }
+
+                    Figure 5: Example Feed GET Response
+
+   In the above example (Figure 5) we can observe that the Feed has only
+   one event type, "https://specs.openid.net/logout" and has no
+   extensions defined for the event (see empty square brackets).  Note
+   also, that no value for "filter" has been specified suggesting that
+   the Feed will return events about all subjects of the publisher.
 
 4.  Subscriptions
 
 4.1.  Overview
 
-   A subscription represents an agreement to deliver events from a
-   specified feed of events from a feed provider to an individual
-   subscriber entity.  The method of delivery and the parameters for
-   delivery are specified a set of parameters called subscription
-   metadata (see Section 4.2).
+   A subscription represents an agreement to deliver SETs from a
+   specified Feed URI from a Feed Provider to an individual Subscriber
+   entity also known as the "audience".  The method of delivery and the
+   parameters for delivery are specified a set of parameters called
+   subscription metadata (see Section 4.2).
 
 4.2.  Subscription Metadata
 
    A subscription is defined by the following metadata:
 
    feedUri
-      A string value containing the URI for a feed supported by the feed
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 10]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+      A String value containing the URI for a feed supported by the feed
       provider.  It describes the content of the feed and MAY also be a
       resolvable URI where the feed meta data may be returned as a JSON
       object.  REQUIRED.
 
-   deliveryUri
+   methodUri
       A REQUIRED single-valued string which is a URI with a prefix of
-      "urn:ietf:params:event:delivery".  The following are defined in
-      Section 5:
+      "urn:ietf:params:set:method".  This specification defines HTTP
+      POST delivery Section 5:
+      "urn:ietf:params:set:method:HTTP:webCallback"
+      in which the Feed Provider delivers events using HTTP POST to a
+      specified callback URI.
 
-      urn:ietf:params:event:delivery:HTTP:webCallback
-         The feed provider delivers events using HTTP POST to a
-         specified callback URI.
-
-      urn:ietf:params:event:delivery:HTTP:poll
-         The subscriber will poll for events using HTTP GET.
-
-   subUri
-      A URI representing the unique identifier for a single subscriber
-      of a feed.  It MAY also be an actual event polling endpoint which
-
-
-
-Hunt, et al.            Expires February 23, 2017               [Page 8]
-
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
-
-
-      the subscriber MAY use to receive such as with "deliveryUri"
-      method of "urn:ietf:params:event:delivery:HTTP:poll".
+   aud
+      An OPTIONAL URI representing the audience of the subscription.
+      The value SHALL be the value of "aud" when the subscriber receives
+      SETs from the feed.
 
    feedJwk
-      AN OPTIONAL JSON Web Key (see [RFC7517]) that will be used to sign
-      published events.  If present, the subscriber can authenticate
-      events relayed from the feed provider.
+      An OPTIONAL public JSON Web Key (see [RFC7517]) that will be used
+      to sign published SETs.  If present, the Subscriber can
+      authenticate SETs relayed from the Feed Provider.
 
    confidentialJwk
-      An OPTIONAL subscriber provided public JSON Web Key (see
-      [RFC7517]) that may be used by the feed provider to encrypt event
-      messages for the subscriber.
+      An OPTIONAL Subscriber provided public JSON Web Key (see
+      [RFC7517]) that MAY be used by the Feed Provider to encrypt SET
+      tokens for the specified Subscriber.
 
    subStatus
-      An optional value which indicates the current status of a
-      subscription:
+      An OPTIONAL value that indicates the current status of a
+      Subscription:
 
-         "on" - the default setting indicates the feed provider
-         processing events and will pass them to the subscriber.
+         "on" - indicates the Subscription has been verified and that
+         the Feed Provider MAY pass SETs to the Subscriber.
 
-         "verify" - the subscription is pending verification.  While in
-         "verify", published events SHALL NOT be stored or delivered to
-         the subscriber.
+         "verify" - indicates the Subscription is pending verification.
+         While in "verify", published SETs SHALL NOT be stored or
+         delivered to the Subscriber.  Once verified, the status returns
+         to "on".
 
-         "paused" - indicates the feed provider is temporarily
-         suspending delivery to subscriber.  While in "paused" events
-         SHOULD be retained and delivered when state returns to "on".
+         "paused" - indicates the Feed Provider is temporarily
+         suspending delivery to Subscriber.  While "paused", SETs SHOULD
+         be retained and delivered when state returns to "on".
+         Verification is NOT required when returning to "on".
 
-         "off" - indicates that the subscription is no longer passing
-         events.  While in off mode, the subscription metadata is
-         maintained, but new events are ignored and not processed or
-         retained.
+         "off" - indicates that the Subscription is no longer passing
+         SETs.  While in off mode, the subscription metadata is
+         maintained, but new events are ignored, not delivered or
 
-         "fail" - Indicates that the feed provider was unable to deliver
-         events to the subscriber for an extended period of time, or due
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 11]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+         retained.  Before returning to "on", a verification MUST be
+         performed.
+
+         "fail" - indicates that the feed provider was unable to deliver
+         SETs to the Subscriber for an extended period of time, or due
          to a call failure to the registered web call back URI.  Unlike
-         paused status, a failed subscription is no longer receiving
-         events nor are they retained by the feed provider.
+         paused status, a failed subscription no longer receives SETs,
+         nor are they retained by the Feed Provider.  Before returning
+         to "on", a verification MUST be performed.
 
    maxRetries
       An OPTIONAL number indicating the maximum number of attempts to
-      deliver an event.  A value of '0' indicates there is no maximum.
-      Upon reaching the maximum, the subscription "subStatus" is set to
-      "failed" [[or "paused"?]].
+      deliver a SET.  A value of '0' indicates there is no maximum.
+      Upon reaching the maximum, the Subscription "subStatus" attrtibute
+      is set to "failed".
 
    maxDeliveryTime
-
-
-
-
-
-Hunt, et al.            Expires February 23, 2017               [Page 9]
-
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
-
-
-      An OPTIONAL number indicating the maximum amount of time an event
-      MAY wait before delivery.  Upon reaching the maximum, the
-      subscription "subStatus" is set to "failed" [[or "paused"?]].
+      An OPTIONAL number indicating the maximum amount of time in
+      seconds a SET MAY take for successful delivery.  Upon reaching the
+      maximum, the subscription "subStatus" is set to "failed".  If
+      undefined, there is no maximum time.
 
    minDeliveryInterval
       An OPTIONAL integer that represents the minimum interval in
@@ -518,163 +648,369 @@ Internet-Draft       draft-hunt-idevent-distribution         August 2016
       attempts.  When in push mode (e.g.  HTTP POST), it is the interval
       the server will wait before sending a new event or events.
 
-4.3.  Subscription Verification
+4.3.  SCIM Subscription Management
+
+   A Feed Publisher MAY use SCIM to support management of subscriptions.
+   Typically this involves support for the Subscription Resource Type,
+   and the corresponding SCIM operations to create, update, retrieve
+   Subscription Resources.  For SCIM service provider capability and
+   schema discovery, see Section 4 [RFC7644].
+
+4.3.1.  SCIM Subscription Resource Type
+
+   When Subscriptions are managed within a SCIM service provider
+   [RFC7644], Subscription resources use schema defined in Section 4.2
+   and use a schema value of
+   "urn:ietf:params:scim:schemas:event:2.0:Subscription".
+
+   The SCIM Subscription "ResourceType" definition is defined as
+   follows:
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 12]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+   {
+     "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
+     "id": "Subscription",
+     "name": "Subscription",
+     "endpoint": "/Subscriptions",
+     "description": "Subscribers to SET Feeds",
+     "schema": "urn:ietf:params:scim:schemas:event:2.0:Subscription",
+     "schemaExtensions": []
+   }
+
+            Figure 6: SCIM Subscription ResourceType Definition
+
+   To retrieve information about one or more Subscriptions, Subscribers
+   or management clients MAY query the "/Subscriptions" endpoint as
+   defined in Section 3.4 [RFC7644].
+
+   The example below retrieves a specific "Subscription" resource whose
+   "id" is "548b7c3f77c8bab33a4fef40".
+
+   GET /Subscriptions/767aad7853d240debc8e3c962051c1c0
+   Host: example.com
+   Accept: application/scim+json
+   Authorization: Bearer h480djs93hd8
+
+              Figure 7: Example SCIM Subscription GET Request
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 13]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+   The response below shows an example Feed resource that describes an
+   available feed.
+
+  HTTP/1.1 200 OK
+  Content-Type: application/scim+json
+  Location:
+   https://example.com/v2/Subscriptions/767aad7853d240debc8e3c962051c1c0
+
+  {
+    "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subscription"],
+    "id":"767aad7853d240debc8e3c962051c1c0",
+    "feedName":"OIDCLogoutFeed",
+    "feedUri":
+      "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+    "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+    "aud":"https://sets.myexamplerp.com",
+    "subStatus":"pending",
+    "maxDeliveryTime":3600,
+    "minDeliveryInterval":0,
+    "description":"Logout events from oidc.example.com",
+    "meta":{
+       ... SCIM meta attributes ...
+    }
+  }
+
+                Figure 8: Example Subscription GET Response
+
+   In the above example (Figure 8) observe that the subscription is for
+   the SCIM "Feed" resource defined at "https://example.com/v2/
+   Feeds/88bc00de776d49d5b535ede882d98f74".  The current subscription
+   state is "pending" which suggest the Subscription Verification (see
+   Section 4.4) process has not yet completed.  Since there is no value
+   for "feedJwk", ) or "confidentialJwk", the SETs will be sent without
+   signing or encryption (plain text).
+
+4.3.2.  New Subscription Requests
+
+   To subscribe to a feed, the subscriber of management client uses the
+   SCIM Create operation as defined in Section 3.3 [RFC7644].  SCIM
+   subscription management service providers MAY have additional schema
+   requirements which MAY be discovered using SCIM service configuration
+   and schema discovery, see Section 4 [RFC7644].
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 14]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+   In the following non-normative example, a new Subscription resource
+   is requested.  Note that the SCIM service provider automatically
+   assigns the "id" attribute.
+
+   POST /Subscriptions
+   Host: example.com
+   Accept: application/scim+json
+   Content-Type: application/scim+json
+   Authorization: Bearer h480djs93hd8
+
+   {
+     "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subscription"],
+     "feedName":"OIDCLogoutFeed",
+     "feedUri":
+       "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+     "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+     "aud":"https://sets.myexamplerp.com",
+     "maxDeliveryTime":3600,
+     "minDeliveryInterval":0,
+     "description":"Logout events from oidc.example.com"
+   }
+
+            Figure 9: Example New Subscription Request in SCIM
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 15]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+   In following non-normative response, the SCIM service provider has
+   automatically assigned a resource location as well as an "id".
+   Usually upon creation, the initial value of "subStatus" is "pending"
+   indicating that the Subscription Verification (see Section 4.4) has
+   not been completed.
+
+  HTTP/1.1 201 Created
+  Content-Type: application/scim+json
+  Location:
+   https://example.com/v2/Subscriptions/767aad7853d240debc8e3c962051c1c0
+
+  {
+    "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subscription"],
+    "id":"767aad7853d240debc8e3c962051c1c0",
+    "feedName":"OIDCLogoutFeed",
+    "feedUri":
+      "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+    "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+    "aud":"https://sets.myexamplerp.com",
+    "subStatus":"pending",
+    "maxDeliveryTime":3600,
+    "minDeliveryInterval":0,
+    "description":"Logout events from oidc.example.com",
+    "meta":{
+       ... SCIM meta attributes ...
+    }
+  }
+
+            Figure 10: Example Response to Subscription Request
+
+4.3.3.  Updating Subscriptions
+
+   To modify a Subscription, a Subscriber or authorized management
+   client MAY use the SCIM PUT operation (see Section 3.5.1 [RFC7644])
+   and MAY use the SCIM PATCH operation (see Section 3.5.2 [RFC7644]) if
+   supported by the SCIM Subscription server.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 16]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+   In the following non-normative example, the client is requesting that
+   "subStatus" be changed to "paused" for the Subscription whose path is
+   identified by the request URI path.
+
+   PATCH /Subscriptions/767aad7853d240debc8e3c962051c1c0
+   Host: example.com
+   Accept: application/scim+json
+   Content-Type: application/scim+json
+   Authorization: Bearer h480djs93hd8
+
+   {
+     "schemas":
+       ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+     "Operations": [{
+       "op":"replace",
+       "path":"subStatus",
+       "value":"paused"
+     }]
+   }
+
+
+                Figure 11: Example SCIM Subscription Update
+
+4.4.  Subscription Verification
 
    In order to avoid ongoing communication issues and to minimize
-   requirements for feed providers to maintain events indefinitely, a
-   verification process is used to confirm that the requested event
-   distribution endpoints are correct and that events may be
-   successfully delivered.  When a subscription is created or modified,
-   the feed provider SHALL set the subscription state ("subStatus") to
-   "verify" and send a test event message to the subscriber.  If the
-   event is delivered successfully, the subscription state MAY be turned
-   to "on".  If however verification fails due to a hard failure, or the
-   client fails to retrieve the event within a [reasonable?] period, the
-   subscription status SHALL be set to "fail".
+   requirements for Feed Providers to maintain a series of SETs
+   indefinitely, a verification process is used to confirm that the
+   requested Subscription distribution endpoints are valid and that SETs
+   may be successfully delivered.  When a Subscription is created or
+   modified, or goes into a failed or off state, the Feed Provider SHALL
+   set the Subscription state attribute "subStatus" to "verify" and send
+   a Verify SET message to the subscriber.  If the SET is delivered
+   successfully, the subscription state SHOULD be turned to "on".  If
+   however verification fails due to a timeout or connection failure, or
+   any other cause, the Subscription status SHALL be set to "fail".
 
-4.3.1.  Verifying 'Push' Style Subscriptions
+4.4.1.  Verifying Subscriptions
 
-   When using the WebCallback mode, or any other 'push'-style
-   communication scheme, the verification process serves to verify that
-   the identified endpoint consents to receiving events and is valid.
-   This prevents a notification server from flooding an endpoint which
-   did not actually request an event subscription.
+   The verification process serves to verify that the identified
+   Subscriber is willing to receive SETs and is correctly configured.
+   In the case of push style subscriptions, where the publisher initates
+   the action to deliver a SET, Verification can also serve to prevent a
+   Feed Publication server from flooding an endpoint which did not
+   actually request a Subscription.
 
-   To confirm a subscription, the feed provider SHALL send a
-   verification event to the subscriber using the registered
-   _deliveryUri_ mechanism.  The event contains the following
-   attributes:
 
-   eventUris  Set with a value of "urn:ietf:params:event:event:verify".
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 17]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+   A Feed Provider MAY send a Verify SET at any time in order to
+   reverify connectivity and to assure the subscriber the subscription
+   is valid (e.g. as a keep alive technique).
+
+   To confirm a subscription, the Feed Provider SHALL send a
+   verification SET to the subscriber using the registered "methodUri"
+   mechanism.  The Verify SET contains the following attributes:
+
+   events  Set with a value of "urn:ietf:params:set:method:verify".
 
    iss  Set to the URI of the feed publisher (see [idevent-token]).
 
    aud  MUST be set to a value that matches the subscription "feedUri"
       requested.
 
-
-
-
-
-
-Hunt, et al.            Expires February 23, 2017              [Page 10]
-
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
-
-
-   confirmChallenge  A String value that the subscriber SHALL echo back
-      in its response.  See deliveryUri method profile for usage
-      details.
-
    exp  A value that indicates the time the verification request will
       expire.  Once expired, the server will set the subscription state
       to "fail".
 
-   If a confidential JWK was supplied, then the event SHOULD be
-   encrypted with the provided key.  Successful parsing of the message
-   confirms that both the endpoint is valid including confirmation of
-   keys.
+   In the SET payload area, a specific delivery method MAY include an
+   attribute that can be used to confirm the subscriber has successfully
+   received and parsed the SET (e.g. such as the inclusion of a
+   challenge attribute, see Section 5.3.3).  If a confidential JWK was
+   supplied, then the SET SHOULD be encrypted with the provided key.
+   Successful parsing of the message confirms that provides confirmation
+   of correct configuration and possession of keys.
 
-   A non-normative JSON representation of an event to be sent to a
-   subscriber as a subscription confirmation.  Note the event is not yet
-   encoded as a JWT token.
+   Note that the verification event URI
+   ("urn:ietf:params:set:method:verify") type is not normally listed as
+   part of the definition of a Feed as it is not part of the normal
+   information flow of a Feed.  Any Feed MAY include a SET verification
+   event whether listed or not in the Feed event metadata.
 
-   {
-     "jti": "4d3559ec67504aaba65d40b0363faad8",
-     "eventUris":["urn:ietf:params:event:event:verify"],
-     "iat": 1458496404,
-     "iss": "https://scim.example.com",
-     "aud":[
-      "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
-      "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
-     ],
-     "confirmChallenge":"ca2179f4-8936-479a-a76d-5486e2baacd7",
-     "exp": 1458497000
+   Upon receiving the SET, the subscriber acknowledges receipt as
+   defined by the method profile (for example, see Section 5.3.3).
 
-   }
-
-   Upon receiving a subscription confirmation request, a confirming
-   subscriber responds with a confirmation using the method described in
-   the deliveryUri profile.  The response includes a "challengeResponse"
-   value.  For example, depending on the deliveryUri profile used, the
-   subscriber might respond with the value of "confirmChallenge" . For
-   example, if the request is received via HTTP/1.1 POST, then the
-   following HTTP response is used to confirm.  A non-normative example
-   of the response is:
-
-   HTTP/1.1 200 OK
-   Content-Type: application/json
-
-   {
-     "challengeResponse":"ca2179f4-8936-479a-a76d-5486e2baacd7"
-   }
-
-
-
-
-
-Hunt, et al.            Expires February 23, 2017              [Page 11]
-
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
-
-
-   If the subscriber returns a non-matching value or an HTTP status
-   other than a 200 series response, the subscription "state" SHALL be
-   set to "fail".  A declining subscriber MAY simply respond with any
-   400 series HTTP error (e.g. 404).
-
-4.3.2.  Verifying 'Polling' Style Subscriptions
-
-   For clients that use a subscription mode (e.g.
-   "urn:ietf:params:scimnotify:api:messages:2.0:poll") that pick up
-   events from a subscription endpoint, the client MAY confirm the
-   subscription by simply reading the event using an HTTP GET at the
-   endpoint specified by the attribute "subUri" in the subscription.
-   Once the confirmation event has been retrieved, the service provider
-   MAY mark the subscription as confirmed.
-
-   A non-normative example of a client, having previously subscribed,
-   picking up the initial subscription confirmation message.
-
-   GET /Events/548b7c3f77c8bab33a4fef40/
-   Host: example.com
-   Accept: application/scim+json
-   Authorization: Bearer h480djs93hd8
-   Content-Length: ...
-
-   To which the event provider responds with the available events which
-   SHOULD include a confirmation event (non-normative example):
-
-   {
-     "schemas":["urn:ietf:params:scim:schemas:notify:2.0:Event"],
-     "publisherUri":"https://scim.example.com",
-     "feedUris":[
-      "https://notify.example.com/Feeds/98d52461fa5bbc879593b7754"
-
-     ],
-     "type":"CONFIRMATION",
-     "confirmChallenge":"ca2179f4-8936-479a-a76d-5486e2baacd7",
-     "expires":""
-
-   }
+   If the subscriber is unable to parse the verification SET, fails to
+   return the correct challenge, or the SET is not delivered after a
+   period of time.  The Feed Publisher will set "subStatus" to "failed".
 
 5.  Event Delivery
 
 5.1.  Introduction to Event Delivery Methods
 
-   Each event delivery method SHALL have the following information:
+   Each event delivery method SHOULD have the following information:
 
    Description
 
 
 
 
-Hunt, et al.            Expires February 23, 2017              [Page 12]
+Hunt, et al.             Expires March 14, 2017                [Page 18]
 
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
-      The _deliveryUri_ URI value for the delivery method and a
+      The _methodUri_ URI value for the delivery method and a
       description of the method.
 
    Subscription Verification Procedure
@@ -694,58 +1030,99 @@ Internet-Draft       draft-hunt-idevent-distribution         August 2016
       impact on the subscriptions operational status ("subStatus") if
       any.
 
-   Multi-Event Message Considerations
-      A description of any special considerations when passing multiple
-      events in a single delivery.[[is this needed?]]
+   This specification defines the first delivery method known as "HTTP
+   Web Callback Method" which uses HTTP POST.
 
-5.2.  HTTP Web Callback Method
+5.2.  Delivery Processing
 
-5.2.1.  Description
-
-   This method allows a feed provider to use HTTP POST to deliver events
-   to a registered web callback URL.  The "deliveryUri" value for this
-   method is "urn:ietf:params:event:delivery:HTTP:webCallback".
-
-   Depending on the settings for the subscription metadata, this
-   delivery method is capable of delivering multiple signed events in a
-   single delivery.
-
-5.2.2.  Delivery Message Format
-
-   The content-type for this method is "application/json" and consists
-   of a JSON object containing the following attributes:
-
-   eventTkns
-      A multi-valued String with each value containing an identity event
-      token ([idevent-token]).  Each value MAY represent an unsigned,
-      signed, or encrypted token.  At least one value MUST be present in
-      a delivery request.
-
-   eventCnt
+   As mentioned in Section 4.2, the attribute "subStatus" defines the
+   current state of a subscribers subscription.  The following describes
+   that actions taken based on "subStatus".
 
 
 
-Hunt, et al.            Expires February 23, 2017              [Page 13]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 19]
 
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
-      An integer representing the number of events present in the
-      message.  REQUIRED.
+   +--------+----------------------------------------------------------+
+   | Status | Action                                                   |
+   +--------+----------------------------------------------------------+
+   | on     | Delivery SHALL be attempted based on the method defined  |
+   |        | in the subscription attribute "methodUri".  If the SET   |
+   |        | fails to deliver it MAY be retained for a retry delivery |
+   |        | in a minimum of _minDeliveryInterval_ seconds. If new    |
+   |        | SETs arrive before the interval, the SETs MUST be held   |
+   |        | for delivery in order of reception.  If this is a repeat |
+   |        | attempt to deliver, the Feed Publisher MAY discard the   |
+   |        | SET if "maxRetries" or _maxDeliveryTime_ is exceeded. If |
+   |        | a SET is discarded, the Feed Publisher MAY set           |
+   |        | "subStatus" to "failed".                                 |
+   | verify | If the SET is not a Verify SET, the SET MAY be retained  |
+   |        | for a retry at the Feed Publishers discretion.  If a     |
+   |        | Verify SET fails to deliver, the Feed Publisher SHALL    |
+   |        | set "subStatus" to "failed".                             |
+   | paused | The SET is held for delivery. The Feed Publisher MAY at  |
+   |        | its own discretion set the subscription state to         |
+   |        | "failed" if "subStatus" is not returned to "on" in what  |
+   |        | the Feed Publisher determines to be a reasonable amount  |
+   |        | of time.                                                 |
+   | off    | The SET is ignored.                                      |
+   | fail   | The SET is ignored due to a previous unrecoverable       |
+   |        | error.                                                   |
+   +--------+----------------------------------------------------------+
 
-   eventPend
-      An boolean indicating more deliveries are pending.  The default
-      value is false.
+                  Table 1: Delivery Processing By Status
 
-   invalidEvents
-      An optional multi-valued set of JSON objects containing events
-      that could not be accepted or failed.  Used in a delivery
-      response, a subscriber MAY return an event that failed to validate
-      or was unparseable.
+5.3.  HTTP Web Callback Method
 
-   {
-   "eventTkns":[
-     "eyJhbGciOiJub25lIn0
+5.3.1.  Description
+
+   This method allows a feed provider to use HTTP POST (Section 4.3.3
+   [RFC7231]) to deliver SETs to a registered web callback URI.  The
+   Subscription "methodUri" value for this method is
+   "urn:ietf:params:set:method:HTTP:webCallback".
+
+   This delivery method is capable of delivering a single SET per HTTP
+   POST request.  Depending on the settings for the subscription
+   metadata (see Section 4.2), the SET MAY be signed and/or encrypted as
+   defined in [idevent-token].
+
+5.3.2.  Delivery Message Format
+
+   The content-type for this method is "application/jwt" and consists of
+   a single SET token (see [idevent-token]).
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 20]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+     eyJhbGciOiJub25lIn0
      .
      eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
      kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
@@ -758,268 +1135,229 @@ Internet-Draft       draft-hunt-idevent-distribution         August 2016
      b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
      tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
      1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
-     ."],
-   "eventCnt":1,
-   "eventPend":false
+     .
+
+               Figure 12: Example Web Callback POST Message
+
+5.3.3.  Subscription Verification
+
+   This profile specifies the verification method for HTTP POST and is
+   based on the general verification method described in Section 4.4.1.
+
+   To confirm a subscription, the Feed Provider SHALL send a
+   verification SET to the subscriber using the registered "methodUri"
+   mechanism which in this case is
+   "urn:ietf:params:set:method:HTTP:webCallback".  The Verify SET
+   contains the attributes listed in Section 4.4.1.
+
+   A payload attribute "confirmChallenge" is provided with a String
+   value that the subscriber SHALL echo back in its response.  The
+   intent is to confirm that the Subscriber has successfully parsed the
+   SET and is not just echoing back HTTP success.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 21]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+   A non-normative JSON representation of an event to be sent to a
+   subscriber as a subscription confirmation.  Note the event is not yet
+   encoded as a JWT token:
+
+   {
+     "jti": "4d3559ec67504aaba65d40b0363faad8",
+     "events":["urn:ietf:params:set:method:verify"],
+     "iat": 1458496404,
+     "iss": "https://scim.example.com",
+     "exp": 1458497000,
+     "aud":[
+      "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
+      "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
+     ],
+     "urn:ietf:params:set:method:verify":{
+       "confirmChallenge":"ca2179f4-8936-479a-a76d-5486e2baacd7"
+     }
    }
 
-                     Example Web Callback POST Message
+            Figure 13: Example Verification SET with Challenge
 
-5.2.3.  Subscription Verification
+   The above SET is encoded as a JWT and transmitted to the Subscriber
+   as shown in Figure 15.
 
-   See Section 4.3.1.
+   Upon receiving a subscription verify SET, a confirming subscriber
+   SHALL respond with a JSON object that includes a "challengeResponse"
+   attribute and the value that was provided in "confirmChallenge".  The
+   content type header is set to "application/json".
 
-5.2.4.  Delivery Procedure
+   The following is a non-normative example response to a Verify SET
+   received via HTTP/1.1 POST and includes a JSON object containing the
+   confirmation attribue and value.
+
+   HTTP/1.1 200 OK
+   Content-Type: application/json
+
+   {
+     "challengeResponse":"ca2179f4-8936-479a-a76d-5486e2baacd7"
+   }
+
+         Figure 14: Example Response to Verify SET with Challenge
+
+   If the subscriber returns a non-matching value or an HTTP status
+   other than a 200 series response, the subscription "state" SHALL be
+   set to "fail".  A declining subscriber MAY simply respond with any
+   400 series HTTP error (e.g. 404).
+
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 22]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+5.3.4.  Delivery Procedure
 
    To deliver an event, the publisher generates an event delivery
-   message and uses HTTP POST to the registered endpoint.
-
-
-
-
-
-
-
-
-Hunt, et al.            Expires February 23, 2017              [Page 14]
-
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
-
+   message and uses HTTP POST to the registered endpoint.  The content-
+   type of the message is "application/jwt" and the expected response
+   type (accept) is "application/json".
 
    POST /Events  HTTP/1.1
    Host: notify.example.com
    Accept: application/json
-   Content-Type: application/json
-   {
-   "eventTkns":[
-     "eyJhbGciOiJub25lIn0
-     .
-     eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
-     kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
-     FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
-     WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
-     WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
-     hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
-     VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
-     SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
-     b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
-     tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
-     1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
-     .",
-     "eyJhbGciOiJub25lIn0
-     .
-     eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
-     kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
-     FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
-     WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
-     WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
-     hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
-     VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
-     SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
-     b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
-     tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
-     1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
-     ."
-     ],
-   "eventCnt":2
-   }
+   Content-Type: application/jwt
+   "eyJhbGciOiJub25lIn0
+   .
+   eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+   kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+   FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+   WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+   WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+   hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+   VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+   SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+   b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+   tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+   1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+   .
 
-                     Example Web Callback POST Request
+               Figure 15: Example Web Callback POST Request
 
-   In response, if the event token is validated, the server SHALL
-   indicate successful submission by responding with:
+   Upon receipt of the request, the Subscriber SHALL validate the JWT
+   structure of the SET as defined in Section 7.2 [RFC7519].  The
+   Subscriber SHALL also validate the SET information as described in
+   Section 2 [idevent-token].
+
+   If the SET is determined to be valid, the Susbscriber SHALL indicate
+   successful submission by responding with HTTP Status 202 as
+   "Accepted" (see Section 6.3.3 [RFC7231]).
+
+   If SET or JWT is invalid, or there is an HTTP error, the Subscriber
+   SHALL respond with the appropriate HTTP error or an HTTP Status 400
+   Bad Request error as follows:
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 23]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+   +----------+--------------------------------------------------------+
+   | Err      | Description                                            |
+   | Value    |                                                        |
+   +----------+--------------------------------------------------------+
+   | jwtParse | Invalid or unparseable JWT or JSON structure.          |
+   | jwtHdr   | In invalid JWT header was detected.                    |
+   | jwtCypto | Unable to parse due to unsupported algorithm.          |
+   | jws      | Signature was not validated.                           |
+   | jwe      | Unable to decrypt JWE encoded data.                    |
+   | jwtAud   | Invalid audience value.                                |
+   | jwtIss   | Issuer not recognized.                                 |
+   | setType  | An unexpected event type was received.                 |
+   | setParse | Invalid structure was encountered such as inability to |
+   |          | parse SET event payload.                               |
+   | setData  | SET event claims incomplete or invalid.                |
+   | dup      | A duplicate SET was received and has been ignored.     |
+   +----------+--------------------------------------------------------+
+
+                      Table 2: HTTP Status 400 Errors
+
+   The following is a non-normative example of a successful receipt of a
+   SET.
 
    HTTP/1.1 202 Accepted
 
-   or to indicate errors it MAY respond with
+              Figure 16: Example Successful Delivery Response
+
+   An HTTP Status 400 Bad Request response includes a JSON object which
+   provides details about the error.  The JSON object includes the JSON
+   attributes:
+
+   err
+      A value which is a keyword that describes the error (see Table 2).
+
+   description
+      A human-readable text that provides additional diagnostic
+      information.
 
 
 
 
 
-Hunt, et al.            Expires February 23, 2017              [Page 15]
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 24]
 
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
-   HTTP/1.1 202 Accepted
+   The following is an example non-normative Bad Request error.
+
+   HTTP/1.1 400 Bad Request
    Content-Type: application/json
 
    {
-     "invalidEvents":[
-       {"err":"duplicate",
-        "description":"Event already received. Ignored.",
-        "value":"eyJhbGciOiJub25lIn0
-     .
-     eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
-     kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
-     FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
-     WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
-     WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
-     hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
-     VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
-     SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
-     b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
-     tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
-     1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
-     ."
-       }
-     ]
+     "err":"dup",
+     "description":"SET already received. Ignored."
+
    }
 
-   Since the normal operation of the Feed Provider is to forward events
-   to registered subscribers, the Feed Provider is not obligated to
-   inform the publisher of a permanent event URI that was created.
-   Servers MAY allow HTTP clients to check for undelivered events by
-   performing a GET against the same endpoint as the Event submission
-   endpoint described above.
-
-5.2.5.  Failure Conditions
-
-   [[TO BE COMPLETED]]
-
-5.3.  HTTP Polling
-
-5.3.1.  Description
-
-   This method allows a subscriber to use HTTP GET to poll for events to
-   the "subUri" provided to the subscriber by the publisher.  The
-   "deliveryUri"value for this method is
-   "urn:ietf:params:event:delivery:HTTP:poll".
-
-   Depending on the settings for the subscription metadata, this
-   delivery method is capable of delivering multiple signed events in a
-   single delivery poll request.
-
-
-
-Hunt, et al.            Expires February 23, 2017              [Page 16]
-
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
-
-
-5.3.2.  Delivery Message Format
-
-   The delivery message is the same as Section 5.2.2.
-
-5.3.3.  Subscription Verification
-
-   Subscription verification is described in Section 4.3.2.
-
-5.3.4.  Delivery Procedure
-
-   To deliver an event, the publisher places the event in a queue/buffer
-   associated with the client subscription that will be requested at
-   some future time by the subscriber using the URI specified in
-   "subUri".
-
-   To pick up any events, the subscriber issues an HTTP GET to the URI
-   provided by the event publisher in "subUri".
-
-   In response to the HTTP GET request, the feed publisher responds with
-   a body that corresponds to the event delivery message format (see
-   Section 5.2.2).
-
-   An example polling request by a subscriber.  The example has been
-   formatted for readability:
-
-   GET /subscriber/66444423ab24430fb06cf0de1ab75247
-      Host: pub.example.com
-      Accept: application/json
-      Authorization: Bearer h480djs93hd8
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.            Expires February 23, 2017              [Page 17]
-
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
-
-
-   An example poll response (formatted for readability):
-
-   HTTP/1.1 200 OK
-   Content-Type: application/json
-   Location:
-     https://pub.example.com/subscriber/66444423ab24430fb06cf0de1ab75247
-   {
-   "eventTkns":[
-     "eyJhbGciOiJub25lIn0
-     .
-     eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
-     kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
-     FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
-     WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
-     WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
-     hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
-     VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
-     SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
-     b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
-     tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
-     1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
-     .",
-     "eyJhbGciOiJub25lIn0
-     .
-     eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
-     kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
-     FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
-     WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
-     WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
-     hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
-     VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
-     SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
-     b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
-     tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
-     1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
-     ."
-     ],
-   "eventCnt":2
-   }
-
-   [[TO BE DISCUSSED: Should the subscriber be able to request events
-   based on an event id (e.g. since), by date, etc.  How does a client
-   know it got them all?  Should we use ETags to signal whether there
-   are new events?]]
-
-
-
-
-
-
-
-Hunt, et al.            Expires February 23, 2017              [Page 18]
-
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
-
-
-5.3.5.  Failure Conditions
-
-   [[TO BE DISCUSSED: The polling mode provides no way for a subscriber
-   to indicate parsing validation errors directly in response to a
-   delivery.  When errors occur, subscriber administrators must re-
-   confirm the subscription configuration.]]
-
-5.4.  Push Notification Extensions
-
-   [[TO BE COMPLETED]]
+                  Figure 17: Example Bad Request Response
 
 6.  Security Considerations
 
@@ -1059,11 +1397,9 @@ Internet-Draft       draft-hunt-idevent-distribution         August 2016
 
 
 
-
-
-Hunt, et al.            Expires February 23, 2017              [Page 19]
+Hunt, et al.             Expires March 14, 2017                [Page 25]
 
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
    [RFC3986]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
@@ -1117,9 +1453,9 @@ Internet-Draft       draft-hunt-idevent-distribution         August 2016
 
 
 
-Hunt, et al.            Expires February 23, 2017              [Page 20]
+Hunt, et al.             Expires March 14, 2017                [Page 26]
 
-Internet-Draft       draft-hunt-idevent-distribution         August 2016
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
    [RFC7517]  Jones, M., "JSON Web Key (JWK)", RFC 7517,
@@ -1145,6 +1481,14 @@ Appendix C.  Change Log
 
    o  Simplified draft to only define HTTP POST profile (TBD)
 
+   o  Removed webpush and polling modes (can be re-added later).
+
+   o  Added SCIM management definitions for Feeds
+
+   o  Added delivery information including errors
+
+   o  Added subscription management information (e.g. how to subscribe)
+
 Authors' Addresses
 
    Phil Hunt (editor)
@@ -1157,6 +1501,17 @@ Authors' Addresses
    Google
 
    Email: mscurtescu@google.com
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 27]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
    Morteza Ansari
@@ -1173,4 +1528,41 @@ Authors' Addresses
 
 
 
-Hunt, et al.            Expires February 23, 2017              [Page 21]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires March 14, 2017                [Page 28]

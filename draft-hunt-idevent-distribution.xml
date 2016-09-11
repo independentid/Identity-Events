@@ -339,20 +339,20 @@
               the primary event. An empty array SHALL indicate there are 
               no extensions. When set, Feeds SHALL only provide the primary
               events defined. However, a Feed Provider MAY provide additional
-              extensions that are not declared.<figure>
-              <preamble>The following is an example events claim:</preamble>
+              extensions that are not declared.<vspace blankLines="1"/>The following is an example events claim:
+              <figure anchor="exEvents" title="Example Events Claim">
               <artwork>"events":{
-                "urn:ietf:params:scim:event:passwordReset":[
-                  "https://example.com/scim/event/passwordResetExt"
-                ],
-                "https://specs.openid.net/logout":[]
-              }</artwork>
-              <postamble>In the above example, the feed has two events 
+  "urn:ietf:params:scim:event:passwordReset":[
+      "https://example.com/scim/event/passwordResetExt"],
+  "https://specs.openid.net/logout":[]
+}</artwork>
+              <postamble></postamble>
+              </figure>
+              In the above example, the feed has two events 
               defined. The first is a hypothetical password reset, and the second is
               a hypothetical OpenID Connect logout. The password reset event
               has one extension defined which is 
-              <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>.</postamble>
-              </figure></t>
+              <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>.</t>
               
 							<t hangText="type">
 								<vspace />
@@ -417,7 +417,7 @@
 							<t hangText="deliveryModes">One or more URIs representing the methods of
 								delivery
 								supported by the feed. By default, all delivery modes are supported.
-                [[DO we need a registry for this, or just remove it??]]
+                [[DO we need this??]]
 							</t>
 
 						</list>
@@ -429,11 +429,13 @@
         Feed resources use schema defined in <xref target="feedMetadata"/>
         and use a schema value of <spanx style="verb">urn:ietf:params:scim:schemas:event:2.0:Feed</spanx>.
         The SCIM <spanx style="verb">ResourceType</spanx> definition defines 
-        the location of the SCIM service provider Feeds endpoint. </t>
+        the location of the SCIM service provider endpoint for <spanx style="verb">Feed</spanx>
+        resources. </t>
         
         <t>
         The Feed <spanx style="verb">ResourceType</spanx> definition 
-        is typically defined as follows:<figure>
+        is typically defined as follows:
+        <figure anchor="feedType" title="SCIM Feed ResourceType Definition">
 <artwork>{
   "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
   "id": "Feed",
@@ -445,23 +447,23 @@
 }</artwork>
         </figure>
         </t>
-        <t>To retrieve information about a feed or a number of feeds, subscribers
-        or management clients MAY query the Feeds endpoint as defined in <xref target="RFC7644">Section 3.4</xref>.</t>
+        <t>To retrieve information about a <spanx style="verb">Feed</spanx> 
+        or a number of feeds, subscribers or management clients MAY query 
+        the <spanx style="verb">/Feeds</spanx> endpoint as defined in 
+        <xref target="RFC7644">Section 3.4</xref>.</t>
         
-         <t><figure anchor="feedGetRequest" title="Example Feed GET Request">
-           <preamble>The example below retrieves a specific Feed resource whose 
-           <spanx style="verb">id</spanx> is <spanx style="verb">548b7c3f77c8bab33a4fef40</spanx>.</preamble>
-           <artwork>
-GET /Feeds/88bc00de776d49d5b535ede882d98f74
+        <t><figure anchor="feedGetRequest" title="Example Feed GET Request">
+         <preamble>The example below retrieves a specific Feed resource whose 
+         <spanx style="verb">id</spanx> is <spanx style="verb">548b7c3f77c8bab33a4fef40</spanx>.</preamble>
+<artwork>GET /Feeds/88bc00de776d49d5b535ede882d98f74
 Host: example.com
 Accept: application/scim+json
-Authorization: Bearer h480djs93hd8         
-           </artwork>
+Authorization: Bearer h480djs93hd8</artwork>
          </figure></t>
-         <t><figure anchor="feedGetResponse" title="Example Feed GET Response">
-              <preamble>The response below shows an example Feed resource
-              that describes an available feed.</preamble>
-              <artwork>HTTP/1.1 200 OK
+         <figure anchor="feedGetResponse" title="Example Feed GET Response">
+         <preamble>The response below shows an example Feed resource
+         that describes an available feed.</preamble>
+<artwork>HTTP/1.1 200 OK
 Content-Type: application/scim+json
 Location: 
  https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74
@@ -481,7 +483,7 @@ ETag: 9d1c124149f522472e7a511c85b3a31b
      ... SCIM meta attributes ...
   }
 }</artwork>
-        </figure></t>
+        </figure>
         <t>In the above example (<xref target="feedGetResponse"/>) we can
         observe that the Feed has only one event type, 
         <spanx style="verb">https://specs.openid.net/logout</spanx> and
@@ -590,7 +592,173 @@ ETag: 9d1c124149f522472e7a511c85b3a31b
               will wait before sending a new event or events.</t>
             </list></t>
         </section>
-        <section title="Subscription Verification">
+        <section title="SCIM Subscription Management">
+          <t>A Feed Publisher MAY use SCIM to support management of subscriptions.
+          Typically this involves support for the Subscription Resource Type, 
+          and the corresponding SCIM operations to create, update, retrieve
+          Subscription Resources. For SCIM service provider capability and 
+          schema discovery, see <xref target="RFC7644">Section 4</xref>.</t>
+          <section title="SCIM Subscription Resource Type">
+            <t>When Subscriptions are managed within a SCIM service provider 
+            <xref target="RFC7644"/>, Subscription resources use schema 
+            defined in <xref target="subscribeMetadata"/> and use a schema 
+            value of 
+            <spanx style="verb">urn:ietf:params:scim:schemas:event:2.0:Subscription</spanx>.</t>
+        
+            <t>The SCIM Subscription <spanx style="verb">ResourceType</spanx> definition 
+            is defined as follows:<figure anchor="subscriptionType" title="SCIM Subscription ResourceType Definition">
+<artwork>{
+  "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
+  "id": "Subscription",
+  "name": "Subscription",
+  "endpoint": "/Subscriptions",
+  "description": "Subscribers to SET Feeds",
+  "schema": "urn:ietf:params:scim:schemas:event:2.0:Subscription",
+  "schemaExtensions": []
+}</artwork>
+            </figure>
+            </t>
+            <t>To retrieve information about one or more Subscriptions, 
+            Subscribers or management clients MAY query the <spanx style="verb">/Subscriptions</spanx> endpoint 
+            as defined in <xref target="RFC7644">Section 3.4</xref>.</t>
+        
+            <t><figure anchor="subscriptionGetRequest" title="Example SCIM Subscription GET Request">
+            <preamble>The example below retrieves a specific <spanx style="verb">Subscription</spanx> resource whose 
+            <spanx style="verb">id</spanx> is <spanx style="verb">548b7c3f77c8bab33a4fef40</spanx>.</preamble>
+            <artwork>GET /Subscriptions/767aad7853d240debc8e3c962051c1c0
+Host: example.com
+Accept: application/scim+json
+Authorization: Bearer h480djs93hd8</artwork>
+            </figure></t>
+            <t><figure anchor="subscriptionResponse" title="Example Subscription GET Response">
+            <preamble>The response below shows an example Feed resource
+            that describes an available feed.</preamble>
+            <artwork>HTTP/1.1 200 OK
+Content-Type: application/scim+json
+Location: 
+ https://example.com/v2/Subscriptions/767aad7853d240debc8e3c962051c1c0
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subscription"],
+  "id":"767aad7853d240debc8e3c962051c1c0",
+  "feedName":"OIDCLogoutFeed",
+  "feedUri":
+    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "aud":"https://sets.myexamplerp.com",
+  "subStatus":"pending",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "description":"Logout events from oidc.example.com",
+  "meta":{
+     ... SCIM meta attributes ...
+  }
+}</artwork>
+            </figure></t>
+            <t>In the above example (<xref target="subscriptionResponse"/>)
+            observe that the subscription is for the SCIM <spanx style="verb">Feed</spanx> resource defined at 
+            <spanx style="verb">https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74</spanx>.
+            The current subscription state is <spanx style="verb">pending</spanx>
+            which suggest the Subscription Verification (see <xref target="verifySubscription"/>) process has not yet 
+            completed. Since there is no value for <spanx style="verb">feedJwk</spanx>, )
+            or <spanx style="verb">confidentialJwk</spanx>, the SETs will be
+            sent without signing or encryption (plain text).</t>          
+          </section>
+          <section title="New Subscription Requests">
+            <t>To subscribe to a feed, the subscriber of management client
+            uses the SCIM Create operation as defined in <xref target="RFC7644">Section 3.3</xref>.
+            SCIM subscription management service providers MAY have additional 
+            schema requirements which MAY be discovered using SCIM service 
+            configuration and schema discovery, see <xref target="RFC7644">Section 4</xref>.
+            </t>
+            <figure anchor="createSubscription" title="Example New Subscription Request in SCIM">
+            <preamble>In the following non-normative example, a new Subscription resource
+            is requested. Note that the SCIM service provider automatically
+            assigns the <spanx style="verb">id</spanx> attribute.</preamble>
+ <artwork>POST /Subscriptions
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subscription"],
+  "feedName":"OIDCLogoutFeed",
+  "feedUri":
+    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "aud":"https://sets.myexamplerp.com",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "description":"Logout events from oidc.example.com"
+}</artwork>
+
+            </figure>
+            <figure anchor="createSubscriptionResponse" title="Example Response to Subscription Request">
+            <preamble>In following non-normative response, the SCIM service provider
+            has automatically assigned a resource location as well as an
+            <spanx style="verb">id</spanx>. Usually upon creation, the
+            initial value of <spanx style="verb">subStatus</spanx> is 
+            <spanx style="verb">pending</spanx> indicating that the 
+            Subscription Verification (see <xref target="verifySubscription"/>) 
+            has not been completed.</preamble>
+<artwork>HTTP/1.1 201 Created
+Content-Type: application/scim+json
+Location: 
+ https://example.com/v2/Subscriptions/767aad7853d240debc8e3c962051c1c0
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subscription"],
+  "id":"767aad7853d240debc8e3c962051c1c0",
+  "feedName":"OIDCLogoutFeed",
+  "feedUri":
+    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "aud":"https://sets.myexamplerp.com",
+  "subStatus":"pending",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "description":"Logout events from oidc.example.com",
+  "meta":{
+     ... SCIM meta attributes ...
+  }
+}</artwork>
+            </figure>
+          </section>
+          <section title="Updating Subscriptions">
+            <t>To modify a Subscription, a Subscriber or authorized management
+            client MAY use the SCIM PUT operation (see <xref target="RFC7644">Section 3.5.1</xref>) 
+            and MAY use the SCIM PATCH operation (see <xref target="RFC7644">Section 3.5.2</xref>) 
+            if supported by the SCIM Subscription server. </t>
+            
+            <figure anchor="subscriptionPatch" title="Example SCIM Subscription Update">
+            <preamble>In the following non-normative example, the client
+            is requesting that <spanx style="verb">subStatus</spanx> be 
+            changed to <spanx style="verb">paused</spanx> for the Subscription
+            whose path is identified by the request URI path.</preamble>
+<artwork>PATCH /Subscriptions/767aad7853d240debc8e3c962051c1c0
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":
+    ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+  "Operations": [{
+    "op":"replace",
+    "path":"subStatus",
+    "value":"paused"
+  }]
+}
+
+</artwork>
+            </figure>
+            
+         
+          </section>
+        </section>
+        <section anchor="verifySubscription" title="Subscription Verification">
           <t>In order to avoid ongoing communication issues and to minimize
           requirements for Feed Providers to maintain a series of SETs indefinitely,
           a verification process is used to confirm that the requested 
@@ -667,6 +835,7 @@ ETag: 9d1c124149f522472e7a511c85b3a31b
             to <spanx style="verb">failed</spanx>. </t>
           
           </section>
+          
         </section>
   </section>
     
@@ -691,6 +860,40 @@ ETag: 9d1c124149f522472e7a511c85b3a31b
         <t>This specification defines the first delivery method known as 
         "HTTP Web Callback Method" which uses HTTP POST.</t>
      </section> 
+     <section title="Delivery Processing">
+     <t>As mentioned in <xref target="subscribeMetadata"/>, the attribute 
+     <spanx style="verb">subStatus</spanx> defines the current state of 
+     a subscribers subscription. The following describes that actions taken
+     based on <spanx style="verb">subStatus</spanx>.</t>
+     <texttable anchor="processingStatus" title="Delivery Processing By Status">
+     <ttcol>Status</ttcol><ttcol>Action</ttcol>
+     
+     <c>on</c><c>Delivery SHALL be attempted based on the method defined
+     in the subscription attribute <spanx style="verb">methodUri</spanx>.
+     If the SET fails to deliver it MAY be retained for a retry delivery in a minimum
+     of <spanx>minDeliveryInterval</spanx> seconds. If new SETs arrive before 
+     the interval, the SETs MUST be held for delivery in order of reception.
+     If this is a repeat attempt to deliver, the Feed Publisher MAY discard
+     the SET if <spanx style="verb">maxRetries</spanx> or <spanx style="emph">maxDeliveryTime</spanx> 
+     is exceeded. If a SET is discarded, the Feed Publisher MAY set <spanx style="verb">subStatus</spanx>
+     to <spanx style="verb">failed</spanx>.</c>
+     
+     <c>verify</c><c>If the SET is not a
+     Verify SET, the SET MAY be retained for a retry at the Feed Publishers discretion. 
+     If a Verify SET fails to deliver, the Feed Publisher SHALL set <spanx style="verb">subStatus</spanx>
+     to <spanx style="verb">failed</spanx>.</c>
+     
+     <c>paused</c><c>The SET is held for delivery. The Feed Publisher MAY
+     at its own discretion set the subscription state to <spanx style="verb">failed</spanx>
+     if <spanx style="verb">subStatus</spanx> is not returned to <spanx style="verb">on</spanx>
+     in what the Feed Publisher determines to be a reasonable amount of time.</c>
+     
+     <c>off</c><c>The SET is ignored.</c>
+     
+     <c>fail</c><c>The SET is ignored due to a previous unrecoverable error. </c>
+     
+     </texttable>
+     </section>
      <section anchor="httpPost" title="HTTP Web Callback Method">
         
        <section title="Description">
@@ -838,13 +1041,17 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
             400 Bad Request error as follows:</t>
             <texttable anchor="reqErrors" title="HTTP Status 400 Errors">
               <ttcol>Err Value</ttcol><ttcol>Description</ttcol>
-              <c>jwtErr</c><c>The payload did not contain a valid JWT.</c>
+              <c>jwtParse</c><c>Invalid or unparseable JWT or JSON structure.</c>
               <c>jwtHdr</c><c>In invalid JWT header was detected.</c>
               <c>jwtCypto</c><c>Unable to parse due to unsupported algorithm.</c>
               <c>jws</c><c>Signature was not validated.</c>
               <c>jwe</c><c>Unable to decrypt JWE encoded data.</c>
-              <c>setEvent</c><c>An unexpected event type was received.</c>
-              <c>setData</c><c>SET event claims information was incomplete or invalid.</c>
+              <c>jwtAud</c><c>Invalid audience value.</c>
+              <c>jwtIss</c><c>Issuer not recognized.</c>
+              <c>setType</c><c>An unexpected event type was received.</c>
+              <c>setParse</c><c>Invalid structure was encountered such as inability
+              to parse SET event payload.</c>
+              <c>setData</c><c>SET event claims incomplete or invalid.</c>
               <c>dup</c><c>A duplicate SET was received and has been ignored.</c>
             </texttable>
             
@@ -984,7 +1191,7 @@ Content-Type: application/json
         <t>Removed webpush and polling modes (can be re-added later).</t>
         <t>Added SCIM management definitions for Feeds</t>
         <t>Added delivery information including errors</t>
-        <t>TBD: Add subscription management information (e.g. how to subscribe)</t>
+        <t>Added subscription management information (e.g. how to subscribe)</t>
       </list> </t>
     </section>
   </back>
