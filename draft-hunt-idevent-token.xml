@@ -418,7 +418,7 @@
             for this claim, its use in general cases is NOT RECOMMENDED.</t>       
           </list>
         </t>
-        <t>The following is a new claim defined by this specification:<list style="hanging">
+        <t>The following are new claims defined by this specification:<list style="hanging">
             <t hangText="events" anchor="eventDef"><vspace blankLines="0"/>A multi-valued 
             String that contains one or more URIs representing the type 
             of event being expressed and the claims that MAY be available
@@ -429,7 +429,33 @@
             by a claim whose name matches a value in 
             <spanx style="verb">events</spanx>.  This claim is 
             REQUIRED to have at least one value.</t>
+            <t hangText="txn" anchor="txnDef"><vspace/>An OPTIONAL single-valued
+            String value that represents a unique transaction identifier. In cases where
+            multiple SETs are issued based on different event URIs, the transaction
+            identifier MAY be used to correlate SETs to the same 
+            originating event or stateful change.</t>
         </list></t>
+      </section>
+      
+      <section title="Idempotency and Ordering Considerations">
+        <t>In many cases SETs will be issued by highly distributed systems and 
+        subscribers. Without additional specification it is quite conceivable
+        that the order of SETs received by a subscriber MAY be different from
+        the order of the originating state changes or events. While 
+        the <spanx style="verb">iat</spanx> value may give
+        a rough indication of SET order, it SHOULD NOT be relied upon unless
+        the profiling SET token specification provides clarification.</t>
+        <t>Profiling specifications are encouraged to consider whether the nature
+        of SETs defined are "idempotent" in the sense that the order of receipt
+        does not matter. For example, in the case of token revocations, each
+        SET can stand on its own and order has no impact. In contrast, a 
+        profiling SET specification related to provisioning might be highly
+        dependent on ordering. As an example: one SET indicates a new resource
+        was created, while the next SET indicates the same resource is modified.
+        Non-Idempotent SET event specifications SHOULD choose to define a 
+        sequencing method such as aa claim used for the purpose
+        or identifying the order of SETs as defined by the Feed Publisher or
+        another method that is part of how SETs are distributed.</t>
       </section>
 
       <section anchor="eventMessage" title="Security Event Token Construction">
@@ -639,8 +665,8 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
 
       <section anchor="ClaimsRegistry" title="JSON Web Token Claims Registration">
 	<t>
-	  This specification registers the <spanx style="verb">events</spanx>
-	  claim in the IANA
+	  This specification registers the <spanx style="verb">events</spanx> and
+    the <spanx style="verb">txn</spanx> claims in the IANA
 	  "JSON Web Token Claims" registry <xref target="IANA.JWT.Claims"/>
 	  established by <xref target="RFC7519"/>.
 	</t>
@@ -653,14 +679,27 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
 		Claim Name: <spanx style="verb">events</spanx>
 	      </t>
 	      <t>
-		Claim Description: Security Events
+		Claim Description: Security Event URIs
 	      </t>
 	      <t>
 		Change Controller: IESG
 	      </t>
 	      <t>
 		Specification Document(s): <xref target="events"/> of [[ this specification ]]
-	      </t>
+	      <vspace blankLines="1"/></t>
+        
+        <t>
+    Claim Name: <spanx style="verb">txn</spanx>
+        </t>
+        <t>
+    Claim Description: SET Transaction Identifier
+        </t>
+        <t>
+    Change Controller: IESG
+        </t>
+        <t>
+    Specification Document(s): <xref target="events"/> of [[ this specification ]]
+        </t>
 	    </list>
 	  </t>
 	</section>
@@ -773,6 +812,11 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
       </list></t>
       
       <t>Draft 05 - PH - Fixed find/replace error that resulted in claim being spelled claimc</t>
+      <t>Draft 06 - PH - <list style="symbols">
+        <t>Corrected typos</t>
+        <t>New txn claim</t>
+        <t>New section on Idempotency and Ordering</t>
+      </list></t>
   
     </section>
   </back>
