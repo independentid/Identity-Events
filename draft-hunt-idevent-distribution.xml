@@ -146,8 +146,14 @@
 						<t hangText="Feed">A Feed is a URI that describes the set of
 							resources and events under which events may be issued. An
 							interested subscriber registers with the feed provider to subscribe
-							to an event uri to receive SETs associated with a Feed.
+							to an event uri to receive SETs associated with a Feed. An
+              individual Feed MAY have zero or more Subscriptions.
 						</t>
+            
+            <t hangText="Subscription">A Subscription contains the information
+            needed by a Feed Provider (e.g. delivery endpoints, credentials)
+            to deliver a Feed of SETs to an individual Subscriber. A 
+            Subscription has ONE Feed.</t>
 
 						<t hangText="Notification Mechanism">
 							A URI that describes the
@@ -156,8 +162,9 @@
 							receive notification events. 
 						</t>
 
-						<t hangText="Subscriber">A Subscriber registers to receive SETs
-              from a feed provider that are part of a Feed.
+						<t hangText="Subscriber">A Subscriber is an party or
+            security entity registers in the form of a Subscription to 
+            receive SETs from a feed provider that are part of a Feed. 
 						</t>
 					</list>
 				</t>
@@ -254,7 +261,8 @@
             which a service provider defines a Feed or how feed URIs should be
             specified. Some possible methods for defining feeds include:
             <list style="hanging">
-              <t hangText="By Resource"><vspace blankLines="0"/>Each resource might have its own event
+              <t hangText="By Resource or Subject"><vspace blankLines="0"/>A
+                resource or subject might have its own associated event
                 notification Feed. For example, a User's mobile application may
                 require notification of changes or rights defined in a SCIM User
                 resource associated with the mobile user.
@@ -520,6 +528,11 @@ ETag: 9d1c124149f522472e7a511c85b3a31b
               <spanx style="verb">urn:ietf:params:set:method:HTTP:webCallback</spanx>
               <vspace blankLines="0"/> in which the Feed Provider delivers events 
               using HTTP POST to a specified callback URI.</t>
+              
+              <t hangText="deliveryUri">A URI that describes the location 
+              SETs are delivered. Its format and usage requirements are 
+              defined by the associated <spanx style="verb">methodUri</spanx> 
+              specification.</t>
 
               <t hangText="aud"><vspace blankLines="0"/>An OPTIONAL URI representing 
               the audience of the subscription. The value SHALL be the value 
@@ -645,6 +658,7 @@ Location:
   "feedUri":
     "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
   "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
   "aud":"https://sets.myexamplerp.com",
   "subStatus":"pending",
   "maxDeliveryTime":3600,
@@ -687,6 +701,7 @@ Authorization: Bearer h480djs93hd8
   "feedUri":
     "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
   "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
   "aud":"https://sets.myexamplerp.com",
   "maxDeliveryTime":3600,
   "minDeliveryInterval":0,
@@ -714,6 +729,7 @@ Location:
   "feedUri":
     "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
   "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
   "aud":"https://sets.myexamplerp.com",
   "subStatus":"pending",
   "maxDeliveryTime":3600,
@@ -774,7 +790,7 @@ Authorization: Bearer h480djs93hd8
           Subscription status SHALL be set to <spanx style="verb">fail</spanx>.
           </t>
           
-          <section anchor="verifyPush" title="Verifying Subscriptions">
+          <section anchor="[[this RFC URL]]#verifyPush" title="Verifying Subscriptions">
             <t>The verification process 
             serves to verify that the identified Subscriber is willing to receive
             SETs and is correctly configured. In the case of push style
@@ -793,7 +809,7 @@ Authorization: Bearer h480djs93hd8
             <spanx style="verb">methodUri</spanx> mechanism. The Verify 
             SET contains the following attributes:<list style="hanging">
               <t hangText="events">Set with a value of 
-              <spanx style="verb">urn:ietf:params:set:method:verify</spanx>.</t>
+              <spanx style="verb">[[this RFC URL]]#verify</spanx>.</t>
 
               <t hangText="iss">Set to the URI of the feed publisher (see 
               <xref target="idevent-token"/>).</t>
@@ -818,7 +834,7 @@ Authorization: Bearer h480djs93hd8
             configuration and possession of keys.</t>
             
             <t>Note that the verification event URI 
-            (<spanx style="verb">urn:ietf:params:set:method:verify</spanx>) 
+            (<spanx style="verb">[[this RFC URL]]#verify</spanx>) 
             type is not normally listed as part of the definition of a 
             Feed as it is not part of the normal information flow of a Feed.
             Any Feed MAY include a SET verification event whether listed or
@@ -907,6 +923,11 @@ Authorization: Bearer h480djs93hd8
             HTTP POST request. Depending on the settings for the 
             subscription metadata (see <xref target="subscribeMetadata"/>), 
             the SET MAY be signed and/or encrypted as defined in <xref target="idevent-token"/>.</t>
+            
+            <t>The Subscription's <spanx style="verb">deliveryUri</spanx> 
+            attribute indicates the location of a Subscriber provided 
+            endpoint which can accept HTTP POST requests (e.g. 
+            <spanx style="verb">https://notify.examplerp.com/Events</spanx>).</t>
        </section>
           
        <section anchor="httpMessageFormat" title="Delivery Message Format">
@@ -957,7 +978,7 @@ Authorization: Bearer h480djs93hd8
             event is not yet encoded as a JWT token:</preamble>
 <artwork>{  
   "jti": "4d3559ec67504aaba65d40b0363faad8",
-  "events":["urn:ietf:params:set:method:verify"],
+  "events":["[[this RFC URL]]#verify"],
   "iat": 1458496404,
   "iss": "https://scim.example.com",  
   "exp": 1458497000,
@@ -965,7 +986,7 @@ Authorization: Bearer h480djs93hd8
    "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
    "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
   ], 
-  "urn:ietf:params:set:method:verify":{
+  "[[this RFC URL]]#verify":{
     "confirmChallenge":"ca2179f4-8936-479a-a76d-5486e2baacd7"
   }  
 }</artwork>
@@ -1010,7 +1031,8 @@ Content-Type: application/json
             
             <figure align="left" anchor="postSet" title="Example Web Callback POST Request">
               <artwork align="left">POST /Events  HTTP/1.1
-Host: notify.example.com
+
+Host: notify.examplerp.com
 Accept: application/json
 Content-Type: application/jwt
 "eyJhbGciOiJub25lIn0
@@ -1106,13 +1128,11 @@ Content-Type: application/json
 
     <section anchor="IANA" title="IANA Considerations">
       <section anchor="notifyMechRegistry"
-               title="SCIM Event Notification Mechanism Registry">
+               title="Event Notification Mechanism Registry">
         <t>TODO: Registration for Notification Mechanisms</t>
       </section>
 
-      <section anchor="eventTypeRegistry" title="SCIM Event Type Registry">
-        <t>TODO: Registration of Event Types</t>
-      </section>
+  
     </section>
   </middle>
 
