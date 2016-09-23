@@ -5,10 +5,10 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                            M. Scurtescu
-Expires: March 26, 2017                                           Google
+Expires: March 27, 2017                                           Google
                                                                M. Ansari
                                                                    Cisco
-                                                      September 22, 2016
+                                                      September 23, 2016
 
 
        SET Token Distribution and Subscription Management Profile
@@ -17,9 +17,10 @@ Expires: March 26, 2017                                           Google
 Abstract
 
    The specification defines how a subscriber to a feed of security
-   events may query for and subscribe to a feed.  The specification
-   defines a single mandatory-to-implement method using HTTP Post to
-   deliver events to registered subscribers.
+   events (SETs) may query for, subscribe and receive SETs from a
+   security event feed.  The specification defines a single mandatory-
+   to-implement method using HTTP Post to deliver events to registered
+   subscribers and a registry for new methods.
 
 Status of This Memo
 
@@ -36,7 +37,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 26, 2017.
+   This Internet-Draft will expire on March 27, 2017.
 
 Copyright Notice
 
@@ -49,28 +50,28 @@ Copyright Notice
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
    to this document.  Code Components extracted from this document must
-   include Simplified BSD License text as described in Section 4.e of
 
 
 
-Hunt, et al.             Expires March 26, 2017                 [Page 1]
+Hunt, et al.             Expires March 27, 2017                 [Page 1]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
+   include Simplified BSD License text as described in Section 4.e of
    the Trust Legal Provisions and are provided without warranty as
    described in the Simplified BSD License.
 
 Table of Contents
 
    1.  Introduction and Overview . . . . . . . . . . . . . . . . . .   2
-     1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   3
+     1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   4
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   4
-   2.  Event Notification Process  . . . . . . . . . . . . . . . . .   4
+   2.  Event Notification Process  . . . . . . . . . . . . . . . . .   5
    3.  Event Feeds . . . . . . . . . . . . . . . . . . . . . . . . .   6
      3.1.  Feed Types  . . . . . . . . . . . . . . . . . . . . . . .   6
      3.2.  Feed Metadata . . . . . . . . . . . . . . . . . . . . . .   7
-     3.3.  SCIM Feed Management  . . . . . . . . . . . . . . . . . .   8
+     3.3.  SCIM Feed Management  . . . . . . . . . . . . . . . . . .   9
    4.  Subscriptions . . . . . . . . . . . . . . . . . . . . . . . .  10
      4.1.  Overview  . . . . . . . . . . . . . . . . . . . . . . . .  10
      4.2.  Subscription Metadata . . . . . . . . . . . . . . . . . .  10
@@ -90,8 +91,7 @@ Table of Contents
        5.3.4.  Delivery Procedure  . . . . . . . . . . . . . . . . .  23
    6.  Security Considerations . . . . . . . . . . . . . . . . . . .  25
    7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  25
-     7.1.  SCIM Event Notification Mechanism Registry  . . . . . . .  25
-     7.2.  SCIM Event Type Registry  . . . . . . . . . . . . . . . .  25
+     7.1.  Event Notification Mechanism Registry . . . . . . . . . .  25
    8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  25
      8.1.  Normative References  . . . . . . . . . . . . . . . . . .  25
      8.2.  Informative References  . . . . . . . . . . . . . . . . .  26
@@ -102,20 +102,20 @@ Table of Contents
 
 1.  Introduction and Overview
 
-   This specification defines a set of capabilities that can be used by
-   publishers to distribute security event tokens or SETs (see
-   [idevent-token]) to subscribers of a SET event feed.  These
+   This specification defines a method by which SETs (see
+   [I-D.hunt-idevent-token]) can be delivered by publishers to feed
+   subscribers using HTTP POST [RFC7231] as well as an extension
+   registry enabling other methods of delivery.  This specification also
 
 
 
-
-Hunt, et al.             Expires March 26, 2017                 [Page 2]
+Hunt, et al.             Expires March 27, 2017                 [Page 2]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
-   capabilities include using HTTP [RFC7231] to query for available
-   feeds, subscribing to a feed, and receiving SET events via HTTP POST.
+   defines how subscribers MAY query for available Feeds, and manage
+   event Subscriptions using SCIM [RFC7644].
 
    The following diagram shows a typical SET Feed Provider and the
    services provided to Subscribers.  Arrow heads point to the service
@@ -124,30 +124,51 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
            +------------+                        +-------------+
            |            |Feeds Catalog           |             |
            |            <------------------------+             |
-           |    SET     |                        |    SET      |
-           |    Feed    |Subscription Request    |    Feed     |
-           |  Provider  <------------------------+  Subscriber |
-           |            |                        |             |
-           |            |Subscription Verify     |             |
-           |            +------------------------>             |
+           |   SCIM     |                        |    SET      |
+           |   Feed     |Subscription Request    |    Feed     |
+           |   Mgmt     <------------------------+  Subscriber |
            |            |                        |             |
            |            |Subscription Mgmt       |             |
            |            <------------------------+             |
            |            |                        |             |
-           |            |SET Delivery            |             |
+           +------------+                        |             |
+           +------------+                        |             |
+           |            |                        |             |
+           |   FEED     |SET Delivery            |             |
            |            +------------------------>             |
+           |  Provider  |                        |             |
            |            |                        |             |
            +------------+                        +-------------+
 
               Figure 1: Subscription Management and Delivery
 
-   A SET feed provider MAY be directly integrated into a source service
+   A SET Feed Provider MAY be directly integrated into a source service
    that generates events, or it may be a separate service entity that
    off-loads event distribution from the event generator to act as its
    delegated publisher.  For the purposes of this specification, while
    SET distribution may be handled separately, this specification will
    consider the method for how event generators send events to
    publishers as out-of-scope.
+
+   The specification uses SCIM protocol [RFC7644] to advertise available
+   Feeds and to enable Subscribers to request, subscriber to, and manage
+   Subscriptions.
+
+   The specification defines a registry by which multiple SET delivery
+   methods can be registered.  The specification includes a web callback
+   method which uses HTTP POST [RFC7231] to deliver SETs to Subscribers.
+
+
+
+
+
+
+
+
+Hunt, et al.             Expires March 27, 2017                 [Page 3]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
 
 1.1.  Notational Conventions
 
@@ -159,16 +180,6 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    that affect the inter-operability and security of implementations.
    When these words are not capitalized, they are meant in their
    natural-language sense.
-
-
-
-
-
-
-Hunt, et al.             Expires March 26, 2017                 [Page 3]
-
-Internet-Draft       draft-hunt-idevent-distribution      September 2016
-
 
    For purposes of readability examples are not URL encoded.
    Implementers MUST percent encode URLs as described in Section 2.1 of
@@ -182,49 +193,53 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 1.2.  Definitions
 
    This specification assumes terminology defined in the Security Event
-   Token specification[idevent-token].
+   Token specification[I-D.hunt-idevent-token].
 
    The following definitions are specific to Identity Event publishing:
 
-   Feed Provider  The Feed Provider publishes SETs to be distributed to
-      registered subscribers.
+   Feed Provider
+      The Feed Provider publishes SETs to be distributed to registered
+      subscribers.
 
-   Feed  A Feed is a URI that describes the set of resources and events
+   Feed
+      A Feed is a URI that describes the set of resources and events
       under which events may be issued.  An interested subscriber
-      registers with the feed provider to subscribe to an event uri to
+      registers with the feed provider to subscribe to an event URI to
       receive SETs associated with a Feed.  An individual Feed MAY have
       zero or more Subscriptions.
 
-   Subscription  A Subscription contains the information needed by a
-      Feed Provider (e.g. delivery endpoints, credentials) to deliver a
-      Feed of SETs to an individual Subscriber.  A Subscription has ONE
-      Feed.
+   Subscription
+      A Subscription contains the information needed by a Feed Provider
+      (e.g. delivery endpoints, credentials) to deliver a Feed of SETs
+      to an individual Subscriber.  A Subscription has ONE Feed.
 
-   Notification Mechanism  A URI that describes the chosen event
-      notification mechanism.  When subscribing to a feed, a client may
-      choose a specific mechanism by which it wishes to receive
-      notification events.
+   Notification Mechanism
+      A URI that describes the chosen event notification mechanism.
+      When subscribing to a feed, a client may choose a specific
+      mechanism by which it wishes to receive notification events.
 
-   Subscriber  A Subscriber is an party or security entity registers in
-      the form of a Subscription to receive SETs from a feed provider
-      that are part of a Feed.
+
+
+
+Hunt, et al.             Expires March 27, 2017                 [Page 4]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+   Subscriber
+      A Subscriber is an party or security entity registers in the form
+      of a Subscription to receive SETs from a feed provider that are
+      part of a Feed.
 
 2.  Event Notification Process
 
    When a Security Event occurs, the Feed Provider constructs a SET
-   token [idevent-token] that describes the event.  The feed provider
-   determines the feeds that the event should be distributed to, and
-   determines which Subscribers need to be notified.
+   token [I-D.hunt-idevent-token] that describes the event.  The feed
+   provider determines the feeds that the event should be distributed
+   to, and determines which Subscribers need to be notified.
 
    How Feeds are defined and the process by which events are identified
    for subscribers is out-of-scope of this specification.
-
-
-
-Hunt, et al.             Expires March 26, 2017                 [Page 4]
-
-Internet-Draft       draft-hunt-idevent-distribution      September 2016
-
 
    When a SET is available for a subscriber, the Feed Provider attempts
    to deliver the SET based on the Subscriber's registered delivery
@@ -234,8 +249,8 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
       uses an HTTP/1.1 POST to the endpoint to deliver the event to the
       registered subscriber;
 
-   o  Or, the Feed Provider delivers the event through a different not
-      defined by this specification.
+   o  Or, the Feed Provider delivers the event through a different
+      method not defined by this specification.
 
    After a SET is delivered to all subscribers, Feed Providers do not
    typically maintain SETs or histories.  As such, published SETs SHOULD
@@ -259,6 +274,14 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    The action a Subscriber takes in response to a SET MAY be
    substantially different than merely copying the action of the
    publisher.  A single SET MAY trigger multiple receiver actions.  For
+
+
+
+Hunt, et al.             Expires March 27, 2017                 [Page 5]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
    example, upon receiving notification that a user resource has been
    added to a group, the Subscriber may first determine that the user
    does not exist in the Subscriber's domain.  The Subscriber translates
@@ -269,18 +292,6 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
    2.  The Subscriber then enables the user for the application
        associated with membership in the Feed Publisher's group.
-
-
-
-
-
-
-
-
-Hunt, et al.             Expires March 26, 2017                 [Page 5]
-
-Internet-Draft       draft-hunt-idevent-distribution      September 2016
-
 
 3.  Event Feeds
 
@@ -301,11 +312,11 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    provider defines a Feed or how feed URIs should be specified.  Some
    possible methods for defining feeds include:
 
-   By Resource
-      Each resource might have its own event notification Feed.  For
-      example, a User's mobile application may require notification of
-      changes or rights defined in a SCIM User resource associated with
-      the mobile user.
+   By Resource or Subject
+      A resource or subject might have its own associated event
+      notification Feed.  For example, a User's mobile application may
+      require notification of changes or rights defined in a SCIM User
+      resource associated with the mobile user.
 
    By Endpoint
       A Feed might be defined by an endpoint where any event relating to
@@ -319,6 +330,14 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
       subscribing enterprise.
 
    By Filter
+
+
+
+Hunt, et al.             Expires March 27, 2017                 [Page 6]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
       A Feed might define a collection of resources based on a filter
       that describes a set of matching criteria a resource may be
       included in a Feed.  Note that this type of Feed may require extra
@@ -329,15 +348,6 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
       based on the filter itself.
 
    By Group
-
-
-
-
-Hunt, et al.             Expires March 26, 2017                 [Page 6]
-
-Internet-Draft       draft-hunt-idevent-distribution      September 2016
-
-
       For example, all resources within a SCIM Group could be used to
       define the resources within a particular Feed.
 
@@ -374,6 +384,16 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
       The following is an example events claim:
 
+
+
+
+
+
+Hunt, et al.             Expires March 27, 2017                 [Page 7]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
    "events":{
      "urn:ietf:params:scim:event:passwordReset":[
          "https://example.com/scim/event/passwordResetExt"],
@@ -385,15 +405,6 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
       In the above example, the feed has two events defined.  The first
       is a hypothetical password reset, and the second is a hypothetical
       OpenID Connect logout.  The password reset event has one extension
-
-
-
-
-Hunt, et al.             Expires March 26, 2017                 [Page 7]
-
-Internet-Draft       draft-hunt-idevent-distribution      September 2016
-
-
       defined which is "https://example.com/scim/event/
       passwordResetExt".
 
@@ -431,6 +442,14 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
    The following multi-valued attributes are defined:
 
+
+
+
+Hunt, et al.             Expires March 27, 2017                 [Page 8]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
    deliveryModes  One or more URIs representing the methods of delivery
       supported by the feed.  By default, all delivery modes are
       supported.  [[DO we need this??]]
@@ -442,13 +461,6 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    "urn:ietf:params:scim:schemas:event:2.0:Feed".  The SCIM
    "ResourceType" definition defines the location of the SCIM service
    provider endpoint for "Feed" resources.
-
-
-
-Hunt, et al.             Expires March 26, 2017                 [Page 8]
-
-Internet-Draft       draft-hunt-idevent-distribution      September 2016
-
 
    The Feed "ResourceType" definition is typically defined as follows:
 
@@ -489,19 +501,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.             Expires March 26, 2017                 [Page 9]
+Hunt, et al.             Expires March 27, 2017                 [Page 9]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -557,7 +557,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 10]
+Hunt, et al.             Expires March 27, 2017                [Page 10]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -613,7 +613,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 11]
+Hunt, et al.             Expires March 27, 2017                [Page 11]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -669,7 +669,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 12]
+Hunt, et al.             Expires March 27, 2017                [Page 12]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -725,7 +725,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 13]
+Hunt, et al.             Expires March 27, 2017                [Page 13]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -781,7 +781,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 14]
+Hunt, et al.             Expires March 27, 2017                [Page 14]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -837,7 +837,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 15]
+Hunt, et al.             Expires March 27, 2017                [Page 15]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -893,7 +893,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 16]
+Hunt, et al.             Expires March 27, 2017                [Page 16]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -939,17 +939,17 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
    The verification process serves to verify that the identified
    Subscriber is willing to receive SETs and is correctly configured.
-   In the case of push style subscriptions, where the publisher initates
-   the action to deliver a SET, Verification can also serve to prevent a
-   Feed Publication server from flooding an endpoint which did not
-   actually request a Subscription.
+   In the case of push style subscriptions, where the publisher
+   initiates the action to deliver a SET, Verification can also serve to
+   prevent a Feed Publication server from flooding an endpoint which did
+   not actually request a Subscription.
 
 
 
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 17]
+Hunt, et al.             Expires March 27, 2017                [Page 17]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -962,9 +962,10 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    verification SET to the subscriber using the registered "methodUri"
    mechanism.  The Verify SET contains the following attributes:
 
-   events  Set with a value of "urn:ietf:params:set:method:verify".
+   events  Set with a value of "[[this RFC URL]]#verify".
 
-   iss  Set to the URI of the feed publisher (see [idevent-token]).
+   iss  Set to the URI of the feed publisher (see
+      [I-D.hunt-idevent-token]).
 
    aud  MUST be set to a value that matches the subscription "feedUri"
       requested.
@@ -981,11 +982,11 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    Successful parsing of the message confirms that provides confirmation
    of correct configuration and possession of keys.
 
-   Note that the verification event URI
-   ("urn:ietf:params:set:method:verify") type is not normally listed as
-   part of the definition of a Feed as it is not part of the normal
-   information flow of a Feed.  Any Feed MAY include a SET verification
-   event whether listed or not in the Feed event metadata.
+   Note that the verification event URI ("[[this RFC URL]]#verify") type
+   is not normally listed as part of the definition of a Feed as it is
+   not part of the normal information flow of a Feed.  Any Feed MAY
+   include a SET verification event whether listed or not in the Feed
+   event metadata.
 
    Upon receiving the SET, the subscriber acknowledges receipt as
    defined by the method profile (for example, see Section 5.3.3).
@@ -1004,13 +1005,12 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-
-Hunt, et al.             Expires March 26, 2017                [Page 18]
+Hunt, et al.             Expires March 27, 2017                [Page 18]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
-      The _methodUri_ URI value for the delivery method and a
+      The "methodUri" URI value for the delivery method and a
       description of the method.
 
    Subscription Verification Procedure
@@ -1019,7 +1019,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
    Delivery Message Format
       A description of an event delivery message and how to locate the
-      event token(s) as well as any additional signaling parameters.
+      event token(s) as well as any additional error signalling.
 
    Delivery Procedure
       The protocol procedure for a delivery request (push or poll), and
@@ -1061,7 +1061,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 19]
+Hunt, et al.             Expires March 27, 2017                [Page 19]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1072,11 +1072,11 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    | on     | Delivery SHALL be attempted based on the method defined  |
    |        | in the subscription attribute "methodUri".  If the SET   |
    |        | fails to deliver it MAY be retained for a retry delivery |
-   |        | in a minimum of _minDeliveryInterval_ seconds. If new    |
+   |        | in a minimum of "minDeliveryInterval" seconds. If new    |
    |        | SETs arrive before the interval, the SETs MUST be held   |
    |        | for delivery in order of reception.  If this is a repeat |
    |        | attempt to deliver, the Feed Publisher MAY discard the   |
-   |        | SET if "maxRetries" or _maxDeliveryTime_ is exceeded. If |
+   |        | SET if "maxRetries" or "maxDeliveryTime" is exceeded. If |
    |        | a SET is discarded, the Feed Publisher MAY set           |
    |        | "subStatus" to "failed".                                 |
    | verify | If the SET is not a Verify SET, the SET MAY be retained  |
@@ -1107,7 +1107,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    This delivery method is capable of delivering a single SET per HTTP
    POST request.  Depending on the settings for the subscription
    metadata (see Section 4.2), the SET MAY be signed and/or encrypted as
-   defined in [idevent-token].
+   defined in [I-D.hunt-idevent-token].
 
    The Subscription's "deliveryUri" attribute indicates the location of
    a Subscriber provided endpoint which can accept HTTP POST requests
@@ -1117,7 +1117,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 20]
+Hunt, et al.             Expires March 27, 2017                [Page 20]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1125,7 +1125,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 5.3.2.  Delivery Message Format
 
    The content-type for this method is "application/jwt" and consists of
-   a single SET token (see [idevent-token]).
+   a single SET token (see [I-D.hunt-idevent-token]).
 
      eyJhbGciOiJub25lIn0
      .
@@ -1173,7 +1173,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 21]
+Hunt, et al.             Expires March 27, 2017                [Page 21]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1184,7 +1184,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
    {
      "jti": "4d3559ec67504aaba65d40b0363faad8",
-     "events":["urn:ietf:params:set:method:verify"],
+     "events":["[[this RFC URL]]#verify"],
      "iat": 1458496404,
      "iss": "https://scim.example.com",
      "exp": 1458497000,
@@ -1192,7 +1192,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
       "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
       "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
      ],
-     "urn:ietf:params:set:method:verify":{
+     "[[this RFC URL]]#verify":{
        "confirmChallenge":"ca2179f4-8936-479a-a76d-5486e2baacd7"
      }
    }
@@ -1209,7 +1209,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
    The following is a non-normative example response to a Verify SET
    received via HTTP/1.1 POST and includes a JSON object containing the
-   confirmation attribue and value.
+   confirmation attribute and value.
 
    HTTP/1.1 200 OK
    Content-Type: application/json
@@ -1229,7 +1229,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 22]
+Hunt, et al.             Expires March 27, 2017                [Page 22]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1266,9 +1266,9 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    Upon receipt of the request, the Subscriber SHALL validate the JWT
    structure of the SET as defined in Section 7.2 [RFC7519].  The
    Subscriber SHALL also validate the SET information as described in
-   Section 2 [idevent-token].
+   Section 2 [I-D.hunt-idevent-token].
 
-   If the SET is determined to be valid, the Susbscriber SHALL indicate
+   If the SET is determined to be valid, the Subscriber SHALL indicate
    successful submission by responding with HTTP Status 202 as
    "Accepted" (see Section 6.3.3 [RFC7231]).
 
@@ -1285,7 +1285,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 23]
+Hunt, et al.             Expires March 27, 2017                [Page 23]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1341,7 +1341,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 24]
+Hunt, et al.             Expires March 27, 2017                [Page 24]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1374,21 +1374,18 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 7.  IANA Considerations
 
-7.1.  SCIM Event Notification Mechanism Registry
+7.1.  Event Notification Mechanism Registry
 
    TODO: Registration for Notification Mechanisms
-
-7.2.  SCIM Event Type Registry
-
-   TODO: Registration of Event Types
 
 8.  References
 
 8.1.  Normative References
 
-   [idevent-token]
-              Oracle Corporation, "Security Event Token (work in
-              progress)".
+   [I-D.hunt-idevent-token]
+              Hunt, P., Denniss, W., Ansari, M., and M. Jones, "Security
+              Event Token (SET)", draft-hunt-idevent-token-05 (work in
+              progress), September 2016.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -1397,7 +1394,10 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 25]
+
+
+
+Hunt, et al.             Expires March 27, 2017                [Page 25]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1453,7 +1453,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 26]
+Hunt, et al.             Expires March 27, 2017                [Page 26]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1477,7 +1477,8 @@ Appendix C.  Change Log
 
    o  Removed the version from filename in GITHUB version
 
-   o  Aligned document with new SET terminology from idevent-token
+   o  Aligned document with new SET terminology from I-D.hunt-idevent-
+      token
 
    o  Simplified draft to only define HTTP POST profile (TBD)
 
@@ -1488,6 +1489,8 @@ Appendix C.  Change Log
    o  Added delivery information including errors
 
    o  Added subscription management information (e.g. how to subscribe)
+
+   o  Updated reference to idevent-token to published IETF version
 
 Authors' Addresses
 
@@ -1506,10 +1509,7 @@ Authors' Addresses
 
 
 
-
-
-
-Hunt, et al.             Expires March 26, 2017                [Page 27]
+Hunt, et al.             Expires March 27, 2017                [Page 27]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1565,4 +1565,4 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 26, 2017                [Page 28]
+Hunt, et al.             Expires March 27, 2017                [Page 28]

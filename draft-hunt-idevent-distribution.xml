@@ -50,9 +50,10 @@
 		<abstract>
 			<t>
 				The specification defines how a subscriber to a feed of security 
-        events may query for and subscribe to a feed. The specification defines
+        events (SETs) may query for, subscribe and receive SETs from a
+        security event feed. The specification defines
         a single mandatory-to-implement method using HTTP Post to deliver 
-        events to registered subscribers. </t>
+        events to registered subscribers and a registry for new methods. </t>
 		</abstract>
 	</front>
 
@@ -60,11 +61,12 @@
 		<section anchor="intro" title="Introduction and Overview" toc="default">
 			
       <t>
-        This specification defines a set of capabilities that can be used
-        by publishers to distribute security event tokens or SETs (see <xref target="idevent-token"/>)
-        to subscribers of a SET event feed. These capabilities include
-        using HTTP <xref target="RFC7231"/> to query for available feeds, subscribing to a feed, and
-        receiving SET events via HTTP POST.
+        This specification defines a method by which SETs (see <xref target="I-D.hunt-idevent-token"/>)
+        can be delivered by publishers to feed subscribers using HTTP POST 
+        <xref target="RFC7231"/> as well as an extension registry enabling
+        other methods of delivery. This specification also defines how 
+        subscribers MAY query for available Feeds, and 
+        manage event Subscriptions using SCIM <xref target="RFC7644"/>. 
 			</t>
 
 			<figure anchor="notificationArch" title="Subscription Management and Delivery">
@@ -75,24 +77,25 @@
 +------------+                        +-------------+
 |            |Feeds Catalog           |             |
 |            &lt;------------------------+             |
-|    SET     |                        |    SET      |
-|    Feed    |Subscription Request    |    Feed     |
-|  Provider  &lt;------------------------+  Subscriber |
-|            |                        |             |
-|            |Subscription Verify     |             |
-|            +------------------------>             |
+|   SCIM     |                        |    SET      |
+|   Feed     |Subscription Request    |    Feed     |
+|   Mgmt     &lt;------------------------+  Subscriber |
 |            |                        |             |
 |            |Subscription Mgmt       |             |
 |            &lt;------------------------+             |
 |            |                        |             |
-|            |SET Delivery            |             |
++------------+                        |             |
++------------+                        |             |
+|            |                        |             |
+|   FEED     |SET Delivery            |             |
 |            +------------------------>             |
+|  Provider  |                        |             | 
 |            |                        |             |
 +------------+                        +-------------+
 </artwork>
 			</figure>
 
-			<t>A SET feed provider MAY be directly integrated into a source
+			<t>A SET Feed Provider MAY be directly integrated into a source
 				service that generates events, or it may be a separate service entity 
         that off-loads event distribution from the event generator to act 
         as its delegated publisher. For the purposes of this specification, 
@@ -100,7 +103,15 @@
         consider the method for how event generators send events to publishers
         as out-of-scope.
 			</t>
+      
+      <t>The specification uses SCIM protocol <xref target="RFC7644"/> to advertise available Feeds
+      and to enable Subscribers to request, subscriber to, and manage
+      Subscriptions.</t>
      
+      <t>The specification defines a registry by which multiple SET delivery
+      methods can be registered. The specification includes a web callback 
+      method which uses HTTP POST <xref target="RFC7231"/> to deliver SETs 
+      to Subscribers.</t>
 
 			<section anchor="notat" title="Notational Conventions" toc="default">
 				<t>
@@ -134,35 +145,35 @@
 
 			<section anchor="defs" title="Definitions" toc="default">
         <t>This specification assumes terminology defined in the Security
-        Event Token specification<xref target="idevent-token"/>.</t>
+        Event Token specification<xref target="I-D.hunt-idevent-token"/>.</t>
 				<t>
 					The following definitions are specific to Identity Event
 					publishing:
 					<list style="hanging">
-						<t hangText="Feed Provider">The Feed Provider publishes
+						<t hangText="Feed Provider"><vspace/>The Feed Provider publishes
 							SETs to be distributed to registered subscribers.
 						</t>
 
-						<t hangText="Feed">A Feed is a URI that describes the set of
+						<t hangText="Feed"><vspace/>A Feed is a URI that describes the set of
 							resources and events under which events may be issued. An
 							interested subscriber registers with the feed provider to subscribe
-							to an event uri to receive SETs associated with a Feed. An
+							to an event URI to receive SETs associated with a Feed. An
               individual Feed MAY have zero or more Subscriptions.
 						</t>
             
-            <t hangText="Subscription">A Subscription contains the information
+            <t hangText="Subscription"><vspace/>A Subscription contains the information
             needed by a Feed Provider (e.g. delivery endpoints, credentials)
             to deliver a Feed of SETs to an individual Subscriber. A 
             Subscription has ONE Feed.</t>
 
-						<t hangText="Notification Mechanism">
+						<t hangText="Notification Mechanism"><vspace/>
 							A URI that describes the
 							chosen event notification mechanism. When subscribing to a feed, a
 							client may choose a specific mechanism by which it wishes to
 							receive notification events. 
 						</t>
 
-						<t hangText="Subscriber">A Subscriber is an party or
+						<t hangText="Subscriber"><vspace/>A Subscriber is an party or
             security entity registers in the form of a Subscription to 
             receive SETs from a feed provider that are part of a Feed. 
 						</t>
@@ -173,7 +184,7 @@
 
 		<section anchor="process" title="Event Notification Process">
 			<t>When a Security Event occurs, the Feed Provider constructs a SET
-      token <xref target="idevent-token"/> that describes the	event. 
+      token <xref target="I-D.hunt-idevent-token"/> that describes the	event. 
       The feed provider determines the feeds that the event should be 
       distributed to, and determines which Subscribers need to be notified.</t>
       <t> 
@@ -192,7 +203,7 @@
 			  </t>
 
 			  <t>Or, the Feed Provider delivers the event through a different
-        not defined by this specification.
+        method not defined by this specification.
 			  </t>
 			</list>
 			</t>
@@ -790,11 +801,11 @@ Authorization: Bearer h480djs93hd8
           Subscription status SHALL be set to <spanx style="verb">fail</spanx>.
           </t>
           
-          <section anchor="[[this RFC URL]]#verifyPush" title="Verifying Subscriptions">
+          <section anchor="verifyPush" title="Verifying Subscriptions">
             <t>The verification process 
             serves to verify that the identified Subscriber is willing to receive
             SETs and is correctly configured. In the case of push style
-            subscriptions, where the publisher initates the action to deliver
+            subscriptions, where the publisher initiates the action to deliver
             a SET, Verification can also serve to prevent
             a Feed Publication server from flooding an endpoint which did not 
             actually request a Subscription.</t>
@@ -812,7 +823,7 @@ Authorization: Bearer h480djs93hd8
               <spanx style="verb">[[this RFC URL]]#verify</spanx>.</t>
 
               <t hangText="iss">Set to the URI of the feed publisher (see 
-              <xref target="idevent-token"/>).</t>
+              <xref target="I-D.hunt-idevent-token"/>).</t>
 
               <t hangText="aud">MUST be set to a value that matches the
               subscription <spanx style="verb">feedUri</spanx> requested.</t>
@@ -858,14 +869,14 @@ Authorization: Bearer h480djs93hd8
   <section anchor="delivery" title="Event Delivery">
      <section anchor="deliveryDefinition" title="Introduction to Event Delivery Methods">
         <t>Each event delivery method SHOULD have the following information:<list style="hanging">
-          <t hangText="Description"><vspace/>The <spanx>methodUri</spanx> URI value
+          <t hangText="Description"><vspace/>The <spanx style="verb">methodUri</spanx> URI value
           for the delivery method and a description of the method.</t>
           <t hangText="Subscription Verification Procedure"><vspace/>The procedure
           that the configuration for a subscription is confirmed causing the
           subscription status to be set to <spanx style="verb">on</spanx>.</t>
           <t hangText="Delivery Message Format"><vspace/>A description of an event delivery
           message and how to locate the event token(s) as well as any additional
-          signaling parameters.</t>
+          error signalling.</t>
           <t hangText="Delivery Procedure"><vspace/>The protocol procedure for a delivery
           request (push or poll), and the expected successful response.</t>
           <t hangText="Failure Conditions"><vspace/>A description of the failure
@@ -887,10 +898,10 @@ Authorization: Bearer h480djs93hd8
      <c>on</c><c>Delivery SHALL be attempted based on the method defined
      in the subscription attribute <spanx style="verb">methodUri</spanx>.
      If the SET fails to deliver it MAY be retained for a retry delivery in a minimum
-     of <spanx>minDeliveryInterval</spanx> seconds. If new SETs arrive before 
+     of <spanx style="verb">minDeliveryInterval</spanx> seconds. If new SETs arrive before 
      the interval, the SETs MUST be held for delivery in order of reception.
      If this is a repeat attempt to deliver, the Feed Publisher MAY discard
-     the SET if <spanx style="verb">maxRetries</spanx> or <spanx style="emph">maxDeliveryTime</spanx> 
+     the SET if <spanx style="verb">maxRetries</spanx> or <spanx style="verb">maxDeliveryTime</spanx> 
      is exceeded. If a SET is discarded, the Feed Publisher MAY set <spanx style="verb">subStatus</spanx>
      to <spanx style="verb">failed</spanx>.</c>
      
@@ -922,7 +933,7 @@ Authorization: Bearer h480djs93hd8
             <t>This delivery method is capable of delivering a single SET per
             HTTP POST request. Depending on the settings for the 
             subscription metadata (see <xref target="subscribeMetadata"/>), 
-            the SET MAY be signed and/or encrypted as defined in <xref target="idevent-token"/>.</t>
+            the SET MAY be signed and/or encrypted as defined in <xref target="I-D.hunt-idevent-token"/>.</t>
             
             <t>The Subscription's <spanx style="verb">deliveryUri</spanx> 
             attribute indicates the location of a Subscriber provided 
@@ -932,7 +943,7 @@ Authorization: Bearer h480djs93hd8
           
        <section anchor="httpMessageFormat" title="Delivery Message Format">
             <t>The content-type for this method is <spanx style="verb">application/jwt</spanx>
-            and consists of a single SET token (see <xref target="idevent-token"/>).</t>
+            and consists of a single SET token (see <xref target="I-D.hunt-idevent-token"/>).</t>
             <figure anchor="messageSet" title="Example Web Callback POST Message">
               <artwork>
   eyJhbGciOiJub25lIn0
@@ -1005,7 +1016,7 @@ Authorization: Bearer h480djs93hd8
               <preamble>
 The following is a non-normative example response to a Verify SET 
 received via HTTP/1.1 POST and includes a JSON object containing the 
-confirmation attribue and value.</preamble>
+confirmation attribute and value.</preamble>
 <artwork>HTTP/1.1 200 OK
 Content-Type: application/json
 
@@ -1053,8 +1064,8 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
             <t>Upon receipt of the request, the Subscriber SHALL validate the 
             JWT structure of the SET as defined in <xref target="RFC7519">Section 7.2</xref>.
             The Subscriber SHALL also validate the SET information as described
-            in <xref target="idevent-token">Section 2</xref>.</t>
-            <t>If the SET is determined to be valid, the Susbscriber SHALL
+            in <xref target="I-D.hunt-idevent-token">Section 2</xref>.</t>
+            <t>If the SET is determined to be valid, the Subscriber SHALL
             indicate successful submission by responding with HTTP Status
             202 as <spanx style="verb">Accepted</spanx> (see <xref target="RFC7231">Section 6.3.3</xref>).</t>
             
@@ -1147,15 +1158,7 @@ Content-Type: application/json
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml' ?><!-- SCIM API -->
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml' ?><!-- SCIM Schema -->
 
-      <reference anchor="idevent-token">
-        
-        <front>
-          <title>Security Event Token (work in progress)</title>
-          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
-          <date/>
-        </front>  
-        <format type="TXT" target="draft-hunt-idevent-token-03.txt"/>    
-      </reference>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.draft-hunt-idevent-token-05.xml'?>
 
     </references>
 
@@ -1206,12 +1209,13 @@ Content-Type: application/json
       <t>Draft 00 - PH - First Draft</t>
       <t>Draft 01 - PH - <list style="symbols">
         <t>Removed the version from filename in GITHUB version</t>
-        <t>Aligned document with new SET terminology from idevent-token</t>
+        <t>Aligned document with new SET terminology from I-D.hunt-idevent-token</t>
         <t>Simplified draft to only define HTTP POST profile (TBD)</t>
         <t>Removed webpush and polling modes (can be re-added later).</t>
         <t>Added SCIM management definitions for Feeds</t>
         <t>Added delivery information including errors</t>
         <t>Added subscription management information (e.g. how to subscribe)</t>
+        <t>Updated reference to idevent-token to published IETF version</t>
       </list> </t>
     </section>
   </back>
