@@ -436,27 +436,6 @@
             originating event or stateful change.</t>
         </list></t>
       </section>
-      
-      <section title="Idempotency and Ordering Considerations">
-        <t>In many cases SETs will be issued by highly distributed systems and 
-        subscribers. Without additional specification it is quite conceivable
-        that the order of SETs received by a subscriber MAY be different from
-        the order of the originating state changes or events. While 
-        the <spanx style="verb">iat</spanx> value may give
-        a rough indication of SET order, it SHOULD NOT be relied upon unless
-        the profiling SET token specification provides clarification.</t>
-        <t>Profiling specifications are encouraged to consider whether the nature
-        of SETs defined are "idempotent" in the sense that the order of receipt
-        does not matter. For example, in the case of token revocations, each
-        SET can stand on its own and order has no impact. In contrast, a 
-        profiling SET specification related to provisioning might be highly
-        dependent on ordering. As an example: one SET indicates a new resource
-        was created, while the next SET indicates the same resource is modified.
-        Non-Idempotent SET event specifications SHOULD choose to define a 
-        sequencing method such as aa claim used for the purpose
-        or identifying the order of SETs as defined by the Feed Publisher or
-        another method that is part of how SETs are distributed.</t>
-      </section>
 
       <section anchor="eventMessage" title="Security Event Token Construction">
         <t>A SET is a JWT <xref target="RFC7519"/> that is 
@@ -598,6 +577,34 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
       and/or OAuth2 <xref target="RFC6749"/>, or Basic Authentication <xref target="RFC7617"/>,
       MUST be signed using JWS <xref target="RFC7515"></xref> so
       that individual events MAY be authenticated and validated by the subscriber.</t>      
+      </section>
+      
+      <section title="Delivery">
+      <t>This specification does not define a delivery mechanism by itself.
+      In addition to confidentiality and integrity (discussed above), implementers
+      and profile specifications MUST consider the consequences of delivery 
+      mechanisms that are not secure and/or not assured. For example, while
+      a SET may be end-to-end secured using JWE, that alone will not guarantee
+      that the correct subscribing party knows they should have received a particular SET.</t>
+      </section>
+      
+      <section title="Sequencing">
+        <t>As defined in this specification, there is no defined way to order
+        multiple SETs in a sequence. Depending on the type and nature of SET
+        event, order may or may not matter. For example, in provisioning, 
+        event order is critical -- an object could not be modified before it
+        was created. In other SET types, such as a token revocation, the order
+        of SETs for revoked tokens does not matter. If however, the event was
+        described as a log-in or logged-out status for a user subject, then 
+        order becomes important.</t>
+        
+        <t>Extension specifications and implementers SHOULD take caution when
+        using timestamps such as <spanx style="verb">iat</spanx> to define order. Distributed systems will have 
+        some amount of clock-skew and thus time by itself will not guarantee order.</t>
+        
+        <t>Specifications profiling SET SHOULD define a mechanism for detecting
+        order or sequence of events. For example, the <spanx>txn</spanx>
+        claim could be defined as an ordered value (e.g. a counter) that the publisher defines.</t>
       </section>
       
       <section title="Timing Issues">
@@ -815,7 +822,7 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
       <t>Draft 06 - PH - <list style="symbols">
         <t>Corrected typos</t>
         <t>New txn claim</t>
-        <t>New section on Idempotency and Ordering</t>
+        <t>New security considerations Sequencing and Timing Issues</t>
       </list></t>
   
     </section>
