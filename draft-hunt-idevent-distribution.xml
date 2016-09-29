@@ -253,14 +253,14 @@
 		<section title="Event Feeds">
 			<t>
 	      An Feed is defined by a <spanx style="verb">feedUri</spanx>. The 
-        Feed provides a series of event in the form of SETS that are made 
-        available to Subscribers. An individual Subscription contains the 
-        metadata about a particular client and their subscription 
+        Feed provides a stream of SETs to be delivered to registered 
+        Subscribers based on a Subscription. An individual Subscription contains the 
+        metadata about a particular Subscriber regarding their subscription 
         to a particular <spanx style="verb">feedUri</spanx>. Subscription
-        metadata describes the client that has subscribed, the current 
-        delivery status indicating whether all events are delivered, pending, 
-        or whether delivery has failed. Subscription metadata also describes the 
-        method of event delivery and any associated configuration information (see
+        metadata indicates the current subscription state indicating whether 
+        all events are delivered, pending, or whether delivery has failed. 
+        Subscription metadata also describes the method of event delivery, 
+        and any associated security and configuration information (see
 				<xref target="subscribeMetadata" />
 				).
 			</t>
@@ -269,8 +269,10 @@
           <t>
             A Feed Provider MAY define Feeds based on a number of
             criteria. This specification does not specify or limit the basis for
-            which a service provider defines a Feed or how feed URIs should be
-            specified. Some possible methods for defining feeds include:
+            which a service provider defines the resources or entities 
+            contained in a Feed or how feed URIs should be
+            specified. Some possible methods for defining entities covered by
+            a Feed include:
             <list style="hanging">
               <t hangText="By Resource or Subject"><vspace blankLines="0"/>A
                 resource or subject might have its own associated event
@@ -279,8 +281,9 @@
                 resource associated with the mobile user.
               </t>
 
-              <t hangText="By Endpoint"><vspace blankLines="0"/>A Feed might be defined by an endpoint
-                where any event relating to a resource within an endpoint is
+              <t hangText="By Endpoint"><vspace blankLines="0"/>A Feed might 
+                be defined by an endpoint where any event relating to a 
+                resource within an endpoint is
                 delivered to a subscriber. This type of feed is likely to have
                 many notifications as the number of resources in an endpoint 
                 grows (e.g. a SCIM "/Users") and SHOULD be used with caution. 
@@ -291,7 +294,8 @@
                 enterprise.
               </t>
 
-              <t hangText="By Filter"><vspace blankLines="0"/>A Feed might define a collection of
+              <t hangText="By Filter"><vspace blankLines="0"/>A Feed might 
+                define a collection of
                 resources based on a filter that describes a set of matching
                 criteria a resource may be included in a Feed. Note that 
                 this type of Feed may require extra processing by the Feed 
@@ -302,9 +306,11 @@
                 based on the filter itself.
               </t>
 
-              <t hangText="By Group"><vspace blankLines="0"/>For example, all resources within a
-                SCIM Group could be used to define the resources within 
-                a particular Feed. 
+              <t hangText="By Group"><vspace blankLines="0"/>All entities
+                or resources within some specified group. For example, 
+                all resources within a SCIM Group could be used to define 
+                the resources for which SETs will be issued within a particular 
+                Feed. 
               </t>
             </list>
 
@@ -327,7 +333,7 @@
 								containing a name for the feed. May be used in administrative
 								user interfaces to assist subscribers in Feed selection. The
 								value MUST be unique within a given administrative domain. This is a
-								required attribute.
+								REQUIRED attribute.
 							</t>
 
 							<t hangText="feedUri">
@@ -339,8 +345,10 @@
 								<spanx style="verb">mutability</spanx>
 								is
 								<spanx style="verb">immutable</spanx>
-								and SHALL NOT change once assigned. This is a REQUIRED
-								attribute.
+								and SHALL NOT change once assigned. The value of this 
+                attribute MAY be the SCIM URI for the Feed resource (e.g. 
+                <spanx style="verb">https://scim.example.com/Feeds/88bc00de</spanx>).
+                This is a REQUIRED attribute. 
 							</t>
 
 							<t hangText="description">
@@ -351,15 +359,17 @@
 								readable form. This is an OPTIONAL attribute.
 							</t>
 
-              <t hangText="events"><vspace/>Is OPTIONAL and has a value 
-              which is a JSON object consisting of multi-valued JSON 
+              <t hangText="events"><vspace/>An attribute whose value 
+              is a JSON object consisting of multi-valued JSON 
               attributes where each attribute is the name of a primary 
               event URI and each value represents an event extension to 
               the primary event. An empty array SHALL indicate there are 
               no extensions. When set, Feeds SHALL only provide the primary
               events defined. However, a Feed Provider MAY provide additional
-              extensions that are not declared.<vspace blankLines="1"/>The following is an example events claim:
-              <figure anchor="exEvents" title="Example Events Claim">
+              extensions that are not declared. This is an OPTIONAL attribute.
+              <vspace blankLines="1"/>The following is a non-normative 
+              example events claim:
+              <figure anchor="exEvents" title="Example Events Attribute">
               <artwork>"events":{
   "urn:ietf:params:scim:event:passwordReset":[
       "https://example.com/scim/event/passwordResetExt"],
@@ -375,7 +385,7 @@
               
 							<t hangText="type">
 								<vspace />
-								An OPTIONAL String attribute that is one of the following canonical values:
+								An OPTIONAL String attribute that MAY have values such as:
 								<list style="hanging">
 									<t hangText="resource">
 										Indicates that the Feed is for
@@ -413,17 +423,21 @@
 									</t>
 									
 								</list>
+                The attribute is typically used by the Feed Publisher to 
+                determine the meaning and content of the Feed <spanx style="verb">filter</spanx>
+                attribute.
 							</t>
 
               <!-- Should we leave this to profiling specifications? -->
 							<t hangText="filter">
 								<vspace />
-								An OPTIONAL String value containing a filter defined by 
-                the Feed Publisher. For example in SCIM, a filter MAY be 
+								An OPTIONAL String value containing a filter whose syntax is defined by 
+                a profiling specification (e.g. SCIM) or the Feed Publisher. 
+                For example in SCIM, a filter MAY be 
                 a filter <xref target="RFC7644">Section 3.4.2.2</xref>),
 								a resource, or a SCIM endpoint URI depending on the value
-                of <spanx style="verb">type</spanx>. For example, if the 
-                Feed is issuing SCIM events, and the type is <spanx style="verb">resource</spanx>,
+                of <spanx style="verb">type</spanx>. And, if the SCIM 
+                Feed type is <spanx style="verb">resource</spanx>,
                 than the filter value is a URI for a SCIM resource.
 							</t>
 
@@ -433,10 +447,11 @@
 					<t>
 						The following multi-valued attributes are defined:
 						<list style="hanging">
-							<t hangText="deliveryModes">One or more URIs representing the methods of
-								delivery
-								supported by the feed. By default, all delivery modes are supported.
-                [[DO we need this??]]
+							<t hangText="deliveryModes"><vspace/>
+                One or more URIs representing the methods of
+								delivery supported by the Feed Publisher. Values in this
+                attribute correspond to the Subscription <spanx style="verb">methodUri</spanx>
+                attribute (see <xref target="subscribeMetadata"/>).
 							</t>
 
 						</list>
@@ -514,15 +529,12 @@ ETag: 9d1c124149f522472e7a511c85b3a31b
 	</section>	
   <section title="Subscriptions">
    
-    <section title="Overview">
-    
       <t>A subscription represents an agreement to deliver SETs from a
       specified Feed URI from a Feed Provider to an individual Subscriber
       entity also known as the "audience". The method of delivery and the 
       parameters for delivery are specified a set of parameters called 
       subscription metadata (see <xref target="subscribeMetadata"/>).
-      </t>
-    </section>
+      </t>   
     
     <section anchor="subscribeMetadata" title="Subscription Metadata">
           <t>
@@ -540,7 +552,7 @@ ETag: 9d1c124149f522472e7a511c85b3a31b
               <vspace blankLines="0"/> in which the Feed Provider delivers events 
               using HTTP POST to a specified callback URI.</t>
               
-              <t hangText="deliveryUri">A URI that describes the location 
+              <t hangText="deliveryUri"><vspace/>A URI that describes the location 
               SETs are delivered. Its format and usage requirements are 
               defined by the associated <spanx style="verb">methodUri</spanx> 
               specification.</t>
@@ -616,9 +628,11 @@ ETag: 9d1c124149f522472e7a511c85b3a31b
               will wait before sending a new event or events.</t>
             </list></t>
         </section>
+        
         <section anchor="subState" title="Subscription State Model">
           <t>The Subscription attribute <spanx style="verb">subStatus</spanx>
-          tracks the state of any particular subscription. The impact on 
+          tracks the state of any particular subscription with regards to
+          whether SETs are ready or able to be delivered. The impact on 
           delivery processing is described in <xref target="processingStatus"/>.</t>
           <figure anchor="stateDiag" title="Subscription States at Feed Publisher">
           <preamble>The following is the state machine representation of a
@@ -669,6 +683,15 @@ ETag: 9d1c124149f522472e7a511c85b3a31b
             requiring administrative action to correct the issue and 
             <spanx style="verb">Restart</spanx>.</t>
             
+            <t hangText="Timeout"><vspace/>A Feed Publisher having not being
+            able to deliver a SET over one or more retries which has reached
+            a limit of attempts (<spanx style="verb">maxRetries</spanx>) 
+            or time (<spanx style="verb">maxDeliveryTime</spanx>)
+            MAY set the subscription state to <spanx style="verb">fail</spanx>.
+            In general, the intention is to indicate the maximum
+            number of retries or time a Feed Publisher is able to wait until
+            SET event loss begins to occur resulting in the failed state.</t>
+            
             <t hangText="Restart"><vspace/>An administrator having corrected the 
             failed delivery condition modifies the Subscription state to
             <spanx style="verb">verify</spanx> (e.g. see <xref target="patchSub"/>).
@@ -692,7 +715,7 @@ ETag: 9d1c124149f522472e7a511c85b3a31b
           </list></t>
         
         </section>
-        <section title="SCIM Subscription Management">
+        <section anchor="subscribeMgmt" title="SCIM Subscription Management">
           <t>A Feed Publisher MAY use SCIM to support management of subscriptions.
           Typically this involves support for the Subscription Resource Type, 
           and the corresponding SCIM operations to create, update, retrieve
@@ -1204,14 +1227,6 @@ Content-Type: application/json
   </section>
 
   <section anchor="Security" title="Security Considerations" toc="default">
-      <t>The synchronizing of User passwords between administrative domains is
-      to be handled with great care. From a security perspective the re-use of
-      passwords across service providers is to be highly discouraged. However,
-      in the enterprise user experience, if the perception of the user is that
-      service providers from multiple domains are part of a single corporate
-      application environment, then password synchronization MAY be
-      appropriate as part of an overall identity management and governance
-      mechanism.</t>
 
       <t>[TO BE COMPLETED]</t>
     </section>
@@ -1219,7 +1234,28 @@ Content-Type: application/json
     <section anchor="IANA" title="IANA Considerations">
       <section anchor="notifyMechRegistry"
                title="Event Notification Mechanism Registry">
-        <t>TODO: Registration for Notification Mechanisms</t>
+        <t>[TODO: Registration for Notification Mechanisms]</t>
+      </section>
+      
+      <section title="SCIM Schema Registration">
+        <t>As per the "SCIM Schema URIs for Data Resources" registry established
+        by <xref target="RFC7643">Section 10.3</xref>, the following defines and registers
+        the following SCIM URIs and Resource Types for Feeds and Subscriptions.</t>
+        <texttable>
+        <ttcol>Schema URI</ttcol><ttcol>Name</ttcol><ttcol>ResourceType</ttcol><ttcol>Reference</ttcol>
+        
+        <c>urn:ietf:params:scim: schemas:event:2.0: Feed</c>
+        <c>SET Event Feed</c>
+        <c>Feed</c>
+        <c><xref target="feedMgmt"/></c>
+        
+        <c>urn:ietf:params:scim: schemas:event:2.0: Subscription</c>
+        <c>SET Event Subscription</c>
+        <c>Subscription</c>
+        <c><xref target="subscribeMgmt"/></c>
+        
+        </texttable>
+      
       </section>
 
   
