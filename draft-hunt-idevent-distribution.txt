@@ -5,10 +5,10 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                            M. Scurtescu
-Expires: March 27, 2017                                           Google
+Expires: April 2, 2017                                            Google
                                                                M. Ansari
                                                                    Cisco
-                                                      September 23, 2016
+                                                      September 29, 2016
 
 
        SET Token Distribution and Subscription Management Profile
@@ -37,7 +37,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 27, 2017.
+   This Internet-Draft will expire on April 2, 2017.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hunt, et al.             Expires March 27, 2017                 [Page 1]
+Hunt, et al.              Expires April 2, 2017                 [Page 1]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -75,45 +75,46 @@ Table of Contents
    4.  Subscriptions . . . . . . . . . . . . . . . . . . . . . . . .  10
      4.1.  Overview  . . . . . . . . . . . . . . . . . . . . . . . .  10
      4.2.  Subscription Metadata . . . . . . . . . . . . . . . . . .  10
-     4.3.  SCIM Subscription Management  . . . . . . . . . . . . . .  12
-       4.3.1.  SCIM Subscription Resource Type . . . . . . . . . . .  12
-       4.3.2.  New Subscription Requests . . . . . . . . . . . . . .  14
-       4.3.3.  Updating Subscriptions  . . . . . . . . . . . . . . .  16
-     4.4.  Subscription Verification . . . . . . . . . . . . . . . .  17
-       4.4.1.  Verifying Subscriptions . . . . . . . . . . . . . . .  17
-   5.  Event Delivery  . . . . . . . . . . . . . . . . . . . . . . .  18
-     5.1.  Introduction to Event Delivery Methods  . . . . . . . . .  18
-     5.2.  Delivery Processing . . . . . . . . . . . . . . . . . . .  19
-     5.3.  HTTP Web Callback Method  . . . . . . . . . . . . . . . .  20
-       5.3.1.  Description . . . . . . . . . . . . . . . . . . . . .  20
-       5.3.2.  Delivery Message Format . . . . . . . . . . . . . . .  21
-       5.3.3.  Subscription Verification . . . . . . . . . . . . . .  21
-       5.3.4.  Delivery Procedure  . . . . . . . . . . . . . . . . .  23
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  25
-   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  25
-     7.1.  Event Notification Mechanism Registry . . . . . . . . . .  25
-   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  25
-     8.1.  Normative References  . . . . . . . . . . . . . . . . . .  25
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .  26
-   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .  27
-   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  27
-   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  27
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  27
+     4.3.  Subscription State Model  . . . . . . . . . . . . . . . .  12
+     4.4.  SCIM Subscription Management  . . . . . . . . . . . . . .  14
+       4.4.1.  SCIM Subscription Resource Type . . . . . . . . . . .  14
+       4.4.2.  New Subscription Requests . . . . . . . . . . . . . .  16
+       4.4.3.  Updating Subscriptions  . . . . . . . . . . . . . . .  18
+     4.5.  Subscription Verification . . . . . . . . . . . . . . . .  19
+       4.5.1.  Verifying Subscriptions . . . . . . . . . . . . . . .  19
+   5.  Event Delivery  . . . . . . . . . . . . . . . . . . . . . . .  20
+     5.1.  Introduction to Event Delivery Methods  . . . . . . . . .  20
+     5.2.  Delivery Processing . . . . . . . . . . . . . . . . . . .  21
+     5.3.  HTTP Web Callback Method  . . . . . . . . . . . . . . . .  22
+       5.3.1.  Description . . . . . . . . . . . . . . . . . . . . .  22
+       5.3.2.  Delivery Message Format . . . . . . . . . . . . . . .  23
+       5.3.3.  Subscription Verification . . . . . . . . . . . . . .  23
+       5.3.4.  Delivery Procedure  . . . . . . . . . . . . . . . . .  25
+   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  27
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  27
+     7.1.  Event Notification Mechanism Registry . . . . . . . . . .  27
+   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  27
+     8.1.  Normative References  . . . . . . . . . . . . . . . . . .  27
+     8.2.  Informative References  . . . . . . . . . . . . . . . . .  28
+   Appendix A.  Contributors . . . . . . . . . . . . . . . . . . . .  29
+   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  29
+   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  29
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  29
 
 1.  Introduction and Overview
 
    This specification defines a method by which SETs (see
    [I-D.hunt-idevent-token]) can be delivered by publishers to feed
    subscribers using HTTP POST [RFC7231] as well as an extension
-   registry enabling other methods of delivery.  This specification also
 
 
 
-Hunt, et al.             Expires March 27, 2017                 [Page 2]
+Hunt, et al.              Expires April 2, 2017                 [Page 2]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
+   registry enabling other methods of delivery.  This specification also
    defines how subscribers MAY query for available Feeds, and manage
    event Subscriptions using SCIM [RFC7644].
 
@@ -164,8 +165,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-
-Hunt, et al.             Expires March 27, 2017                 [Page 3]
+Hunt, et al.              Expires April 2, 2017                 [Page 3]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -221,7 +221,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                 [Page 4]
+Hunt, et al.              Expires April 2, 2017                 [Page 4]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -277,7 +277,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                 [Page 5]
+Hunt, et al.              Expires April 2, 2017                 [Page 5]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -333,7 +333,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                 [Page 6]
+Hunt, et al.              Expires April 2, 2017                 [Page 6]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -389,7 +389,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                 [Page 7]
+Hunt, et al.              Expires April 2, 2017                 [Page 7]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -445,7 +445,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                 [Page 8]
+Hunt, et al.              Expires April 2, 2017                 [Page 8]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -501,7 +501,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                 [Page 9]
+Hunt, et al.              Expires April 2, 2017                 [Page 9]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -557,7 +557,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 10]
+Hunt, et al.              Expires April 2, 2017                [Page 10]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -613,7 +613,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 11]
+Hunt, et al.              Expires April 2, 2017                [Page 11]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -651,7 +651,109 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
       attempts.  When in push mode (e.g.  HTTP POST), it is the interval
       the server will wait before sending a new event or events.
 
-4.3.  SCIM Subscription Management
+4.3.  Subscription State Model
+
+   The Subscription attribute "subStatus" tracks the state of any
+   particular subscription.  The impact on delivery processing is
+   described in Table 1.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.              Expires April 2, 2017                [Page 12]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+   The following is the state machine representation of a subscription
+   on a Feed Publisher.  Note that a subscription cannot be made active
+   until a verification process has been completed.  As such, a newly
+   created subscription begins with state "verify".
+
+                                  +
+                                  |
+                                Create
+                                  v
+       +------+              +----------+
+       | fail +->Restart---->|  verify  |
+       +------+              +----+-----+
+           ^                      |
+           |<----Confirm Fail<----+
+           |                   Confirm
+           |                      v
+           |                 +----------+               +--------+
+           |                 |          +--->Suspend--->|        |
+           +------Timeout<---+    on    |               | paused |
+                             |          |<--Resume<-----+        |
+                             +-+--------+               +--------+
+                               |      ^
+                            Disable Enable
+                               v      |
+                             +--------+-+
+                             |   off    |
+                             +----------+
+
+              Figure 6: Subscription States at Feed Publisher
+
+   In the above diagram, the following actions impact the state of a
+   Subscription. "subStatus" values are shown in the boxes, and change
+   based on the following actions:
+
+   Create
+      A Subscriber or an administrator creates a new subscription using
+      SCIM as described in Section 4.4.2.  The initial state is
+      "verify".
+
+   Confirm
+      The Feed Publisher sends a verification SET to the Subscriber
+      which confirms with the correct response as described in
+      Section 4.5.  If it succeeds to deliver, the Feed Publisher mail
+      retry or set state to "on".
+
+   Confirm Fail
+
+
+
+
+
+Hunt, et al.              Expires April 2, 2017                [Page 13]
+
+Internet-Draft       draft-hunt-idevent-distribution      September 2016
+
+
+      If the confirmation fails, the Feed Publisher sets the state to
+      "fail" requiring administrative action to correct the issue and
+      "Restart".
+
+   Restart
+      An administrator having corrected the failed delivery condition
+      modifies the Subscription state to "verify" (e.g. see
+      Section 4.4.3).
+
+   Suspend and Resume
+      A Subscription MAY be suspended and resumed by updating the
+      Subscription state to "paused" or "on".  For example, see see
+      Section 4.4.3.  While suspended, the Feed Publisher MAY retain
+      undelivered SETs for a period of time.  If the Feed Publisher is
+      no longer able to retain SETs, the subscription state SHOULD be
+      set to "off" to indicate SETs are being lost.
+
+   Enable and Disable
+      A subscription MAY be disabled and enabled by updating the
+      Subscription state to "off" or "on".  For example, see see
+      Section 4.4.3.  While the Subscription is disabled, all SETs that
+      occur at the Feed Publisher are lost.
+
+4.4.  SCIM Subscription Management
 
    A Feed Publisher MAY use SCIM to support management of subscriptions.
    Typically this involves support for the Subscription Resource Type,
@@ -659,23 +761,30 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    Subscription Resources.  For SCIM service provider capability and
    schema discovery, see Section 4 [RFC7644].
 
-4.3.1.  SCIM Subscription Resource Type
+4.4.1.  SCIM Subscription Resource Type
 
    When Subscriptions are managed within a SCIM service provider
    [RFC7644], Subscription resources use schema defined in Section 4.2
    and use a schema value of
    "urn:ietf:params:scim:schemas:event:2.0:Subscription".
 
+   The SCIM Subscription "ResourceType" definition is defined as
+   follows:
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 12]
+
+
+
+
+
+
+
+
+Hunt, et al.              Expires April 2, 2017                [Page 14]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
-
-   The SCIM Subscription "ResourceType" definition is defined as
-   follows:
 
    {
      "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
@@ -687,7 +796,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
      "schemaExtensions": []
    }
 
-            Figure 6: SCIM Subscription ResourceType Definition
+            Figure 7: SCIM Subscription ResourceType Definition
 
    To retrieve information about one or more Subscriptions, Subscribers
    or management clients MAY query the "/Subscriptions" endpoint as
@@ -701,7 +810,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    Accept: application/scim+json
    Authorization: Bearer h480djs93hd8
 
-              Figure 7: Example SCIM Subscription GET Request
+              Figure 8: Example SCIM Subscription GET Request
 
 
 
@@ -725,7 +834,10 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 13]
+
+
+
+Hunt, et al.              Expires April 2, 2017                [Page 15]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -756,17 +868,17 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
     }
   }
 
-                Figure 8: Example Subscription GET Response
+                Figure 9: Example Subscription GET Response
 
-   In the above example (Figure 8) observe that the subscription is for
+   In the above example (Figure 9) observe that the subscription is for
    the SCIM "Feed" resource defined at "https://example.com/v2/
    Feeds/88bc00de776d49d5b535ede882d98f74".  The current subscription
    state is "pending" which suggest the Subscription Verification (see
-   Section 4.4) process has not yet completed.  Since there is no value
+   Section 4.5) process has not yet completed.  Since there is no value
    for "feedJwk", ) or "confidentialJwk", the SETs will be sent without
    signing or encryption (plain text).
 
-4.3.2.  New Subscription Requests
+4.4.2.  New Subscription Requests
 
    To subscribe to a feed, the subscriber of management client uses the
    SCIM Create operation as defined in Section 3.3 [RFC7644].  SCIM
@@ -781,7 +893,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 14]
+Hunt, et al.              Expires April 2, 2017                [Page 16]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -809,7 +921,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
      "description":"Logout events from oidc.example.com"
    }
 
-            Figure 9: Example New Subscription Request in SCIM
+            Figure 10: Example New Subscription Request in SCIM
 
 
 
@@ -837,7 +949,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 15]
+Hunt, et al.              Expires April 2, 2017                [Page 17]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -845,7 +957,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    In following non-normative response, the SCIM service provider has
    automatically assigned a resource location as well as an "id".
    Usually upon creation, the initial value of "subStatus" is "pending"
-   indicating that the Subscription Verification (see Section 4.4) has
+   indicating that the Subscription Verification (see Section 4.5) has
    not been completed.
 
   HTTP/1.1 201 Created
@@ -871,9 +983,9 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
     }
   }
 
-            Figure 10: Example Response to Subscription Request
+            Figure 11: Example Response to Subscription Request
 
-4.3.3.  Updating Subscriptions
+4.4.3.  Updating Subscriptions
 
    To modify a Subscription, a Subscriber or authorized management
    client MAY use the SCIM PUT operation (see Section 3.5.1 [RFC7644])
@@ -893,7 +1005,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 16]
+Hunt, et al.              Expires April 2, 2017                [Page 18]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -919,9 +1031,9 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    }
 
 
-                Figure 11: Example SCIM Subscription Update
+                Figure 12: Example SCIM Subscription Update
 
-4.4.  Subscription Verification
+4.5.  Subscription Verification
 
    In order to avoid ongoing communication issues and to minimize
    requirements for Feed Providers to maintain a series of SETs
@@ -935,7 +1047,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    however verification fails due to a timeout or connection failure, or
    any other cause, the Subscription status SHALL be set to "fail".
 
-4.4.1.  Verifying Subscriptions
+4.5.1.  Verifying Subscriptions
 
    The verification process serves to verify that the identified
    Subscriber is willing to receive SETs and is correctly configured.
@@ -949,7 +1061,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 17]
+Hunt, et al.              Expires April 2, 2017                [Page 19]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1005,7 +1117,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 18]
+Hunt, et al.              Expires April 2, 2017                [Page 20]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1061,7 +1173,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 19]
+Hunt, et al.              Expires April 2, 2017                [Page 21]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1117,7 +1229,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 20]
+Hunt, et al.              Expires April 2, 2017                [Page 22]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1142,18 +1254,18 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
      1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
      .
 
-               Figure 12: Example Web Callback POST Message
+               Figure 13: Example Web Callback POST Message
 
 5.3.3.  Subscription Verification
 
    This profile specifies the verification method for HTTP POST and is
-   based on the general verification method described in Section 4.4.1.
+   based on the general verification method described in Section 4.5.1.
 
    To confirm a subscription, the Feed Provider SHALL send a
    verification SET to the subscriber using the registered "methodUri"
    mechanism which in this case is
    "urn:ietf:params:set:method:HTTP:webCallback".  The Verify SET
-   contains the attributes listed in Section 4.4.1.
+   contains the attributes listed in Section 4.5.1.
 
    A payload attribute "confirmChallenge" is provided with a String
    value that the subscriber SHALL echo back in its response.  The
@@ -1173,7 +1285,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 21]
+Hunt, et al.              Expires April 2, 2017                [Page 23]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1197,10 +1309,10 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
      }
    }
 
-            Figure 13: Example Verification SET with Challenge
+            Figure 14: Example Verification SET with Challenge
 
    The above SET is encoded as a JWT and transmitted to the Subscriber
-   as shown in Figure 15.
+   as shown in Figure 16.
 
    Upon receiving a subscription verify SET, a confirming subscriber
    SHALL respond with a JSON object that includes a "challengeResponse"
@@ -1218,7 +1330,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
      "challengeResponse":"ca2179f4-8936-479a-a76d-5486e2baacd7"
    }
 
-         Figure 14: Example Response to Verify SET with Challenge
+         Figure 15: Example Response to Verify SET with Challenge
 
    If the subscriber returns a non-matching value or an HTTP status
    other than a 200 series response, the subscription "state" SHALL be
@@ -1229,7 +1341,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 22]
+Hunt, et al.              Expires April 2, 2017                [Page 24]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1261,7 +1373,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
    .
 
-               Figure 15: Example Web Callback POST Request
+               Figure 16: Example Web Callback POST Request
 
    Upon receipt of the request, the Subscriber SHALL validate the JWT
    structure of the SET as defined in Section 7.2 [RFC7519].  The
@@ -1285,7 +1397,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 23]
+Hunt, et al.              Expires April 2, 2017                [Page 25]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1315,7 +1427,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
    HTTP/1.1 202 Accepted
 
-              Figure 16: Example Successful Delivery Response
+              Figure 17: Example Successful Delivery Response
 
    An HTTP Status 400 Bad Request response includes a JSON object which
    provides details about the error.  The JSON object includes the JSON
@@ -1341,7 +1453,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 24]
+Hunt, et al.              Expires April 2, 2017                [Page 26]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1357,7 +1469,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
    }
 
-                  Figure 17: Example Bad Request Response
+                  Figure 18: Example Bad Request Response
 
 6.  Security Considerations
 
@@ -1397,7 +1509,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 25]
+Hunt, et al.              Expires April 2, 2017                [Page 27]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1453,7 +1565,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 26]
+Hunt, et al.              Expires April 2, 2017                [Page 28]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1509,7 +1621,7 @@ Authors' Addresses
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 27]
+Hunt, et al.              Expires April 2, 2017                [Page 29]
 
 Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
@@ -1565,4 +1677,4 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 
 
 
-Hunt, et al.             Expires March 27, 2017                [Page 28]
+Hunt, et al.              Expires April 2, 2017                [Page 30]

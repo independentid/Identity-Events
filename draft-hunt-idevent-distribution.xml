@@ -616,6 +616,82 @@ ETag: 9d1c124149f522472e7a511c85b3a31b
               will wait before sending a new event or events.</t>
             </list></t>
         </section>
+        <section anchor="subState" title="Subscription State Model">
+          <t>The Subscription attribute <spanx style="verb">subStatus</spanx>
+          tracks the state of any particular subscription. The impact on 
+          delivery processing is described in <xref target="processingStatus"/>.</t>
+          <figure anchor="stateDiag" title="Subscription States at Feed Publisher">
+          <preamble>The following is the state machine representation of a
+          subscription on a Feed Publisher. Note that a subscription cannot
+          be made active until a verification process has been completed. As 
+          such, a newly created subscription begins with state 
+          <spanx style="verb">verify</spanx>.</preamble>
+          <artwork>
+                               +
+                               |
+                             Create
+                               v
+    +------+              +----------+
+    | fail +->Restart---->|  verify  |
+    +------+              +----+-----+
+        ^                      |
+        |&lt;----Confirm Fail&lt;----+
+        |                   Confirm
+        |                      v
+        |                 +----------+               +--------+
+        |                 |          +--->Suspend--->|        |
+        +------Timeout&lt;---+    on    |               | paused |
+                          |          |&lt;--Resume&lt;-----+        |
+                          +-+--------+               +--------+
+                            |      ^
+                         Disable Enable
+                            v      |
+                          +--------+-+
+                          |   off    |
+                          +----------+</artwork>
+          </figure>
+          <t>In the above diagram, the following actions impact the state
+          of a Subscription. <spanx style="verb">subStatus</spanx> values are shown in
+          the boxes, and change based on the following actions:<list style="hanging">
+          
+            <t hangText="Create"><vspace/>A Subscriber or an administrator creates
+            a new subscription using SCIM as described in <xref target="createSub"></xref>.
+            The initial state is <spanx style="verb">verify</spanx>.</t>
+            
+            <t hangText="Confirm"><vspace/>The Feed Publisher sends a verification
+            SET to the Subscriber which confirms with the correct response as
+            described in <xref target="verifySubscription"/>. If it succeeds
+            to deliver, the Feed Publisher mail retry or set state to 
+            <spanx style="verb">on</spanx>.</t>
+            
+            <t hangText="Confirm Fail"><vspace/>If the confirmation fails,
+            the Feed Publisher sets the state to <spanx style="verb">fail</spanx>
+            requiring administrative action to correct the issue and 
+            <spanx style="verb">Restart</spanx>.</t>
+            
+            <t hangText="Restart"><vspace/>An administrator having corrected the 
+            failed delivery condition modifies the Subscription state to
+            <spanx style="verb">verify</spanx> (e.g. see <xref target="patchSub"/>).
+            </t>
+            
+            <t hangText="Suspend and Resume"><vspace/>A Subscription MAY be 
+            suspended and resumed by updating the Subscription state to
+            <spanx style="verb">paused</spanx> or <spanx style="verb">on</spanx>. For
+            example, see see <xref target="patchSub"/>. While suspended,
+            the Feed Publisher MAY retain undelivered SETs for a period of time.
+            If the Feed Publisher is no longer able to retain SETs, the subscription
+            state SHOULD be set to <spanx style="verb">off</spanx> to indicate
+            SETs are being lost.
+            </t>
+            
+            <t hangText="Enable and Disable"><vspace/>A subscription MAY be
+            disabled and enabled by updating the Subscription state to
+            <spanx style="verb">off</spanx> or <spanx style="verb">on</spanx>. For
+            example, see see <xref target="patchSub"/>. While the Subscription
+            is disabled, all SETs that occur at the Feed Publisher are lost.</t>
+          </list></t>
+        
+        </section>
         <section title="SCIM Subscription Management">
           <t>A Feed Publisher MAY use SCIM to support management of subscriptions.
           Typically this involves support for the Subscription Resource Type, 
@@ -689,7 +765,7 @@ Location:
             or <spanx style="verb">confidentialJwk</spanx>, the SETs will be
             sent without signing or encryption (plain text).</t>          
           </section>
-          <section title="New Subscription Requests">
+          <section anchor="createSub" title="New Subscription Requests">
             <t>To subscribe to a feed, the subscriber of management client
             uses the SCIM Create operation as defined in <xref target="RFC7644">Section 3.3</xref>.
             SCIM subscription management service providers MAY have additional 
@@ -752,7 +828,7 @@ Location:
 }</artwork>
             </figure>
           </section>
-          <section title="Updating Subscriptions">
+          <section anchor="patchSub" title="Updating Subscriptions">
             <t>To modify a Subscription, a Subscriber or authorized management
             client MAY use the SCIM PUT operation (see <xref target="RFC7644">Section 3.5.1</xref>) 
             and MAY use the SCIM PATCH operation (see <xref target="RFC7644">Section 3.5.2</xref>) 
