@@ -599,7 +599,7 @@ ETag: 9d1c124149f522472e7a511c85b3a31b
               <t hangText="maxRetries"><vspace blankLines="0"/>An OPTIONAL number indicating the 
               maximum number of attempts to deliver a SET. A value of '0'
               indicates there is no maximum. Upon reaching the maximum, the 
-              Subscription <spanx style="verb">subStatus</spanx> attrtibute is set
+              Subscription <spanx style="verb">subStatus</spanx> attribute is set
               to <spanx style="verb">failed</spanx>.</t>
               
               <t hangText="maxDeliveryTime"><vspace blankLines="0"/>An OPTIONAL number indicating
@@ -966,8 +966,9 @@ Authorization: Bearer h480djs93hd8
      <section title="Delivery Processing">
      <t>As mentioned in <xref target="subscribeMetadata"/>, the attribute 
      <spanx style="verb">subStatus</spanx> defines the current state of 
-     a subscribers subscription. The following describes that actions taken
-     based on <spanx style="verb">subStatus</spanx>.</t>
+     a subscribers subscription. <xref target="stateDiag"/> shows a state 
+     diagram for Subscriptions. The following describes that actions taken
+     by the Feed Publisher based upon <spanx style="verb">subStatus</spanx>.</t>
      <texttable anchor="processingStatus" title="Delivery Processing By Status">
      <ttcol>Status</ttcol><ttcol>Action</ttcol>
      
@@ -984,9 +985,11 @@ Authorization: Bearer h480djs93hd8
      <c>verify</c><c>If the SET is not a
      Verify SET, the SET MAY be retained for a retry at the Feed Publishers discretion. 
      If a Verify SET fails to deliver, the Feed Publisher SHALL set <spanx style="verb">subStatus</spanx>
-     to <spanx style="verb">failed</spanx>.</c>
+     to <spanx style="verb">failed</spanx>. The Feed Publish MAY opt to make
+     multiple attempts to complete a verification during which status remains as 
+     <spanx style="verb">verify</spanx>.</c>
      
-     <c>paused</c><c>The SET is held for delivery. The Feed Publisher MAY
+     <c>paused</c><c>The SET is held for delivery in a queue. The Feed Publisher MAY
      at its own discretion set the subscription state to <spanx style="verb">failed</spanx>
      if <spanx style="verb">subStatus</spanx> is not returned to <spanx style="verb">on</spanx>
      in what the Feed Publisher determines to be a reasonable amount of time.</c>
@@ -1150,7 +1153,7 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
             400 Bad Request error as follows:</t>
             <texttable anchor="reqErrors" title="HTTP Status 400 Errors">
               <ttcol>Err Value</ttcol><ttcol>Description</ttcol>
-              <c>jwtParse</c><c>Invalid or unparseable JWT or JSON structure.</c>
+              <c>jwtParse</c><c>Invalid or unparsable JWT or JSON structure.</c>
               <c>jwtHdr</c><c>In invalid JWT header was detected.</c>
               <c>jwtCypto</c><c>Unable to parse due to unsupported algorithm.</c>
               <c>jws</c><c>Signature was not validated.</c>
@@ -1292,6 +1295,7 @@ Content-Type: application/json
         <t>Added delivery information including errors</t>
         <t>Added subscription management information (e.g. how to subscribe)</t>
         <t>Updated reference to idevent-token to published IETF version</t>
+        <t>Added a state diagram for Subscriptions</t>
       </list> </t>
     </section>
   </back>

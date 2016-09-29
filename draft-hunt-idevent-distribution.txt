@@ -634,7 +634,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    maxRetries
       An OPTIONAL number indicating the maximum number of attempts to
       deliver a SET.  A value of '0' indicates there is no maximum.
-      Upon reaching the maximum, the Subscription "subStatus" attrtibute
+      Upon reaching the maximum, the Subscription "subStatus" attribute
       is set to "failed".
 
    maxDeliveryTime
@@ -1148,9 +1148,9 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
 5.2.  Delivery Processing
 
    As mentioned in Section 4.2, the attribute "subStatus" defines the
-   current state of a subscribers subscription.  The following describes
-   that actions taken based on "subStatus".
-
+   current state of a subscribers subscription.  Figure 6 shows a state
+   diagram for Subscriptions.  The following describes that actions
+   taken by the Feed Publisher based upon "subStatus".
 
 
 
@@ -1194,12 +1194,14 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    | verify | If the SET is not a Verify SET, the SET MAY be retained  |
    |        | for a retry at the Feed Publishers discretion.  If a     |
    |        | Verify SET fails to deliver, the Feed Publisher SHALL    |
-   |        | set "subStatus" to "failed".                             |
-   | paused | The SET is held for delivery. The Feed Publisher MAY at  |
-   |        | its own discretion set the subscription state to         |
-   |        | "failed" if "subStatus" is not returned to "on" in what  |
-   |        | the Feed Publisher determines to be a reasonable amount  |
-   |        | of time.                                                 |
+   |        | set "subStatus" to "failed". The Feed Publish MAY opt to |
+   |        | make multiple attempts to complete a verification during |
+   |        | which status remains as "verify".                        |
+   | paused | The SET is held for delivery in a queue. The Feed        |
+   |        | Publisher MAY at its own discretion set the subscription |
+   |        | state to "failed" if "subStatus" is not returned to "on" |
+   |        | in what the Feed Publisher determines to be a reasonable |
+   |        | amount of time.                                          |
    | off    | The SET is ignored.                                      |
    | fail   | The SET is ignored due to a previous unrecoverable       |
    |        | error.                                                   |
@@ -1224,8 +1226,6 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    The Subscription's "deliveryUri" attribute indicates the location of
    a Subscriber provided endpoint which can accept HTTP POST requests
    (e.g.  "https://notify.examplerp.com/Events").
-
-
 
 
 
@@ -1406,7 +1406,7 @@ Internet-Draft       draft-hunt-idevent-distribution      September 2016
    | Err      | Description                                            |
    | Value    |                                                        |
    +----------+--------------------------------------------------------+
-   | jwtParse | Invalid or unparseable JWT or JSON structure.          |
+   | jwtParse | Invalid or unparsable JWT or JSON structure.           |
    | jwtHdr   | In invalid JWT header was detected.                    |
    | jwtCypto | Unable to parse due to unsupported algorithm.          |
    | jws      | Signature was not validated.                           |
@@ -1604,6 +1604,8 @@ Appendix C.  Change Log
 
    o  Updated reference to idevent-token to published IETF version
 
+   o  Added a state diagram for Subscriptions
+
 Authors' Addresses
 
    Phil Hunt (editor)
@@ -1616,8 +1618,6 @@ Authors' Addresses
    Google
 
    Email: mscurtescu@google.com
-
-
 
 
 
