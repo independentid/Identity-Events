@@ -5,16 +5,16 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                              W. Denniss
-Expires: March 19, 2017                                           Google
+Expires: May 25, 2017                                             Google
                                                                M. Ansari
                                                                    Cisco
                                                                 M. Jones
                                                                Microsoft
-                                                      September 15, 2016
+                                                       November 21, 2016
 
 
                        Security Event Token (SET)
-                      draft-hunt-idevent-token-06
+                      draft-hunt-idevent-token-07
 
 Abstract
 
@@ -39,7 +39,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 19, 2017.
+   This Internet-Draft will expire on May 25, 2017.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Hunt, et al.             Expires March 19, 2017                 [Page 1]
+Hunt, et al.              Expires May 25, 2017                  [Page 1]
 
-Internet-Draft          draft-hunt-idevent-token          September 2016
+Internet-Draft          draft-hunt-idevent-token           November 2016
 
 
    carefully, as they describe your rights and restrictions with respect
@@ -71,19 +71,20 @@ Table of Contents
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   4
    2.  The Security Event Token (SET)  . . . . . . . . . . . . . . .   5
      2.1.  Core SET Claims . . . . . . . . . . . . . . . . . . . . .   8
-     2.2.  Idempotency and Ordering Considerations . . . . . . . . .  10
-     2.3.  Security Event Token Construction . . . . . . . . . . . .  10
+     2.2.  Security Event Token Construction . . . . . . . . . . . .  10
    3.  Security Considerations . . . . . . . . . . . . . . . . . . .  13
      3.1.  Confidentiality and Integrity . . . . . . . . . . . . . .  13
-     3.2.  Timing Issues . . . . . . . . . . . . . . . . . . . . . .  13
-     3.3.  Distinguishing SETs from Access Tokens  . . . . . . . . .  13
-   4.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  14
-   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  14
-     5.1.  JSON Web Token Claims Registration  . . . . . . . . . . .  14
+     3.2.  Delivery  . . . . . . . . . . . . . . . . . . . . . . . .  13
+     3.3.  Sequencing  . . . . . . . . . . . . . . . . . . . . . . .  13
+     3.4.  Timing Issues . . . . . . . . . . . . . . . . . . . . . .  14
+     3.5.  Distinguishing SETs from Access Tokens  . . . . . . . . .  14
+   4.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  15
+   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  15
+     5.1.  JSON Web Token Claims Registration  . . . . . . . . . . .  15
        5.1.1.  Registry Contents . . . . . . . . . . . . . . . . . .  15
    6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  15
-     6.1.  Normative References  . . . . . . . . . . . . . . . . . .  15
-     6.2.  Informative References  . . . . . . . . . . . . . . . . .  16
+     6.1.  Normative References  . . . . . . . . . . . . . . . . . .  16
+     6.2.  Informative References  . . . . . . . . . . . . . . . . .  17
    Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  17
    Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  17
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  18
@@ -108,10 +109,9 @@ Table of Contents
 
 
 
-
-Hunt, et al.             Expires March 19, 2017                 [Page 2]
+Hunt, et al.              Expires May 25, 2017                  [Page 2]
 
-Internet-Draft          draft-hunt-idevent-token          September 2016
+Internet-Draft          draft-hunt-idevent-token           November 2016
 
 
    o  The creation, modification, removal of a resource.
@@ -165,9 +165,9 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.             Expires March 19, 2017                 [Page 3]
+Hunt, et al.              Expires May 25, 2017                  [Page 3]
 
-Internet-Draft          draft-hunt-idevent-token          September 2016
+Internet-Draft          draft-hunt-idevent-token           November 2016
 
 
    This specification is scoped to security and identity related events.
@@ -221,9 +221,9 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.             Expires March 19, 2017                 [Page 4]
+Hunt, et al.              Expires May 25, 2017                  [Page 4]
 
-Internet-Draft          draft-hunt-idevent-token          September 2016
+Internet-Draft          draft-hunt-idevent-token           November 2016
 
 
       A Subscriber registers to receive SETs from a Feed Publisher using
@@ -264,22 +264,22 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
       is the first value in the "events" array, while event extensions
       are the 2nd, 3rd, etc.
 
-   o  For each value of "events", a JSON attribute, whose value is a
-      JSON object, MAY be added known as an event "payload".  The
+   o  Each value of the "events" claim, is a JSON attribute, whose value
+      is a JSON object also known as the event "payload" object.  The
       payload object contains claims typically unique to the events URI
       value and are not registered as JWT claims.  These claims are
-      defined within their associated event specification.  Event
-      extensions can be used for many purposes.  Some examples include
-      but are not limited to:
+      defined within their associated event specification.  An event
+      with no payload attributes SHALL be specified as the empty JSON
+      object ("{}").Event extensions can be used for many purposes.
+      Some examples include but are not limited to:
 
 
 
 
 
-
-Hunt, et al.             Expires March 19, 2017                 [Page 5]
+Hunt, et al.              Expires May 25, 2017                  [Page 5]
 
-Internet-Draft          draft-hunt-idevent-token          September 2016
+Internet-Draft          draft-hunt-idevent-token           November 2016
 
 
       *  A categorization extension applied to multiple event types in
@@ -302,10 +302,6 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
    {
      "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
-     "events":[
-       "urn:ietf:params:scim:event:passwordReset",
-       "https://example.com/scim/event/passwordResetExt"
-     ],
      "iat": 1458496025,
      "iss": "https://scim.example.com",
      "aud":[
@@ -313,12 +309,12 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
        "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
      ],
      "sub":"https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
-     "urn:ietf:params:scim:event:passwordReset":{
-       "id":"44f6142df96bd6ab61e7521d9"
-     },
-     "https://example.com/scim/event/passwordResetExt":{
-        "resetAttempts":5
-     }
+     "events":[
+       "urn:ietf:params:scim:event:passwordReset":{
+         "id":"44f6142df96bd6ab61e7521d9"},
+       "https://example.com/scim/event/passwordResetExt":{
+         "resetAttempts":5}
+     ]
    }
 
                 Figure 1: Example SCIM Password Reset Event
@@ -329,19 +325,18 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
    o  An "events" claim specifying the hypothetical SCIM urn
       ("urn:ietf:params:scim:event:passwordReset") for a password reset,
       and a custom extension, "https://example.com/scim/event/
-
-
-
-
-Hunt, et al.             Expires March 19, 2017                 [Page 6]
-
-Internet-Draft          draft-hunt-idevent-token          September 2016
-
-
       passwordResetExt", that is used to provide additional event
       information such as the current count of resets.
 
    o  An "iss" claims, denotes the event publisher.
+
+
+
+
+Hunt, et al.              Expires May 25, 2017                  [Page 6]
+
+Internet-Draft          draft-hunt-idevent-token           November 2016
+
 
    o  The "sub" claims specifies the SCIM resource URI that was
       affected.
@@ -352,13 +347,12 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
    Additional extensions to an event may be added by adding more values
    to the "events" claims.  For each event URI value specified, there
-   MAY be a corresponding claim that has a JSON object that contains the
-   claims associated with that event (e.g.,
-   "https://example.com/scim/event/passwordResetExt").  In this example,
-   the SCIM event indicates that a password has been updated and the
-   current password reset count is 5.  Notice that the value for
-   "resetAttempts" is actually part of its own JSON object
-   "https://example.com/scim/event/passwordResetExt".
+   MAY be a corresponding JSON object that contains the claims
+   associated with that event.  In this example, the SCIM event
+   indicates that a password has been updated and the current password
+   reset count is 5.  Notice that the value for "resetAttempts" is
+   actually part of its own JSON object associated with the extension
+   URI.
 
    Here is another example event token, this one for a Logout Token:
 
@@ -370,12 +364,11 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
      "exp": 1458668580,
      "sub": "248289761001",
      "events": [
-       "https://specs.openid.net/logout"
-     ],
-     "https://specs.openid.net/logout": {
-       "iss": "https://token.example.com",
-       "sid": "08a5019c-17e1-4977-8f42-65a12843ea02"
-     }
+       "https://specs.openid.net/logout":{
+         "iss": "https://token.example.com",
+         "sid": "08a5019c-17e1-4977-8f42-65a12843ea02"
+       }
+     ]
    }
 
                    Figure 2: Example OpenID Logout Event
@@ -389,9 +382,16 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.             Expires March 19, 2017                 [Page 7]
+
+
+
+
+
+
+
+Hunt, et al.              Expires May 25, 2017                  [Page 7]
 
-Internet-Draft          draft-hunt-idevent-token          September 2016
+Internet-Draft          draft-hunt-idevent-token           November 2016
 
 
    In the following example, a fictional medical service collects
@@ -402,20 +402,20 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
    {
      "jti": "fb4e75b5411e4e19b6c0fe87950f7749",
-     "events":[
-       "https://openid.net/heart/consent.html"
-     ],
+
      "sub": "248289761001",
      "iat": 1458496025,
      "iss": "https://my.examplemed.com",
      "aud":[
        "https://rp.example.com"
      ],
-     "https://openid.net/heart/consent":{
-       "consentUri":[
-         "https://terms.examplemed.com/labdisclosure.html#Agree"
-       ]
-     }
+     "events":[
+       "https://openid.net/heart/consent.html":{
+         "consentUri":[
+           "https://terms.examplemed.com/labdisclosure.html#Agree"
+         ]
+       }
+     ]
    }
 
                       Figure 3: Example Consent Event
@@ -445,9 +445,9 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.             Expires March 19, 2017                 [Page 8]
+Hunt, et al.              Expires May 25, 2017                  [Page 8]
 
-Internet-Draft          draft-hunt-idevent-token          September 2016
+Internet-Draft          draft-hunt-idevent-token           November 2016
 
 
    aud
@@ -490,20 +490,20 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
    The following are new claims defined by this specification:
 
    events
-      A multi-valued String that contains one or more URIs representing
-      the type of event being expressed and the claims that MAY be
-      available within the JWT.  The first value SHALL indicate the type
-      of SET event and following values represent extensions to that
-      event.  For each value present, there MAY be an associated JSON
-      sub-objects present in the SET.  Each JSON sub-object is denoted
-      by a claim whose name matches a value in "events".  This claim is
-      REQUIRED to have at least one value.
+      A multi-valued set of JSON attributes whose names are URIs
+      representing the primary event (the first value) and event
+      extensions being expressed.  For each JSON attribute present,
+      there SHALL be an associated value which is a JSON object.  The
+      JSON object MAY be an empty object ("{}"), or it MAY be a JSON
+      object containing data as described by the profiling event
+      specification.
 
 
 
-Hunt, et al.             Expires March 19, 2017                 [Page 9]
+
+Hunt, et al.              Expires May 25, 2017                  [Page 9]
 
-Internet-Draft          draft-hunt-idevent-token          September 2016
+Internet-Draft          draft-hunt-idevent-token           November 2016
 
 
    txn
@@ -513,30 +513,7 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
       used to correlate SETs to the same originating event or stateful
       change.
 
-2.2.  Idempotency and Ordering Considerations
-
-   In many cases SETs will be issued by highly distributed systems and
-   subscribers.  Without additional specification it is quite
-   conceivable that the order of SETs received by a subscriber MAY be
-   different from the order of the originating state changes or events.
-   While the "iat" value may give a rough indication of SET order, it
-   SHOULD NOT be relied upon unless the profiling SET token
-   specification provides clarification.
-
-   Profiling specifications are encouraged to consider whether the
-   nature of SETs defined are "idempotent" in the sense that the order
-   of receipt does not matter.  For example, in the case of token
-   revocations, each SET can stand on its own and order has no impact.
-   In contrast, a profiling SET specification related to provisioning
-   might be highly dependent on ordering.  As an example: one SET
-   indicates a new resource was created, while the next SET indicates
-   the same resource is modified.  Non-Idempotent SET event
-   specifications SHOULD choose to define a sequencing method such as aa
-   claim used for the purpose or identifying the order of SETs as
-   defined by the Feed Publisher or another method that is part of how
-   SETs are distributed.
-
-2.3.  Security Event Token Construction
+2.2.  Security Event Token Construction
 
    A SET is a JWT [RFC7519] that is constructed by building a JSON
    structure that constitutes an event object and which is then used as
@@ -557,43 +534,66 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.             Expires March 19, 2017                [Page 10]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.              Expires May 25, 2017                 [Page 10]
 
-Internet-Draft          draft-hunt-idevent-token          September 2016
+Internet-Draft          draft-hunt-idevent-token           November 2016
 
 
    The following is an example event token (which has been formatted for
    readability):
 
-  {
-    "jti": "4d3559ec67504aaba65d40b0363faad8",
-    "iat": 1458496404,
-    "iss": "https://scim.example.com",
-    "aud":[
-     "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
-     "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
-    ],
+   {
+     "jti": "4d3559ec67504aaba65d40b0363faad8",
+     "iat": 1458496404,
+     "iss": "https://scim.example.com",
+     "aud":[
+      "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
+      "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
+     ],
 
-    "events":[
-      "urn:ietf:params:scim:event:create"
-    ],
-    "urn:ietf:params:scim:event:create":{
-      "ref": "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
-      "attributes":["id", "name", "userName", "password", "emails"],
-      "values":{
-        "emails":[
-         {"type":"work", "value":"jdoe@example.com"}
-        ],
-        "password":"not4u2no",
-        "userName":"jdoe",
-        "id":"44f6142df96bd6ab61e7521d9",
-        "name":{
-          "givenName":"John",
-          "familyName":"Doe"
-        }
-      }
-    }
-  }
+     "events":[
+       "urn:ietf:params:scim:event:create":{
+         "ref":
+           "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
+         "attributes":["id", "name", "userName", "password", "emails"],
+         "values":{
+           "emails":[
+            {"type":"work", "value":"jdoe@example.com"}
+           ],
+           "password":"not4u2no",
+           "userName":"jdoe",
+           "id":"44f6142df96bd6ab61e7521d9",
+           "name":{
+             "givenName":"John",
+             "familyName":"Doe"
+           }
+         }
+       }
+     ]
+   }
 
                      Figure 4: Example Event JSON Data
 
@@ -613,9 +613,9 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.             Expires March 19, 2017                [Page 11]
+Hunt, et al.              Expires May 25, 2017                 [Page 11]
 
-Internet-Draft          draft-hunt-idevent-token          September 2016
+Internet-Draft          draft-hunt-idevent-token           November 2016
 
 
    Base64url encoding of the octets of the UTF-8 representation of the
@@ -669,9 +669,9 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
 
 
 
-Hunt, et al.             Expires March 19, 2017                [Page 12]
+Hunt, et al.              Expires May 25, 2017                 [Page 12]
 
-Internet-Draft          draft-hunt-idevent-token          September 2016
+Internet-Draft          draft-hunt-idevent-token           November 2016
 
 
    To create and or validate a signed or encrypted SET, follow the
@@ -700,7 +700,47 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
    so that individual events MAY be authenticated and validated by the
    subscriber.
 
-3.2.  Timing Issues
+3.2.  Delivery
+
+   This specification does not define a delivery mechanism by itself.
+   In addition to confidentiality and integrity (discussed above),
+   implementers and profile specifications MUST consider the
+   consequences of delivery mechanisms that are not secure and/or not
+   assured.  For example, while a SET may be end-to-end secured using
+   JWE, that alone will not guarantee that the correct subscribing party
+   knows they should have received a particular SET.
+
+3.3.  Sequencing
+
+   As defined in this specification, there is no defined way to order
+   multiple SETs in a sequence.  Depending on the type and nature of SET
+   event, order may or may not matter.  For example, in provisioning,
+   event order is critical -- an object could not be modified before it
+   was created.  In other SET types, such as a token revocation, the
+   order of SETs for revoked tokens does not matter.  If however, the
+   event was described as a log-in or logged-out status for a user
+   subject, then order becomes important.
+
+
+
+
+
+Hunt, et al.              Expires May 25, 2017                 [Page 13]
+
+Internet-Draft          draft-hunt-idevent-token           November 2016
+
+
+   Extension specifications and implementers SHOULD take caution when
+   using timestamps such as "iat" to define order.  Distributed systems
+   will have some amount of clock-skew and thus time by itself will not
+   guarantee order.
+
+   Specifications profiling SET SHOULD define a mechanism for detecting
+   order or sequence of events.  For example, the _txn_ claim could be
+   defined as an ordered value (e.g. a counter) that the publisher
+   defines.
+
+3.4.  Timing Issues
 
    When SETs are delivered asynchronously and/or out-of-band with
    respect to the original action that incurred the security event, it
@@ -717,19 +757,11 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
    Alternatively, the specification could use timestamps that allows new
    sessions to be started immediately after a stated logout event time.
 
-3.3.  Distinguishing SETs from Access Tokens
+3.5.  Distinguishing SETs from Access Tokens
 
    Because [RFC7519] states that "all claims that are not understood by
    implementations MUST be ignored.", there is a consideration that a
    SET token might be confused as an access or authorization token in
-
-
-
-Hunt, et al.             Expires March 19, 2017                [Page 13]
-
-Internet-Draft          draft-hunt-idevent-token          September 2016
-
-
    the case where a SET is mistakenly or intentionally intercepted and
    presented as an access token.  To avoid this it is recommended that
    implementers consider one or more of the following:
@@ -746,6 +778,13 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
       "events" claim as a means to detect SET event tokens.  This is
       particularly useful if the same endpoint may receive both types of
       tokens.
+
+
+
+Hunt, et al.              Expires May 25, 2017                 [Page 14]
+
+Internet-Draft          draft-hunt-idevent-token           November 2016
+
 
    o  Consider avoiding use of the "sub" claim at the top level.
 
@@ -777,15 +816,6 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
    IANA "JSON Web Token Claims" registry [IANA.JWT.Claims] established
    by [RFC7519].
 
-
-
-
-
-Hunt, et al.             Expires March 19, 2017                [Page 14]
-
-Internet-Draft          draft-hunt-idevent-token          September 2016
-
-
 5.1.1.  Registry Contents
 
    o  Claim Name: "events"
@@ -799,6 +829,18 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
    o  Specification Document(s): Section 2 of [[ this specification ]]
 
 6.  References
+
+
+
+
+
+
+
+
+Hunt, et al.              Expires May 25, 2017                 [Page 15]
+
+Internet-Draft          draft-hunt-idevent-token           November 2016
+
 
 6.1.  Normative References
 
@@ -832,20 +874,6 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
               RFC 6749, DOI 10.17487/RFC6749, October 2012,
               <http://www.rfc-editor.org/info/rfc6749>.
 
-
-
-
-
-
-Hunt, et al.             Expires March 19, 2017                [Page 15]
-
-Internet-Draft          draft-hunt-idevent-token          September 2016
-
-
-   [RFC7159]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
-              Interchange Format", RFC 7159, DOI 10.17487/RFC7159, March
-              2014, <http://www.rfc-editor.org/info/rfc7159>.
-
    [RFC7519]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
               <http://www.rfc-editor.org/info/rfc7519>.
@@ -860,11 +888,17 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
               RFC 7617, DOI 10.17487/RFC7617, September 2015,
               <http://www.rfc-editor.org/info/rfc7617>.
 
-6.2.  Informative References
 
-   [idevent-scim]
-              Oracle Corporation, "SCIM Event Extensions (work in
-              progress)", <draft-hunt-idevent-scim-00.txt>.
+
+
+
+
+Hunt, et al.              Expires May 25, 2017                 [Page 16]
+
+Internet-Draft          draft-hunt-idevent-token           November 2016
+
+
+6.2.  Informative References
 
    [RFC7009]  Lodderstedt, T., Ed., Dronia, S., and M. Scurtescu, "OAuth
               2.0 Token Revocation", RFC 7009, DOI 10.17487/RFC7009,
@@ -886,17 +920,6 @@ Internet-Draft          draft-hunt-idevent-token          September 2016
               and C. Mortimore, "System for Cross-domain Identity
               Management: Protocol", RFC 7644, DOI 10.17487/RFC7644,
               September 2015, <http://www.rfc-editor.org/info/rfc7644>.
-
-
-
-
-
-
-
-Hunt, et al.             Expires March 19, 2017                [Page 16]
-
-Internet-Draft          draft-hunt-idevent-token          September 2016
-
 
 Appendix A.  Acknowledgments
 
@@ -922,6 +945,15 @@ Appendix B.  Change Log
       General edit corrections from Sarah Squire
       Changed "event" term to "SET"
       Corrected author organization for William Denniss to Google
+
+
+
+
+Hunt, et al.              Expires May 25, 2017                 [Page 17]
+
+Internet-Draft          draft-hunt-idevent-token           November 2016
+
+
       Changed definition of SET to be 2 parts, an envelope and 1 or more
       payloads.
       Clarified that the intent is to express a single event with
@@ -947,16 +979,12 @@ Appendix B.  Change Log
 
    Draft 06 - PH -
 
-
-
-Hunt, et al.             Expires March 19, 2017                [Page 17]
-
-Internet-Draft          draft-hunt-idevent-token          September 2016
-
-
    o  Corrected typos
    o  New txn claim
-   o  New section on Idempotency and Ordering
+   o  New security considerations Sequencing and Timing Issues
+
+   Draft 07 - PH - Moved payload objects to be values of event uri
+   attributes per discussion
 
 Authors' Addresses
 
@@ -970,6 +998,16 @@ Authors' Addresses
    Google
 
    Email: wdenniss@google.com
+
+
+
+
+
+
+
+Hunt, et al.              Expires May 25, 2017                 [Page 18]
+
+Internet-Draft          draft-hunt-idevent-token           November 2016
 
 
    Morteza Ansari
@@ -1005,4 +1043,22 @@ Authors' Addresses
 
 
 
-Hunt, et al.             Expires March 19, 2017                [Page 18]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.              Expires May 25, 2017                 [Page 19]

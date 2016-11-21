@@ -13,7 +13,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="std" docName="draft-hunt-idevent-token-06" ipr="trust200902">
+<rfc category="std" docName="draft-hunt-idevent-token-07" ipr="trust200902">
   <front>
     <title abbrev="draft-hunt-idevent-token">Security Event Token (SET)</title>
 
@@ -46,7 +46,7 @@
       <organization abbrev="Microsoft">Microsoft</organization>
       <address>
         <email>mbj@microsoft.com</email>
-	<uri>http://self-issued.info/</uri>
+	      <uri>http://self-issued.info/</uri>
       </address>
     </author>
 
@@ -225,12 +225,14 @@
         value in the <spanx style="verb">events</spanx> array, while event 
         extensions are the 2nd, 3rd, etc.</t> 
         
-        <t>For each value of <spanx style="verb">events</spanx>, a JSON 
-        attribute, whose value is a JSON object, MAY be added known as an 
-        event "payload". The payload object contains claims
+        <t>Each value of the <spanx style="verb">events</spanx> claim, is a JSON 
+        attribute, whose value is a JSON object also known as the 
+        event "payload" object. The payload object contains claims
         typically unique to the events URI value and are not
         registered as JWT claims. These claims are defined
-        within their associated event specification. Event extensions can 
+        within their associated event specification. An event with no  
+        payload attributes SHALL be specified as the empty JSON object 
+        (<spanx style="verb">{}</spanx>).Event extensions can 
         be used for many purposes. Some examples include but are not limited 
         to:<list style="symbols">
           <t>A categorization extension applied to multiple event types 
@@ -253,10 +255,6 @@
         <artwork>
 { 
   "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
-  "events":[
-    "urn:ietf:params:scim:event:passwordReset",
-    "https://example.com/scim/event/passwordResetExt"
-  ],
   "iat": 1458496025,
   "iss": "https://scim.example.com",  
   "aud":[
@@ -264,12 +262,12 @@
     "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
   ],  
   "sub":"https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
-  "urn:ietf:params:scim:event:passwordReset":{
-    "id":"44f6142df96bd6ab61e7521d9"
-  },
-  "https://example.com/scim/event/passwordResetExt":{
-     "resetAttempts":5
-  }
+  "events":[
+    "urn:ietf:params:scim:event:passwordReset":{
+      "id":"44f6142df96bd6ab61e7521d9"},
+    "https://example.com/scim/event/passwordResetExt":{
+      "resetAttempts":5}
+  ]
 }
 </artwork>
       </figure>      
@@ -294,13 +292,12 @@
       <t>Additional extensions to an event may be added by adding more 
       values to the <spanx style="verb">events</spanx> claims. For 
       each event URI value specified, there MAY be a corresponding 
-      claim that has a JSON object that contains the claims 
-      associated with that event (e.g.,
-      <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>).
-      In this example, the SCIM event indicates that a password has been updated 
-      and the current password reset count is 5. Notice that the value for 
-      "resetAttempts" is actually part of its own JSON object 
-      <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>.  
+      JSON object that contains the claims 
+      associated with that event. In this example, the SCIM event 
+      indicates that a password has been updated and the current 
+      password reset count is 5. Notice that the value for 
+      "resetAttempts" is actually part of its own JSON object associated
+      with the extension URI.  
       </t>
 
       <t><figure anchor="exampleBackLogoutEvent" title="Example OpenID Logout Event">
@@ -316,12 +313,11 @@
   "exp": 1458668580,
   "sub": "248289761001",
   "events": [
-    "https://specs.openid.net/logout"
-  ],
-  "https://specs.openid.net/logout": {
-    "iss": "https://token.example.com",
-    "sid": "08a5019c-17e1-4977-8f42-65a12843ea02"
-  }
+    "https://specs.openid.net/logout":{
+      "iss": "https://token.example.com",
+      "sid": "08a5019c-17e1-4977-8f42-65a12843ea02"
+    }
+  ]
 }
 </artwork>
           </figure>In the above example, the event has its own issuer, 
@@ -341,20 +337,20 @@
         <artwork>
 { 
   "jti": "fb4e75b5411e4e19b6c0fe87950f7749",
-  "events":[
-    "https://openid.net/heart/consent.html"
-  ],
+  
   "sub": "248289761001",
   "iat": 1458496025,
   "iss": "https://my.examplemed.com",  
   "aud":[
     "https://rp.example.com"
   ],  
-  "https://openid.net/heart/consent":{
-    "consentUri":[
-      "https://terms.examplemed.com/labdisclosure.html#Agree"
-    ]
-  }
+  "events":[
+    "https://openid.net/heart/consent.html":{
+      "consentUri":[
+        "https://terms.examplemed.com/labdisclosure.html#Agree"
+      ]
+    }
+  ]
 }
 </artwork>
       </figure>  
@@ -420,15 +416,13 @@
         </t>
         <t>The following are new claims defined by this specification:<list style="hanging">
             <t hangText="events" anchor="eventDef"><vspace blankLines="0"/>A multi-valued 
-            String that contains one or more URIs representing the type 
-            of event being expressed and the claims that MAY be available
-            within the JWT. The first value SHALL indicate the type of SET event
-            and following values represent extensions to that event. 
-            For each value present, there MAY be an associated JSON sub-objects
-            present in the SET. Each JSON sub-object is denoted 
-            by a claim whose name matches a value in 
-            <spanx style="verb">events</spanx>.  This claim is 
-            REQUIRED to have at least one value.</t>
+            set of JSON attributes whose names are URIs representing the  
+            primary event (the first value) and event extensions being expressed. 
+            For each JSON attribute present, there SHALL be an associated 
+            value which is a JSON object. 
+            The JSON object MAY be an empty object (<spanx style="verb">{}</spanx>), 
+            or it MAY be a JSON object containing data as described by the 
+            profiling event specification.</t>
             <t hangText="txn" anchor="txnDef"><vspace/>An OPTIONAL single-valued
             String value that represents a unique transaction identifier. In cases where
             multiple SETs are issued based on different event URIs, the transaction
@@ -460,24 +454,24 @@
   ],  
   
   "events":[
-    "urn:ietf:params:scim:event:create"
-  ],
-  "urn:ietf:params:scim:event:create":{
-    "ref": "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
-    "attributes":["id", "name", "userName", "password", "emails"],
-    "values":{
-      "emails":[
-       {"type":"work", "value":"jdoe@example.com"}
-      ],
-      "password":"not4u2no",
-      "userName":"jdoe",
-      "id":"44f6142df96bd6ab61e7521d9",
-      "name":{
-        "givenName":"John",
-        "familyName":"Doe"
+    "urn:ietf:params:scim:event:create":{
+      "ref":
+        "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
+      "attributes":["id", "name", "userName", "password", "emails"],
+      "values":{
+        "emails":[
+         {"type":"work", "value":"jdoe@example.com"}
+        ],
+        "password":"not4u2no",
+        "userName":"jdoe",
+        "id":"44f6142df96bd6ab61e7521d9",
+        "name":{
+          "givenName":"John",
+          "familyName":"Doe"
+        }
       }
-    }  
-  }
+    }
+  ]
 }
 </artwork>
           </figure></t>
@@ -735,7 +729,6 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml'?><!-- TLS 1.2 -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6125.xml'?><!-- TLS Cert-->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6749.xml'?><!-- OAuth 2 -->
-      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7159.xml'?><!-- JSON -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml'?><!-- JWT -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7525.xml'?><!-- TLS BCP -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7617.xml'?><!-- Basic Auth -->
@@ -758,15 +751,7 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7516.xml'?><!-- JWE -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7517.xml'?><!-- JWK -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7644.xml'?><!-- SCIM Protocl -->
-    
-      <reference anchor="idevent-scim" target="draft-hunt-idevent-scim-00.txt">
-        <front>
-          <title>SCIM Event Extensions (work in progress)</title>
-          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
-          <date/>
-        </front>  
-      </reference>
- 
+     
  <!-- 
       <reference anchor="RISC">
         <front>
@@ -824,6 +809,8 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
         <t>New txn claim</t>
         <t>New security considerations Sequencing and Timing Issues</t>
       </list></t>
+      
+      <t>Draft 07 - PH - Moved payload objects to be values of event uri attributes per discussion</t>
   
     </section>
   </back>
