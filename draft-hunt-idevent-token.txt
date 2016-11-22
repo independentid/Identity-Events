@@ -357,26 +357,26 @@ Internet-Draft          draft-hunt-idevent-token           November 2016
    Here is another example event token, this one for a Logout Token:
 
    {
-     "iss": "https://server.example.com",
-     "aud": "https://rp.example.com",
-     "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
-     "iat": 1458668180,
-     "exp": 1458668580,
-     "sub": "248289761001",
-     "events": [
-       "https://specs.openid.net/logout":{
-         "iss": "https://token.example.com",
-         "sid": "08a5019c-17e1-4977-8f42-65a12843ea02"
-       }
-     ]
+      "iss": "https://server.example.com",
+      "sub": "248289761001",
+      "aud": "s6BhdRkqt3",
+      "iat": 1471566154,
+      "jti": "bWJq",
+      "sid": "08a5019c-17e1-4977-8f42-65a12843ea02",
+      "events": [
+        "http://schemas.openid.net/event/backchannel-logout":{}
+      ]
    }
 
                    Figure 2: Example OpenID Logout Event
 
-   In the above example, the event has its own issuer,
-   "https://server.example.com" while the event is about the logging out
-   of a user session identified in the event extension by "jti" that was
-   issued by "https://token.example.com".
+   Note that the above SET has an empty JSON object and uses the JWT
+   registered claims "sub" and "sid" to identify the subject that was
+   logged-out.
+
+
+
+
 
 
 
