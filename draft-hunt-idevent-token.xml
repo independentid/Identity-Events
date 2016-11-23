@@ -60,7 +60,7 @@
     <keyword>Internet-Draft</keyword>
 
     <abstract>
-      <t>This specification defines the Security Event token, which may
+      <t>This specification defines the Security Event Token, which may
       be distributed via a protocol such as HTTP. The Security Event Token 
       (SET) specification profiles the JSON Web Token (JWT) and may be optionally signed 
       and/or encrypted. A SET describes a statement of fact that may be 
@@ -96,7 +96,7 @@
       </list>
       </t>
       
-      <t>Based on some agreed upon criteria for an event Feed, 
+      <t>Based on some agreed upon criteria for an event feed, 
       the publisher distributes events to the appropriate subscribers.
       While an event may be delivered via synchronous means (e.g., HTTP POST),
       the distribution of the event often happens asynchronously to the 
@@ -131,7 +131,7 @@
       this specification to define normative events.</t>
       
       <t>This specification is scoped to security and identity related events.
-      While event tokens may be used for other purposes, the specification
+      While security event tokens may be used for other purposes, the specification
       only considers security and privacy concerns relevant to identity 
       and personal information.</t>
 
@@ -208,7 +208,7 @@
       specification. A SET has the following structure:
       <list style="symbols">
         <t>An outer JSON structure that acts as the SET envelope. The envelope 
-        contains a set of JSON attributes, called JWT claims, typically common to every 
+        contains a set of JSON attributes, called the JWT Claims Set, typically common to every 
         SET or common to a number of different Security Events within a 
         single profiling specification or a related series of specifications. 
         Claims in the envelope SHOULD be registered in the JWT Token 
@@ -218,25 +218,25 @@
         <t>Envelope claims that are profiled and defined 
         in this specification are used to validate the SET and determine 
         the event data included. The claim <spanx style="verb">events</spanx>
-        describes the type of SET event 
-        and indicates the data that MAY be present in the SET. While a SET 
+        identifies the type of security event 
+        and MAY also include event-specific data. While a SET 
         contains a single event, it MAY have multiple extensions providing 
         additional data about the same event. The primary event is the first 
         value in the <spanx style="verb">events</spanx> array, while event 
         extensions are the 2nd, 3rd, etc.</t> 
         
-        <t>Each value of the <spanx style="verb">events</spanx> claim, is a JSON 
+        <t>Each JSON member of the <spanx style="verb">events</spanx> claim, is a JSON 
         attribute, whose value is a JSON object also known as the 
         event "payload" object. The payload object contains claims
         typically unique to the events URI value and are not
         registered as JWT claims. These claims are defined
-        within their associated event specification. An event with no  
-        payload attributes SHALL be specified as the empty JSON object 
-        (<spanx style="verb">{}</spanx>).Event extensions can 
+        by their associated event specification. An event with no  
+        payload claims SHALL be specified as the empty JSON object 
+        (<spanx style="verb">{}</spanx>). Event extensions can 
         be used for many purposes. Some examples include but are not limited 
         to:<list style="symbols">
           <t>A categorization extension applied to multiple event types 
-          in order to provide classification information (e.g. threat type or level).</t>
+          to provide classification information (e.g., threat type or level).</t>
           <t>Enhancement of an existing specifications the arise over time.</t>
           <t>Correlation extensions needed to link a potential series of events.</t>
           <t>Localized contextual extensions needed between a publisher and subscriber.</t>
@@ -246,62 +246,62 @@
       </t>
 
       <figure anchor="examplePassword" title="Example SCIM Password Reset Event">
-        <preamble>The following is a non-normative example showing a hypothetical 
-        SCIM password reset SET. The example also shows an example where the 
+        <preamble>The following is a non-normative example showing the JWT Claims Set for a hypothetical 
+        SCIM password reset SET. This example is also one in which the
         issuer has provided an extension 
         (<spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>)
-        that is used to convey additional information such as the current
+        that is used to convey additional information -- in this case, the current
         count of reset attempts:</preamble>
         <artwork>
 { 
   "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
   "iat": 1458496025,
   "iss": "https://scim.example.com",  
-  "aud":[
+  "aud": [
     "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
     "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
   ],  
-  "sub":"https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
-  "events":[
-    "urn:ietf:params:scim:event:passwordReset":{
-      "id":"44f6142df96bd6ab61e7521d9"},
-    "https://example.com/scim/event/passwordResetExt":{
-      "resetAttempts":5}
-  ]
+  "sub": "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
+  "events": {
+    "urn:ietf:params:scim:event:passwordReset": 
+      { "id":"44f6142df96bd6ab61e7521d9"},
+    "https://example.com/scim/event/passwordResetExt": 
+      { "resetAttempts":5}
+  }
 }
 </artwork>
       </figure>      
       <t>The event in the figure above expresses hypothetical password
       reset event for SCIM <xref target="RFC7644"/>. The JWT consists of:<list style="symbols">
         <t>An <spanx style="verb">events</spanx> claim specifying the hypothetical 
-        SCIM urn (<spanx style="verb">urn:ietf:params:scim:event:passwordReset</spanx>) 
+        SCIM URN (<spanx style="verb">urn:ietf:params:scim:event:passwordReset</spanx>) 
         for a password reset, and a custom extension, 
         <spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>, 
         that is used to provide additional event information such as the 
         current count of resets.</t>
         <t>An <spanx style="verb">iss</spanx>
-        claims, denotes the event publisher.</t>
-        <t>The <spanx style="verb">sub</spanx> claims specifies the SCIM 
+        claim, denoting the event publisher.</t>
+        <t>The <spanx style="verb">sub</spanx> claim specifies the SCIM 
         resource URI that was affected.</t>
-        <t>The <spanx style="verb">aud</spanx> claims specifies the 
-        intended audience for the event. In practical terms, this MAY be 
-        the URI for the event Feed that a client has subscribed to.
+        <t>The <spanx style="verb">aud</spanx> claim specifies the 
+        intended audiences for the event. In practical terms, an audience MAY be 
+        the URI for an event feed that a client has subscribed to.
         </t>
       </list></t>
       
       <t>Additional extensions to an event may be added by adding more 
       values to the <spanx style="verb">events</spanx> claims. For 
-      each event URI value specified, there MAY be a corresponding 
+      each event URI value specified, there is a corresponding 
       JSON object that contains the claims 
-      associated with that event. In this example, the SCIM event 
+      associated with that event, if any. In this example, the SCIM event 
       indicates that a password has been updated and the current 
       password reset count is 5. Notice that the value for 
       "resetAttempts" is actually part of its own JSON object associated
       with the extension URI.  
       </t>
 
-      <t><figure anchor="exampleBackLogoutEvent" title="Example OpenID Logout Event">
-            <preamble>Here is another example event token, this one
+      <t><figure anchor="exampleBackLogoutEvent" title="Example OpenID Back-Channel Logout Event">
+            <preamble>Here is another example JWT Claims Set for a security event token, this one
               for a Logout Token:</preamble>
 
             <artwork>
@@ -312,9 +312,9 @@
    "iat": 1471566154,
    "jti": "bWJq",
    "sid": "08a5019c-17e1-4977-8f42-65a12843ea02",
-   "events": [ 
-     "http://schemas.openid.net/event/backchannel-logout":{}
-   ]
+   "events": {
+     "http://schemas.openid.net/event/backchannel-logout": {}
+   }
 }
 </artwork>
           </figure>Note that the above SET has an empty JSON object and
@@ -324,10 +324,10 @@
           <t>
           
           <figure anchor="exampleConsent" title="Example Consent Event">
-        <preamble>In the following example, a fictional medical service collects 
+        <preamble>In the following example JWT Claims Set, a fictional medical service collects 
           consent for medical actions and notifies other parties. The individual
           for whom consent is identified was originally authenticated via
-          OpenID Connect.  In this case, the issuer of the SET event is an
+          OpenID Connect.  In this case, the issuer of the security event is an
           application rather than the OpenID provider:</preamble>
         <artwork>
 { 
@@ -336,16 +336,16 @@
   "sub": "248289761001",
   "iat": 1458496025,
   "iss": "https://my.examplemed.com",  
-  "aud":[
+  "aud": [
     "https://rp.example.com"
   ],  
-  "events":[
+  "events": {
     "https://openid.net/heart/consent.html":{
       "consentUri":[
         "https://terms.examplemed.com/labdisclosure.html#Agree"
       ]
     }
-  ]
+  }
 }
 </artwork>
       </figure>  
@@ -364,7 +364,7 @@
             <t hangText="jti"><vspace blankLines="0"/>As defined by 
             <xref target="RFC7519">Section 4.1.7</xref> contains a unique
             identifier for an event. The identifier SHOULD be unique within
-            a particular event Feed and MAY be used by clients to track
+            a particular event feed and MAY be used by clients to track
             whether a particular event has already been received. This 
             claim is REQUIRED.</t>
 
@@ -374,7 +374,7 @@
  
             <t hangText="aud"><vspace blankLines="0"/>A multi-valued String containing the URIs
             representing the audience of the event. Values are typically URLs of
-            the Feeds the event is associated with. When an event has
+            the feeds the event is associated with. When an event has
             multiple audiences that go to the same subscriber, the publisher is not
             obligated to deliver repeated events to the same subscriber.
             This claim is RECOMMENDED.</t>
@@ -410,14 +410,15 @@
           </list>
         </t>
         <t>The following are new claims defined by this specification:<list style="hanging">
-            <t hangText="events" anchor="eventDef"><vspace blankLines="0"/>A multi-valued 
-            set of JSON attributes whose names are URIs representing the  
-            primary event (the first value) and event extensions being expressed. 
-            For each JSON attribute present, there SHALL be an associated 
-            value which is a JSON object. 
-            The JSON object MAY be an empty object (<spanx style="verb">{}</spanx>), 
-            or it MAY be a JSON object containing data as described by the 
-            profiling event specification.</t>
+            <t hangText="events" anchor="eventDef"><vspace blankLines="0"/>
+            A JSON object whose members are a set of JSON attributes 
+            whose names are URIs representing the  primary event (the 
+            first value) and event extensions being expressed. For each 
+            JSON attribute present, there SHALL be an associated 
+            value which is a JSON object. The JSON object MAY be an empty 
+            object (<spanx style="verb">{}</spanx>), or it MAY be a JSON 
+            object containing data as described by the profiling event 
+            specification.</t>
             <t hangText="txn" anchor="txnDef"><vspace/>An OPTIONAL single-valued
             String value that represents a unique transaction identifier. In cases where
             multiple SETs are issued based on different event URIs, the transaction
@@ -433,9 +434,9 @@
         <t>While this specification uses JWT to convey a SET, implementers
         SHALL NOT use SETs to convey authentication or authorization assertions.</t>
 
-        <t><figure anchor="exampleJsonEvent" title="Example Event JSON Data">
+        <t><figure anchor="exampleJsonEvent" title="Example Event Claims">
             <preamble>The
-            following is an example event token (which has been formatted
+            following is an example JWT Claims Set for a security event token (which has been formatted
             for readability):</preamble>
 
             <artwork>
@@ -443,30 +444,30 @@
   "jti": "4d3559ec67504aaba65d40b0363faad8",
   "iat": 1458496404,
   "iss": "https://scim.example.com",  
-  "aud":[
+  "aud": [
    "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
    "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
   ],  
   
-  "events":[
-    "urn:ietf:params:scim:event:create":{
+  "events": {
+    "urn:ietf:params:scim:event:create": {
       "ref":
         "https://scim.example.com/Users/44f6142df96bd6ab61e7521d9",
       "attributes":["id", "name", "userName", "password", "emails"],
-      "values":{
-        "emails":[
-         {"type":"work", "value":"jdoe@example.com"}
+      "values": {
+        "emails": [
+         {"type": "work", "value": "jdoe@example.com"}
         ],
-        "password":"not4u2no",
-        "userName":"jdoe",
-        "id":"44f6142df96bd6ab61e7521d9",
-        "name":{
-          "givenName":"John",
-          "familyName":"Doe"
+        "password": "not4u2no",
+        "userName": "jdoe",
+        "id": "44f6142df96bd6ab61e7521d9",
+        "name": {
+          "givenName": "John",
+          "familyName": "Doe"
         }
       }
     }
-  ]
+  }
 }
 </artwork>
           </figure></t>
@@ -495,23 +496,24 @@
             <artwork>
 eyAgCiAgImp0aSI6ICI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIsCiAg
 ImlhdCI6IDE0NTg0OTY0MDQsCiAgImlzcyI6ICJodHRwczovL3NjaW0uZXhhbXBsZS5j
-b20iLCAgCiAgImF1ZCI6WwogICAiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0ZlZWRz
-Lzk4ZDUyNDYxZmE1YmJjODc5NTkzYjc3NTQiLAogICAiaHR0cHM6Ly9zY2ltLmV4YW1w
-bGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIxZDA4NjQxZDc2NzZlZTciCiAgXSwgIAogIAog
-ICJldmVudHMiOlsKICAgICJ1cm46aWV0ZjpwYXJhbXM6c2NpbTpldmVudDpjcmVhdGUi
-CiAgXSwKICAidXJuOmlldGY6cGFyYW1zOnNjaW06ZXZlbnQ6Y3JlYXRlIjp7CiAgICAi
-cmVmIjogImh0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9Vc2Vycy80NGY2MTQyZGY5NmJk
-NmFiNjFlNzUyMWQ5IiwKICAgICJhdHRyaWJ1dGVzIjpbImlkIiwibmFtZSIsInVzZXJO
-YW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiXSwKICAgICJ2YWx1ZXMiOnsKICAgICAgImVt
-YWlscyI6WwogICAgICAgeyJ0eXBlIjoid29yayIsInZhbHVlIjoiamRvZUBleGFtcGxl
-LmNvbSJ9CiAgICAgIF0sCiAgICAgICJwYXNzd29yZCI6Im5vdDR1Mm5vIiwKICAgICAg
-InVzZXJOYW1lIjoiamRvZSIsCiAgICAgICJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3
-NTIxZDkiLAogICAgICAibmFtZSI6ewogICAgICAgICJnaXZlbk5hbWUiOiJKb2huIiwK
-ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
+b20iLCAgCiAgImF1ZCI6IFsKICAgImh0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVk
+cy85OGQ1MjQ2MWZhNWJiYzg3OTU5M2I3NzU0IiwKICAgImh0dHBzOi8vc2NpbS5leGFt
+cGxlLmNvbS9GZWVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3IgogIF0sICAKICAK
+ICAiZXZlbnRzIjogewogICAgInVybjppZXRmOnBhcmFtczpzY2ltOmV2ZW50OmNyZWF0
+ZSI6IHsKICAgICAgInJlZiI6CiAgICAgICAgImh0dHBzOi8vc2NpbS5leGFtcGxlLmNv
+bS9Vc2Vycy80NGY2MTQyZGY5NmJkNmFiNjFlNzUyMWQ5IiwKICAgICAgImF0dHJpYnV0
+ZXMiOlsiaWQiLCAibmFtZSIsICJ1c2VyTmFtZSIsICJwYXNzd29yZCIsICJlbWFpbHMi
+XSwKICAgICAgInZhbHVlcyI6IHsKICAgICAgICAiZW1haWxzIjogWwogICAgICAgICB7
+InR5cGUiOiAid29yayIsICJ2YWx1ZSI6ICJqZG9lQGV4YW1wbGUuY29tIn0KICAgICAg
+ICBdLAogICAgICAgICJwYXNzd29yZCI6ICJub3Q0dTJubyIsCiAgICAgICAgInVzZXJO
+YW1lIjogImpkb2UiLAogICAgICAgICJpZCI6ICI0NGY2MTQyZGY5NmJkNmFiNjFlNzUy
+MWQ5IiwKICAgICAgICAibmFtZSI6IHsKICAgICAgICAgICJnaXZlbk5hbWUiOiAiSm9o
+biIsCiAgICAgICAgICAiZmFtaWx5TmFtZSI6ICJEb2UiCiAgICAgICAgfQogICAgICB9
+CiAgICB9CiAgfQp9
 </artwork>
           </figure>
           <figure anchor="eventToken"
-            title="Example Unsecured Event Token">
+            title="Example Unsecured Security Event Token">
             <preamble>The encoded JWS signature is the empty string.
             Concatenating the parts yields:</preamble>
 
@@ -520,19 +522,20 @@ eyJhbGciOiJub25lIn0
 .
 eyAgCiAgImp0aSI6ICI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIsCiAg
 ImlhdCI6IDE0NTg0OTY0MDQsCiAgImlzcyI6ICJodHRwczovL3NjaW0uZXhhbXBsZS5j
-b20iLCAgCiAgImF1ZCI6WwogICAiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0ZlZWRz
-Lzk4ZDUyNDYxZmE1YmJjODc5NTkzYjc3NTQiLAogICAiaHR0cHM6Ly9zY2ltLmV4YW1w
-bGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIxZDA4NjQxZDc2NzZlZTciCiAgXSwgIAogIAog
-ICJldmVudHMiOlsKICAgICJ1cm46aWV0ZjpwYXJhbXM6c2NpbTpldmVudDpjcmVhdGUi
-CiAgXSwKICAidXJuOmlldGY6cGFyYW1zOnNjaW06ZXZlbnQ6Y3JlYXRlIjp7CiAgICAi
-cmVmIjogImh0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9Vc2Vycy80NGY2MTQyZGY5NmJk
-NmFiNjFlNzUyMWQ5IiwKICAgICJhdHRyaWJ1dGVzIjpbImlkIiwibmFtZSIsInVzZXJO
-YW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiXSwKICAgICJ2YWx1ZXMiOnsKICAgICAgImVt
-YWlscyI6WwogICAgICAgeyJ0eXBlIjoid29yayIsInZhbHVlIjoiamRvZUBleGFtcGxl
-LmNvbSJ9CiAgICAgIF0sCiAgICAgICJwYXNzd29yZCI6Im5vdDR1Mm5vIiwKICAgICAg
-InVzZXJOYW1lIjoiamRvZSIsCiAgICAgICJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3
-NTIxZDkiLAogICAgICAibmFtZSI6ewogICAgICAgICJnaXZlbk5hbWUiOiJKb2huIiwK
-ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
+b20iLCAgCiAgImF1ZCI6IFsKICAgImh0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVk
+cy85OGQ1MjQ2MWZhNWJiYzg3OTU5M2I3NzU0IiwKICAgImh0dHBzOi8vc2NpbS5leGFt
+cGxlLmNvbS9GZWVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3IgogIF0sICAKICAK
+ICAiZXZlbnRzIjogewogICAgInVybjppZXRmOnBhcmFtczpzY2ltOmV2ZW50OmNyZWF0
+ZSI6IHsKICAgICAgInJlZiI6CiAgICAgICAgImh0dHBzOi8vc2NpbS5leGFtcGxlLmNv
+bS9Vc2Vycy80NGY2MTQyZGY5NmJkNmFiNjFlNzUyMWQ5IiwKICAgICAgImF0dHJpYnV0
+ZXMiOlsiaWQiLCAibmFtZSIsICJ1c2VyTmFtZSIsICJwYXNzd29yZCIsICJlbWFpbHMi
+XSwKICAgICAgInZhbHVlcyI6IHsKICAgICAgICAiZW1haWxzIjogWwogICAgICAgICB7
+InR5cGUiOiAid29yayIsICJ2YWx1ZSI6ICJqZG9lQGV4YW1wbGUuY29tIn0KICAgICAg
+ICBdLAogICAgICAgICJwYXNzd29yZCI6ICJub3Q0dTJubyIsCiAgICAgICAgInVzZXJO
+YW1lIjogImpkb2UiLAogICAgICAgICJpZCI6ICI0NGY2MTQyZGY5NmJkNmFiNjFlNzUy
+MWQ5IiwKICAgICAgICAibmFtZSI6IHsKICAgICAgICAgICJnaXZlbk5hbWUiOiAiSm9o
+biIsCiAgICAgICAgICAiZmFtaWx5TmFtZSI6ICJEb2UiCiAgICAgICAgfQogICAgICB9
+CiAgICB9CiAgfQp9
 .
 </artwork>
           </figure></t>
@@ -593,7 +596,7 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
         
         <t>Specifications profiling SET SHOULD define a mechanism for detecting
         order or sequence of events. For example, the <spanx>txn</spanx>
-        claim could be defined as an ordered value (e.g. a counter) that the publisher defines.</t>
+        claim could contain an ordered value (e.g., a counter) that the publisher defines.</t>
       </section>
       
       <section title="Timing Issues">
@@ -618,7 +621,7 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
         by implementations MUST be ignored.</spanx>, there is a consideration that 
         a SET token might be confused as an access or authorization token in 
         the case where a SET is mistakenly or intentionally intercepted and 
-        presented as an access token. To avoid this it is recommended that
+        presented as an access token. To avoid this, it is recommended that
         implementers consider one or more of the following:<list style="symbols">
           <t>Avoid use of the JWT claim <spanx style="verb">exp</spanx> within the
           envelope.</t>
@@ -629,7 +632,7 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
           distinguish between normal access and logout notification.</t>
           <t>Modify access validation systems to check for the presence of 
           the <spanx style="verb">events</spanx> claim as a means to detect
-          SET event tokens. This is particularly useful if the same endpoint
+          security event tokens. This is particularly useful if the same endpoint
           may receive both types of tokens.</t>
           <t>Consider avoiding use of the <spanx style="verb">sub</spanx>
           claim at the top level.</t>
@@ -642,7 +645,7 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
       <t>If a SET needs to be retained for audit purposes, JWS MAY 
       be used to provide verification of its authenticity.</t>
       
-      <t>Event Publishers SHOULD attempt to specialize Feeds so that the content
+      <t>Event Publishers SHOULD attempt to specialize feeds so that the content
       is targeted to the specific business and protocol needs of subscribers.</t>
       
       <t>When sharing personally identifiable information or information
@@ -662,7 +665,7 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
       <section anchor="ClaimsRegistry" title="JSON Web Token Claims Registration">
 	<t>
 	  This specification registers the <spanx style="verb">events</spanx> and
-    the <spanx style="verb">txn</spanx> claims in the IANA
+	  <spanx style="verb">txn</spanx> claims in the IANA
 	  "JSON Web Token Claims" registry <xref target="IANA.JWT.Claims"/>
 	  established by <xref target="RFC7519"/>.
 	</t>
@@ -675,7 +678,7 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
 		Claim Name: <spanx style="verb">events</spanx>
 	      </t>
 	      <t>
-		Claim Description: Security Event URIs
+		Claim Description: Security Event List
 	      </t>
 	      <t>
 		Change Controller: IESG
@@ -688,7 +691,7 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
     Claim Name: <spanx style="verb">txn</spanx>
         </t>
         <t>
-    Claim Description: SET Transaction Identifier
+    Claim Description: Transaction Identifier
         </t>
         <t>
     Change Controller: IESG
@@ -779,7 +782,7 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
       <t>Draft 01 - PH - Renamed eventUris to events</t>
       <t>Draft 00 - PH - First Draft</t>
       <t>Draft 01 - PH - Fixed some alignment issues with JWT. Remove event type attribute.</t>
-      <t>Draft 02 - PH - Renamed to Security Events, Removed questions, clarified examples and intro text, and added security and privacy section.</t>
+      <t>Draft 02 - PH - Renamed to Security Events, removed questions, clarified examples and intro text, and added security and privacy section.</t>
       <t>Draft 03 - PH <list style="symboles">
         <t>General edit corrections from Sarah Squire</t>
         <t>Changed "event" term to "SET"</t>
@@ -804,9 +807,13 @@ ICAgICAgICAiZmFtaWx5TmFtZSI6IkRvZSIKICAgICAgfQogICAgfSAgCiAgfQp9
         <t>New txn claim</t>
         <t>New security considerations Sequencing and Timing Issues</t>
       </list></t>
-      
-      <t>Draft 07 - PH - Moved payload objects to be values of event uri attributes per discussion</t>
-  
+      <t>
+	Draft 07 -
+	<list style="symbols">
+	  <t>PH - Moved payload objects to be values of event URI attributes, per discussion.</t>
+	  <t>mbj - Applied terminology consistency and grammar cleanups.</t>
+	</list>
+      </t>
     </section>
   </back>
 </rfc>
