@@ -2,7 +2,7 @@
 
 
 
-Network Working Group                                       P. Hunt, Ed.
+Security Events Working Group                               P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                              W. Denniss
 Expires: May 27, 2017                                             Google
@@ -247,7 +247,7 @@ Internet-Draft          draft-hunt-idevent-token           November 2016
    specification.  A SET has the following structure:
 
    o  An outer JSON structure that acts as the SET envelope.  The
-      envelope contains a set of JSON attributes, called the JWT Claims
+      envelope contains a set of name/value pairs called the JWT Claims
       Set, typically common to every SET or common to a number of
       different Security Events within a single profiling specification
       or a related series of specifications.  Claims in the envelope
@@ -260,18 +260,18 @@ Internet-Draft          draft-hunt-idevent-token           November 2016
       data included.  The claim "events" identifies the type of security
       event and MAY also include event-specific data.  While a SET
       contains a single event, it MAY have multiple extensions providing
-      additional data about the same event.  The primary event is the
-      first value in the "events" array, while event extensions are the
-      2nd, 3rd, etc.
+      additional data about the same event.  The primary event is
+      typically the first value in the "events" object, while event
+      extensions are the 2nd, 3rd, etc.
 
-   o  Each JSON member of the "events" claim, is a JSON attribute, whose
-      value is a JSON object also known as the event "payload" object.
-      The payload object contains claims typically unique to the events
-      URI value and are not registered as JWT claims.  These claims are
+   o  Each JSON member of the "events" object is a name/value pair,
+      whose value is a JSON object known as the event "payload".  The
+      payload object contains claims typically unique to the event's URI
+      value and are not registered as JWT claims.  These claims are
       defined by their associated event specification.  An event with no
-      payload claims SHALL be specified as the empty JSON object ("{}").
-      Event extensions can be used for many purposes.  Some examples
-      include but are not limited to:
+      payload claims SHALL be represented as the empty JSON object
+      ("{}").  Event extensions can be used for many purposes.  Some
+      examples include but are not limited to:
 
 
 
@@ -490,14 +490,14 @@ Internet-Draft          draft-hunt-idevent-token           November 2016
    The following are new claims defined by this specification:
 
    events
-      A JSON object whose members are a set of JSON attributes whose
-      names are URIs representing the primary event (the first value)
-      and event extensions being expressed.  For each JSON attribute
-      present, there SHALL be an associated value which is a JSON
-      object.  The JSON object MAY be an empty object ("{}"), or it MAY
-      be a JSON object containing data as described by the profiling
-      event specification.
+      A JSON object whose members are a set of JSON name/value pairs
+      whose names are URIs representing the primary event (typically the
+      first member) and event extensions being expressed.  For each name
+      present, the corresponding value SHALL be a JSON object.  The JSON
+      object MAY be an empty object ("{}"), or it MAY be a JSON object
+      containing data as described by the profiling event specification.
 
+   txn
 
 
 
@@ -506,7 +506,6 @@ Hunt, et al.              Expires May 27, 2017                  [Page 9]
 Internet-Draft          draft-hunt-idevent-token           November 2016
 
 
-   txn
       An OPTIONAL single-valued String value that represents a unique
       transaction identifier.  In cases where multiple SETs are issued
       based on different event URIs, the transaction identifier MAY be
@@ -521,6 +520,7 @@ Internet-Draft          draft-hunt-idevent-token           November 2016
 
    While this specification uses JWT to convey a SET, implementers SHALL
    NOT use SETs to convey authentication or authorization assertions.
+
 
 
 
@@ -736,7 +736,7 @@ Internet-Draft          draft-hunt-idevent-token           November 2016
    guarantee order.
 
    Specifications profiling SET SHOULD define a mechanism for detecting
-   order or sequence of events.  For example, the _txn_ claim could
+   order or sequence of events.  For example, the "txn" claim could
    contain an ordered value (e.g., a counter) that the publisher
    defines.
 
@@ -819,7 +819,7 @@ Internet-Draft          draft-hunt-idevent-token           November 2016
 5.1.1.  Registry Contents
 
    o  Claim Name: "events"
-   o  Claim Description: Security Event List
+   o  Claim Description: Security Event Object
    o  Change Controller: IESG
    o  Specification Document(s): Section 2 of [[ this specification ]]
 

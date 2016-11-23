@@ -53,8 +53,10 @@
     <date year="2016"/>
 
     <area>Security</area>
+    <workgroup>Security Events Working Group</workgroup>
 
     <keyword>Identity</keyword>
+    <keyword>Security</keyword>
     <keyword>Event</keyword>
     <keyword>Token</keyword>
     <keyword>Internet-Draft</keyword>
@@ -208,7 +210,7 @@
       specification. A SET has the following structure:
       <list style="symbols">
         <t>An outer JSON structure that acts as the SET envelope. The envelope 
-        contains a set of JSON attributes, called the JWT Claims Set, typically common to every 
+        contains a set of name/value pairs called the JWT Claims Set, typically common to every 
         SET or common to a number of different Security Events within a 
         single profiling specification or a related series of specifications. 
         Claims in the envelope SHOULD be registered in the JWT Token 
@@ -221,17 +223,17 @@
         identifies the type of security event 
         and MAY also include event-specific data. While a SET 
         contains a single event, it MAY have multiple extensions providing 
-        additional data about the same event. The primary event is the first 
-        value in the <spanx style="verb">events</spanx> array, while event 
+        additional data about the same event. The primary event is typically the first 
+        value in the <spanx style="verb">events</spanx> object, while event 
         extensions are the 2nd, 3rd, etc.</t> 
         
-        <t>Each JSON member of the <spanx style="verb">events</spanx> claim, is a JSON 
-        attribute, whose value is a JSON object also known as the 
-        event "payload" object. The payload object contains claims
-        typically unique to the events URI value and are not
+        <t>Each JSON member of the <spanx style="verb">events</spanx> object is a
+        name/value pair, whose value is a JSON object known as the 
+        event "payload". The payload object contains claims
+        typically unique to the event's URI value and are not
         registered as JWT claims. These claims are defined
         by their associated event specification. An event with no  
-        payload claims SHALL be specified as the empty JSON object 
+        payload claims SHALL be represented as the empty JSON object 
         (<spanx style="verb">{}</spanx>). Event extensions can 
         be used for many purposes. Some examples include but are not limited 
         to:<list style="symbols">
@@ -411,15 +413,16 @@
         </t>
         <t>The following are new claims defined by this specification:<list style="hanging">
             <t hangText="events" anchor="eventDef"><vspace blankLines="0"/>
-            A JSON object whose members are a set of JSON attributes 
-            whose names are URIs representing the  primary event (the 
-            first value) and event extensions being expressed. For each 
-            JSON attribute present, there SHALL be an associated 
-            value which is a JSON object. The JSON object MAY be an empty 
+            A JSON object whose members are a set of JSON name/value pairs
+            whose names are URIs representing the primary event (typically the 
+            first member) and event extensions being expressed. For each 
+            name present, the corresponding value SHALL be a JSON object.
+	    The JSON object MAY be an empty 
             object (<spanx style="verb">{}</spanx>), or it MAY be a JSON 
             object containing data as described by the profiling event 
             specification.</t>
-            <t hangText="txn" anchor="txnDef"><vspace/>An OPTIONAL single-valued
+            <t hangText="txn" anchor="txnDef"><vspace blankLines="0"/>
+	    An OPTIONAL single-valued
             String value that represents a unique transaction identifier. In cases where
             multiple SETs are issued based on different event URIs, the transaction
             identifier MAY be used to correlate SETs to the same 
@@ -595,7 +598,7 @@ CiAgICB9CiAgfQp9
         some amount of clock-skew and thus time by itself will not guarantee order.</t>
         
         <t>Specifications profiling SET SHOULD define a mechanism for detecting
-        order or sequence of events. For example, the <spanx>txn</spanx>
+        order or sequence of events. For example, the <spanx style="verb">txn</spanx>
         claim could contain an ordered value (e.g., a counter) that the publisher defines.</t>
       </section>
       
@@ -678,7 +681,7 @@ CiAgICB9CiAgfQp9
 		Claim Name: <spanx style="verb">events</spanx>
 	      </t>
 	      <t>
-		Claim Description: Security Event List
+		Claim Description: Security Event Object
 	      </t>
 	      <t>
 		Change Controller: IESG
