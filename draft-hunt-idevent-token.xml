@@ -418,7 +418,7 @@
         </t>
         <t>The following are new claims defined by this specification:<list style="hanging">
             <t hangText="events" anchor="eventDef"><vspace blankLines="0"/>
-            The semantics of this claim is to define a set event statements
+            The semantics of this claim is to define a set of event statements
             that each MAY add additional claims to fully describe a single
             logical event that has occurred (e.g. a state change to a subject).
             Multiple event statements of the same type SHALL NOT be accepted. 

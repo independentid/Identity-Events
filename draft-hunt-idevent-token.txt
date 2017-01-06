@@ -507,7 +507,7 @@ Internet-Draft          draft-hunt-idevent-token            January 2017
 
 
    events
-      The semantics of this claim is to define a set event statements
+      The semantics of this claim is to define a set of event statements
       that each MAY add additional claims to fully describe a single
       logical event that has occurred (e.g. a state change to a
       subject).  Multiple event statements of the same type SHALL NOT be
