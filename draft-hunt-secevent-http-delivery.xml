@@ -1,0 +1,1097 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type='text/xsl' href='http://xml.resource.org/authoring/rfc2629.xslt' ?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<?rfc toc="yes"?>
+<?rfc tocompact="yes"?>
+<?rfc tocdepth="3"?>
+<?rfc tocindent="yes"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc comments="yes"?>
+<?rfc inline="yes"?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+<rfc category="std" docName="draft-hunt-secevent-http-delivery-00"
+	ipr="trust200902">
+	<front>
+		<title abbrev="draft-hunt-secevent-http-delivery">
+			SET Token Delivery Using HTTP</title>
+
+		<author fullname="Phil Hunt" initials="P." role="editor"
+			surname="Hunt">
+			<organization abbrev="Oracle">Oracle Corporation</organization>
+
+			<address>
+				<email>phil.hunt@yahoo.com</email>
+			</address>
+		</author>
+    
+    <author fullname="Marius Scurtescu" initials="M.S." surname="Scurtescu">
+      <organization abbrev="Google">Google</organization>
+
+      <address>
+        <email>mscurtescu@google.com</email>
+      </address>
+    </author>
+
+		<date year="2017" />
+
+		<keyword>Internet-Draft</keyword>
+
+		<abstract>
+			<t>
+				This specification defines how a security event token (SET) publisher
+        delivers events to a previously registered receiver using HTTP
+        over TLS. The specification defines the configuration metadata the publisher
+        uses to establish a stream of HTTP POSTs to a receiver's endpoint. It also
+        describes requirements for assured delivery, and a method communication
+        error detection.
+        </t>
+		</abstract>
+	</front>
+
+	<middle>
+		<section anchor="intro" title="Introduction and Overview" toc="default">
+			
+      <t>
+        This specification defines how a stream of SETs (see <xref target="I-D.ietf-secevent-token"/>)
+        can be transmitted by a publisher to a previously registered 
+        receiver using HTTP POST <xref target="RFC7231"/>
+        over TLS. The specification defines the metadata the publisher
+        uses to describe the receiver's HTTP endpoint and the SET token 
+        delivery configuration. The specification defines how
+        the receiver may check the current metadata and delivery status 
+        using HTTP GET over TLS.
+      			</t>
+
+			<figure anchor="notificationStream" title="SET Event Stream">
+          <preamble>The following diagram shows a typical SET Event Stream.
+          A stream consists of a pair of HTTP endpoints, one for the event stream
+          transmitter and one for the receiver. The receiver endpoint is 
+          used by the transmitter to deliver SET events via HTTPS POST.
+          The transmitter endpoint is used by the receiver to perform 
+          HTTPS GET requests to check the stream status.
+        Arrow heads point
+        to the service provider (the direction of an HTTP request):</preamble>
+					<artwork align="center">
++-----------+ Data Plane            +----------+
+|Transmitter+------HTTP POST--------> Receiver |
+|           &lt;------HTTP GET---------+          |
++-----------+         Control Plane +----------+
+</artwork>
+        <postamble></postamble>
+			</figure>
+      <figure anchor="notificationIDP" title="Bi-directional Streams"><preamble>
+        In some service provider relationships, for example between 
+        Identity Providers and Relying Parties, there may be a need to 
+        have bi-directional SET event exchange. This involves 
+        establishing a second event stream that works with transmitter 
+        and receiver roles reversed.
+      </preamble>
+      <artwork>
+  Identity                             Relying
+  Provider                             Party
+
+                 IDP to RP Stream
+
++-----------+ Data Plane            +------------+
+|Transmitter+-----------------------> Receiver   |
+|           &lt;-----------------------+            |
++-----------+         Control Plane +------------+
+
+
+                 RP to IDP Stream
+
++-----------+ Data Plane            +------------+
+| Receiver  &lt;-----------------------+ Transmitter|
+|           +----------------------->            |
++-----------+         Control Plane +------------+
+      </artwork></figure>
+      
+
+			<section anchor="notat" title="Notational Conventions" toc="default">
+				<t>
+					The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+					"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in
+					this
+					document are to be interpreted as described in
+					<xref target="RFC2119" />
+					. These keywords are capitalized when used to
+					unambiguously specify requirements of the protocol or application
+					features and behavior that affect the inter-operability and security of
+					implementations. When these words are not capitalized, they are
+					meant
+					in their natural-language sense.
+				</t>
+
+				<t>
+					For purposes of readability examples are not URL encoded.
+					Implementers MUST percent encode URLs as described in
+					<xref target="RFC3986">Section 2.1 of</xref>
+					.
+				</t>
+
+				<t>Throughout this documents all figures MAY contain spaces and
+					extra
+					line-wrapping for readability and space limitations. Similarly, some
+					URI's contained within examples, have been shortened for space and
+					readability reasons.
+				</t>
+			</section>
+
+			<section anchor="defs" title="Definitions" toc="default">
+        <t>This specification assumes terminology defined in the Security
+        Event Token specification<xref target="I-D.hunt-idevent-token"/>.</t>
+				<t>
+					The following definitions are specific to Identity Event
+					publishing:
+					<list style="hanging">
+            <t hangText="Identity Provider"><vspace/>
+              An Identity Provider is a service provider that issues authentication
+              assertions that may be used by Relying Party service providers
+              to establish login sessions with users. Examples of Identity 
+              Providers are defined in: OpenID Connect 
+              <xref target="openid-connect-core"/> and SAML2 
+              <xref target="saml-core-2.0"/>. For the purpose of this 
+              specification an Identity Provider also includes any provider
+              of services where the compromise of an account may open up 
+              relying parties to attack. For example for the purposes of
+              security events, an email service provider could be 
+              considered an "implicit" Identity Provider.
+            </t>
+            <t hangText="Relying Party"><vspace/>
+              A Relying Party is a service provider that accepts assertions 
+              from Identity Providers to establish sessions. Examples of 
+              Relying Parties are defined in: OpenID Connect 
+              <xref target="openid-connect-core"/> and SAML2 
+              <xref target="saml-core-2.0"/>
+            </t>
+						<t hangText="Event Transmitter"><vspace/>
+              A service provider that sends SETs to other providers known
+              as an Event Receiver. The term is agnostic as to whether the 
+              Transmitter an Identity Provider or a Relying Party. The 
+              transmitter is responsible for offering a way for the 
+              Receiver to register to receive events as well as providing
+              a Control Plane service. 
+						</t>
+            
+            <t hangText="Event Receiver"><vspace/>
+              A service provider that registers to receive SETs from 
+              an Event Transmitter and provides . The term is agnostic as to whether the Receiver is the Identity Authority or implicit/explicit RP though the more common case will be when the Reciever is a Relying Party. Identity Event receivers are responsible for registering config info to receive events at any given transmitter.
+            </t>
+
+            <t hangText="Event Stream"><vspace/>
+              An Event Stream establishes Event Receiver endpoints, security,
+              and configuration data that an Event Transmitter MAY use to
+              send a series of SET Events to an Event Receiver. An Event 
+              Stream is also known as the "data plane" of a transmitter and
+              receiver protocol relationship. 
+            </t>
+            
+            <t hangText="Control Plane"><vspace/>
+              A Control Plane represents an service offered by an Event
+              Transmitter that lets an Event Receiver query the current
+              operational and/or error status of an Event Stream.  The
+              Control Plane MAY also be used to retrieve Event Stream
+              and SET configuration data.
+            </t>
+            
+						<t hangText="Event Family"><vspace/>An Event Family is a 
+              URI that describes the set of events types be issued in 
+              an Event Stream.
+						</t>
+            
+            <t hangText="Subject"><vspace/>
+              The security subject around which a security event has 
+              occurred. For example, a security subject might per a user, 
+              a person, an email address, a service provider entity, an
+              IP address, an OAuth Client, a mobile device, or any identifiable
+              thing referenced in security and authorization systems.
+            </t>
+
+						<t hangText="Notification Mechanism"><vspace/>
+							A URI that describes the
+							chosen event notification mechanism. When subscribing to a feed, a
+							client may choose a specific mechanism by which it wishes to
+							receive notification events. 
+						</t>
+
+					</list>
+				</t>
+			</section>
+		</section>
+
+		<section anchor="process" title="Event Notification Process">
+			<t>When a Security Event occurs, the Feed Provider constructs a SET
+      token <xref target="I-D.hunt-idevent-token"/> that describes the	event. 
+      The feed provider determines the feeds that the event should be 
+      distributed to, and determines which Subscribers need to be notified.</t>
+      <t> 
+      How Feeds are defined and the process by which events are identified for 
+      subscribers is out-of-scope of this	specification.
+			</t>
+
+			<t>
+			When a SET is available for a subscriber, the Feed Provider
+			attempts to deliver the SET based on the Subscriber's registered
+			delivery mechanism:
+			<list style="symbols">
+				<t>The subscriber provided a web-callback endpoint, the
+				publisher uses an HTTP/1.1 POST to the endpoint to deliver the
+				event to the registered subscriber;
+			  </t>
+
+			  <t>Or, the Feed Provider delivers the event through a different
+        method not defined by this specification.
+			  </t>
+			</list>
+			</t>
+
+			<t>After a SET is delivered to all subscribers, Feed Providers
+				do not typically maintain SETs or histories. As such,
+				published SETs SHOULD be self-validating (e.g. signed).
+			</t>
+
+			<t>
+				If delivery to any particular subscriber has been delayed for
+				an extended period of time, the Feed Provider MAY suspend the
+				subscription and even stop maintaining outstanding SETs for
+				the Subscriber at its discretion and available resources. See subscription
+				<spanx style="verb">state</spanx> in <xref target="subscribeMetadata" />.
+			</t>
+
+			<t>
+				Upon receiving a SET, the Subscriber reads the token and validates 
+        it. Based on the content of the token, the subscriber decides what 
+        if any action it needs to take in response to the SET. For 
+        example, in response to a SCIM event <xref target="idevent-scim"/> 
+        indicating a changed resource, the subscriber might perform a 
+        SCIM GET request (see <xref target="RFC7644">Section 3.4</xref>)
+				to the affected resource URI in order to confidentially obtain 
+        the current state of the affected SCIM resource. 
+      </t>
+        
+      <t>
+        The action a Subscriber takes in response to a SET MAY be substantially 
+        different than merely copying the action of the publisher. A single 
+        SET MAY trigger multiple receiver actions. For example, upon receiving 
+        notification that a user resource has been added to a group, the 
+        Subscriber may first determine that the user does not exist in the 
+        Subscriber's domain. The Subscriber translates the event into two 
+        actions:<list style="numbers">
+          <t>Retrieve the user (e.g. using SCIM GET) and then provisions 
+          the user locally. After enabling the user,</t>
+          <t>The Subscriber then enables the user for the application 
+        associated with membership in the Feed Publisher's group.</t>
+        </list>  
+			</t>
+		</section>	
+  <section title="Subscriptions">
+   
+      <t>A subscription represents an agreement to deliver SETs from a
+      specified Feed URI from a Feed Provider to an individual Subscriber
+      entity also known as the "audience". The method of delivery and the 
+      parameters for delivery are specified a set of parameters called 
+      subscription metadata (see <xref target="subscribeMetadata"/>).
+      </t>   
+    
+    <section anchor="subscribeMetadata" title="Subscription Metadata">
+          <t>
+            A subscription is defined by the following metadata:
+            <list style="hanging">
+              <t hangText="feedUri"><vspace />A String value containing the URI
+              for a feed supported by the feed provider. It describes the 
+              content of the feed and MAY also be a resolvable URI where the
+              feed meta data may be returned as a JSON object. REQUIRED.</t>
+
+              <t hangText="methodUri"><vspace />A REQUIRED single-valued string
+              which is a URI with a prefix of <spanx style="verb">urn:ietf:params:set:method</spanx>.
+              This specification defines HTTP POST delivery <xref target="delivery"/>:
+              <spanx style="verb">urn:ietf:params:set:method:HTTP:webCallback</spanx>
+              <vspace blankLines="0"/> in which the Feed Provider delivers events 
+              using HTTP POST to a specified callback URI.</t>
+              
+              <t hangText="deliveryUri"><vspace/>A URI that describes the location 
+              SETs are delivered. Its format and usage requirements are 
+              defined by the associated <spanx style="verb">methodUri</spanx> 
+              specification.</t>
+
+              <t hangText="aud"><vspace blankLines="0"/>An OPTIONAL URI representing 
+              the audience of the subscription. The value SHALL be the value 
+              of "aud" when the subscriber receives SETs from the feed.
+              </t>
+
+              <t hangText="feedJwk"><vspace blankLines="0"/>An OPTIONAL public JSON Web Key (see
+              <xref target="RFC7517" />) that will be used
+              to sign published SETs. If present, the Subscriber can
+              authenticate SETs relayed from the Feed Provider.</t>
+
+              <t hangText="confidentialJwk"><vspace blankLines="0"/>An OPTIONAL Subscriber 
+              provided public JSON Web Key (see <xref target="RFC7517" />) 
+              that MAY be used by the Feed Provider to encrypt SET tokens 
+              for the specified Subscriber.</t>
+
+              <t hangText="subStatus"><vspace blankLines="0"/>An OPTIONAL 
+              value that indicates the current status of a Subscription:<list>
+                  <t><spanx style="verb">on</spanx> - indicates the Subscription
+                  has been verified and that the Feed Provider MAY pass 
+                  SETs to the Subscriber.</t>
+
+                  <t><spanx style="verb">verify</spanx> - indicates the 
+                  Subscription is pending verification. While in "verify", 
+                  published SETs SHALL NOT be stored or delivered to the 
+                  Subscriber. Once verified, the status returns to 
+                  <spanx style="verb">on</spanx>.</t>
+
+                  <t><spanx style="verb">paused</spanx> - indicates the
+                  Feed Provider is temporarily suspending delivery to
+                  Subscriber. While <spanx style="verb">paused</spanx>,
+                  SETs SHOULD be retained and delivered when state
+                  returns to <spanx style="verb">on</spanx>. Verification
+                  is NOT required when returning to <spanx style="verb">on</spanx>.</t>
+
+                  <t><spanx style="verb">off</spanx> - indicates that the
+                  Subscription is no longer passing SETs. While in off mode,
+                  the subscription metadata is maintained, but new events 
+                  are ignored, not delivered or retained. Before returning
+                  to <spanx style="verb">on</spanx>, a verification MUST
+                  be performed.</t>
+
+                  <t><spanx style="verb">fail</spanx> - indicates that the
+                  feed provider was unable to deliver SETs to the
+                  Subscriber for an extended period of time, or due to a call
+                  failure to the registered web call back URI. Unlike paused
+                  status, a failed subscription no longer receives SETs,
+                  nor are they retained by the Feed Provider. Before returning
+                  to <spanx style="verb">on</spanx>, a verification MUST
+                  be performed.</t>
+                </list></t>
+                
+              <t hangText="maxRetries"><vspace blankLines="0"/>An OPTIONAL number indicating the 
+              maximum number of attempts to deliver a SET. A value of '0'
+              indicates there is no maximum. Upon reaching the maximum, the 
+              Subscription <spanx style="verb">subStatus</spanx> attribute is set
+              to <spanx style="verb">failed</spanx>.</t>
+              
+              <t hangText="maxDeliveryTime"><vspace blankLines="0"/>An OPTIONAL number indicating
+              the maximum amount of time in seconds a SET MAY take for
+              successful delivery.  Upon reaching the maximum, the 
+              subscription <spanx style="verb">subStatus</spanx> is set
+              to <spanx style="verb">failed</spanx>. If undefined, there is no maximum time.</t>
+              
+              <t hangText="minDeliveryInterval"><vspace blankLines="0"/>An OPTIONAL
+              integer that represents the minimum interval in seconds between deliveries. A value of '0'
+              indicates delivery should happen immediately. When delivery is
+              a polling method (e.g. HTTP GET), it is the expected time between subscriber attempts.
+              When in push mode (e.g. HTTP POST), it is the interval the server
+              will wait before sending a new event or events.</t>
+            </list></t>
+        </section>
+        
+        <section anchor="subState" title="Subscription State Model">
+          <t>The Subscription attribute <spanx style="verb">subStatus</spanx>
+          tracks the state of any particular subscription with regards to
+          whether SETs are ready or able to be delivered. The impact on 
+          delivery processing is described in <xref target="processingStatus"/>.</t>
+          <figure anchor="stateDiag" title="Subscription States at Feed Publisher">
+          <preamble>The following is the state machine representation of a
+          subscription on a Feed Publisher. Note that a subscription cannot
+          be made active until a verification process has been completed. As 
+          such, a newly created subscription begins with state 
+          <spanx style="verb">verify</spanx>.</preamble>
+          <artwork>
+                               +
+                               |
+                             Create
+                               v
+    +------+              +----------+
+    | fail +->Restart---->|  verify  |
+    +------+              +----+-----+
+        ^                      |
+        |&lt;----Confirm Fail&lt;----+
+        |                   Confirm
+        |                      v
+        |                 +----------+               +--------+
+        |                 |          +--->Suspend--->|        |
+        +------Timeout&lt;---+    on    |               | paused |
+                          |          |&lt;--Resume&lt;-----+        |
+                          +-+--------+               +--------+
+                            |      ^
+                         Disable Enable
+                            v      |
+                          +--------+-+
+                          |   off    |
+                          +----------+</artwork>
+          </figure>
+          <t>In the above diagram, the following actions impact the state
+          of a Subscription. <spanx style="verb">subStatus</spanx> values are shown in
+          the boxes, and change based on the following actions:<list style="hanging">
+          
+            <t hangText="Create"><vspace/>A Subscriber or an administrator creates
+            a new subscription using SCIM as described in <xref target="createSub"></xref>.
+            The initial state is <spanx style="verb">verify</spanx>.</t>
+            
+            <t hangText="Confirm"><vspace/>The Feed Publisher sends a verification
+            SET to the Subscriber which confirms with the correct response as
+            described in <xref target="verifySubscription"/>. If it succeeds
+            to deliver, the Feed Publisher mail retry or set state to 
+            <spanx style="verb">on</spanx>.</t>
+            
+            <t hangText="Confirm Fail"><vspace/>If the confirmation fails,
+            the Feed Publisher sets the state to <spanx style="verb">fail</spanx>
+            requiring administrative action to correct the issue and 
+            <spanx style="verb">Restart</spanx>.</t>
+            
+            <t hangText="Timeout"><vspace/>A Feed Publisher having not being
+            able to deliver a SET over one or more retries which has reached
+            a limit of attempts (<spanx style="verb">maxRetries</spanx>) 
+            or time (<spanx style="verb">maxDeliveryTime</spanx>)
+            MAY set the subscription state to <spanx style="verb">fail</spanx>.
+            In general, the intention is to indicate the maximum
+            number of retries or time a Feed Publisher is able to wait until
+            SET event loss begins to occur resulting in the failed state.</t>
+            
+            <t hangText="Restart"><vspace/>An administrator having corrected the 
+            failed delivery condition modifies the Subscription state to
+            <spanx style="verb">verify</spanx> (e.g. see <xref target="patchSub"/>).
+            </t>
+            
+            <t hangText="Suspend and Resume"><vspace/>A Subscription MAY be 
+            suspended and resumed by updating the Subscription state to
+            <spanx style="verb">paused</spanx> or <spanx style="verb">on</spanx>. For
+            example, see see <xref target="patchSub"/>. While suspended,
+            the Feed Publisher MAY retain undelivered SETs for a period of time.
+            If the Feed Publisher is no longer able to retain SETs, the subscription
+            state SHOULD be set to <spanx style="verb">off</spanx> to indicate
+            SETs are being lost.
+            </t>
+            
+            <t hangText="Enable and Disable"><vspace/>A subscription MAY be
+            disabled and enabled by updating the Subscription state to
+            <spanx style="verb">off</spanx> or <spanx style="verb">on</spanx>. For
+            example, see see <xref target="patchSub"/>. While the Subscription
+            is disabled, all SETs that occur at the Feed Publisher are lost.</t>
+          </list></t>
+        
+        </section>
+        <section anchor="verifySubscription" title="Subscription Verification">
+          <t>In order to avoid ongoing communication issues and to minimize
+          requirements for Feed Providers to maintain a series of SETs indefinitely,
+          a verification process is used to confirm that the requested 
+          Subscription distribution endpoints are valid and that SETs may be
+          successfully delivered. When a Subscription is created or modified,
+          or goes into a failed or off state, 
+          the Feed Provider SHALL set the Subscription state attribute 
+          <spanx style="verb">subStatus</spanx> to <spanx style="verb">verify</spanx> 
+          and send a Verify SET message to the subscriber. If the SET is
+          delivered successfully, the subscription state SHOULD be turned to 
+          <spanx style="verb">on</spanx>. If however verification fails due
+          to a timeout or connection failure, or any other cause, the 
+          Subscription status SHALL be set to <spanx style="verb">fail</spanx>.
+          </t>
+          
+          <section anchor="verifyPush" title="Verifying Subscriptions">
+            <t>The verification process 
+            serves to verify that the identified Subscriber is willing to receive
+            SETs and is correctly configured. In the case of push style
+            subscriptions, where the publisher initiates the action to deliver
+            a SET, Verification can also serve to prevent
+            a Feed Publication server from flooding an endpoint which did not 
+            actually request a Subscription.</t>
+            
+            <t>
+            A Feed Provider MAY send a Verify SET at any time in order to 
+            reverify connectivity and to assure the subscriber the subscription
+            is valid (e.g. as a keep alive technique).</t>
+
+            <t>To confirm a subscription, the Feed Provider SHALL send a
+            verification SET to the subscriber using the registered 
+            <spanx style="verb">methodUri</spanx> mechanism. The Verify 
+            SET contains the following attributes:<list style="hanging">
+              <t hangText="events">Set with a value of 
+              <spanx style="verb">[[this RFC URL]]#verify</spanx>.</t>
+
+              <t hangText="iss">Set to the URI of the feed publisher (see 
+              <xref target="I-D.hunt-idevent-token"/>).</t>
+
+              <t hangText="aud">MUST be set to a value that matches the
+              subscription <spanx style="verb">feedUri</spanx> requested.</t>
+
+              <t hangText="exp">A value that indicates the
+              time the verification request will expire. Once expired, the
+              server will set the subscription state to <spanx style="verb">fail</spanx>.</t>
+              
+            </list>
+            
+            In the SET payload area, a specific delivery method MAY include
+            an attribute that can be used to confirm the subscriber has 
+            successfully received and parsed the SET (e.g. such as the 
+            inclusion of a challenge attribute, see <xref target="CallbackVerify"/>).
+            
+            If a confidential JWK was supplied, then the SET SHOULD
+            be encrypted with the provided key. Successful parsing of the
+            message confirms that provides confirmation of correct 
+            configuration and possession of keys.</t>
+            
+            <t>Note that the verification event URI 
+            (<spanx style="verb">[[this RFC URL]]#verify</spanx>) 
+            type is not normally listed as part of the definition of a 
+            Feed as it is not part of the normal information flow of a Feed.
+            Any Feed MAY include a SET verification event whether listed or
+            not in the Feed event metadata.</t>
+
+            <t>
+            Upon receiving the SET, the subscriber acknowledges receipt as 
+            defined by the method profile (for example, see <xref target="CallbackVerify"/>).</t>
+            
+            <t>
+            If the subscriber is unable to parse the verification SET, fails 
+            to return the correct challenge, or the SET is not delivered after
+            a period of time. The Feed Publisher will set <spanx style="verb">subStatus</spanx>
+            to <spanx style="verb">failed</spanx>. </t>
+          
+          </section>
+          
+        </section>
+  </section>
+    
+  <section anchor="delivery" title="Event Delivery">
+     <section anchor="deliveryDefinition" title="Introduction to Event Delivery Methods">
+        <t>Each event delivery method SHOULD have the following information:<list style="hanging">
+          <t hangText="Description"><vspace/>The <spanx style="verb">methodUri</spanx> URI value
+          for the delivery method and a description of the method.</t>
+          <t hangText="Subscription Verification Procedure"><vspace/>The procedure
+          that the configuration for a subscription is confirmed causing the
+          subscription status to be set to <spanx style="verb">on</spanx>.</t>
+          <t hangText="Delivery Message Format"><vspace/>A description of an event delivery
+          message and how to locate the event token(s) as well as any additional
+          error signalling.</t>
+          <t hangText="Delivery Procedure"><vspace/>The protocol procedure for a delivery
+          request (push or poll), and the expected successful response.</t>
+          <t hangText="Failure Conditions"><vspace/>A description of the failure
+          conditions that might occur and the impact on the subscriptions
+          operational status (<spanx style="verb">subStatus</spanx>) if any.</t>
+          
+        </list> </t>
+        <t>This specification defines the first delivery method known as 
+        "HTTP Web Callback Method" which uses HTTP POST.</t>
+     </section> 
+     <section title="Delivery Processing">
+     <t>As mentioned in <xref target="subscribeMetadata"/>, the attribute 
+     <spanx style="verb">subStatus</spanx> defines the current state of 
+     a subscribers subscription. <xref target="stateDiag"/> shows a state 
+     diagram for Subscriptions. The following describes that actions taken
+     by the Feed Publisher based upon <spanx style="verb">subStatus</spanx>.</t>
+     <texttable anchor="processingStatus" title="Delivery Processing By Status">
+     <ttcol>Status</ttcol><ttcol>Action</ttcol>
+     
+     <c>on</c><c>Delivery SHALL be attempted based on the method defined
+     in the subscription attribute <spanx style="verb">methodUri</spanx>.
+     If the SET fails to deliver it MAY be retained for a retry delivery in a minimum
+     of <spanx style="verb">minDeliveryInterval</spanx> seconds. If new SETs arrive before 
+     the interval, the SETs MUST be held for delivery in order of reception.
+     If this is a repeat attempt to deliver, the Feed Publisher MAY discard
+     the SET if <spanx style="verb">maxRetries</spanx> or <spanx style="verb">maxDeliveryTime</spanx> 
+     is exceeded. If a SET is discarded, the Feed Publisher MAY set <spanx style="verb">subStatus</spanx>
+     to <spanx style="verb">failed</spanx>.</c>
+     
+     <c>verify</c><c>If the SET is not a
+     Verify SET, the SET MAY be retained for a retry at the Feed Publishers discretion. 
+     If a Verify SET fails to deliver, the Feed Publisher SHALL set <spanx style="verb">subStatus</spanx>
+     to <spanx style="verb">failed</spanx>. The Feed Publish MAY opt to make
+     multiple attempts to complete a verification during which status remains as 
+     <spanx style="verb">verify</spanx>.</c>
+     
+     <c>paused</c><c>The SET is held for delivery in a queue. The Feed Publisher MAY
+     at its own discretion set the subscription state to <spanx style="verb">failed</spanx>
+     if <spanx style="verb">subStatus</spanx> is not returned to <spanx style="verb">on</spanx>
+     in what the Feed Publisher determines to be a reasonable amount of time.</c>
+     
+     <c>off</c><c>The SET is ignored.</c>
+     
+     <c>fail</c><c>The SET is ignored due to a previous unrecoverable error. </c>
+     
+     </texttable>
+     </section>
+     <section anchor="httpPost" title="HTTP Web Callback Method">
+        
+       <section title="Description">
+            <t>This method allows a feed provider to use HTTP POST 
+            (<xref target="RFC7231">Section 4.3.3</xref>) to deliver
+            SETs to a registered web callback URI. The Subscription 
+            <spanx style="verb">methodUri</spanx> value for this method 
+            is <spanx style="verb">urn:ietf:params:set:method:HTTP:webCallback</spanx>.</t>
+            
+            <t>This delivery method is capable of delivering a single SET per
+            HTTP POST request. Depending on the settings for the 
+            subscription metadata (see <xref target="subscribeMetadata"/>), 
+            the SET MAY be signed and/or encrypted as defined in <xref target="I-D.hunt-idevent-token"/>.</t>
+            
+            <t>The Subscription's <spanx style="verb">deliveryUri</spanx> 
+            attribute indicates the location of a Subscriber provided 
+            endpoint which can accept HTTP POST requests (e.g. 
+            <spanx style="verb">https://notify.examplerp.com/Events</spanx>).</t>
+       </section>
+          
+       <section anchor="httpMessageFormat" title="Delivery Message Format">
+            <t>The content-type for this method is <spanx style="verb">application/jwt</spanx>
+            and consists of a single SET token (see <xref target="I-D.hunt-idevent-token"/>).</t>
+            <figure anchor="messageSet" title="Example Web Callback POST Message">
+              <artwork>
+  eyJhbGciOiJub25lIn0
+  .
+  eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+  kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+  FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+  WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+  WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+  hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+  VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+  SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+  b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+  tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+  1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+  .
+</artwork>
+            </figure>
+            
+          </section>
+
+          <section anchor="CallbackVerify" title="Subscription Verification">
+            
+            <t>This profile specifies the verification method for HTTP POST 
+            and is based on the general verification method described in
+            <xref target="verifyPush"/>.</t>
+
+            <t>To confirm a subscription, the Feed Provider SHALL send a
+            verification SET to the subscriber using the registered 
+            <spanx style="verb">methodUri</spanx> mechanism which in this case
+            is <spanx style="verb">urn:ietf:params:set:method:HTTP:webCallback</spanx>. 
+            The Verify SET contains the attributes listed in <xref target="verifyPush"/>.</t>
+              
+            <t>A payload attribute <spanx style="verb">confirmChallenge</spanx>
+            is provided with a String value that the subscriber SHALL echo 
+            back in its response. The intent is to confirm that the Subscriber 
+            has successfully parsed the SET and is not just echoing back 
+            HTTP success.</t>
+
+            <figure anchor="verifyPostEvent" title="Example Verification SET with Challenge">
+            <preamble>A non-normative JSON representation of an event to be
+            sent to a subscriber as a subscription confirmation. Note the
+            event is not yet encoded as a JWT token:</preamble>
+<artwork>{  
+  "jti": "4d3559ec67504aaba65d40b0363faad8",
+  "events":["[[this RFC URL]]#verify"],
+  "iat": 1458496404,
+  "iss": "https://scim.example.com",  
+  "exp": 1458497000,
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
+   "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
+  ], 
+  "[[this RFC URL]]#verify":{
+    "confirmChallenge":"ca2179f4-8936-479a-a76d-5486e2baacd7"
+  }  
+}</artwork>
+            </figure>
+            
+            <t>The above SET is encoded as a JWT and transmitted to the 
+            Subscriber as shown in <xref target="postSet"/>.</t>
+
+            <t>Upon receiving a subscription verify SET, a confirming
+            subscriber SHALL respond with a JSON object that includes a 
+            <spanx style="verb">challengeResponse</spanx> attribute and 
+            the value that was provided in <spanx style="verb">confirmChallenge</spanx>.
+            The content type header is set to <spanx style="verb">application/json</spanx>.</t>
+            
+            <figure anchor="verifyPostResponse" title="Example Response to Verify SET with Challenge">
+              <preamble>
+The following is a non-normative example response to a Verify SET 
+received via HTTP/1.1 POST and includes a JSON object containing the 
+confirmation attribute and value.</preamble>
+<artwork>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{  
+  "challengeResponse":"ca2179f4-8936-479a-a76d-5486e2baacd7"
+}</artwork>
+            </figure>
+
+            <t>
+            If the subscriber returns a non-matching value or an HTTP status
+            other than a 200 series response, the subscription 
+            <spanx style="verb">state</spanx> SHALL be set to <spanx style="verb">fail</spanx>.
+            A declining subscriber MAY simply respond with any 400 series HTTP
+            error (e.g. 404).</t>
+          
+          </section>
+
+          <section title="Delivery Procedure">
+            <t>To deliver an event, the publisher generates an event delivery message
+            and uses HTTP POST to the registered endpoint. The content-type of the
+            message is <spanx style="verb">application/jwt</spanx> and the expected
+            response type (accept) is <spanx style="verb">application/json</spanx>.</t>
+            
+            <figure align="left" anchor="postSet" title="Example Web Callback POST Request">
+              <artwork align="left">POST /Events  HTTP/1.1
+
+Host: notify.examplerp.com
+Accept: application/json
+Content-Type: application/jwt
+"eyJhbGciOiJub25lIn0
+.
+eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+.</artwork>
+            </figure>
+            <t>Upon receipt of the request, the Subscriber SHALL validate the 
+            JWT structure of the SET as defined in <xref target="RFC7519">Section 7.2</xref>.
+            The Subscriber SHALL also validate the SET information as described
+            in <xref target="I-D.hunt-idevent-token">Section 2</xref>.</t>
+            <t>If the SET is determined to be valid, the Subscriber SHALL
+            indicate successful submission by responding with HTTP Status
+            202 as <spanx style="verb">Accepted</spanx> (see <xref target="RFC7231">Section 6.3.3</xref>).</t>
+            
+            <t>If SET or JWT is invalid, or there is an HTTP error, the Subscriber
+            SHALL respond with the appropriate HTTP error or an HTTP Status
+            400 Bad Request error as follows:</t>
+            <texttable anchor="reqErrors" title="HTTP Status 400 Errors">
+              <ttcol>Err Value</ttcol><ttcol>Description</ttcol>
+              <c>jwtParse</c><c>Invalid or unparsable JWT or JSON structure.</c>
+              <c>jwtHdr</c><c>In invalid JWT header was detected.</c>
+              <c>jwtCypto</c><c>Unable to parse due to unsupported algorithm.</c>
+              <c>jws</c><c>Signature was not validated.</c>
+              <c>jwe</c><c>Unable to decrypt JWE encoded data.</c>
+              <c>jwtAud</c><c>Invalid audience value.</c>
+              <c>jwtIss</c><c>Issuer not recognized.</c>
+              <c>setType</c><c>An unexpected event type was received.</c>
+              <c>setParse</c><c>Invalid structure was encountered such as inability
+              to parse SET event payload.</c>
+              <c>setData</c><c>SET event claims incomplete or invalid.</c>
+              <c>dup</c><c>A duplicate SET was received and has been ignored.</c>
+            </texttable>
+            
+            <figure anchor="goodPostResponse" title="Example Successful Delivery Response">
+            <preamble>The following is a non-normative example of a successful
+            receipt of a SET.</preamble>
+              <artwork>HTTP/1.1 202 Accepted</artwork>
+            </figure> 
+            
+            <t>An HTTP Status 400 Bad Request response includes a JSON
+            object which provides details about the error. The JSON object
+            includes the JSON attributes: <list style="hanging">
+              <t hangText="err"><vspace/>A value which is a keyword that 
+              describes the error (see <xref target="reqErrors"/>).</t>
+              <t hangText="description"><vspace/>A human-readable text that provides
+              additional diagnostic information.</t>
+            </list> </t>
+            <figure anchor="badPostResponse" title="Example Bad Request Response">
+            <preamble>The following is an example non-normative Bad
+            Request error.</preamble>
+            <artwork>HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "err":"dup",
+  "description":"SET already received. Ignored."
+
+}</artwork>
+            </figure>
+
+          
+            
+            <t></t>
+       </section>
+
+      
+     </section>
+  </section>
+
+  <section anchor="Security" title="Security Considerations" toc="default">
+
+      <t>[TO BE COMPLETED]</t>
+    </section>
+
+    <section anchor="IANA" title="IANA Considerations">
+      
+      <section title="SCIM Schema Registration">
+        <t>As per the "SCIM Schema URIs for Data Resources" registry established
+        by <xref target="RFC7643">Section 10.3</xref>, the following defines and registers
+        the following SCIM URIs and Resource Types for Feeds and Subscriptions.</t>
+        <texttable>
+        <ttcol>Schema URI</ttcol><ttcol>Name</ttcol><ttcol>ResourceType</ttcol><ttcol>Reference</ttcol>
+        
+        <c>urn:ietf:params:scim: schemas:event:2.0: Subscription</c>
+        <c>SET Event Subscription</c>
+        <c>Subscription</c>
+        <c><xref target="subscribeMgmt"/></c>
+        
+        </texttable>
+      
+      </section>
+
+  
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml' ?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5988.xml' ?>
+      
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-token-00.xml'?>
+
+    </references>
+
+    <references title="Informative References">
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7517.xml' ?><!-- JWK -->
+      
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml' ?><!-- SCIM API -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml' ?><!-- SCIM Schema -->
+
+ <!--      <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.draft-ietf-webpush-protocol-02.xml'?>
+ -->
+      <reference anchor="openid-connnect-core">
+        <front>
+          <title>OpenID Connect Core 1.0</title>
+          <author fullname="Nat Sakimura et al"><organization>NRI</organization></author>
+          <date day="8" month="Nov" year="2014"/>
+        </front>
+        <format type="HTML" target="http://openid.net/specs/openid-connect-core-1_0.html"/>
+      </reference>
+      <reference anchor="saml-core-2.0">
+        <front>
+          <title>Assertions and Protocols for the OASIS Security Assertion Markup Language (SAML) V2.0</title>
+          <author fullname="Scott Cantor et al"><organization>Internet2</organization></author>
+          <date day="15" month="March" year="2005"/>
+        </front>
+        <format type="PDF" target="http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf"/>
+      </reference>
+      <reference anchor="idevent-scim">
+        <front>
+          <title>SCIM Event Extensions (work in progress)</title>
+          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
+          <date/>
+        </front>  
+        <format type="TXT" target="draft-hunt-idevent-scim-00.txt"/>    
+      </reference>
+
+     <!-- 
+      <reference anchor="Order-Operations">
+        <front>
+          <title>Order of Operations: Programming Languages</title>
+
+          <author>
+            <organization>Wikipedia</organization>
+          </author>
+
+          <date/>
+        </front>
+
+        <format target="http://en.wikipedia.org/wiki/Order_of_operations#Programming_languages"
+                type="HTML"/>
+      </reference>
+       -->
+    </references>
+
+    <section title="SCIM Profile">
+      <t>This section describes how SCIM can be extended to used to support management 
+      and provisioning of SEC Event delivery endpoints.</t>
+    
+      <t>A Feed Publisher MAY use SCIM to support management of subscriptions.
+      Doing so only requires defining the Subscription Resource Type, and 
+      supporting the corresponding SCIM operations to create, update, 
+      retrieve Subscription Resources. For SCIM service provider capability 
+      and schema discovery, see <xref target="RFC7644">Section 4</xref>.</t>
+          
+      <section title="SCIM Subscription Resource Type">
+        <t>When Subscriptions are managed within a SCIM service provider 
+        <xref target="RFC7644"/>, Subscription resources use schema 
+        defined in <xref target="subscribeMetadata"/> and use a schema 
+        value of <spanx style="verb">urn:ietf:params:scim:schemas:event:2.0:Subscription</spanx>.
+        </t>
+        
+        <t>The SCIM Subscription <spanx style="verb">ResourceType</spanx> definition 
+        is defined as follows:<figure anchor="subscriptionType" title="SCIM Subscription ResourceType Definition">
+<artwork>{
+  "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
+  "id": "Subscription",
+  "name": "Subscription",
+  "endpoint": "/Subscriptions",
+  "description": "Subscribers to SET Feeds",
+  "schema": "urn:ietf:params:scim:schemas:event:2.0:Subscription",
+  "schemaExtensions": []
+}</artwork>
+            </figure>
+            </t>
+            <t>To retrieve information about one or more Subscriptions, 
+            Subscribers or management clients MAY query the <spanx style="verb">/Subscriptions</spanx> endpoint 
+            as defined in <xref target="RFC7644">Section 3.4</xref>.</t>
+        
+            <t><figure anchor="subscriptionGetRequest" title="Example SCIM Subscription GET Request">
+            <preamble>The example below retrieves a specific <spanx style="verb">Subscription</spanx> resource whose 
+            <spanx style="verb">id</spanx> is <spanx style="verb">548b7c3f77c8bab33a4fef40</spanx>.</preamble>
+            <artwork>GET /Subscriptions/767aad7853d240debc8e3c962051c1c0
+Host: example.com
+Accept: application/scim+json
+Authorization: Bearer h480djs93hd8</artwork>
+            </figure></t>
+            <t><figure anchor="subscriptionResponse" title="Example Subscription GET Response">
+            <preamble>The response below shows an example Feed resource
+            that describes an available feed.</preamble>
+            <artwork>HTTP/1.1 200 OK
+Content-Type: application/scim+json
+Location: 
+ https://example.com/v2/Subscriptions/767aad7853d240debc8e3c962051c1c0
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subscription"],
+  "id":"767aad7853d240debc8e3c962051c1c0",
+  "feedName":"OIDCLogoutFeed",
+  "feedUri":
+    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
+  "aud":"https://sets.myexamplerp.com",
+  "subStatus":"pending",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "description":"Logout events from oidc.example.com",
+  "meta":{
+     ... SCIM meta attributes ...
+  }
+}</artwork>
+            </figure></t>
+            <t>In the above example (<xref target="subscriptionResponse"/>)
+            observe that the subscription is for the SCIM <spanx style="verb">Feed</spanx> resource defined at 
+            <spanx style="verb">https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74</spanx>.
+            The current subscription state is <spanx style="verb">pending</spanx>
+            which suggest the Subscription Verification (see <xref target="verifySubscription"/>) process has not yet 
+            completed. Since there is no value for <spanx style="verb">feedJwk</spanx>, )
+            or <spanx style="verb">confidentialJwk</spanx>, the SETs will be
+            sent without signing or encryption (plain text).</t>          
+          </section>
+          <section anchor="createSub" title="New Subscription Requests">
+            <t>To subscribe to a feed, the subscriber of management client
+            uses the SCIM Create operation as defined in <xref target="RFC7644">Section 3.3</xref>.
+            SCIM subscription management service providers MAY have additional 
+            schema requirements which MAY be discovered using SCIM service 
+            configuration and schema discovery, see <xref target="RFC7644">Section 4</xref>.
+            </t>
+            <figure anchor="createSubscription" title="Example New Subscription Request in SCIM">
+            <preamble>In the following non-normative example, a new Subscription resource
+            is requested. Note that the SCIM service provider automatically
+            assigns the <spanx style="verb">id</spanx> attribute.</preamble>
+ <artwork>POST /Subscriptions
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subscription"],
+  "feedName":"OIDCLogoutFeed",
+  "feedUri":
+    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
+  "aud":"https://sets.myexamplerp.com",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "description":"Logout events from oidc.example.com"
+}</artwork>
+
+            </figure>
+            <figure anchor="createSubscriptionResponse" title="Example Response to Subscription Request">
+            <preamble>In following non-normative response, the SCIM service provider
+            has automatically assigned a resource location as well as an
+            <spanx style="verb">id</spanx>. Usually upon creation, the
+            initial value of <spanx style="verb">subStatus</spanx> is 
+            <spanx style="verb">pending</spanx> indicating that the 
+            Subscription Verification (see <xref target="verifySubscription"/>) 
+            has not been completed.</preamble>
+<artwork>HTTP/1.1 201 Created
+Content-Type: application/scim+json
+Location: 
+ https://example.com/v2/Subscriptions/767aad7853d240debc8e3c962051c1c0
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subscription"],
+  "id":"767aad7853d240debc8e3c962051c1c0",
+  "feedName":"OIDCLogoutFeed",
+  "feedUri":
+    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
+  "aud":"https://sets.myexamplerp.com",
+  "subStatus":"pending",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "description":"Logout events from oidc.example.com",
+  "meta":{
+     ... SCIM meta attributes ...
+  }
+}</artwork>
+            </figure>
+          </section>
+          <section anchor="patchSub" title="Updating Subscriptions">
+            <t>To modify a Subscription, a Subscriber or authorized management
+            client MAY use the SCIM PUT operation (see <xref target="RFC7644">Section 3.5.1</xref>) 
+            and MAY use the SCIM PATCH operation (see <xref target="RFC7644">Section 3.5.2</xref>) 
+            if supported by the SCIM Subscription server. </t>
+            
+            <figure anchor="subscriptionPatch" title="Example SCIM Subscription Update">
+            <preamble>In the following non-normative example, the client
+            is requesting that <spanx style="verb">subStatus</spanx> be 
+            changed to <spanx style="verb">paused</spanx> for the Subscription
+            whose path is identified by the request URI path.</preamble>
+<artwork>PATCH /Subscriptions/767aad7853d240debc8e3c962051c1c0
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":
+    ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+  "Operations": [{
+    "op":"replace",
+    "path":"subStatus",
+    "value":"paused"
+  }]
+}
+
+</artwork>
+            </figure>
+            
+         
+        
+        </section>      
+    </section>
+
+    <section title="Acknowledgments">
+      <t>The editor would like to thank the participants in the the SCIM
+      working group for their support of this specification.</t>
+    </section>
+
+    <section title="Change Log">
+      <t>Draft 00 - PH - First Draft based on reduced version of draft-hunt-idevent-distribution</t>
+      
+    </section>
+  </back>
+</rfc>
