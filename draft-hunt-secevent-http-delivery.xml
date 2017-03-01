@@ -221,9 +221,11 @@
 			</section>
 		</section>
 
-		<section anchor="process" title="Event Notification Process">
+    <section title="Data Plane - SET Event Delivery">
+    
+    <section anchor="process" title="Event Notification Process">
 			<t>When a Security Event occurs, the Feed Provider constructs a SET
-      token <xref target="I-D.hunt-idevent-token"/> that describes the	event. 
+      token <xref target="I-D.hunt-idevent-token" /> that describes the	event. 
       The feed provider determines the feeds that the event should be 
       distributed to, and determines which Subscribers need to be notified.</t>
       <t> 
@@ -264,7 +266,7 @@
 				Upon receiving a SET, the Subscriber reads the token and validates 
         it. Based on the content of the token, the subscriber decides what 
         if any action it needs to take in response to the SET. For 
-        example, in response to a SCIM event <xref target="idevent-scim"/> 
+        example, in response to a SCIM event <xref target="idevent-scim" /> 
         indicating a changed resource, the subscriber might perform a 
         SCIM GET request (see <xref target="RFC7644">Section 3.4</xref>)
 				to the affected resource URI in order to confidentially obtain 
@@ -285,290 +287,20 @@
         associated with membership in the Feed Publisher's group.</t>
         </list>  
 			</t>
-		</section>	
-  <section title="Subscriptions">
-   
-      <t>A subscription represents an agreement to deliver SETs from a
-      specified Feed URI from a Feed Provider to an individual Subscriber
-      entity also known as the "audience". The method of delivery and the 
-      parameters for delivery are specified a set of parameters called 
-      subscription metadata (see <xref target="subscribeMetadata"/>).
-      </t>   
-    
-    <section anchor="subscribeMetadata" title="Subscription Metadata">
-          <t>
-            A subscription is defined by the following metadata:
-            <list style="hanging">
-              <t hangText="feedUri"><vspace />A String value containing the URI
-              for a feed supported by the feed provider. It describes the 
-              content of the feed and MAY also be a resolvable URI where the
-              feed meta data may be returned as a JSON object. REQUIRED.</t>
-
-              <t hangText="methodUri"><vspace />A REQUIRED single-valued string
-              which is a URI with a prefix of <spanx style="verb">urn:ietf:params:set:method</spanx>.
-              This specification defines HTTP POST delivery <xref target="delivery"/>:
-              <spanx style="verb">urn:ietf:params:set:method:HTTP:webCallback</spanx>
-              <vspace blankLines="0"/> in which the Feed Provider delivers events 
-              using HTTP POST to a specified callback URI.</t>
-              
-              <t hangText="deliveryUri"><vspace/>A URI that describes the location 
-              SETs are delivered. Its format and usage requirements are 
-              defined by the associated <spanx style="verb">methodUri</spanx> 
-              specification.</t>
-
-              <t hangText="aud"><vspace blankLines="0"/>An OPTIONAL URI representing 
-              the audience of the subscription. The value SHALL be the value 
-              of "aud" when the subscriber receives SETs from the feed.
-              </t>
-
-              <t hangText="feedJwk"><vspace blankLines="0"/>An OPTIONAL public JSON Web Key (see
-              <xref target="RFC7517" />) that will be used
-              to sign published SETs. If present, the Subscriber can
-              authenticate SETs relayed from the Feed Provider.</t>
-
-              <t hangText="confidentialJwk"><vspace blankLines="0"/>An OPTIONAL Subscriber 
-              provided public JSON Web Key (see <xref target="RFC7517" />) 
-              that MAY be used by the Feed Provider to encrypt SET tokens 
-              for the specified Subscriber.</t>
-
-              <t hangText="subStatus"><vspace blankLines="0"/>An OPTIONAL 
-              value that indicates the current status of a Subscription:<list>
-                  <t><spanx style="verb">on</spanx> - indicates the Subscription
-                  has been verified and that the Feed Provider MAY pass 
-                  SETs to the Subscriber.</t>
-
-                  <t><spanx style="verb">verify</spanx> - indicates the 
-                  Subscription is pending verification. While in "verify", 
-                  published SETs SHALL NOT be stored or delivered to the 
-                  Subscriber. Once verified, the status returns to 
-                  <spanx style="verb">on</spanx>.</t>
-
-                  <t><spanx style="verb">paused</spanx> - indicates the
-                  Feed Provider is temporarily suspending delivery to
-                  Subscriber. While <spanx style="verb">paused</spanx>,
-                  SETs SHOULD be retained and delivered when state
-                  returns to <spanx style="verb">on</spanx>. Verification
-                  is NOT required when returning to <spanx style="verb">on</spanx>.</t>
-
-                  <t><spanx style="verb">off</spanx> - indicates that the
-                  Subscription is no longer passing SETs. While in off mode,
-                  the subscription metadata is maintained, but new events 
-                  are ignored, not delivered or retained. Before returning
-                  to <spanx style="verb">on</spanx>, a verification MUST
-                  be performed.</t>
-
-                  <t><spanx style="verb">fail</spanx> - indicates that the
-                  feed provider was unable to deliver SETs to the
-                  Subscriber for an extended period of time, or due to a call
-                  failure to the registered web call back URI. Unlike paused
-                  status, a failed subscription no longer receives SETs,
-                  nor are they retained by the Feed Provider. Before returning
-                  to <spanx style="verb">on</spanx>, a verification MUST
-                  be performed.</t>
-                </list></t>
-                
-              <t hangText="maxRetries"><vspace blankLines="0"/>An OPTIONAL number indicating the 
-              maximum number of attempts to deliver a SET. A value of '0'
-              indicates there is no maximum. Upon reaching the maximum, the 
-              Subscription <spanx style="verb">subStatus</spanx> attribute is set
-              to <spanx style="verb">failed</spanx>.</t>
-              
-              <t hangText="maxDeliveryTime"><vspace blankLines="0"/>An OPTIONAL number indicating
-              the maximum amount of time in seconds a SET MAY take for
-              successful delivery.  Upon reaching the maximum, the 
-              subscription <spanx style="verb">subStatus</spanx> is set
-              to <spanx style="verb">failed</spanx>. If undefined, there is no maximum time.</t>
-              
-              <t hangText="minDeliveryInterval"><vspace blankLines="0"/>An OPTIONAL
-              integer that represents the minimum interval in seconds between deliveries. A value of '0'
-              indicates delivery should happen immediately. When delivery is
-              a polling method (e.g. HTTP GET), it is the expected time between subscriber attempts.
-              When in push mode (e.g. HTTP POST), it is the interval the server
-              will wait before sending a new event or events.</t>
-            </list></t>
-        </section>
-        
-        <section anchor="subState" title="Subscription State Model">
-          <t>The Subscription attribute <spanx style="verb">subStatus</spanx>
-          tracks the state of any particular subscription with regards to
-          whether SETs are ready or able to be delivered. The impact on 
-          delivery processing is described in <xref target="processingStatus"/>.</t>
-          <figure anchor="stateDiag" title="Subscription States at Feed Publisher">
-          <preamble>The following is the state machine representation of a
-          subscription on a Feed Publisher. Note that a subscription cannot
-          be made active until a verification process has been completed. As 
-          such, a newly created subscription begins with state 
-          <spanx style="verb">verify</spanx>.</preamble>
-          <artwork>
-                               +
-                               |
-                             Create
-                               v
-    +------+              +----------+
-    | fail +->Restart---->|  verify  |
-    +------+              +----+-----+
-        ^                      |
-        |&lt;----Confirm Fail&lt;----+
-        |                   Confirm
-        |                      v
-        |                 +----------+               +--------+
-        |                 |          +--->Suspend--->|        |
-        +------Timeout&lt;---+    on    |               | paused |
-                          |          |&lt;--Resume&lt;-----+        |
-                          +-+--------+               +--------+
-                            |      ^
-                         Disable Enable
-                            v      |
-                          +--------+-+
-                          |   off    |
-                          +----------+</artwork>
-          </figure>
-          <t>In the above diagram, the following actions impact the state
-          of a Subscription. <spanx style="verb">subStatus</spanx> values are shown in
-          the boxes, and change based on the following actions:<list style="hanging">
-          
-            <t hangText="Create"><vspace/>A Subscriber or an administrator creates
-            a new subscription using SCIM as described in <xref target="createSub"></xref>.
-            The initial state is <spanx style="verb">verify</spanx>.</t>
-            
-            <t hangText="Confirm"><vspace/>The Feed Publisher sends a verification
-            SET to the Subscriber which confirms with the correct response as
-            described in <xref target="verifySubscription"/>. If it succeeds
-            to deliver, the Feed Publisher mail retry or set state to 
-            <spanx style="verb">on</spanx>.</t>
-            
-            <t hangText="Confirm Fail"><vspace/>If the confirmation fails,
-            the Feed Publisher sets the state to <spanx style="verb">fail</spanx>
-            requiring administrative action to correct the issue and 
-            <spanx style="verb">Restart</spanx>.</t>
-            
-            <t hangText="Timeout"><vspace/>A Feed Publisher having not being
-            able to deliver a SET over one or more retries which has reached
-            a limit of attempts (<spanx style="verb">maxRetries</spanx>) 
-            or time (<spanx style="verb">maxDeliveryTime</spanx>)
-            MAY set the subscription state to <spanx style="verb">fail</spanx>.
-            In general, the intention is to indicate the maximum
-            number of retries or time a Feed Publisher is able to wait until
-            SET event loss begins to occur resulting in the failed state.</t>
-            
-            <t hangText="Restart"><vspace/>An administrator having corrected the 
-            failed delivery condition modifies the Subscription state to
-            <spanx style="verb">verify</spanx> (e.g. see <xref target="patchSub"/>).
-            </t>
-            
-            <t hangText="Suspend and Resume"><vspace/>A Subscription MAY be 
-            suspended and resumed by updating the Subscription state to
-            <spanx style="verb">paused</spanx> or <spanx style="verb">on</spanx>. For
-            example, see see <xref target="patchSub"/>. While suspended,
-            the Feed Publisher MAY retain undelivered SETs for a period of time.
-            If the Feed Publisher is no longer able to retain SETs, the subscription
-            state SHOULD be set to <spanx style="verb">off</spanx> to indicate
-            SETs are being lost.
-            </t>
-            
-            <t hangText="Enable and Disable"><vspace/>A subscription MAY be
-            disabled and enabled by updating the Subscription state to
-            <spanx style="verb">off</spanx> or <spanx style="verb">on</spanx>. For
-            example, see see <xref target="patchSub"/>. While the Subscription
-            is disabled, all SETs that occur at the Feed Publisher are lost.</t>
-          </list></t>
-        
-        </section>
-        <section anchor="verifySubscription" title="Subscription Verification">
-          <t>In order to avoid ongoing communication issues and to minimize
-          requirements for Feed Providers to maintain a series of SETs indefinitely,
-          a verification process is used to confirm that the requested 
-          Subscription distribution endpoints are valid and that SETs may be
-          successfully delivered. When a Subscription is created or modified,
-          or goes into a failed or off state, 
-          the Feed Provider SHALL set the Subscription state attribute 
-          <spanx style="verb">subStatus</spanx> to <spanx style="verb">verify</spanx> 
-          and send a Verify SET message to the subscriber. If the SET is
-          delivered successfully, the subscription state SHOULD be turned to 
-          <spanx style="verb">on</spanx>. If however verification fails due
-          to a timeout or connection failure, or any other cause, the 
-          Subscription status SHALL be set to <spanx style="verb">fail</spanx>.
-          </t>
-          
-          <section anchor="verifyPush" title="Verifying Subscriptions">
-            <t>The verification process 
-            serves to verify that the identified Subscriber is willing to receive
-            SETs and is correctly configured. In the case of push style
-            subscriptions, where the publisher initiates the action to deliver
-            a SET, Verification can also serve to prevent
-            a Feed Publication server from flooding an endpoint which did not 
-            actually request a Subscription.</t>
-            
-            <t>
-            A Feed Provider MAY send a Verify SET at any time in order to 
-            reverify connectivity and to assure the subscriber the subscription
-            is valid (e.g. as a keep alive technique).</t>
-
-            <t>To confirm a subscription, the Feed Provider SHALL send a
-            verification SET to the subscriber using the registered 
-            <spanx style="verb">methodUri</spanx> mechanism. The Verify 
-            SET contains the following attributes:<list style="hanging">
-              <t hangText="events">Set with a value of 
-              <spanx style="verb">[[this RFC URL]]#verify</spanx>.</t>
-
-              <t hangText="iss">Set to the URI of the feed publisher (see 
-              <xref target="I-D.hunt-idevent-token"/>).</t>
-
-              <t hangText="aud">MUST be set to a value that matches the
-              subscription <spanx style="verb">feedUri</spanx> requested.</t>
-
-              <t hangText="exp">A value that indicates the
-              time the verification request will expire. Once expired, the
-              server will set the subscription state to <spanx style="verb">fail</spanx>.</t>
-              
-            </list>
-            
-            In the SET payload area, a specific delivery method MAY include
-            an attribute that can be used to confirm the subscriber has 
-            successfully received and parsed the SET (e.g. such as the 
-            inclusion of a challenge attribute, see <xref target="CallbackVerify"/>).
-            
-            If a confidential JWK was supplied, then the SET SHOULD
-            be encrypted with the provided key. Successful parsing of the
-            message confirms that provides confirmation of correct 
-            configuration and possession of keys.</t>
-            
-            <t>Note that the verification event URI 
-            (<spanx style="verb">[[this RFC URL]]#verify</spanx>) 
-            type is not normally listed as part of the definition of a 
-            Feed as it is not part of the normal information flow of a Feed.
-            Any Feed MAY include a SET verification event whether listed or
-            not in the Feed event metadata.</t>
-
-            <t>
-            Upon receiving the SET, the subscriber acknowledges receipt as 
-            defined by the method profile (for example, see <xref target="CallbackVerify"/>).</t>
-            
-            <t>
-            If the subscriber is unable to parse the verification SET, fails 
-            to return the correct challenge, or the SET is not delivered after
-            a period of time. The Feed Publisher will set <spanx style="verb">subStatus</spanx>
-            to <spanx style="verb">failed</spanx>. </t>
-          
-          </section>
-          
-        </section>
-  </section>
-    
-  <section anchor="delivery" title="Event Delivery">
+		</section><section anchor="delivery" title="Event Delivery">
      <section anchor="deliveryDefinition" title="Introduction to Event Delivery Methods">
         <t>Each event delivery method SHOULD have the following information:<list style="hanging">
-          <t hangText="Description"><vspace/>The <spanx style="verb">methodUri</spanx> URI value
+          <t hangText="Description"><vspace />The <spanx style="verb">methodUri</spanx> URI value
           for the delivery method and a description of the method.</t>
-          <t hangText="Subscription Verification Procedure"><vspace/>The procedure
+          <t hangText="Subscription Verification Procedure"><vspace />The procedure
           that the configuration for a subscription is confirmed causing the
           subscription status to be set to <spanx style="verb">on</spanx>.</t>
-          <t hangText="Delivery Message Format"><vspace/>A description of an event delivery
+          <t hangText="Delivery Message Format"><vspace />A description of an event delivery
           message and how to locate the event token(s) as well as any additional
           error signalling.</t>
-          <t hangText="Delivery Procedure"><vspace/>The protocol procedure for a delivery
+          <t hangText="Delivery Procedure"><vspace />The protocol procedure for a delivery
           request (push or poll), and the expected successful response.</t>
-          <t hangText="Failure Conditions"><vspace/>A description of the failure
+          <t hangText="Failure Conditions"><vspace />A description of the failure
           conditions that might occur and the impact on the subscriptions
           operational status (<spanx style="verb">subStatus</spanx>) if any.</t>
           
@@ -577,9 +309,9 @@
         "HTTP Web Callback Method" which uses HTTP POST.</t>
      </section> 
      <section title="Delivery Processing">
-     <t>As mentioned in <xref target="subscribeMetadata"/>, the attribute 
+     <t>As mentioned in <xref target="subscribeMetadata" />, the attribute 
      <spanx style="verb">subStatus</spanx> defines the current state of 
-     a subscribers subscription. <xref target="stateDiag"/> shows a state 
+     a subscribers subscription. <xref target="stateDiag" /> shows a state 
      diagram for Subscriptions. The following describes that actions taken
      by the Feed Publisher based upon <spanx style="verb">subStatus</spanx>.</t>
      <texttable anchor="processingStatus" title="Delivery Processing By Status">
@@ -624,8 +356,8 @@
             
             <t>This delivery method is capable of delivering a single SET per
             HTTP POST request. Depending on the settings for the 
-            subscription metadata (see <xref target="subscribeMetadata"/>), 
-            the SET MAY be signed and/or encrypted as defined in <xref target="I-D.hunt-idevent-token"/>.</t>
+            subscription metadata (see <xref target="subscribeMetadata" />), 
+            the SET MAY be signed and/or encrypted as defined in <xref target="I-D.hunt-idevent-token" />.</t>
             
             <t>The Subscription's <spanx style="verb">deliveryUri</spanx> 
             attribute indicates the location of a Subscriber provided 
@@ -635,7 +367,7 @@
           
        <section anchor="httpMessageFormat" title="Delivery Message Format">
             <t>The content-type for this method is <spanx style="verb">application/jwt</spanx>
-            and consists of a single SET token (see <xref target="I-D.hunt-idevent-token"/>).</t>
+            and consists of a single SET token (see <xref target="I-D.hunt-idevent-token" />).</t>
             <figure anchor="messageSet" title="Example Web Callback POST Message">
               <artwork>
   eyJhbGciOiJub25lIn0
@@ -661,13 +393,13 @@
             
             <t>This profile specifies the verification method for HTTP POST 
             and is based on the general verification method described in
-            <xref target="verifyPush"/>.</t>
+            <xref target="verifyPush" />.</t>
 
             <t>To confirm a subscription, the Feed Provider SHALL send a
             verification SET to the subscriber using the registered 
             <spanx style="verb">methodUri</spanx> mechanism which in this case
             is <spanx style="verb">urn:ietf:params:set:method:HTTP:webCallback</spanx>. 
-            The Verify SET contains the attributes listed in <xref target="verifyPush"/>.</t>
+            The Verify SET contains the attributes listed in <xref target="verifyPush" />.</t>
               
             <t>A payload attribute <spanx style="verb">confirmChallenge</spanx>
             is provided with a String value that the subscriber SHALL echo 
@@ -696,7 +428,7 @@
             </figure>
             
             <t>The above SET is encoded as a JWT and transmitted to the 
-            Subscriber as shown in <xref target="postSet"/>.</t>
+            Subscriber as shown in <xref target="postSet" />.</t>
 
             <t>Upon receiving a subscription verify SET, a confirming
             subscriber SHALL respond with a JSON object that includes a 
@@ -789,9 +521,9 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
             <t>An HTTP Status 400 Bad Request response includes a JSON
             object which provides details about the error. The JSON object
             includes the JSON attributes: <list style="hanging">
-              <t hangText="err"><vspace/>A value which is a keyword that 
-              describes the error (see <xref target="reqErrors"/>).</t>
-              <t hangText="description"><vspace/>A human-readable text that provides
+              <t hangText="err"><vspace />A value which is a keyword that 
+              describes the error (see <xref target="reqErrors" />).</t>
+              <t hangText="description"><vspace />A human-readable text that provides
               additional diagnostic information.</t>
             </list> </t>
             <figure anchor="badPostResponse" title="Example Bad Request Response">
@@ -814,7 +546,314 @@ Content-Type: application/json
 
       
      </section>
-  </section>
+  </section></section>
+			
+  <section title="Control Plane">
+  
+    <section title="Event Stream Configuration">
+   
+      <t>An Event Stream represents an agreement to deliver SETs from a
+      specified Feed URI from an Event Transmitter to an Event Receiver.
+      The method of delivery and the 
+      parameters for delivery are specified a set of parameters called 
+      subscription metadata (see <xref target="subscribeMetadata" />).
+      </t>   
+    
+      <section anchor="subscribeMetadata" title="Configuration Metadata">
+          <t>
+            A subscription is defined by the following metadata:
+            <list style="hanging">
+              <t hangText="feedUri"><vspace />A String value containing the URI
+              for a feed supported by the feed provider. It describes the 
+              content of the feed and MAY also be a resolvable URI where the
+              feed meta data may be returned as a JSON object. REQUIRED.</t>
+
+              <t hangText="methodUri"><vspace />A REQUIRED single-valued string
+              which is a URI with a prefix of <spanx style="verb">urn:ietf:params:set:method</spanx>.
+              This specification defines HTTP POST delivery <xref target="delivery" />:
+              <spanx style="verb">urn:ietf:params:set:method:HTTP:webCallback</spanx>
+              <vspace blankLines="0" /> in which the Feed Provider delivers events 
+              using HTTP POST to a specified callback URI.</t>
+              
+              <t hangText="deliveryUri"><vspace />A URI that describes the location 
+              SETs are delivered. Its format and usage requirements are 
+              defined by the associated <spanx style="verb">methodUri</spanx> 
+              specification.</t>
+
+              <t hangText="aud"><vspace blankLines="0" />An OPTIONAL URI representing 
+              the audience of the subscription. The value SHALL be the value 
+              of "aud" when the subscriber receives SETs from the feed.
+              </t>
+
+              <t hangText="feedJwk"><vspace blankLines="0" />An OPTIONAL public JSON Web Key (see
+              <xref target="RFC7517" />) that will be used
+              to sign published SETs. If present, the Subscriber can
+              authenticate SETs relayed from the Feed Provider.</t>
+
+              <t hangText="confidentialJwk"><vspace blankLines="0" />An OPTIONAL Subscriber 
+              provided public JSON Web Key (see <xref target="RFC7517" />) 
+              that MAY be used by the Feed Provider to encrypt SET tokens 
+              for the specified Subscriber.</t>
+
+              <t hangText="subStatus"><vspace blankLines="0" />An OPTIONAL 
+              value that indicates the current status of a Subscription:<list>
+                  <t><spanx style="verb">on</spanx> - indicates the Subscription
+                  has been verified and that the Feed Provider MAY pass 
+                  SETs to the Subscriber.</t>
+
+                  <t><spanx style="verb">verify</spanx> - indicates the 
+                  Subscription is pending verification. While in "verify", 
+                  published SETs SHALL NOT be stored or delivered to the 
+                  Subscriber. Once verified, the status returns to 
+                  <spanx style="verb">on</spanx>.</t>
+
+                  <t><spanx style="verb">paused</spanx> - indicates the
+                  Feed Provider is temporarily suspending delivery to
+                  Subscriber. While <spanx style="verb">paused</spanx>,
+                  SETs SHOULD be retained and delivered when state
+                  returns to <spanx style="verb">on</spanx>. Verification
+                  is NOT required when returning to <spanx style="verb">on</spanx>.</t>
+
+                  <t><spanx style="verb">off</spanx> - indicates that the
+                  Subscription is no longer passing SETs. While in off mode,
+                  the subscription metadata is maintained, but new events 
+                  are ignored, not delivered or retained. Before returning
+                  to <spanx style="verb">on</spanx>, a verification MUST
+                  be performed.</t>
+
+                  <t><spanx style="verb">fail</spanx> - indicates that the
+                  feed provider was unable to deliver SETs to the
+                  Subscriber for an extended period of time, or due to a call
+                  failure to the registered web call back URI. Unlike paused
+                  status, a failed subscription no longer receives SETs,
+                  nor are they retained by the Feed Provider. Before returning
+                  to <spanx style="verb">on</spanx>, a verification MUST
+                  be performed.</t>
+                </list></t>
+                
+              <t hangText="maxRetries"><vspace blankLines="0" />An OPTIONAL number indicating the 
+              maximum number of attempts to deliver a SET. A value of '0'
+              indicates there is no maximum. Upon reaching the maximum, the 
+              Subscription <spanx style="verb">subStatus</spanx> attribute is set
+              to <spanx style="verb">failed</spanx>.</t>
+              
+              <t hangText="maxDeliveryTime"><vspace blankLines="0" />An OPTIONAL number indicating
+              the maximum amount of time in seconds a SET MAY take for
+              successful delivery.  Upon reaching the maximum, the 
+              subscription <spanx style="verb">subStatus</spanx> is set
+              to <spanx style="verb">failed</spanx>. If undefined, there is no maximum time.</t>
+              
+              <t hangText="minDeliveryInterval"><vspace blankLines="0" />An OPTIONAL
+              integer that represents the minimum interval in seconds between deliveries. A value of '0'
+              indicates delivery should happen immediately. When delivery is
+              a polling method (e.g. HTTP GET), it is the expected time between subscriber attempts.
+              When in push mode (e.g. HTTP POST), it is the interval the server
+              will wait before sending a new event or events.</t>
+            </list></t>
+        </section>
+        
+        <section anchor="subState" title="Event Stream Status">
+          <t>The Event Stream configuration attribute <spanx style="verb">subStatus</spanx>
+          tracks the state of any particular subscription with regards to
+          whether SETs are ready or able to be delivered. The impact on 
+          delivery processing is described in <xref target="processingStatus" />.</t>
+          <figure anchor="stateDiag" title="Subscription States at Feed Publisher">
+          <preamble>The following is the state machine representation of a
+          subscription on a Feed Publisher. Note that a subscription cannot
+          be made active until a verification process has been completed. As 
+          such, a newly created subscription begins with state 
+          <spanx style="verb">verify</spanx>.</preamble>
+          <artwork>
+                               +
+                               |
+                             Create
+                               v
+    +------+              +----------+
+    | fail +->Restart---->|  verify  |
+    +------+              +----+-----+
+        ^                      |
+        |&lt;----Confirm Fail&lt;----+
+        |                   Confirm
+        |                      v
+        |                 +----------+               +--------+
+        |                 |          +--->Suspend--->|        |
+        +------Timeout&lt;---+    on    |               | paused |
+                          |          |&lt;--Resume&lt;-----+        |
+                          +-+--------+               +--------+
+                            |      ^
+                         Disable Enable
+                            v      |
+                          +--------+-+
+                          |   off    |
+                          +----------+</artwork>
+          </figure>
+          <t>In the above diagram, the following actions impact the state
+          of a Subscription. <spanx style="verb">subStatus</spanx> values are shown in
+          the boxes, and change based on the following actions:<list style="hanging">
+          
+            <t hangText="Create"><vspace />A Subscriber or an administrator creates
+            a new subscription using SCIM as described in <xref target="createSub"></xref>.
+            The initial state is <spanx style="verb">verify</spanx>.</t>
+            
+            <t hangText="Confirm"><vspace />The Feed Publisher sends a verification
+            SET to the Subscriber which confirms with the correct response as
+            described in <xref target="verifySubscription" />. If it succeeds
+            to deliver, the Feed Publisher mail retry or set state to 
+            <spanx style="verb">on</spanx>.</t>
+            
+            <t hangText="Confirm Fail"><vspace />If the confirmation fails,
+            the Feed Publisher sets the state to <spanx style="verb">fail</spanx>
+            requiring administrative action to correct the issue and 
+            <spanx style="verb">Restart</spanx>.</t>
+            
+            <t hangText="Timeout"><vspace />A Feed Publisher having not being
+            able to deliver a SET over one or more retries which has reached
+            a limit of attempts (<spanx style="verb">maxRetries</spanx>) 
+            or time (<spanx style="verb">maxDeliveryTime</spanx>)
+            MAY set the subscription state to <spanx style="verb">fail</spanx>.
+            In general, the intention is to indicate the maximum
+            number of retries or time a Feed Publisher is able to wait until
+            SET event loss begins to occur resulting in the failed state.</t>
+            
+            <t hangText="Restart"><vspace />An administrator having corrected the 
+            failed delivery condition modifies the Subscription state to
+            <spanx style="verb">verify</spanx> (e.g. see <xref target="patchSub" />).
+            </t>
+            
+            <t hangText="Suspend and Resume"><vspace />A Subscription MAY be 
+            suspended and resumed by updating the Subscription state to
+            <spanx style="verb">paused</spanx> or <spanx style="verb">on</spanx>. For
+            example, see see <xref target="patchSub" />. While suspended,
+            the Feed Publisher MAY retain undelivered SETs for a period of time.
+            If the Feed Publisher is no longer able to retain SETs, the subscription
+            state SHOULD be set to <spanx style="verb">off</spanx> to indicate
+            SETs are being lost.
+            </t>
+            
+            <t hangText="Enable and Disable"><vspace />A subscription MAY be
+            disabled and enabled by updating the Subscription state to
+            <spanx style="verb">off</spanx> or <spanx style="verb">on</spanx>. For
+            example, see see <xref target="patchSub" />. While the Subscription
+            is disabled, all SETs that occur at the Feed Publisher are lost.</t>
+          </list></t>
+        
+        </section>
+        <section title="Checking Stream Configuration and Status">
+          <t>An Event Receiver MAY check the current status of a Stream
+          with the Event Transmitter, by performing an HTTP GET using the
+          provided URI from the Transmitter.</t>
+          <t>The format of the response is defined by <xref target="RFC7644">Section TBD</xref>.
+          </t>
+         
+<figure anchor="streamResponse" title="Example Subscription GET Response">
+            <preamble>The response below shows an example Event Stream response.</preamble>
+            <artwork>HTTP/1.1 200 OK
+Content-Type: application/json
+Location: 
+ https://example.com/v2/Streams/767aad7853d240debc8e3c962051c1c0
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:Stream"],
+  "id":"767aad7853d240debc8e3c962051c1c0",
+  "feedName":"OIDCLogoutFeed",
+  "feedUri":
+    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
+  "aud":"https://sets.myexamplerp.com",
+  "subStatus":"fail",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "description":"Logout events from oidc.example.com",
+  "meta":{
+     ... SCIM meta attributes ...
+  }
+}</artwork>
+            </figure>        
+        </section>
+        <section anchor="verifySubscription" title="Stream Configuration Verification">
+          <t>In order to avoid ongoing communication issues and to minimize
+          requirements for Feed Providers to maintain a series of SETs indefinitely,
+          a verification process is used to confirm that the requested 
+          Subscription distribution endpoints are valid and that SETs may be
+          successfully delivered. When a Subscription is created or modified,
+          or goes into a failed or off state, 
+          the Feed Provider SHALL set the Subscription state attribute 
+          <spanx style="verb">subStatus</spanx> to <spanx style="verb">verify</spanx> 
+          and send a Verify SET message to the subscriber. If the SET is
+          delivered successfully, the subscription state SHOULD be turned to 
+          <spanx style="verb">on</spanx>. If however verification fails due
+          to a timeout or connection failure, or any other cause, the 
+          Subscription status SHALL be set to <spanx style="verb">fail</spanx>.
+          </t>
+          
+          <section anchor="verifyPush" title="Verifying Subscriptions">
+            <t>The verification process 
+            serves to verify that the identified Subscriber is willing to receive
+            SETs and is correctly configured. In the case of push style
+            subscriptions, where the publisher initiates the action to deliver
+            a SET, Verification can also serve to prevent
+            a Feed Publication server from flooding an endpoint which did not 
+            actually request a Subscription.</t>
+            
+            <t>
+            A Feed Provider MAY send a Verify SET at any time in order to 
+            reverify connectivity and to assure the subscriber the subscription
+            is valid (e.g. as a keep alive technique).</t>
+
+            <t>To confirm a subscription, the Feed Provider SHALL send a
+            verification SET to the subscriber using the registered 
+            <spanx style="verb">methodUri</spanx> mechanism. The Verify 
+            SET contains the following attributes:<list style="hanging">
+              <t hangText="events">Set with a value of 
+              <spanx style="verb">[[this RFC URL]]#verify</spanx>.</t>
+
+              <t hangText="iss">Set to the URI of the feed publisher (see 
+              <xref target="I-D.hunt-idevent-token" />).</t>
+
+              <t hangText="aud">MUST be set to a value that matches the
+              subscription <spanx style="verb">feedUri</spanx> requested.</t>
+
+              <t hangText="exp">A value that indicates the
+              time the verification request will expire. Once expired, the
+              server will set the subscription state to <spanx style="verb">fail</spanx>.</t>
+              
+            </list>
+            
+            In the SET payload area, a specific delivery method MAY include
+            an attribute that can be used to confirm the subscriber has 
+            successfully received and parsed the SET (e.g. such as the 
+            inclusion of a challenge attribute, see <xref target="CallbackVerify" />).
+            
+            If a confidential JWK was supplied, then the SET SHOULD
+            be encrypted with the provided key. Successful parsing of the
+            message confirms that provides confirmation of correct 
+            configuration and possession of keys.</t>
+            
+            <t>Note that the verification event URI 
+            (<spanx style="verb">[[this RFC URL]]#verify</spanx>) 
+            type is not normally listed as part of the definition of a 
+            Feed as it is not part of the normal information flow of a Feed.
+            Any Feed MAY include a SET verification event whether listed or
+            not in the Feed event metadata.</t>
+
+            <t>
+            Upon receiving the SET, the subscriber acknowledges receipt as 
+            defined by the method profile (for example, see <xref target="CallbackVerify" />).</t>
+            
+            <t>
+            If the subscriber is unable to parse the verification SET, fails 
+            to return the correct challenge, or the SET is not delivered after
+            a period of time. The Feed Publisher will set <spanx style="verb">subStatus</spanx>
+            to <spanx style="verb">failed</spanx>. </t>
+          
+          </section>
+          
+        </section>
+  </section></section>
+  
+    
+  
 
   <section anchor="Security" title="Security Considerations" toc="default">
 
