@@ -167,11 +167,9 @@
           The following definitions are used with SETs:
           <list style="hanging">
  
-            <t hangText="Security Event Token (SET)"><vspace blankLines="0"/>An SET is a 
-              JWT that is to be
-              distributed to one or more registered subscribers. A SET MAY
-              be signed or encrypted using JWS and/or JWE for authentication 
-              and confidentiality reasons.
+            <t hangText="Security Event Token (SET)"><vspace blankLines="0"/>
+              A SET is a JWT <xref target="RFC7519"/> that is 
+              distributed to one or more registered Event Receivers. 
             </t>
 
             <t hangText="Feed"><vspace blankLines="0"/>A Feed is a logical
@@ -194,6 +192,7 @@
               security events, an email service provider could be 
               considered an "implicit" Identity Provider.
             </t>
+            
             <t hangText="Relying Party"><vspace/>
               A Relying Party is a service provider that accepts assertions 
               from Identity Providers to establish sessions. Examples of 
@@ -201,31 +200,40 @@
               <xref target="openid-connect-core"/> and SAML2 
               <xref target="saml-core-2.0"/>
             </t>
+            
             <t hangText="Event Transmitter"><vspace/>
-              A service provider that sends SETs to other providers known
-              as an Event Receiver. The term is agnostic as to whether the 
-              Transmitter an Identity Provider or a Relying Party. The 
-              transmitter is responsible for offering a way for the 
-              Receiver to register to receive events as well as providing
-              a Control Plane service. 
+              A service provider that delivers SETs to other providers known
+              as Event Receivers. Two examples of an Event Receivers are 
+              Identity Providers or a Relying Parties. An Event Transmitter
+              is responsible for offering a service that allows the Event
+              Receiver to check the Event Stream configuration and status
+              known as the "Control Plane". 
             </t>
             
             <t hangText="Event Receiver"><vspace/>
               A service provider that registers to receive SETs from 
-              an Event Transmitter and provides . The term is agnostic as to whether the Receiver is the Identity Authority or implicit/explicit RP though the more common case will be when the Reciever is a Relying Party. Identity Event receivers are responsible for registering config info to receive events at any given transmitter.
+              an Event Transmitter and provides . The term is agnostic 
+              as to whether the Receiver is the Identity Authority or 
+              implicit/explicit RP though the more common case will be 
+              when the Receiver is a Relying Party. Event Receivers
+              can check current Event Stream configuration and status by
+              accessing the Event Transmitters "Control Plane".
             </t>
 
             <t hangText="Event Stream"><vspace/>
-              An Event Stream establishes Event Receiver endpoints, security,
-              and configuration data that an Event Transmitter MAY use to
+              An Event Stream establishes Event Receiver communication
+              endpoints, security configuration and feed content that 
+              is used by an Event Transmitter to
               send a series of SET Events to an Event Receiver. An Event 
-              Stream is also known as the "data plane" of a transmitter and
-              receiver protocol relationship. 
+              Stream is also known as the "Data Plane" of a transmitter and
+              receiver protocol relationship. Access to the current 
+              configuration and Event Stream status is accessed via the
+              "Control Plane" service offered by an Event Transmitter.
             </t>
             
             <t hangText="Subject"><vspace blankLines="0"/>A 
-            Subject is the entity to which a SET refers. A 
-            Subject may be a principal (e.g., 
+            A SET describes an event or state change that has occurred 
+            about a Subject. A Subject may be a principal (e.g., 
             <xref target="RFC7519">Section 4.1.2</xref>), a web resource,
             or other thing such as an IP address that a SET might reference.</t>
             
