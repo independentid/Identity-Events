@@ -13,9 +13,9 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="std" docName="draft-ietf-secevent-token-00" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-token-01" ipr="trust200902">
   <front>
-    <title abbrev="draft-hunt-idevent-token">Security Event Token (SET)</title>
+    <title abbrev="draft-ietf-secevent-token">Security Event Token (SET)</title>
 
     <author fullname="Phil Hunt" initials="P." role="editor" surname="Hunt">
       <organization abbrev="Oracle">Oracle Corporation</organization>
@@ -64,9 +64,10 @@
     <abstract>
       <t>This specification defines the Security Event Token, which may
       be distributed via a protocol such as HTTP. The Security Event Token 
-      (SET) specification profiles the JSON Web Token (JWT) and may be optionally signed 
-      and/or encrypted. A SET describes a statement of fact that may be 
-      shared by an event publisher with event subscribers.</t>
+      (SET) specification profiles the JSON Web Token (JWT) which can be 
+      optionally signed and/or encrypted. A SET describes a statement 
+      of fact from the perspective of an issuer that it intends to share
+      with one or more receivers.</t>
     </abstract>
   </front>
 
@@ -79,13 +80,26 @@
       signed using JSON Web Signature (JWS) <xref target="RFC7515"/>
       and/or encrypted using JSON Web Encryption (JWE) <xref target="RFC7516"/>.</t>
       
-      <t>For the purpose of this specification, an event is a statement
-      of fact by a publisher (also known as the event issuer) that the state of 
-      a security subject (e.g., a web resource, token, IP address) it 
-      controls or is aware of, has changed in some way (explicitly or 
-      implicitly). A security subject may be permanent (e.g., a user account) or 
-      temporary (e.g., an HTTP session) in nature. A state change 
-      may include direct changes of entity state, implicit changes to state 
+      <t>This specification is intended to profile the use of JWT 
+      for the purpose of issuing security event tokens (SETs). This specification defines a 
+      base format upon which profiling specifications define actual 
+      events and their meaning regarding subjects. Unless otherwise 
+      specified, this specification uses non-normative example events intended to 
+      demonstrate how events may be constructed. </t>
+      
+      <t>This specification is scoped to security and identity related events.
+      While security event tokens may be used for other purposes, the specification
+      only considers security and privacy concerns relevant to identity 
+      and personal information.</t>
+      
+      <t>Security Events are not commands issued between parties. 
+      A security event is a statement of fact from the perspective of an 
+      issuer about the state of a security subject (e.g., a web 
+      resource, token, IP address) that the issuer controls or is aware 
+      of, that has changed in some way (explicitly or implicitly). A 
+      security subject MAY be permanent (e.g., a user account) or 
+      temporary (e.g., an HTTP session) in nature. A state change could 
+      describe a direct change of entity state, an implicit change of state 
       or other higher-level security statements such as:
       <list style="symbols">
         <t>The creation, modification, removal of a resource.</t>
@@ -98,46 +112,34 @@
       </list>
       </t>
       
-      <t>Based on some externally agreed criteria for an event feed, 
-      the publisher distributes events to the appropriate subscribers of a
-      feed. While an event may be delivered via synchronous means (e.g., 
-      HTTP POST), the distribution of the event often happens 
-      asynchronously to the change of state which generated the security 
-      event. As an example, an OAuth2 Authorization Server 
-      <xref target="RFC6749"/>, having received a token revocation 
-      request <xref target="RFC7009"/>, may issue a token revocation 
-      event to downstream web resource providers. Having been informed 
-      of a token revocation, the OAuth2 web resource service provider 
-      may add the token identifier to its local revocation list assuming 
-      the token has not already expired.</t>
+      <t>A series of SETs (Security Event Tokens) are shared between a 
+      transmitter (issuer) of events and a receiver in what is known as 
+      an event stream. The stream defines endpoints for communications, the
+      method of delivery, and token signing and encryption requirements. 
+      A stream MAY be defined by a feed URI 
+      which defines the types of events issued and the subjects that are
+      part of the feed.</t>
       
-      <t>A subscriber having received an event, validates and interprets the
-      event and takes its own independent action, if any. For example, 
-      having been informed of a personal identifier now being associated 
-      with a different security subject (i.e., is being used by someone else), the 
-      subscriber may choose to ensure that the new user is not granted 
-      access to resources associated with the previous user. Or it may
-      not have any relationship with the subject, and no action is taken.</t>
+      <t>While subject state changes are often triggered by 
+      a user-agent or security-subsystem, the issuance and transmission 
+      of an event often occurs asynchronously and in a back-channel to
+      the action which caused the change that generated the security 
+      event. Subsequently, an Event Receiver having received a SET, 
+      validates and interprets the received SET and takes its own 
+      independent action, if any. For example, having been informed of 
+      a personal identifier being associated with a different security 
+      subject (e.g., an email address is being used by someone else), 
+      the Event Receiver may choose to ensure that the new user is not granted 
+      access to resources associated with the previous user. Or, the 
+      Event Receiver may not have any relationship with the subject, 
+      and no action is taken.</t>
       
-      <t>While subscribers will often take actions upon receiving one
-      or more events, events MUST NOT be assumed to be commands or requests. 
-      To do so requires complex bi-directional signals and error recovery 
-      mechanisms that fall outside the scope of this specification. 
+      <t>While Event Receivers will often take actions upon receiving 
+      SETs, security events MUST NOT be assumed to be commands or requests. 
       The intent of this specification is to define a way of exchanging 
       statements of fact that subscribers may interpret for their own
-      purposes. Since events are typically historical statements by a publisher
-      and are not commands, idempotency or lack thereof, does not apply.</t>
-      
-      <t>Unless otherwise specified, this specification uses example 
-      events intended to serve as non-normative examples showing how an 
-      event may be constructed. It is expected that other "profiling" 
-      specifications will use this specification to define normative 
-      events within some specified context or protocol.</t>
-      
-      <t>This specification is scoped to security and identity related events.
-      While security event tokens may be used for other purposes, the specification
-      only considers security and privacy concerns relevant to identity 
-      and personal information.</t>
+      purposes. As such, SETs have no capability for error signalling 
+      other to ensure the validation of a received SET. </t>
 
       <section anchor="notat" title="Notational Conventions" toc="default">
         <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
@@ -164,13 +166,7 @@
         <t>
           The following definitions are used with SETs:
           <list style="hanging">
-            
-            <t hangText="Feed Publisher"><vspace blankLines="0"/>The Feed Publisher creates
-              SETs to be distributed to registered subscribers. In JWT
-              terminology, the Feed Publisher is also known as the issuer
-              (<spanx style="verb">iss</spanx>).
-            </t>
-
+ 
             <t hangText="Security Event Token (SET)"><vspace blankLines="0"/>An SET is a 
               JWT that is to be
               distributed to one or more registered subscribers. A SET MAY
@@ -180,22 +176,62 @@
 
             <t hangText="Feed"><vspace blankLines="0"/>A Feed is a logical
               grouping of SETs or a context under which SETs may be issued. 
-              A Subscriber registers with the Feed Publisher to subscribe
-              to SETs associated with a Feed. How a Feed is defined or
+              A receiver registers with the Feed Transmitter to receive
+              SETs associated with a Feed. How a Feed is defined or
               the method for subscription is out-of-scope of this specification.
             </t>
-            
-            <t hangText="Subscriber"><vspace blankLines="0"/>A Subscriber 
-              registers to receive SETs from a Feed Publisher using a protocol 
-              such as  HTTP. The method of registration and delivery is out-of-scope
-              of this specification.
+
+             <t hangText="Identity Provider"><vspace/>
+              An Identity Provider is a service provider that issues authentication
+              assertions that may be used by Relying Party service providers
+              to establish login sessions with users. Examples of Identity 
+              Providers are defined in: OpenID Connect 
+              <xref target="openid-connect-core"/> and SAML2 
+              <xref target="saml-core-2.0"/>. For the purpose of this 
+              specification an Identity Provider also includes any provider
+              of services where the compromise of an account may open up 
+              relying parties to attack. For example for the purposes of
+              security events, an email service provider could be 
+              considered an "implicit" Identity Provider.
+            </t>
+            <t hangText="Relying Party"><vspace/>
+              A Relying Party is a service provider that accepts assertions 
+              from Identity Providers to establish sessions. Examples of 
+              Relying Parties are defined in: OpenID Connect 
+              <xref target="openid-connect-core"/> and SAML2 
+              <xref target="saml-core-2.0"/>
+            </t>
+            <t hangText="Event Transmitter"><vspace/>
+              A service provider that sends SETs to other providers known
+              as an Event Receiver. The term is agnostic as to whether the 
+              Transmitter an Identity Provider or a Relying Party. The 
+              transmitter is responsible for offering a way for the 
+              Receiver to register to receive events as well as providing
+              a Control Plane service. 
             </t>
             
-            <t hangText="Security Subject"><vspace blankLines="0"/>A 
-            Security Subject is the entity to which a SET refers. A 
-            Security Subject may be a principle (e.g., 
+            <t hangText="Event Receiver"><vspace/>
+              A service provider that registers to receive SETs from 
+              an Event Transmitter and provides . The term is agnostic as to whether the Receiver is the Identity Authority or implicit/explicit RP though the more common case will be when the Reciever is a Relying Party. Identity Event receivers are responsible for registering config info to receive events at any given transmitter.
+            </t>
+
+            <t hangText="Event Stream"><vspace/>
+              An Event Stream establishes Event Receiver endpoints, security,
+              and configuration data that an Event Transmitter MAY use to
+              send a series of SET Events to an Event Receiver. An Event 
+              Stream is also known as the "data plane" of a transmitter and
+              receiver protocol relationship. 
+            </t>
+            
+            <t hangText="Subject"><vspace blankLines="0"/>A 
+            Subject is the entity to which a SET refers. A 
+            Subject may be a principal (e.g., 
             <xref target="RFC7519">Section 4.1.2</xref>), a web resource,
             or other thing such as an IP address that a SET might reference.</t>
+            
+            <t hangText="Profiling Specification">A specification that 
+            uses the SET Token specification to define one or more event
+            types and the associated claims included.</t>
           </list>
         </t>
       </section>
@@ -204,35 +240,36 @@
     <section anchor="events" title="The Security Event Token (SET)">
       <t>A SET conveys a statement (in the form of a JWT
       <xref target="RFC7519"/>) about a single security event in relation
-      to a Security Subject that may be of 
-      interest to a Subscriber or set of Subscribers receiving SETs from
-      a Feed Publisher.</t>
+      to a Subject that may be of interest to an Event Receiver(s) 
+      receiving a stream of SETs from a Feed Transmitter.</t>
       
       <t>The schema and structure of a SET follows the JWT <xref target="RFC7519"/>
       specification. A SET has the following structure:
       <list style="symbols">
-        <t>An outer JSON structure that acts as the SET envelope. The envelope 
+        <t>An outer JSON object that acts as the SET "envelope". The envelope 
         contains a set of name/value pairs called the JWT Claims Set, 
         typically common to every SET or common to a number of different 
-        Security Events within a single profiling specification or a 
-        related series of specifications. Claims in the envelope SHOULD 
-        be registered in the JWT Token Claims Registry <xref target="RFC7519">Section 10.1</xref> or be
+        Events within a single Profiling Specification or a 
+        related series of specifications. Claims in the envelope (the outer
+        JSON structure) SHOULD be registered in the JWT Token Claims 
+        Registry <xref target="RFC7519">Section 10.1</xref> or be
         Public Claims or Private Claims as also defined in <xref target="RFC7519"/>.</t>
         
         <t>Envelope claims that are profiled and defined 
-        in this specification are used to validate a SET and declare 
-        the event data included in the SET. The claim <spanx style="verb">events</spanx>
-        identifies the security event types being expressed related to the 
-        Security Subject and MAY also include event-specific data.</t> 
+        in this specification are used to validate a SET and declare the
+        contents of the event data included in the SET. The claim 
+        <spanx style="verb">events</spanx> identifies the event types 
+        expressed that are related to the Security Subject and MAY also 
+        include event-specific data.</t> 
         
-        <t>Each JSON member of the <spanx style="verb">events</spanx> object is a
-        name/value pair. The JSON attribute name is a URI String value 
-        that expresses an event type. The corresponding value is a JSON object known as the 
-        event "payload". The payload JSON object contains claims
-        typically unique to the event's URI type value and are not
-        registered as JWT claims. These claims are defined
-        by their associated event specification. An event with no  
-        payload claims SHALL be represented as the empty JSON object 
+        <t>Each JSON member of the <spanx style="verb">events</spanx> 
+        object is a name and value pair. The JSON attribute name is a 
+        URI String value that expresses an event type, and the 
+        corresponding value is a JSON object known as the event "payload". 
+        The payload JSON object contains claims typically unique to the 
+        event's URI type value and are not registered as JWT claims. 
+        These claims are defined by their associated Profiling 
+        Specification. An event with no payload claims SHALL be represented as the empty JSON object 
         (<spanx style="verb">{}</spanx>). In many cases, one event URI expresses
         the primary event URI, while other events might be considered extensions
         that MAY be used to do things such as:<list style="symbols">
@@ -240,7 +277,7 @@
           information (e.g., threat type or level).</t>
           <t>An enhancement of an existing specifications the arise over time.</t>
           <t>An extensions needed to link a potential series of events.</t>
-          <t>Localized specific purpose extensions needed between a
+          <t>Localized specific purpose events URI used between a
           particular publisher and subscriber.</t>
         </list></t>
         
@@ -249,10 +286,10 @@
 
       <figure anchor="examplePassword" title="Example SCIM Password Reset Event">
         <preamble>The following is a non-normative example showing the JWT Claims Set for a hypothetical 
-        SCIM password reset SET. This example shows an extension 
-        (<spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>)
-        that is used to convey additional information -- in this case, the current
-        count of reset attempts:</preamble>
+        SCIM password reset SET. This example shows an additional events 
+        value (<spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>)
+        used as an extension to convey additional information -- in this 
+        case, the current count of reset attempts:</preamble>
         <artwork>
 { 
   "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
@@ -284,9 +321,9 @@
         claim, denoting the event publisher.</t>
         <t>The <spanx style="verb">sub</spanx> claim specifies the SCIM 
         resource URI that was affected.</t>
-        <t>The <spanx style="verb">aud</spanx> claim specifies the 
-        intended audiences for the event. In practical terms, an audience MAY be 
-        the URI for an event feed that a client has subscribed to.
+        <t>The <spanx style="verb">aud</spanx> claim specifies a JSON array
+        defining the intended audiences for the event. In practical terms, an audience may be 
+        the URI for an event feed that a client has subscribed to (see <xref target="RFC7519">Section 4.1.3</xref>).
         </t>
       </list></t>
       
@@ -403,7 +440,7 @@
             This is usually the entity whose "state" was changed. For example,
             an IP Address was added to a black list. A URI representing a
             user resource that was modified. A token identifier for a revoked 
-            token. If used, the profile specification SHOULD
+            token. If used, the Profile Specification SHOULD
             define the content and format semantics for the value. This claim
             is OPTIONAL, as the principal for any given profile may already be
             identified without the inclusion of a subject claim.</t>   
@@ -432,8 +469,8 @@
             the corresponding value 
             SHALL be a JSON object. The JSON object MAY be an empty 
             object (<spanx style="verb">{}</spanx>), or it MAY be a JSON 
-            object containing data as described by the profiling event 
-            specification.</t>
+            object containing data as described by the Profiling 
+            Specification.</t>
             <t hangText="txn" anchor="txnDef"><vspace blankLines="0"/>
 	          An OPTIONAL String value that represents a unique transaction 
             identifier. In cases where multiple SETs are issued based on 
@@ -570,7 +607,7 @@ Il0KICAgIH0KICB9Cn0
       <section title="Delivery">
       <t>This specification does not define a delivery mechanism by itself.
       In addition to confidentiality and integrity (discussed above), implementers
-      and profile specifications MUST consider the consequences of delivery 
+      and Profile Specifications MUST consider the consequences of delivery 
       mechanisms that are not secure and/or not assured. For example, while
       a SET may be end-to-end secured using JWE encrypted SETs, without TLS 
       there is no assurance that the correct endpoint received the SET and 
@@ -587,7 +624,7 @@ Il0KICAgIH0KICB9Cn0
         described as a log-in or logged-out status for a user subject, then 
         order becomes important.</t>
         
-        <t>Extension specifications and implementers SHOULD take caution when
+        <t>Profiling Specifications and implementers SHOULD take caution when
         using timestamps such as <spanx style="verb">iat</spanx> to define order. Distributed systems will have 
         some amount of clock-skew and thus time by itself will not guarantee order.</t>
         
@@ -605,7 +642,7 @@ Il0KICAgIH0KICB9Cn0
         cause a logout SET to be issued that may arrive at the same time 
         as the user-agent accesses a web site having just logged-in. If
         timing is not handled properly, the effect would be to erroneously
-        treat the new user session as logged out. Profiling specifications 
+        treat the new user session as logged out. Profiling Specifications 
         SHOULD be careful to anticipate timing and subject selection information. 
         For example, it might be more appropriate to cancel a "session" 
         rather than a "user". Alternatively, the specification could use timestamps
@@ -746,6 +783,22 @@ Il0KICAgIH0KICB9Cn0
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7516.xml'?><!-- JWE -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7517.xml'?><!-- JWK -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7644.xml'?><!-- SCIM Protocl -->
+       <reference anchor="openid-connect-core">
+        <front>
+          <title>OpenID Connect Core 1.0</title>
+          <author fullname="Nat Sakimura et al"><organization>NRI</organization></author>
+          <date day="8" month="Nov" year="2014"/>
+        </front>
+        <format type="HTML" target="http://openid.net/specs/openid-connect-core-1_0.html"/>
+      </reference>
+      <reference anchor="saml-core-2.0">
+        <front>
+          <title>Assertions and Protocols for the OASIS Security Assertion Markup Language (SAML) V2.0</title>
+          <author fullname="Scott Cantor et al"><organization>Internet2</organization></author>
+          <date day="15" month="March" year="2005"/>
+        </front>
+        <format type="PDF" target="http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf"/>
+      </reference>
      
  <!-- 
       <reference anchor="RISC">
@@ -771,11 +824,14 @@ Il0KICAgIH0KICB9Cn0
     <!-- <section anchor="Contributors" title="Contributors"/> Uncomment if and when this section is non-empty -->
 
     <section anchor="Acknowledgments" title="Acknowledgments">
+      <t>The editors would like to thanks the members of the SCIM WG which 
+      began discussions of provisioning events starting with: draft-hunt-scim-notify-00 in 2015.</t>
       <t>The editors would like to thank the participants in the IETF id-event
       mailing list and related working groups for their support of this specification.</t>
     </section>
 
     <section anchor="History" title="Change Log">
+      <t>From the original draft-hunt-idevent-token:</t>
       <t>Draft 01 - PH - Renamed eventUris to events</t>
       <t>Draft 00 - PH - First Draft</t>
       <t>Draft 01 - PH - Fixed some alignment issues with JWT. Remove event type attribute.</t>
@@ -818,6 +874,13 @@ Il0KICAgIH0KICB9Cn0
         be considered extensions of others (which is for the subscriber 
         or profiling specifications to determine).</t>
         <t>Other editorial changes suggested by Yaron </t>
+      </list></t>
+      <t><vspace/>From draft-ietf-secevent-token:</t>
+      <t>Draft 00 - PH - First WG Draft based on draft-hunt-idevent-token</t>
+      <t>Draft 01 - PH - Changes as follows:<list style="symbols">
+        <t>Changed terminology away from pub-sub to transmitter/receiver based on WG feedback</t>
+        <t>Cleaned up/removed some text about extensions (now only used as example)</t>
+        <t>Clarify purpose of spec vs. future profiling specs that define actual events</t>
       </list></t>
     </section>
   </back>
