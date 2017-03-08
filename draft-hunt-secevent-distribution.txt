@@ -5,8 +5,8 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                            M. Scurtescu
-Expires: September 7, 2017                                        Google
-                                                           March 6, 2017
+Expires: September 9, 2017                                        Google
+                                                           March 8, 2017
 
 
                      SET Token Delivery Using HTTP
@@ -14,12 +14,15 @@ Expires: September 7, 2017                                        Google
 
 Abstract
 
-   This specification defines how a security event token (SET) issuer
-   delivers events to a previously registered receiver using HTTP over
-   TLS.  The specification defines the configuration metadata the issuer
-   uses to establish a stream of HTTP POSTs to a receiver's endpoint.
-   It also describes requirements for optional assured delivery, and a
-   method communication error detection.
+   This specification defines how a series of security event tokens
+   (SETs) may be delivered to a previously registered receiver using
+   HTTP over TLS.  The specification defines the metadata the an Event
+   Transmitter uses to describe the Event Receiver's HTTP endpoint and
+   the SET token delivery configuration.  The specification defines how
+   the Event Receiver may check the current configuration metadata and
+   delivery status using HTTP GET over TLS.  The specification also
+   defines how delivery can be assured subject to the SET Token
+   Receiver's need for assurance.
 
 Status of This Memo
 
@@ -36,7 +39,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on September 7, 2017.
+   This Internet-Draft will expire on September 9, 2017.
 
 Copyright Notice
 
@@ -47,17 +50,17 @@ Copyright Notice
    Provisions Relating to IETF Documents
    (http://trustee.ietf.org/license-info) in effect on the date of
    publication of this document.  Please review these documents
-   carefully, as they describe your rights and restrictions with respect
-   to this document.  Code Components extracted from this document must
-   include Simplified BSD License text as described in Section 4.e of
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017               [Page 1]
+Hunt & Scurtescu        Expires September 9, 2017               [Page 1]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
+   carefully, as they describe your rights and restrictions with respect
+   to this document.  Code Components extracted from this document must
+   include Simplified BSD License text as described in Section 4.e of
    the Trust Legal Provisions and are provided without warranty as
    described in the Simplified BSD License.
 
@@ -66,28 +69,28 @@ Table of Contents
    1.  Introduction and Overview . . . . . . . . . . . . . . . . . .   2
      1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   4
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   4
-   2.  Control Plane . . . . . . . . . . . . . . . . . . . . . . . .   5
-     2.1.  Event Stream Configuration  . . . . . . . . . . . . . . .   5
-     2.2.  Event Stream State Model  . . . . . . . . . . . . . . . .   7
-     2.3.  Checking Stream Configuration and Stream State  . . . . .   9
-     2.4.  Event Stream Management . . . . . . . . . . . . . . . . .  10
-       2.4.1.  Event Stream Resource Type Definition . . . . . . . .  11
-       2.4.2.  Creating A New Event Stream . . . . . . . . . . . . .  12
-       2.4.3.  Updating An Event Stream  . . . . . . . . . . . . . .  14
-   3.  Data Plane  . . . . . . . . . . . . . . . . . . . . . . . . .  15
-     3.1.  Event Delivery Process  . . . . . . . . . . . . . . . . .  15
-     3.2.  Event Stream State  . . . . . . . . . . . . . . . . . . .  17
-     3.3.  HTTP POST Delivery  . . . . . . . . . . . . . . . . . . .  17
-     3.4.  Event Stream Verification . . . . . . . . . . . . . . . .  21
-   4.  Security Considerations . . . . . . . . . . . . . . . . . . .  23
-   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  23
-     5.1.  SCIM Schema Registration  . . . . . . . . . . . . . . . .  23
-   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  23
-     6.1.  Normative References  . . . . . . . . . . . . . . . . . .  23
-     6.2.  Informative References  . . . . . . . . . . . . . . . . .  24
-   Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  24
-   Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  25
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  25
+   2.  Control Plane . . . . . . . . . . . . . . . . . . . . . . . .   6
+     2.1.  Event Stream Configuration  . . . . . . . . . . . . . . .   6
+     2.2.  Event Stream State Model  . . . . . . . . . . . . . . . .   8
+     2.3.  Checking Stream Configuration and Stream State  . . . . .  10
+     2.4.  Event Stream Management . . . . . . . . . . . . . . . . .  12
+       2.4.1.  Event Stream Resource Type Definition . . . . . . . .  12
+       2.4.2.  Creating A New Event Stream . . . . . . . . . . . . .  14
+       2.4.3.  Updating An Event Stream  . . . . . . . . . . . . . .  16
+   3.  Data Plane  . . . . . . . . . . . . . . . . . . . . . . . . .  17
+     3.1.  Event Delivery Process  . . . . . . . . . . . . . . . . .  17
+     3.2.  Event Stream State  . . . . . . . . . . . . . . . . . . .  19
+     3.3.  HTTP POST Delivery  . . . . . . . . . . . . . . . . . . .  19
+     3.4.  Event Stream Verification . . . . . . . . . . . . . . . .  23
+   4.  Security Considerations . . . . . . . . . . . . . . . . . . .  25
+   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  25
+     5.1.  SCIM Schema Registration  . . . . . . . . . . . . . . . .  25
+   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  25
+     6.1.  Normative References  . . . . . . . . . . . . . . . . . .  25
+     6.2.  Informative References  . . . . . . . . . . . . . . . . .  26
+   Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  26
+   Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  27
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  27
 
 1.  Introduction and Overview
 
@@ -106,10 +109,7 @@ Table of Contents
 
 
 
-
-
-
-Hunt & Scurtescu        Expires September 7, 2017               [Page 2]
+Hunt & Scurtescu        Expires September 9, 2017               [Page 2]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -117,10 +117,11 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
    The following diagram shows a typical SET Event Stream.  A stream
    consists of a pair of HTTP endpoints, one for the event stream
    transmitter and one for the receiver.  The receiver endpoint is used
-   by the transmitter to deliver SET events via HTTPS POST.  The
-   transmitter endpoint is used by the receiver to perform HTTPS GET
-   requests to check the stream status.  Arrow heads point to the
-   service provider (the direction of an HTTP request):
+   by the transmitter to deliver SET events via HTTPS POST and is known
+   as the "Data Plane".  The transmitter's HTTP endpoint is used by the
+   receiver to perform HTTPS GET requests to check the stream status and
+   is known as the "Control Plane".  In the diagram, the arrow heads
+   point to the service provider (the direction of an HTTP request):
 
              +-----------+ Data Plane            +----------+
              |Transmitter+------HTTP POST--------> Receiver |
@@ -160,16 +161,17 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
       and optionally managed Event Streams.  It defines the metadata
       associated with Event Streams along with stream status reporting.
 
-   Data Plane  Through which SET Events are delivered by an Event
-      Transmitter to an Event Receiver using a defined Event Stream.
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017               [Page 3]
+
+Hunt & Scurtescu        Expires September 9, 2017               [Page 3]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
+   Data Plane  Through which SET Events are delivered by an Event
+      Transmitter to an Event Receiver using a defined Event Stream.
       The Data Plane includes a verification process which tests and
       validates Event Stream configuration.  The Data plan defines
       processing and error signaling used in the delivery of SETs.
@@ -197,10 +199,61 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 1.2.  Definitions
 
    This specification assumes terminology defined in the Security Event
-   Token specification[I-D.ietf-secevent-token].
+   Token specification[I-D.ietf-secevent-token] .
 
    The following definitions are defined for Security Event
    distribution:
+
+   Identity Provider
+      An Identity Provider is a service provider that issues
+      authentication assertions that may be used by Relying Party
+      service providers to establish login sessions with users.
+      Examples of Identity Providers are defined in: OpenID Connect
+      [openid-connect-core] and SAML2 [saml-core-2.0].  For the purpose
+      of this specification an Identity Provider also includes any
+      provider of services where the compromise of an account may open
+      up relying parties to attack.  For example for the purposes of
+      security events, an email service provider could be considered an
+      "implicit" Identity Provider.
+
+   Relying Party
+
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017               [Page 4]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
+
+      A Relying Party is a service provider that accepts assertions from
+      Identity Providers to establish sessions.  Examples of Relying
+      Parties are defined in: OpenID Connect [openid-connect-core] and
+      SAML2 [saml-core-2.0]
+
+   Event Transmitter
+      A service provider that delivers SETs to other providers known as
+      Event Receivers.  Some examples of Event Transmitters are Identity
+      Providers and Relying Parties.  An Event Transmitter is
+      responsible for offering a service that allows the Event Receiver
+      to check the Event Stream configuration and status known as the
+      "Control Plane".
+
+   Event Receiver
+      A service provider that registers to receive SETs from an Event
+      Transmitter and provides an endpoint to receive SETs via HTTP POST
+      (known as the "Data Plane").  Some examples of Event Receivers are
+      Identity Providers and Relying Parties.  Event Receivers can check
+      current Event Stream configuration and status by accessing the
+      Event Transmitters "Control Plane".
+
+   Event Stream
+      An Event Stream establishes Event Receiver communication
+      endpoints, security configuration and feed content that is used by
+      an Event Transmitter to send a series of SET Events to an Event
+      Receiver.  An Event Stream defines a "Data Plane" and "Control
+      Plane" service relationship between an Event Transmitter and and
+      Event Receiver.
 
    Control Plane
       A Control Plane represents an service offered by an Event
@@ -209,6 +262,11 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
       Plane MAY also be used to retrieve Event Stream and SET
       configuration data.
 
+   Data Plane
+      The Data Plane represents the HTTP service offered by an Event
+      Receiver that allows the Event Transmitter to deliver multiple
+      SETs via HTTP POST as part of an Event Stream.
+
    Event Family
       An Event Family is a URI that describes the set of events types be
       issued in an Event Stream.
@@ -216,16 +274,15 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
    Subject
       The security subject around which a security event has occurred.
       For example, a security subject might per a user, a person, an
-      email address, a service provider entity, an IP address, an OAuth
 
 
 
-
-Hunt & Scurtescu        Expires September 7, 2017               [Page 4]
+Hunt & Scurtescu        Expires September 9, 2017               [Page 5]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
+      email address, a service provider entity, an IP address, an OAuth
       Client, a mobile device, or any identifiable thing referenced in
       security and authorization systems.
 
@@ -276,8 +333,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-
-Hunt & Scurtescu        Expires September 7, 2017               [Page 5]
+Hunt & Scurtescu        Expires September 9, 2017               [Page 6]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -333,7 +389,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017               [Page 6]
+Hunt & Scurtescu        Expires September 9, 2017               [Page 7]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -389,7 +445,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017               [Page 7]
+Hunt & Scurtescu        Expires September 9, 2017               [Page 8]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -445,7 +501,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017               [Page 8]
+Hunt & Scurtescu        Expires September 9, 2017               [Page 9]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -495,18 +551,25 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
    The format of the response is defined by Section TBD [RFC7644].
 
+   In addition to the attributes defined in Section 2.1, the response
+   SHALL include an additional JSON attribute "schemas" with at least a
+   single value of "urn:ietf:params:scim:schemas:event:2.0:EventStream".
 
 
 
-
-
-
-Hunt & Scurtescu        Expires September 7, 2017               [Page 9]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 10]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
-   The response below shows an example Event Stream response.
+   This static attribute is provided to enable optional SCIM client
+   compatibility and informs the client of the type of JSON object being
+   returned.  Service providers may offer additional attributes by
+   adding additional schema values as per [RFC7644].
+
+   The response below shows an example response to an HTTP GET, in this
+   case to "https://example.com/v2/
+   EventStreams/767aad7853d240debc8e3c962051c1c0".
 
    HTTP/1.1 200 OK
    Content-Type: application/json
@@ -523,6 +586,8 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
      "deliveryUri":"https://notify.examplerp.com/Events",
      "aud":"https://sets.myexamplerp.com",
      "subStatus":"fail",
+     "txErr":"connection",
+     "txErrDesc":"TCP connect error to notify.examplerp.com.",
      "maxDeliveryTime":3600,
      "minDeliveryInterval":0,
      "description":"Logout events from oidc.example.com",
@@ -533,11 +598,44 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
                    Figure 4: Example Stream GET Response
 
+   In the above figure, the Event Stream is showing a failed status due
+   to a TCP connection error.  The Event Receiver is able to discover
+   that its endpoint was unavailable and has been marked failed by the
+   Event Transmitter.  It is expected that the appropriate operations
+   staff would be alerted and some corrective action would be taken.
+
+   The frequency with which Event Receivers should poll the Event Stream
+   status depends on the following factors:
+
+   o  The level of technical fault tolerance and availability of the
+      receiving endpoint.
+
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 11]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
+
+   o  A frequency appropriate to the amount of risk that can be
+      tolerated for lost events.  For example, if Security Events are
+      considered informational, then infrequent (hourly or daily) may be
+      sufficient.
+
+   In most cases Event Stream status polling can be triggered on a
+   timeout basis.  Event Receivers would typically poll if they have not
+   received a SET for some period during which SETs would be expected
+   based on past experience.
+
 2.4.  Event Stream Management
 
    This section describes how SCIM [RFC7644] and [RFC7643] MAY be used
    to add create, read, update, delete capability to the Control Plane
    to enable provisioning and operational management of Event Streams.
+   In addition to provisioning of Event Streams, it can also be used by
+   Event Receivers to change or reset the operational state of Event
+   Streams such as pausing, stopping, or re-enabling after a failure.
 
    SCIM is a management protocol used by many security systems for
    provisioning and co-ordinating identities and other security subjects
@@ -545,22 +643,14 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
    intended to be implemented by applications that need provisioning and
    management of security subjects and is ideal to the task of
    provisioning related security event signal systems.  Examples of
-   provisioning endpoints include both Identity Providers and Relying
-   Party applications (e.g. business and consumer web applications) as
-   well as security and authorization infrastructure components.
+   provisioning endpoints (SCIM service providers) include both Identity
+   Providers and Relying Party applications (e.g. business and consumer
+   web applications) as well as security and authorization
+   infrastructure components.
 
    [[Editors Note: At the time of writing, some groups feel a CRUD API
    is not required and participants would prefer to manage streams using
    an out-of-band workflow approach.]]
-
-
-
-
-
-Hunt & Scurtescu        Expires September 7, 2017              [Page 10]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
 
 2.4.1.  Event Stream Resource Type Definition
 
@@ -571,6 +661,18 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
    (see Sections 3 and 4 [RFC7644]).
 
    The "EventStream" resource type definition is defined as follows:
+
+
+
+
+
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 12]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
 
 {
   "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
@@ -613,7 +715,17 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 11]
+
+
+
+
+
+
+
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 13]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -669,7 +781,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 12]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 14]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -725,7 +837,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 13]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 15]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -781,7 +893,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 14]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 16]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -837,7 +949,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 15]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 17]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -893,7 +1005,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 16]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 18]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -949,7 +1061,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 17]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 19]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -1005,7 +1117,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 18]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 20]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -1061,7 +1173,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 19]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 21]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -1117,7 +1229,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 20]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 22]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -1173,7 +1285,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 21]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 23]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -1229,7 +1341,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 22]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 24]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -1285,7 +1397,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 23]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 25]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -1341,7 +1453,7 @@ Appendix A.  Acknowledgments
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 24]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 26]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -1397,4 +1509,4 @@ Authors' Addresses
 
 
 
-Hunt & Scurtescu        Expires September 7, 2017              [Page 25]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 27]

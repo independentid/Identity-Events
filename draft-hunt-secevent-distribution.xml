@@ -40,12 +40,15 @@
 
 		<abstract>
 			<t>
-				This specification defines how a security event token (SET) issuer
-        delivers events to a previously registered receiver using HTTP
-        over TLS. The specification defines the configuration metadata the issuer
-        uses to establish a stream of HTTP POSTs to a receiver's endpoint. It also
-        describes requirements for optional assured delivery, and a method communication
-        error detection.
+				This specification defines how a series of security event tokens 
+        (SETs) may be delivered to a previously registered receiver 
+        using HTTP over TLS. The specification defines the metadata the 
+        an Event Transmitter uses to describe the Event Receiver's HTTP 
+        endpoint and the SET token delivery configuration. The 
+        specification defines how the Event Receiver may check the 
+        current configuration metadata and delivery status using 
+        HTTP GET over TLS. The specification also defines how delivery 
+        can be assured subject to the SET Token Receiver's need for assurance.
         </t>
 		</abstract>
 	</front>
@@ -67,13 +70,14 @@
       			</t>
 
 			<figure anchor="notificationStream" title="SET Event Stream">
-          <preamble>The following diagram shows a typical SET Event Stream.
-          A stream consists of a pair of HTTP endpoints, one for the event stream
-          transmitter and one for the receiver. The receiver endpoint is 
-          used by the transmitter to deliver SET events via HTTPS POST.
-          The transmitter endpoint is used by the receiver to perform 
-          HTTPS GET requests to check the stream status.
-        Arrow heads point
+          <preamble>The following diagram shows a typical SET Event 
+          Stream. A stream consists of a pair of HTTP endpoints, one for 
+          the event stream transmitter and one for the receiver. The 
+          receiver endpoint is used by the transmitter to deliver SET 
+          events via HTTPS POST and is known as the "Data Plane". The 
+          transmitter's HTTP endpoint is used by the receiver to perform 
+          HTTPS GET requests to check the stream status and is known as 
+          the "Control Plane". In the diagram, the arrow heads point
         to the service provider (the direction of an HTTP request):</preamble>
 					<artwork align="center">
 +-----------+ Data Plane            +----------+
@@ -155,10 +159,63 @@
 
 			<section anchor="defs" title="Definitions" toc="default">
         <t>This specification assumes terminology defined in the Security
-        Event Token specification<xref target="I-D.ietf-secevent-token"/>.</t>
+        Event Token specification<xref target="I-D.ietf-secevent-token"/>
+        .</t>
 				<t>
 					The following definitions are defined for Security Event distribution:
 					<list style="hanging">
+          
+            <t hangText="Identity Provider"><vspace/>
+              An Identity Provider is a service provider that issues authentication
+              assertions that may be used by Relying Party service providers
+              to establish login sessions with users. Examples of Identity 
+              Providers are defined in: OpenID Connect 
+              <xref target="openid-connect-core"/> and SAML2 
+              <xref target="saml-core-2.0"/>. For the purpose of this 
+              specification an Identity Provider also includes any provider
+              of services where the compromise of an account may open up 
+              relying parties to attack. For example for the purposes of
+              security events, an email service provider could be 
+              considered an "implicit" Identity Provider.
+            </t>
+              
+            <t hangText="Relying Party"><vspace/>
+              A Relying Party is a service provider that accepts assertions 
+              from Identity Providers to establish sessions. Examples of 
+              Relying Parties are defined in: OpenID Connect 
+              <xref target="openid-connect-core"/> and SAML2 
+              <xref target="saml-core-2.0"/>
+            </t>          
+            
+            <t hangText="Event Transmitter"><vspace/>
+              A service provider that delivers SETs to other providers known
+              as Event Receivers. Some examples of Event Transmitters are 
+              Identity Providers and Relying Parties. An Event Transmitter
+              is responsible for offering a service that allows the Event
+              Receiver to check the Event Stream configuration and status
+              known as the "Control Plane". 
+            </t>
+            
+            <t hangText="Event Receiver"><vspace/>
+              A service provider that registers to receive SETs from 
+              an Event Transmitter and provides an endpoint to receive
+              SETs via HTTP POST (known as the "Data Plane"). 
+              Some examples of Event Receivers are 
+              Identity Providers and Relying Parties. Event Receivers
+              can check current Event Stream configuration and status by
+              accessing the Event Transmitters "Control Plane".
+            </t>
+  
+            <t hangText="Event Stream"><vspace/>
+              An Event Stream establishes Event Receiver communication
+              endpoints, security configuration and feed content that 
+              is used by an Event Transmitter to
+              send a series of SET Events to an Event Receiver. An Event 
+              Stream defines a "Data Plane" and "Control Plane" service
+              relationship between
+              an Event Transmitter and and Event Receiver. 
+            </t>
+              
             <t hangText="Control Plane"><vspace/>
               A Control Plane represents an service offered by an Event
               Transmitter that lets an Event Receiver query the current
@@ -166,6 +223,12 @@
               Control Plane MAY also be used to retrieve Event Stream
               and SET configuration data.
             </t>
+            
+            <t hangText="Data Plane"><vspace/>
+              The Data Plane represents the HTTP service offered by an 
+              Event Receiver that allows the Event Transmitter to 
+              deliver multiple SETs via HTTP POST as part of an Event
+              Stream.</t>
             
 						<t hangText="Event Family"><vspace/>An Event Family is a 
               URI that describes the set of events types be issued in 
@@ -184,6 +247,7 @@
 				</t>
 			</section>
 		</section>
+    
 
     <section title="Control Plane">
   
@@ -432,10 +496,21 @@
           provided URI from the Transmitter.</t>
           <t>The format of the response is defined by <xref target="RFC7644">Section TBD</xref>.
           </t>
+          
+          <t>In addition to the attributes defined in 
+          <xref target="subscribeMetadata"/>, the response SHALL include
+          an additional JSON attribute <spanx style="verb">schemas</spanx>
+          with at least a single value of <spanx style="verb">urn:ietf:params:scim:schemas:event:2.0:EventStream</spanx>.
+          This static attribute is provided to enable optional SCIM client
+          compatibility and informs the client of the type of JSON 
+          object being returned. Service providers may offer additional 
+          attributes by adding additional schema values as per <xref target="RFC7644"/>.
+          </t>
          
 <figure anchor="streamResponse" title="Example Stream GET Response">
-            <preamble>The response below shows an example Event Stream response.</preamble>
-            <artwork>HTTP/1.1 200 OK
+<preamble>The response below shows an example response to an HTTP GET, 
+in this case to <spanx style="verb">https://example.com/v2/EventStreams/767aad7853d240debc8e3c962051c1c0</spanx>.</preamble>
+<artwork>HTTP/1.1 200 OK
 Content-Type: application/json
 Location: 
  https://example.com/v2/EventStreams/767aad7853d240debc8e3c962051c1c0
@@ -450,6 +525,8 @@ Location:
   "deliveryUri":"https://notify.examplerp.com/Events",
   "aud":"https://sets.myexamplerp.com",
   "subStatus":"fail",
+  "txErr":"connection",
+  "txErrDesc":"TCP connect error to notify.examplerp.com.",
   "maxDeliveryTime":3600,
   "minDeliveryInterval":0,
   "description":"Logout events from oidc.example.com",
@@ -457,14 +534,38 @@ Location:
      ... SCIM meta attributes ...
   }
 }</artwork>
-            </figure>        
-        </section>
+</figure>  
+      <t>In the above figure, the Event Stream is showing a failed
+      status due to a TCP connection error. The Event Receiver is
+      able to discover that its endpoint was unavailable and has been
+      marked failed by the Event Transmitter. It is expected that the
+      appropriate operations staff would be alerted and some 
+      corrective action would be taken.</t>
+      
+      <t>The frequency with which Event Receivers should poll the
+      Event Stream status depends on the following factors: <list style="symbols">
+      <t>The level of technical fault tolerance and availability of the 
+      receiving endpoint.</t>
+      <t>A frequency appropriate to the amount of risk that can be tolerated for lost
+      events. For example, if Security Events are considered informational,
+      then infrequent (hourly or daily) may be sufficient.</t>
+      </list>
+      In most cases Event Stream status polling can be triggered on a 
+      timeout basis. Event Receivers would typically poll if they have not
+      received a SET for some period during which SETs would be expected
+      based on past experience.
+      </t>
+      
+  </section>
   
   <section anchor="streamManagement" title="Event Stream Management">
       <t>This section describes how SCIM <xref target="RFC7644"/>
       and <xref target="RFC7643"/> MAY be used to add
       create, read, update, delete capability to the Control Plane to enable
-      provisioning and operational management of Event Streams. </t>
+      provisioning and operational management of Event Streams. In addition
+      to provisioning of Event Streams, it can also be used by Event
+      Receivers to change or reset the operational state of Event Streams
+      such as pausing, stopping, or re-enabling after a failure. </t>
       
       <t>SCIM is a management protocol used by many security systems 
       for provisioning and co-ordinating identities and other security
@@ -472,15 +573,13 @@ Location:
       HTTP that is intended to be implemented by applications that need 
       provisioning and management of security subjects and is ideal to 
       the task of provisioning related security event signal
-      systems. Examples of provisioning endpoints include both Identity 
-      Providers and Relying Party applications (e.g. business and 
+      systems. Examples of provisioning endpoints (SCIM service providers) 
+      include both Identity Providers and Relying Party applications (e.g. business and 
       consumer web applications) as well as security and authorization 
       infrastructure components.</t>
       
       <t>[[Editors Note:  At the time of writing, some groups feel a CRUD API is not required and 
       participants would prefer to manage streams using an out-of-band workflow approach.]]</t>
-    
-      
           
       <section title="Event Stream Resource Type Definition">
       
@@ -508,12 +607,12 @@ the endpoint location of EventStream resources and the SCIM schema used
 to define the resource.  The corresponding schema for the EventStream
 resource MAY be retrieved from the SCIM <spanx style="verb">/Schemas</spanx> 
 endpoint (see <xref target="RFC7644">Section 3.2</xref>).</postamble>
-            </figure>
-            </t>
-            <t>To retrieve information about one or more Event Streams, 
-            authorized clients MAY query the 
-            <spanx style="verb">/EventStreams</spanx> endpoint 
-            as defined in <xref target="RFC7644">Section 3.4</xref>.</t>
+        </figure>
+        </t>
+        <t>To retrieve information about one or more Event Streams, 
+        authorized clients MAY query the 
+        <spanx style="verb">/EventStreams</spanx> endpoint 
+        as defined in <xref target="RFC7644">Section 3.4</xref>.</t>
         
 <figure anchor="subscriptionGetRequest" title="Example SCIM EventStream HTTP GET Request">
             <preamble>The example below retrieves a specific <spanx style="verb">EventStream</spanx> resource whose 
@@ -551,31 +650,32 @@ Location:
 }</artwork>
 </figure>
             
-            <t>In the above example (<xref target="subscriptionResponse" />)
-            the EventStream is for the the Feed  
-            <spanx style="verb">https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74</spanx>.
-            The current Event Stream state is <spanx style="verb">verify</spanx>
-            which suggest the Event Stream Verification (see <xref target="verifyStream" />) process has not yet 
-            completed. Since there is no value for <spanx style="verb">feedJwk</spanx>, )
-            or <spanx style="verb">confidentialJwk</spanx>, SETs will be
-            sent without signing or encryption (plain text).</t>          
-          </section>
-          <section anchor="createSub" title="Creating A New Event Stream">
-            <t>To subscribe to a feed, the Event Receiver first obtains 
-            an authorization credential authorizing to to make the request
-            (this process is out of scope of the specification but is often
-            completed through OAuth). Upon obtaining authorization, the 
-            Event Receiver organization uses the SCIM Create operation
-            (HTTP POST) as defined in <xref target="RFC7644">Section 3.3</xref>.
-            Event Transmitter's Control Plane service MAY have additional 
-            schema requirements for Event Stream creation which MAY be 
-            discovered using SCIM service configuration and schema discovery, 
-            see <xref target="RFC7644">Section 4</xref>.
-            </t>
-            <figure anchor="createSubscription" title="Example Create Event Stream Request">
-            <preamble>In the following non-normative example, a new EventStream
-            is created. Note that the Event Transmitter's control-plane automatically
-            assigns the <spanx style="verb">id</spanx> attribute.</preamble>
+        <t>In the above example (<xref target="subscriptionResponse" />)
+        the EventStream is for the the Feed  
+        <spanx style="verb">https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74</spanx>.
+        The current Event Stream state is <spanx style="verb">verify</spanx>
+        which suggest the Event Stream Verification (see <xref target="verifyStream" />) process has not yet 
+        completed. Since there is no value for <spanx style="verb">feedJwk</spanx>, )
+        or <spanx style="verb">confidentialJwk</spanx>, SETs will be
+        sent without signing or encryption (plain text).</t>          
+      </section>
+      
+      <section anchor="createSub" title="Creating A New Event Stream">
+        <t>To subscribe to a feed, the Event Receiver first obtains 
+        an authorization credential authorizing to to make the request
+        (this process is out of scope of the specification but is often
+        completed through OAuth). Upon obtaining authorization, the 
+        Event Receiver organization uses the SCIM Create operation
+        (HTTP POST) as defined in <xref target="RFC7644">Section 3.3</xref>.
+        Event Transmitter's Control Plane service MAY have additional 
+        schema requirements for Event Stream creation which MAY be 
+        discovered using SCIM service configuration and schema discovery, 
+        see <xref target="RFC7644">Section 4</xref>.
+        </t>
+        <figure anchor="createSubscription" title="Example Create Event Stream Request">
+        <preamble>In the following non-normative example, a new EventStream
+        is created. Note that the Event Transmitter's control-plane automatically
+        assigns the <spanx style="verb">id</spanx> attribute.</preamble>
  <artwork>POST /EventStreams
 Host: example.com
 Accept: application/scim+json
@@ -595,15 +695,15 @@ Authorization: Bearer h480djs93hd8
   "description":"Logout events from oidc.example.com"
 }</artwork>
 
-            </figure>
-            <figure anchor="createSubscriptionResponse" title="Example Response to Create EventStream Request">
-            <preamble>In following non-normative response, the Event service provider
-            has automatically assigned a resource location as well as an
-            <spanx style="verb">id</spanx>. Usually upon creation, the
-            initial value of <spanx style="verb">subStatus</spanx> is 
-            <spanx style="verb">pending</spanx> indicating that the 
-            Stream Verification process (see <xref target="verifyStream" />) 
-            has not been completed.</preamble>
+        </figure>
+        <figure anchor="createSubscriptionResponse" title="Example Response to Create EventStream Request">
+        <preamble>In following non-normative response, the Event service provider
+        has automatically assigned a resource location as well as an
+        <spanx style="verb">id</spanx>. Usually upon creation, the
+        initial value of <spanx style="verb">subStatus</spanx> is 
+        <spanx style="verb">pending</spanx> indicating that the 
+        Stream Verification process (see <xref target="verifyStream" />) 
+        has not been completed.</preamble>
 <artwork>HTTP/1.1 201 Created
 Content-Type: application/scim+json
 Location: 
@@ -626,32 +726,33 @@ Location:
      ... SCIM meta attributes ...
   }
 }</artwork>
-            </figure>
-          </section>
-          <section anchor="patchSub" title="Updating An Event Stream">
-            <t>Periodically, Event Receivers MAY have need to update an
-            Event Stream configuration for the purpose of:<list style="symbols">
-            <t>Rotating access credentials or keys</t>
-            <t>Updating endpoint configuration</t>
-            <t>Making operational changes such as pausing, resetting, or 
-            disabling an Event Stream.</t>
-            <t>Other operations (e.g. such as adding or removing subjects)
-            as defined by profiling Event specifications.</t></list></t>
-            <t>To modify an EventStream, an Event Receiver or authorized management
-            client MAY use the HTTP PUT operation (see <xref target="RFC7644">Section 3.5.1</xref>) 
-            or MAY use the HTTP PATCH operation (see <xref target="RFC7644">Section 3.5.2</xref>) 
-            if supported by the Event Transmitter's control plane service. 
-            Note that HTTP PATCH enables more specific changes. This is particularly 
-            useful when updating multi-valued attributes that may contain 
-            large numbers of values. An example of this would be an EventStream
-            that uses a <spanx style="verb">members</spanx> attribute to define the 
-            subjects of the Event Stream.</t>
-            
-            <figure anchor="subscriptionPatch" title="Example EventStream PATCH Request">
-            <preamble>In the following non-normative example, the client
-            is requesting that <spanx style="verb">subStatus</spanx> be 
-            changed to <spanx style="verb">paused</spanx> for the EventStream
-            whose path is identified by the request URI path.</preamble>
+        </figure>
+      </section>
+      
+      <section anchor="patchSub" title="Updating An Event Stream">
+        <t>Periodically, Event Receivers MAY have need to update an
+        Event Stream configuration for the purpose of:<list style="symbols">
+        <t>Rotating access credentials or keys</t>
+        <t>Updating endpoint configuration</t>
+        <t>Making operational changes such as pausing, resetting, or 
+        disabling an Event Stream.</t>
+        <t>Other operations (e.g. such as adding or removing subjects)
+        as defined by profiling Event specifications.</t></list></t>
+        <t>To modify an EventStream, an Event Receiver or authorized management
+        client MAY use the HTTP PUT operation (see <xref target="RFC7644">Section 3.5.1</xref>) 
+        or MAY use the HTTP PATCH operation (see <xref target="RFC7644">Section 3.5.2</xref>) 
+        if supported by the Event Transmitter's control plane service. 
+        Note that HTTP PATCH enables more specific changes. This is particularly 
+        useful when updating multi-valued attributes that may contain 
+        large numbers of values. An example of this would be an EventStream
+        that uses a <spanx style="verb">members</spanx> attribute to define the 
+        subjects of the Event Stream.</t>
+        
+        <figure anchor="subscriptionPatch" title="Example EventStream PATCH Request">
+        <preamble>In the following non-normative example, the client
+        is requesting that <spanx style="verb">subStatus</spanx> be 
+        changed to <spanx style="verb">paused</spanx> for the EventStream
+        whose path is identified by the request URI path.</preamble>
 <artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
 Host: example.com
 Accept: application/scim+json
@@ -676,15 +777,10 @@ values in order to make a PUT request. In other words, an HTTP PATCH can
 be typically done in a single request response whereas an HTTP POST usually
 is preceded by an HTTP GET.</postamble>
             </figure>
-         
-        
-        </section>      
+      </section>      
     </section>
-  
-  
   </section>
-  
-  
+   
   <section title="Data Plane">
     <t>The data plane represent the HTTP request channel by which the Event
     Transmitter delivers SET Events to an Event Receiver.</t>
