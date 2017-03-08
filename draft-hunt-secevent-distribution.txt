@@ -69,28 +69,28 @@ Table of Contents
    1.  Introduction and Overview . . . . . . . . . . . . . . . . . .   2
      1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   4
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   4
-   2.  Control Plane . . . . . . . . . . . . . . . . . . . . . . . .   6
+   2.  Control Plane - Monitoring  . . . . . . . . . . . . . . . . .   6
      2.1.  Event Stream Configuration  . . . . . . . . . . . . . . .   6
-     2.2.  Event Stream State Model  . . . . . . . . . . . . . . . .   8
-     2.3.  Checking Stream Configuration and Stream State  . . . . .  10
-     2.4.  Event Stream Management . . . . . . . . . . . . . . . . .  12
-       2.4.1.  Event Stream Resource Type Definition . . . . . . . .  12
-       2.4.2.  Creating A New Event Stream . . . . . . . . . . . . .  14
-       2.4.3.  Updating An Event Stream  . . . . . . . . . . . . . .  16
-   3.  Data Plane  . . . . . . . . . . . . . . . . . . . . . . . . .  17
-     3.1.  Event Delivery Process  . . . . . . . . . . . . . . . . .  17
-     3.2.  Event Stream State  . . . . . . . . . . . . . . . . . . .  19
-     3.3.  HTTP POST Delivery  . . . . . . . . . . . . . . . . . . .  19
-     3.4.  Event Stream Verification . . . . . . . . . . . . . . . .  23
-   4.  Security Considerations . . . . . . . . . . . . . . . . . . .  25
-   5.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  25
-     5.1.  SCIM Schema Registration  . . . . . . . . . . . . . . . .  25
-   6.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  25
-     6.1.  Normative References  . . . . . . . . . . . . . . . . . .  25
-     6.2.  Informative References  . . . . . . . . . . . . . . . . .  26
-   Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  26
-   Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  27
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  27
+     2.2.  Event Stream State Model  . . . . . . . . . . . . . . . .   9
+     2.3.  Checking Stream Configuration and Stream State  . . . . .  11
+   3.  Data Plane  . . . . . . . . . . . . . . . . . . . . . . . . .  13
+     3.1.  Event Delivery Process  . . . . . . . . . . . . . . . . .  13
+     3.2.  Event Stream State  . . . . . . . . . . . . . . . . . . .  14
+     3.3.  HTTP POST Delivery  . . . . . . . . . . . . . . . . . . .  15
+     3.4.  Event Stream Verification . . . . . . . . . . . . . . . .  18
+   4.  Control Plane - Management and Provisioning . . . . . . . . .  20
+     4.1.  Event Stream Resource Type Definition . . . . . . . . . .  20
+     4.2.  Creating A New Event Stream . . . . . . . . . . . . . . .  22
+     4.3.  Updating An Event Stream  . . . . . . . . . . . . . . . .  24
+   5.  Security Considerations . . . . . . . . . . . . . . . . . . .  25
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  25
+     6.1.  SCIM Schema Registration  . . . . . . . . . . . . . . . .  26
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  26
+     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  26
+     7.2.  Informative References  . . . . . . . . . . . . . . . . .  27
+   Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  27
+   Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  28
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  28
 
 1.  Introduction and Overview
 
@@ -286,14 +286,30 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
       Client, a mobile device, or any identifiable thing referenced in
       security and authorization systems.
 
-2.  Control Plane
+2.  Control Plane - Monitoring
 
-   The control plane is provided by the Event Transmitter and enables
+   The Control Plane is provided by the Event Transmitter and enables
    Event Receivers to check the Event Stream configuration and check for
-   transmission errors.
+   transmission errors.  This section describes mandatory to implement
+   functionality to enable Event Receivers to detect SET delivery
+   problems that may occur when an Event Transmitter fails to deliver
+   SETs.
 
    Implementers MAY optionally implement and support full Event Stream
-   management as described in Section 2.4.
+   provisioning and management as described in Section 4.  This
+   functionality also allows Event Receivers to "pause", "disable", or
+   re-enable Event Streams in scenario where the operational needs of
+   the receiver need to be co-ordinated with Event Transmitters (see
+   Section 2.2 and Section 4.3).
+
+   SCIM defines flexible mechanisms to ease adaptability to different
+   underlying data systems while maximizing inter-operabilty.  Section 2
+   [RFC7643] SHALL provide the processing rule that enable Control Plane
+   providers and clients negotiate specific attributes (metadata)
+   including differing provider definitions of attribute types,
+   mutability, cardinality, or returnability that MAY differ.  For HTTP
+   method handling and error signaling, the processing rules in
+   [RFC7644] SHALL apply.
 
 2.1.  Event Stream Configuration
 
@@ -313,6 +329,15 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
    methodUri
       A REQUIRED JSON String value which is a URI with a prefix of
       "urn:ietf:params:set:method".  This specification defines HTTP
+
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017               [Page 6]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
+
       POST delivery method:
       "urn:ietf:params:set:method:HTTP:webCallback"
       in which the Feed Provider delivers events using HTTP POST to a
@@ -329,15 +354,6 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
       be the value of SET "aud" claim sent to the Event Receiver.
 
    feedJwk
-
-
-
-
-Hunt & Scurtescu        Expires September 9, 2017               [Page 6]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
-
       An OPTIONAL public JSON Web Key (see [RFC7517]) from the Event
       Transmitter that will be used by the Event Receiver to verify the
       authenticity of issued SETs.
@@ -370,6 +386,14 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
          "off" - indicates that the Event Stream is no longer passing
          SETs.  While in off mode, the Event Stream metadata is
          maintained, but new events are ignored, not delivered or
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017               [Page 7]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
+
          retained.  Before returning to "on", a verification MUST be
          performed.
 
@@ -386,14 +410,6 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
       is set to "failed".
 
    maxDeliveryTime
-
-
-
-Hunt & Scurtescu        Expires September 9, 2017               [Page 7]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
-
       An OPTIONAL number indicating the maximum amount of time in
       seconds a SET MAY take for successful delivery per request or
       cumulatively across multiple retries.  Upon reaching the maximum,
@@ -426,22 +442,6 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
          Receiver has indicated an error for which the Event Transmitter
          is unable to correct.
 
-      [[Editors note: other conditions?]]
-
-   txErrDesc
-      An OPTIONAL String value that is usually human readable that
-      provides further diagnostic detail by the indicated "txErr" error
-      code.
-
-2.2.  Event Stream State Model
-
-   The Event Stream configuration attribute "subStatus" tracks the state
-   of any particular Event Stream with regards to whether SETs are ready
-   or able to be delivered.  The impact on delivery processing is
-   described in Table 1.
-
-
-
 
 
 
@@ -449,6 +449,24 @@ Hunt & Scurtescu        Expires September 9, 2017               [Page 8]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
+
+      [[Editors note: other conditions?]]
+
+   txErrDesc
+      An OPTIONAL String value that is usually human readable that
+      provides further diagnostic detail by the indicated "txErr" error
+      code.
+
+   Additional Event Stream metadata (attributes) MAY be defined as
+   extensions.  The method for adding new attributes is defined in
+   Section 3.3 [RFC7643].
+
+2.2.  Event Stream State Model
+
+   The Event Stream configuration attribute "subStatus" tracks the state
+   of any particular Event Stream with regards to whether SETs are ready
+   or able to be delivered.  The impact on delivery processing is
+   described in Table 1.
 
    The following is the state machine representation of a Event Stream
    on a Event Transmitter.  Note that a Event Stream cannot be made
@@ -480,13 +498,21 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
             Figure 3: Event Stream States at Event Transmitter
 
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017               [Page 9]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
+
    In the above diagram, the following actions impact the state of an
    Event Stream. "subStatus" values are shown in the boxes, and change
    based on the following actions:
 
    Create
       A Event Receiver or an administrator creates a new Event Stream
-      using SCIM as described in Section 2.4.2.  The initial state is
+      using SCIM as described in Section 4.2.  The initial state is
       "verify".
 
    Confirm
@@ -496,16 +522,6 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
       SHALL set state to "on".
 
    Confirm Fail
-
-
-
-
-
-Hunt & Scurtescu        Expires September 9, 2017               [Page 9]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
-
       If the confirmation fails, the Event Transmitter sets the state to
       "fail" requiring administrative action to correct the issue and
       "Restart".
@@ -527,21 +543,29 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
    Restart
       An administrator having corrected the failed delivery condition
       modifies the Event Stream state to "verify" (e.g. see
-      Section 2.4.3).
+      Section 4.3).
 
    Suspend and Resume
       An Event Stream MAY be suspended and resumed by updating the Event
       Stream state to "paused" or "on".  For example, see see
-      Section 2.4.3.  While suspended, the Event Transmitter MAY retain
+      Section 4.3.  While suspended, the Event Transmitter MAY retain
       undelivered SETs for a period of time.  If the Event Transmitter
       is no longer able to retain SETs, the Event Stream state SHOULD be
       set to "off" to indicate SETs are being lost.
 
    Enable and Disable
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 10]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
+
       A Event Stream MAY be disabled and enabled by updating the Event
-      Stream state to "off" or "on".  For example, see see
-      Section 2.4.3.  While the Event Stream is disabled, all SETs that
-      occur at the Event Transmitter are lost.
+      Stream state to "off" or "on".  For example, see see Section 4.3.
+      While the Event Stream is disabled, all SETs that occur at the
+      Event Transmitter are lost.
 
 2.3.  Checking Stream Configuration and Stream State
 
@@ -554,18 +578,45 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
    In addition to the attributes defined in Section 2.1, the response
    SHALL include an additional JSON attribute "schemas" with at least a
    single value of "urn:ietf:params:scim:schemas:event:2.0:EventStream".
-
-
-
-Hunt & Scurtescu        Expires September 9, 2017              [Page 10]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
-
    This static attribute is provided to enable optional SCIM client
    compatibility and informs the client of the type of JSON object being
    returned.  Service providers may offer additional attributes by
    adding additional schema values as per [RFC7644].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 11]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
 
    The response below shows an example response to an HTTP GET, in this
    case to "https://example.com/v2/
@@ -610,61 +661,10 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
    o  The level of technical fault tolerance and availability of the
       receiving endpoint.
 
-
-
-
-Hunt & Scurtescu        Expires September 9, 2017              [Page 11]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
-
    o  A frequency appropriate to the amount of risk that can be
       tolerated for lost events.  For example, if Security Events are
       considered informational, then infrequent (hourly or daily) may be
       sufficient.
-
-   In most cases Event Stream status polling can be triggered on a
-   timeout basis.  Event Receivers would typically poll if they have not
-   received a SET for some period during which SETs would be expected
-   based on past experience.
-
-2.4.  Event Stream Management
-
-   This section describes how SCIM [RFC7644] and [RFC7643] MAY be used
-   to add create, read, update, delete capability to the Control Plane
-   to enable provisioning and operational management of Event Streams.
-   In addition to provisioning of Event Streams, it can also be used by
-   Event Receivers to change or reset the operational state of Event
-   Streams such as pausing, stopping, or re-enabling after a failure.
-
-   SCIM is a management protocol used by many security systems for
-   provisioning and co-ordinating identities and other security subjects
-   in cross-domain scenarios.  SCIM is a RESTful profile of HTTP that is
-   intended to be implemented by applications that need provisioning and
-   management of security subjects and is ideal to the task of
-   provisioning related security event signal systems.  Examples of
-   provisioning endpoints (SCIM service providers) include both Identity
-   Providers and Relying Party applications (e.g. business and consumer
-   web applications) as well as security and authorization
-   infrastructure components.
-
-   [[Editors Note: At the time of writing, some groups feel a CRUD API
-   is not required and participants would prefer to manage streams using
-   an out-of-band workflow approach.]]
-
-2.4.1.  Event Stream Resource Type Definition
-
-   To extend SCIM to support Event Streams, requires defining an
-   "EventStream" SCIM resource type, and implementing the corresponding
-   RESTful HTTP operations to create, update, retrieve EventStream
-   Resources.  For SCIM service provider capability and schema discovery
-   (see Sections 3 and 4 [RFC7644]).
-
-   The "EventStream" resource type definition is defined as follows:
-
-
-
-
 
 
 
@@ -674,267 +674,10 @@ Hunt & Scurtescu        Expires September 9, 2017              [Page 12]
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
-{
-  "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
-  "id": "EventStream",
-  "name": "EventStream",
-  "endpoint": "/EventStreams",
-  "description": "Endpoint and event configuration and status for SEC EVENT streams.",
-  "schema": "urn:ietf:params:scim:schemas:event:2.0:EventStream",
-  "schemaExtensions": []
-}
-
-   The resource type above is discoverable in the "/ResourceTypes" and
-   informs SCIM clients about the endpoint location of EventStream
-   resources and the SCIM schema used to define the resource.  The
-   corresponding schema for the EventStream resource MAY be retrieved
-   from the SCIM "/Schemas" endpoint (see Section 3.2 [RFC7644]).
-
-            Figure 5: SCIM EventStream Resource Type Definition
-
-   To retrieve information about one or more Event Streams, authorized
-   clients MAY query the "/EventStreams" endpoint as defined in
-   Section 3.4 [RFC7644].
-
-   The example below retrieves a specific "EventStream" resource whose
-   "id" is "548b7c3f77c8bab33a4fef40".
-
-   GET /EventStreams/767aad7853d240debc8e3c962051c1c0
-   Host: example.com
-   Accept: application/json
-   Authorization: Bearer h480djs93hd8
-
-            Figure 6: Example SCIM EventStream HTTP GET Request
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt & Scurtescu        Expires September 9, 2017              [Page 13]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
-
-   The response below shows an example Feed resource that describes an
-   available feed.
-
-   HTTP/1.1 200 OK
-   Content-Type: application/json
-   Location:
-    https://example.com/v2/EventStreams/767aad7853d240debc8e3c962051c1c0
-
-   {
-     "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
-     "id":"767aad7853d240debc8e3c962051c1c0",
-     "feedName":"OIDCLogoutFeed",
-     "feedUri":
-       "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
-     "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
-     "deliveryUri":"https://notify.examplerp.com/Events",
-     "aud":"https://sets.myexamplerp.com",
-     "subStatus":"verify",
-     "maxDeliveryTime":3600,
-     "minDeliveryInterval":0,
-     "description":"Logout events from oidc.example.com",
-     "meta":{
-        ... SCIM meta attributes ...
-     }
-   }
-
-              Figure 7: Example EventStream HTTP GET Response
-
-   In the above example (Figure 7) the EventStream is for the the Feed
-   "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74".  The
-   current Event Stream state is "verify" which suggest the Event Stream
-   Verification (see Section 3.4) process has not yet completed.  Since
-   there is no value for "feedJwk", ) or "confidentialJwk", SETs will be
-   sent without signing or encryption (plain text).
-
-2.4.2.  Creating A New Event Stream
-
-   To subscribe to a feed, the Event Receiver first obtains an
-   authorization credential authorizing to to make the request (this
-   process is out of scope of the specification but is often completed
-   through OAuth).  Upon obtaining authorization, the Event Receiver
-   organization uses the SCIM Create operation (HTTP POST) as defined in
-   Section 3.3 [RFC7644].  Event Transmitter's Control Plane service MAY
-   have additional schema requirements for Event Stream creation which
-   MAY be discovered using SCIM service configuration and schema
-   discovery, see Section 4 [RFC7644].
-
-
-
-
-
-Hunt & Scurtescu        Expires September 9, 2017              [Page 14]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
-
-   In the following non-normative example, a new EventStream is created.
-   Note that the Event Transmitter's control-plane automatically assigns
-   the "id" attribute.
-
-   POST /EventStreams
-   Host: example.com
-   Accept: application/scim+json
-   Content-Type: application/scim+json
-   Authorization: Bearer h480djs93hd8
-
-   {
-     "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
-     "feedName":"OIDCLogoutFeed",
-     "feedUri":
-       "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
-     "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
-     "deliveryUri":"https://notify.examplerp.com/Events",
-     "aud":"https://sets.myexamplerp.com",
-     "maxDeliveryTime":3600,
-     "minDeliveryInterval":0,
-     "description":"Logout events from oidc.example.com"
-   }
-
-               Figure 8: Example Create Event Stream Request
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt & Scurtescu        Expires September 9, 2017              [Page 15]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
-
-   In following non-normative response, the Event service provider has
-   automatically assigned a resource location as well as an "id".
-   Usually upon creation, the initial value of "subStatus" is "pending"
-   indicating that the Stream Verification process (see Section 3.4) has
-   not been completed.
-
-   HTTP/1.1 201 Created
-   Content-Type: application/scim+json
-   Location:
-    https://example.com/v2/EventStreams/767aad7853d240debc8e3c962051c1c0
-
-   {
-     "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
-     "id":"767aad7853d240debc8e3c962051c1c0",
-     "feedName":"OIDCLogoutFeed",
-     "feedUri":
-       "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
-     "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
-     "deliveryUri":"https://notify.examplerp.com/Events",
-     "aud":"https://sets.myexamplerp.com",
-     "subStatus":"verify",
-     "maxDeliveryTime":3600,
-     "minDeliveryInterval":0,
-     "description":"Logout events from oidc.example.com",
-     "meta":{
-        ... SCIM meta attributes ...
-     }
-   }
-
-         Figure 9: Example Response to Create EventStream Request
-
-2.4.3.  Updating An Event Stream
-
-   Periodically, Event Receivers MAY have need to update an Event Stream
-   configuration for the purpose of:
-
-   o  Rotating access credentials or keys
-
-   o  Updating endpoint configuration
-
-   o  Making operational changes such as pausing, resetting, or
-      disabling an Event Stream.
-
-   o  Other operations (e.g. such as adding or removing subjects) as
-      defined by profiling Event specifications.
-
-   To modify an EventStream, an Event Receiver or authorized management
-   client MAY use the HTTP PUT operation (see Section 3.5.1 [RFC7644])
-
-
-
-Hunt & Scurtescu        Expires September 9, 2017              [Page 16]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
-
-   or MAY use the HTTP PATCH operation (see Section 3.5.2 [RFC7644]) if
-   supported by the Event Transmitter's control plane service.  Note
-   that HTTP PATCH enables more specific changes.  This is particularly
-   useful when updating multi-valued attributes that may contain large
-   numbers of values.  An example of this would be an EventStream that
-   uses a "members" attribute to define the subjects of the Event
-   Stream.
-
-   In the following non-normative example, the client is requesting that
-   "subStatus" be changed to "paused" for the EventStream whose path is
-   identified by the request URI path.
-
-   PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
-   Host: example.com
-   Accept: application/scim+json
-   Content-Type: application/scim+json
-   Authorization: Bearer h480djs93hd8
-
-   {
-     "schemas":
-       ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
-     "Operations": [{
-       "op":"replace",
-       "path":"subStatus",
-       "value":"paused"
-     }]
-   }
-
-
-   Upon receiving the request, the Event Transmitter would stop sending
-   Events to the Receiver.  Note that while the request MAY seem complex
-   it avoids the need for the requestor to have all of the current
-   EventStream values in order to make a PUT request.  In other words,
-   an HTTP PATCH can be typically done in a single request response
-   whereas an HTTP POST usually is preceded by an HTTP GET.
-
-               Figure 10: Example EventStream PATCH Request
+   In most cases Event Stream status polling can be triggered on a
+   timeout basis.  Event Receivers would typically poll if they have not
+   received a SET for some period during which SETs would be expected
+   based on past experience.
 
 3.  Data Plane
 
@@ -945,15 +688,6 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
    When a Security Event occurs, the Feed Provider constructs a SET
    token [I-D.ietf-secevent-token] that describes the event.  The feed
-
-
-
-
-Hunt & Scurtescu        Expires September 9, 2017              [Page 17]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
-
    provider determines the feeds that the event should be distributed
    to, and determines which Event Receivers need to be notified.
 
@@ -989,6 +723,13 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
    state of the transmitter's affected SCIM resource in order to
    reconcile local corresponding state changes.
 
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 13]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
+
    The action a Event Receiver takes in response to a SET MAY be
    substantially different than merely copying the action of the SET
    issuer.  A single SET can trigger one or more receiver actions or it
@@ -1003,19 +744,47 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
    2.  The Event Receiver then enables the user for the application
        associated with membership in the issuer's group.
 
-
-
-Hunt & Scurtescu        Expires September 9, 2017              [Page 18]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
-
 3.2.  Event Stream State
 
    As mentioned in Section 2.1, the attribute "subStatus" defines the
    current state of an Event Stream.  Figure 3 shows a state diagram for
    Event Streams.  The following describes that actions taken by the
    Event Transmitter based upon "subStatus".
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 14]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
 
    +--------+----------------------------------------------------------+
    | Status | Action                                                   |
@@ -1059,19 +828,19 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
    The SET to be delivered MAY be signed and/or encrypted as defined in
    [I-D.ietf-secevent-token].
 
-
-
-Hunt & Scurtescu        Expires September 9, 2017              [Page 19]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
-
    The Event Stream's "deliveryUri" attribute indicates the location of
    a Event Receiver provided endpoint which accepts HTTP POST requests
    (e.g.  "https://notify.examplerp.com/Events").
 
    The content-type for the HTTP POST is "application/jwt" and SHALL
    consists of a single SET token (see [I-D.ietf-secevent-token]).
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 15]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
 
      eyJhbGciOiJub25lIn0
      .
@@ -1088,39 +857,12 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
      1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
      .
 
-                 Figure 11: Encoded SET To Be Transmitted
+                  Figure 5: Encoded SET To Be Transmitted
 
    To deliver an event, the Event Transmitter generates an event
    delivery message and uses HTTP POST to the EventStream configured
    endpoint.  The content-type of the message is "application/jwt" and
    the expected response type (accept) is "application/json".
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt & Scurtescu        Expires September 9, 2017              [Page 20]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
 
    POST /Events  HTTP/1.1
 
@@ -1142,12 +884,19 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
    1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
    .
 
-               Figure 12: Example Web Callback POST Request
+                Figure 6: Example Web Callback POST Request
 
    Upon receipt of the request, the Event Receiver SHALL validate the
    JWT structure of the SET as defined in Section 7.2 [RFC7519].  The
    Event Receiver SHALL also validate the SET information as described
    in Section 2 [I-D.ietf-secevent-token].
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 16]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
 
    If the SET is determined to be valid, the Event Receiver SHALL
    indicate successful submission by responding with HTTP Status 202 as
@@ -1156,27 +905,6 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
    If SET or JWT is invalid, or there is an HTTP error, the Event
    Receiver SHALL respond with the appropriate HTTP error or an HTTP
    Status 400 Bad Request error as follows:
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt & Scurtescu        Expires September 9, 2017              [Page 21]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
 
    +----------+--------------------------------------------------------+
    | Err      | Description                                            |
@@ -1203,7 +931,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
    HTTP/1.1 202 Accepted
 
-              Figure 13: Example Successful Delivery Response
+              Figure 7: Example Successful Delivery Response
 
    An HTTP Status 400 Bad Request response includes a JSON object which
    provides details about the error.  The JSON object includes the JSON
@@ -1221,15 +949,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-
-
-
-
-
-
-
-
-Hunt & Scurtescu        Expires September 9, 2017              [Page 22]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 17]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -1245,7 +965,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
    }
 
-                  Figure 14: Example Bad Request Response
+                  Figure 8: Example Bad Request Response
 
 3.4.  Event Stream Verification
 
@@ -1285,7 +1005,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
-Hunt & Scurtescu        Expires September 9, 2017              [Page 23]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 18]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -1309,10 +1029,10 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
      }
    }
 
-            Figure 15: Example Verification SET with Challenge
+             Figure 9: Example Verification SET with Challenge
 
    The above SET is encoded as a JWT and transmitted to the Event
-   Receiver as shown in Figure 12.
+   Receiver as shown in Figure 6.
 
    Upon receiving a verify SET, the Event Receiver SHALL respond with a
    JSON object that includes a "challengeResponse" attribute and the
@@ -1330,7 +1050,7 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
      "challengeResponse":"ca2179f4-8936-479a-a76d-5486e2baacd7"
    }
 
-         Figure 16: Example Response to Verify SET with Challenge
+         Figure 10: Example Response to Verify SET with Challenge
 
    If the Event Receiver returns a non-matching value or an HTTP status
    other than a 200 series response, the Event Stream "state" SHALL be
@@ -1341,18 +1061,348 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
 
+Hunt & Scurtescu        Expires September 9, 2017              [Page 19]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
+
+4.  Control Plane - Management and Provisioning
+
+   This section describes how SCIM [RFC7644] and [RFC7643] MAY be used
+   to add create, read, update, delete capability to the Control Plane
+   to enable provisioning and operational management of Event Streams.
+   In addition to provisioning of Event Streams, it can also be used by
+   Event Receivers to change or reset the operational state of Event
+   Streams such as pausing, stopping, or re-enabling after a failure.
+
+   SCIM is a protocol used by many security systems for provisioning and
+   co-ordinating identities and other security subjects in cross-domain
+   scenarios.  SCIM is a RESTful profile of HTTP that is intended to be
+   implemented by applications that need provisioning and management of
+   security subjects and is ideal to the task of provisioning related
+   security event signal systems.  Examples of provisioning endpoints
+   (SCIM service providers) include both Identity Providers and Relying
+   Party applications (e.g. business and consumer web applications) as
+   well as security and authorization infrastructure components.
+
+   [[Editors Note: At the time of writing, some groups feel a CRUD API
+   is not required and participants would prefer to manage streams using
+   an out-of-band workflow approach.]]
+
+4.1.  Event Stream Resource Type Definition
+
+   To extend SCIM to support Event Streams, requires defining an
+   "EventStream" SCIM resource type, and implementing the corresponding
+   RESTful HTTP operations to create, update, retrieve EventStream
+   Resources.  For SCIM service provider capability and schema discovery
+   (see Sections 3 and 4 [RFC7644]).
+
+   The "EventStream" resource type definition is defined as follows:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 20]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
+
+{
+  "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
+  "id": "EventStream",
+  "name": "EventStream",
+  "endpoint": "/EventStreams",
+  "description": "Endpoint and event configuration and status for SEC EVENT streams.",
+  "schema": "urn:ietf:params:scim:schemas:event:2.0:EventStream",
+  "schemaExtensions": []
+}
+
+   The resource type above is discoverable in the "/ResourceTypes" and
+   informs SCIM clients about the endpoint location of EventStream
+   resources and the SCIM schema used to define the resource.  The
+   corresponding schema for the EventStream resource MAY be retrieved
+   from the SCIM "/Schemas" endpoint (see Section 3.2 [RFC7644]).
+
+           Figure 11: SCIM EventStream Resource Type Definition
+
+   To retrieve information about one or more Event Streams, authorized
+   clients MAY query the "/EventStreams" endpoint as defined in
+   Section 3.4 [RFC7644].
+
+   The example below retrieves a specific "EventStream" resource whose
+   "id" is "548b7c3f77c8bab33a4fef40".
+
+   GET /EventStreams/767aad7853d240debc8e3c962051c1c0
+   Host: example.com
+   Accept: application/json
+   Authorization: Bearer h480djs93hd8
+
+           Figure 12: Example SCIM EventStream HTTP GET Request
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 21]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
+
+   The response below shows an example Feed resource that describes an
+   available feed.
+
+   HTTP/1.1 200 OK
+   Content-Type: application/json
+   Location:
+    https://example.com/v2/EventStreams/767aad7853d240debc8e3c962051c1c0
+
+   {
+     "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
+     "id":"767aad7853d240debc8e3c962051c1c0",
+     "feedName":"OIDCLogoutFeed",
+     "feedUri":
+       "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+     "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+     "deliveryUri":"https://notify.examplerp.com/Events",
+     "aud":"https://sets.myexamplerp.com",
+     "subStatus":"verify",
+     "maxDeliveryTime":3600,
+     "minDeliveryInterval":0,
+     "description":"Logout events from oidc.example.com",
+     "meta":{
+        ... SCIM meta attributes ...
+     }
+   }
+
+             Figure 13: Example EventStream HTTP GET Response
+
+   In the above example (Figure 13) the EventStream is for the the Feed
+   "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74".  The
+   current Event Stream state is "verify" which suggest the Event Stream
+   Verification (see Section 3.4) process has not yet completed.  Since
+   there is no value for "feedJwk", ) or "confidentialJwk", SETs will be
+   sent without signing or encryption (plain text).
+
+4.2.  Creating A New Event Stream
+
+   To subscribe to a feed, the Event Receiver first obtains an
+   authorization credential authorizing to to make the request (this
+   process is out of scope of the specification but is often completed
+   through OAuth).  Upon obtaining authorization, the Event Receiver
+   organization uses the SCIM Create operation (HTTP POST) as defined in
+   Section 3.3 [RFC7644].  Event Transmitter's Control Plane service MAY
+   have additional schema requirements for Event Stream creation which
+   MAY be discovered using SCIM service configuration and schema
+   discovery, see Section 4 [RFC7644].
+
+
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 22]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
+
+   In the following non-normative example, a new EventStream is created.
+   Note that the Event Transmitter's control-plane automatically assigns
+   the "id" attribute.
+
+   POST /EventStreams
+   Host: example.com
+   Accept: application/scim+json
+   Content-Type: application/scim+json
+   Authorization: Bearer h480djs93hd8
+
+   {
+     "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
+     "feedName":"OIDCLogoutFeed",
+     "feedUri":
+       "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+     "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+     "deliveryUri":"https://notify.examplerp.com/Events",
+     "aud":"https://sets.myexamplerp.com",
+     "maxDeliveryTime":3600,
+     "minDeliveryInterval":0,
+     "description":"Logout events from oidc.example.com"
+   }
+
+              Figure 14: Example Create Event Stream Request
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 23]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
+
+   In following non-normative response, the Event service provider has
+   automatically assigned a resource location as well as an "id".
+   Usually upon creation, the initial value of "subStatus" is "pending"
+   indicating that the Stream Verification process (see Section 3.4) has
+   not been completed.
+
+   HTTP/1.1 201 Created
+   Content-Type: application/scim+json
+   Location:
+    https://example.com/v2/EventStreams/767aad7853d240debc8e3c962051c1c0
+
+   {
+     "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
+     "id":"767aad7853d240debc8e3c962051c1c0",
+     "feedName":"OIDCLogoutFeed",
+     "feedUri":
+       "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+     "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+     "deliveryUri":"https://notify.examplerp.com/Events",
+     "aud":"https://sets.myexamplerp.com",
+     "subStatus":"verify",
+     "maxDeliveryTime":3600,
+     "minDeliveryInterval":0,
+     "description":"Logout events from oidc.example.com",
+     "meta":{
+        ... SCIM meta attributes ...
+     }
+   }
+
+         Figure 15: Example Response to Create EventStream Request
+
+4.3.  Updating An Event Stream
+
+   Periodically, Event Receivers MAY have need to update an Event Stream
+   configuration for the purpose of:
+
+   o  Rotating access credentials or keys
+
+   o  Updating endpoint configuration
+
+   o  Making operational changes such as pausing, resetting, or
+      disabling an Event Stream.
+
+   o  Other operations (e.g. such as adding or removing subjects) as
+      defined by profiling Event specifications.
+
+   To modify an EventStream, an Event Receiver or authorized management
+   client MAY use the HTTP PUT operation (see Section 3.5.1 [RFC7644])
+
+
+
 Hunt & Scurtescu        Expires September 9, 2017              [Page 24]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
 
-4.  Security Considerations
+   or MAY use the HTTP PATCH operation (see Section 3.5.2 [RFC7644]) if
+   supported by the Event Transmitter's control plane service.  Note
+   that HTTP PATCH enables more specific changes.  This is particularly
+   useful when updating multi-valued attributes that may contain large
+   numbers of values.  An example of this would be an EventStream that
+   uses a "members" attribute to define the subjects of the Event
+   Stream.
+
+   In the following non-normative example, the client is requesting that
+   "subStatus" be changed to "paused" for the EventStream whose path is
+   identified by the request URI path.
+
+   PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
+   Host: example.com
+   Accept: application/scim+json
+   Content-Type: application/scim+json
+   Authorization: Bearer h480djs93hd8
+
+   {
+     "schemas":
+       ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+     "Operations": [{
+       "op":"replace",
+       "path":"subStatus",
+       "value":"paused"
+     }]
+   }
+
+
+   Upon receiving the request, the Event Transmitter would stop sending
+   Events to the Receiver.  Note that while the request MAY seem complex
+   it avoids the need for the requestor to have all of the current
+   EventStream values in order to make a PUT request.  In other words,
+   an HTTP PATCH can be typically done in a single request response
+   whereas an HTTP POST usually is preceded by an HTTP GET.
+
+               Figure 16: Example EventStream PATCH Request
+
+5.  Security Considerations
 
    [TO BE COMPLETED]
 
-5.  IANA Considerations
+6.  IANA Considerations
 
-5.1.  SCIM Schema Registration
+
+
+
+
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 25]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
+
+6.1.  SCIM Schema Registration
 
    As per the "SCIM Schema URIs for Data Resources" registry established
    by Section 10.3 [RFC7643], the following defines and registers the
@@ -1366,9 +1416,9 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
    | EventStream               | Stream   |              |             |
    +---------------------------+----------+--------------+-------------+
 
-6.  References
+7.  References
 
-6.1.  Normative References
+7.1.  Normative References
 
    [I-D.ietf-secevent-token]
               Hunt, P., Denniss, W., Ansari, M., and M. Jones, "Security
@@ -1394,19 +1444,21 @@ Internet-Draft      draft-hunt-secevent-distribution          March 2017
               DOI 10.17487/RFC7231, June 2014,
               <http://www.rfc-editor.org/info/rfc7231>.
 
-
-
-
-Hunt & Scurtescu        Expires September 9, 2017              [Page 25]
-
-Internet-Draft      draft-hunt-secevent-distribution          March 2017
-
-
    [RFC7519]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
               <http://www.rfc-editor.org/info/rfc7519>.
 
-6.2.  Informative References
+
+
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 26]
+
+Internet-Draft      draft-hunt-secevent-distribution          March 2017
+
+
+7.2.  Informative References
 
    [idevent-scim]
               Oracle Corporation, "SCIM Event Extensions (work in
@@ -1453,7 +1505,11 @@ Appendix A.  Acknowledgments
 
 
 
-Hunt & Scurtescu        Expires September 9, 2017              [Page 26]
+
+
+
+
+Hunt & Scurtescu        Expires September 9, 2017              [Page 27]
 
 Internet-Draft      draft-hunt-secevent-distribution          March 2017
 
@@ -1509,4 +1565,4 @@ Authors' Addresses
 
 
 
-Hunt & Scurtescu        Expires September 9, 2017              [Page 27]
+Hunt & Scurtescu        Expires September 9, 2017              [Page 28]

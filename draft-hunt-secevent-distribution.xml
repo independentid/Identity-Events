@@ -249,13 +249,31 @@
 		</section>
     
 
-    <section title="Control Plane">
+    <section title="Control Plane - Monitoring">
   
-    <t>The control plane is provided by the Event Transmitter and
+    <t>The Control Plane is provided by the Event Transmitter and
     enables Event Receivers to check the Event Stream configuration
-    and check for transmission errors.</t>
-    <t>Implementers MAY optionally implement and support full Event Stream management
-    as described in <xref target="streamManagement"/>.</t>
+    and check for transmission errors. This section describes mandatory
+    to implement functionality to enable Event Receivers to detect
+    SET delivery problems that may occur when an Event Transmitter fails
+    to deliver SETs.</t>
+    
+    <t>Implementers MAY optionally implement and support full Event Stream 
+    provisioning and management as described in <xref target="streamManagement"/>.
+    This functionality also allows Event Receivers to "pause", "disable",
+    or re-enable Event Streams in scenario where the operational
+    needs of the receiver need to be co-ordinated with Event Transmitters 
+    (see <xref target="subState"/> and <xref target="patchSub"/>).</t>
+    
+    <t>SCIM defines flexible mechanisms to ease adaptability
+    to different underlying data systems while maximizing 
+    inter-operabilty. <xref target="RFC7643">Section 2</xref>
+    SHALL provide the processing rule that enable Control Plane 
+    providers and clients negotiate specific attributes (metadata) 
+    including differing provider definitions of attribute types, 
+    mutability, cardinality, or returnability that MAY differ. 
+    For HTTP method handling and error signaling, the 
+    processing rules in <xref target="RFC7644"/> SHALL apply. </t>
       
     
     <section anchor="subscribeMetadata" title="Event Stream Configuration">
@@ -398,6 +416,12 @@
               detail by the indicated <spanx style="verb">txErr</spanx>
               error code.</t>
             </list></t>
+            
+            <t>Additional Event Stream metadata (attributes) MAY be defined
+            as extensions. The method for adding new attributes is defined in 
+            <xref target="RFC7643">Section 3.3</xref>.</t>
+            
+            
         </section>
         
         <section anchor="subState" title="Event Stream State Model">
@@ -490,7 +514,8 @@
           </list></t>
         
         </section>
-        <section title="Checking Stream Configuration and Stream State">
+        
+        <section anchor="getStatus" title="Checking Stream Configuration and Stream State">
           <t>An Event Receiver MAY check the current status of a Stream
           with the Event Transmitter, by performing an HTTP GET using the
           provided URI from the Transmitter.</t>
@@ -558,227 +583,7 @@ Location:
       
   </section>
   
-  <section anchor="streamManagement" title="Event Stream Management">
-      <t>This section describes how SCIM <xref target="RFC7644"/>
-      and <xref target="RFC7643"/> MAY be used to add
-      create, read, update, delete capability to the Control Plane to enable
-      provisioning and operational management of Event Streams. In addition
-      to provisioning of Event Streams, it can also be used by Event
-      Receivers to change or reset the operational state of Event Streams
-      such as pausing, stopping, or re-enabling after a failure. </t>
-      
-      <t>SCIM is a management protocol used by many security systems 
-      for provisioning and co-ordinating identities and other security
-      subjects in cross-domain scenarios. SCIM is a RESTful profile of
-      HTTP that is intended to be implemented by applications that need 
-      provisioning and management of security subjects and is ideal to 
-      the task of provisioning related security event signal
-      systems. Examples of provisioning endpoints (SCIM service providers) 
-      include both Identity Providers and Relying Party applications (e.g. business and 
-      consumer web applications) as well as security and authorization 
-      infrastructure components.</t>
-      
-      <t>[[Editors Note:  At the time of writing, some groups feel a CRUD API is not required and 
-      participants would prefer to manage streams using an out-of-band workflow approach.]]</t>
-          
-      <section title="Event Stream Resource Type Definition">
-      
-        <t>To extend SCIM to support Event Streams, requires defining
-        an <spanx style="verb">EventStream</spanx> SCIM resource type, 
-        and implementing the corresponding RESTful HTTP operations to create, 
-        update, retrieve EventStream Resources. For SCIM service provider capability 
-        and schema discovery (see <xref target="RFC7644">Sections 3 and 4</xref>).</t>   
-        
-        <t>The <spanx style="verb">EventStream</spanx> resource type definition 
-        is defined as follows:
-<figure anchor="subscriptionType" title="SCIM EventStream Resource Type Definition">
-<artwork>{
-  "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
-  "id": "EventStream",
-  "name": "EventStream",
-  "endpoint": "/EventStreams",
-  "description": "Endpoint and event configuration and status for SEC EVENT streams.",
-  "schema": "urn:ietf:params:scim:schemas:event:2.0:EventStream",
-  "schemaExtensions": []
-}</artwork>
-<postamble>The resource type above is discoverable in the 
-<spanx style="verb">/ResourceTypes</spanx> and informs SCIM clients about
-the endpoint location of EventStream resources and the SCIM schema used
-to define the resource.  The corresponding schema for the EventStream
-resource MAY be retrieved from the SCIM <spanx style="verb">/Schemas</spanx> 
-endpoint (see <xref target="RFC7644">Section 3.2</xref>).</postamble>
-        </figure>
-        </t>
-        <t>To retrieve information about one or more Event Streams, 
-        authorized clients MAY query the 
-        <spanx style="verb">/EventStreams</spanx> endpoint 
-        as defined in <xref target="RFC7644">Section 3.4</xref>.</t>
-        
-<figure anchor="subscriptionGetRequest" title="Example SCIM EventStream HTTP GET Request">
-            <preamble>The example below retrieves a specific <spanx style="verb">EventStream</spanx> resource whose 
-            <spanx style="verb">id</spanx> is <spanx style="verb">548b7c3f77c8bab33a4fef40</spanx>.</preamble>
-            <artwork>GET /EventStreams/767aad7853d240debc8e3c962051c1c0
-Host: example.com
-Accept: application/json
-Authorization: Bearer h480djs93hd8</artwork>
-</figure>
-
-<figure anchor="subscriptionResponse" title="Example EventStream HTTP GET Response">
-            <preamble>The response below shows an example Feed resource
-            that describes an available feed.</preamble>
-            <artwork>HTTP/1.1 200 OK
-Content-Type: application/json
-Location: 
- https://example.com/v2/EventStreams/767aad7853d240debc8e3c962051c1c0
-
-{
-  "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
-  "id":"767aad7853d240debc8e3c962051c1c0",
-  "feedName":"OIDCLogoutFeed",
-  "feedUri":
-    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
-  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
-  "deliveryUri":"https://notify.examplerp.com/Events",
-  "aud":"https://sets.myexamplerp.com",
-  "subStatus":"verify",
-  "maxDeliveryTime":3600,
-  "minDeliveryInterval":0,
-  "description":"Logout events from oidc.example.com",
-  "meta":{
-     ... SCIM meta attributes ...
-  }
-}</artwork>
-</figure>
-            
-        <t>In the above example (<xref target="subscriptionResponse" />)
-        the EventStream is for the the Feed  
-        <spanx style="verb">https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74</spanx>.
-        The current Event Stream state is <spanx style="verb">verify</spanx>
-        which suggest the Event Stream Verification (see <xref target="verifyStream" />) process has not yet 
-        completed. Since there is no value for <spanx style="verb">feedJwk</spanx>, )
-        or <spanx style="verb">confidentialJwk</spanx>, SETs will be
-        sent without signing or encryption (plain text).</t>          
-      </section>
-      
-      <section anchor="createSub" title="Creating A New Event Stream">
-        <t>To subscribe to a feed, the Event Receiver first obtains 
-        an authorization credential authorizing to to make the request
-        (this process is out of scope of the specification but is often
-        completed through OAuth). Upon obtaining authorization, the 
-        Event Receiver organization uses the SCIM Create operation
-        (HTTP POST) as defined in <xref target="RFC7644">Section 3.3</xref>.
-        Event Transmitter's Control Plane service MAY have additional 
-        schema requirements for Event Stream creation which MAY be 
-        discovered using SCIM service configuration and schema discovery, 
-        see <xref target="RFC7644">Section 4</xref>.
-        </t>
-        <figure anchor="createSubscription" title="Example Create Event Stream Request">
-        <preamble>In the following non-normative example, a new EventStream
-        is created. Note that the Event Transmitter's control-plane automatically
-        assigns the <spanx style="verb">id</spanx> attribute.</preamble>
- <artwork>POST /EventStreams
-Host: example.com
-Accept: application/scim+json
-Content-Type: application/scim+json
-Authorization: Bearer h480djs93hd8
-
-{
-  "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
-  "feedName":"OIDCLogoutFeed",
-  "feedUri":
-    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
-  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
-  "deliveryUri":"https://notify.examplerp.com/Events",
-  "aud":"https://sets.myexamplerp.com",
-  "maxDeliveryTime":3600,
-  "minDeliveryInterval":0,
-  "description":"Logout events from oidc.example.com"
-}</artwork>
-
-        </figure>
-        <figure anchor="createSubscriptionResponse" title="Example Response to Create EventStream Request">
-        <preamble>In following non-normative response, the Event service provider
-        has automatically assigned a resource location as well as an
-        <spanx style="verb">id</spanx>. Usually upon creation, the
-        initial value of <spanx style="verb">subStatus</spanx> is 
-        <spanx style="verb">pending</spanx> indicating that the 
-        Stream Verification process (see <xref target="verifyStream" />) 
-        has not been completed.</preamble>
-<artwork>HTTP/1.1 201 Created
-Content-Type: application/scim+json
-Location: 
- https://example.com/v2/EventStreams/767aad7853d240debc8e3c962051c1c0
-
-{
-  "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
-  "id":"767aad7853d240debc8e3c962051c1c0",
-  "feedName":"OIDCLogoutFeed",
-  "feedUri":
-    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
-  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
-  "deliveryUri":"https://notify.examplerp.com/Events",
-  "aud":"https://sets.myexamplerp.com",
-  "subStatus":"verify",
-  "maxDeliveryTime":3600,
-  "minDeliveryInterval":0,
-  "description":"Logout events from oidc.example.com",
-  "meta":{
-     ... SCIM meta attributes ...
-  }
-}</artwork>
-        </figure>
-      </section>
-      
-      <section anchor="patchSub" title="Updating An Event Stream">
-        <t>Periodically, Event Receivers MAY have need to update an
-        Event Stream configuration for the purpose of:<list style="symbols">
-        <t>Rotating access credentials or keys</t>
-        <t>Updating endpoint configuration</t>
-        <t>Making operational changes such as pausing, resetting, or 
-        disabling an Event Stream.</t>
-        <t>Other operations (e.g. such as adding or removing subjects)
-        as defined by profiling Event specifications.</t></list></t>
-        <t>To modify an EventStream, an Event Receiver or authorized management
-        client MAY use the HTTP PUT operation (see <xref target="RFC7644">Section 3.5.1</xref>) 
-        or MAY use the HTTP PATCH operation (see <xref target="RFC7644">Section 3.5.2</xref>) 
-        if supported by the Event Transmitter's control plane service. 
-        Note that HTTP PATCH enables more specific changes. This is particularly 
-        useful when updating multi-valued attributes that may contain 
-        large numbers of values. An example of this would be an EventStream
-        that uses a <spanx style="verb">members</spanx> attribute to define the 
-        subjects of the Event Stream.</t>
-        
-        <figure anchor="subscriptionPatch" title="Example EventStream PATCH Request">
-        <preamble>In the following non-normative example, the client
-        is requesting that <spanx style="verb">subStatus</spanx> be 
-        changed to <spanx style="verb">paused</spanx> for the EventStream
-        whose path is identified by the request URI path.</preamble>
-<artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
-Host: example.com
-Accept: application/scim+json
-Content-Type: application/scim+json
-Authorization: Bearer h480djs93hd8
-
-{
-  "schemas":
-    ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
-  "Operations": [{
-    "op":"replace",
-    "path":"subStatus",
-    "value":"paused"
-  }]
-}
-
-</artwork>
-<postamble>Upon receiving the request, the Event Transmitter would stop
-sending Events to the Receiver. Note that while the request MAY seem complex
-it avoids the need for the requestor to have all of the current EventStream
-values in order to make a PUT request. In other words, an HTTP PATCH can
-be typically done in a single request response whereas an HTTP POST usually
-is preceded by an HTTP GET.</postamble>
-            </figure>
-      </section>      
-    </section>
+  
   </section>
    
   <section title="Data Plane">
@@ -1103,7 +908,227 @@ Content-Type: application/json
      </section>
    </section>
 			
-   <section anchor="Security" title="Security Considerations" toc="default">
+   <section anchor="streamManagement" title="Control Plane - Management and Provisioning">
+      <t>This section describes how SCIM <xref target="RFC7644" />
+      and <xref target="RFC7643" /> MAY be used to add
+      create, read, update, delete capability to the Control Plane to enable
+      provisioning and operational management of Event Streams. In addition
+      to provisioning of Event Streams, it can also be used by Event
+      Receivers to change or reset the operational state of Event Streams
+      such as pausing, stopping, or re-enabling after a failure. </t>
+      
+      <t>SCIM is a protocol used by many security systems 
+      for provisioning and co-ordinating identities and other security
+      subjects in cross-domain scenarios. SCIM is a RESTful profile of
+      HTTP that is intended to be implemented by applications that need 
+      provisioning and management of security subjects and is ideal to 
+      the task of provisioning related security event signal
+      systems. Examples of provisioning endpoints (SCIM service providers) 
+      include both Identity Providers and Relying Party applications (e.g. business and 
+      consumer web applications) as well as security and authorization 
+      infrastructure components.</t>
+      
+      <t>[[Editors Note:  At the time of writing, some groups feel a CRUD API is not required and 
+      participants would prefer to manage streams using an out-of-band workflow approach.]]</t>
+          
+      <section title="Event Stream Resource Type Definition">
+      
+        <t>To extend SCIM to support Event Streams, requires defining
+        an <spanx style="verb">EventStream</spanx> SCIM resource type, 
+        and implementing the corresponding RESTful HTTP operations to create, 
+        update, retrieve EventStream Resources. For SCIM service provider capability 
+        and schema discovery (see <xref target="RFC7644">Sections 3 and 4</xref>).</t>   
+        
+        <t>The <spanx style="verb">EventStream</spanx> resource type definition 
+        is defined as follows:
+<figure anchor="subscriptionType" title="SCIM EventStream Resource Type Definition">
+<artwork>{
+  "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
+  "id": "EventStream",
+  "name": "EventStream",
+  "endpoint": "/EventStreams",
+  "description": "Endpoint and event configuration and status for SEC EVENT streams.",
+  "schema": "urn:ietf:params:scim:schemas:event:2.0:EventStream",
+  "schemaExtensions": []
+}</artwork>
+<postamble>The resource type above is discoverable in the 
+<spanx style="verb">/ResourceTypes</spanx> and informs SCIM clients about
+the endpoint location of EventStream resources and the SCIM schema used
+to define the resource.  The corresponding schema for the EventStream
+resource MAY be retrieved from the SCIM <spanx style="verb">/Schemas</spanx> 
+endpoint (see <xref target="RFC7644">Section 3.2</xref>).</postamble>
+        </figure>
+        </t>
+        <t>To retrieve information about one or more Event Streams, 
+        authorized clients MAY query the 
+        <spanx style="verb">/EventStreams</spanx> endpoint 
+        as defined in <xref target="RFC7644">Section 3.4</xref>.</t>
+        
+<figure anchor="subscriptionGetRequest" title="Example SCIM EventStream HTTP GET Request">
+            <preamble>The example below retrieves a specific <spanx style="verb">EventStream</spanx> resource whose 
+            <spanx style="verb">id</spanx> is <spanx style="verb">548b7c3f77c8bab33a4fef40</spanx>.</preamble>
+            <artwork>GET /EventStreams/767aad7853d240debc8e3c962051c1c0
+Host: example.com
+Accept: application/json
+Authorization: Bearer h480djs93hd8</artwork>
+</figure>
+
+<figure anchor="subscriptionResponse" title="Example EventStream HTTP GET Response">
+            <preamble>The response below shows an example Feed resource
+            that describes an available feed.</preamble>
+            <artwork>HTTP/1.1 200 OK
+Content-Type: application/json
+Location: 
+ https://example.com/v2/EventStreams/767aad7853d240debc8e3c962051c1c0
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
+  "id":"767aad7853d240debc8e3c962051c1c0",
+  "feedName":"OIDCLogoutFeed",
+  "feedUri":
+    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
+  "aud":"https://sets.myexamplerp.com",
+  "subStatus":"verify",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "description":"Logout events from oidc.example.com",
+  "meta":{
+     ... SCIM meta attributes ...
+  }
+}</artwork>
+</figure>
+            
+        <t>In the above example (<xref target="subscriptionResponse" />)
+        the EventStream is for the the Feed  
+        <spanx style="verb">https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74</spanx>.
+        The current Event Stream state is <spanx style="verb">verify</spanx>
+        which suggest the Event Stream Verification (see <xref target="verifyStream" />) process has not yet 
+        completed. Since there is no value for <spanx style="verb">feedJwk</spanx>, )
+        or <spanx style="verb">confidentialJwk</spanx>, SETs will be
+        sent without signing or encryption (plain text).</t>          
+      </section>
+      
+      <section anchor="createSub" title="Creating A New Event Stream">
+        <t>To subscribe to a feed, the Event Receiver first obtains 
+        an authorization credential authorizing to to make the request
+        (this process is out of scope of the specification but is often
+        completed through OAuth). Upon obtaining authorization, the 
+        Event Receiver organization uses the SCIM Create operation
+        (HTTP POST) as defined in <xref target="RFC7644">Section 3.3</xref>.
+        Event Transmitter's Control Plane service MAY have additional 
+        schema requirements for Event Stream creation which MAY be 
+        discovered using SCIM service configuration and schema discovery, 
+        see <xref target="RFC7644">Section 4</xref>.
+        </t>
+        <figure anchor="createSubscription" title="Example Create Event Stream Request">
+        <preamble>In the following non-normative example, a new EventStream
+        is created. Note that the Event Transmitter's control-plane automatically
+        assigns the <spanx style="verb">id</spanx> attribute.</preamble>
+ <artwork>POST /EventStreams
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
+  "feedName":"OIDCLogoutFeed",
+  "feedUri":
+    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
+  "aud":"https://sets.myexamplerp.com",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "description":"Logout events from oidc.example.com"
+}</artwork>
+
+        </figure>
+        <figure anchor="createSubscriptionResponse" title="Example Response to Create EventStream Request">
+        <preamble>In following non-normative response, the Event service provider
+        has automatically assigned a resource location as well as an
+        <spanx style="verb">id</spanx>. Usually upon creation, the
+        initial value of <spanx style="verb">subStatus</spanx> is 
+        <spanx style="verb">pending</spanx> indicating that the 
+        Stream Verification process (see <xref target="verifyStream" />) 
+        has not been completed.</preamble>
+<artwork>HTTP/1.1 201 Created
+Content-Type: application/scim+json
+Location: 
+ https://example.com/v2/EventStreams/767aad7853d240debc8e3c962051c1c0
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
+  "id":"767aad7853d240debc8e3c962051c1c0",
+  "feedName":"OIDCLogoutFeed",
+  "feedUri":
+    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
+  "aud":"https://sets.myexamplerp.com",
+  "subStatus":"verify",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "description":"Logout events from oidc.example.com",
+  "meta":{
+     ... SCIM meta attributes ...
+  }
+}</artwork>
+        </figure>
+      </section>
+      
+      <section anchor="patchSub" title="Updating An Event Stream">
+        <t>Periodically, Event Receivers MAY have need to update an
+        Event Stream configuration for the purpose of:<list style="symbols">
+        <t>Rotating access credentials or keys</t>
+        <t>Updating endpoint configuration</t>
+        <t>Making operational changes such as pausing, resetting, or 
+        disabling an Event Stream.</t>
+        <t>Other operations (e.g. such as adding or removing subjects)
+        as defined by profiling Event specifications.</t></list></t>
+        <t>To modify an EventStream, an Event Receiver or authorized management
+        client MAY use the HTTP PUT operation (see <xref target="RFC7644">Section 3.5.1</xref>) 
+        or MAY use the HTTP PATCH operation (see <xref target="RFC7644">Section 3.5.2</xref>) 
+        if supported by the Event Transmitter's control plane service. 
+        Note that HTTP PATCH enables more specific changes. This is particularly 
+        useful when updating multi-valued attributes that may contain 
+        large numbers of values. An example of this would be an EventStream
+        that uses a <spanx style="verb">members</spanx> attribute to define the 
+        subjects of the Event Stream.</t>
+        
+        <figure anchor="subscriptionPatch" title="Example EventStream PATCH Request">
+        <preamble>In the following non-normative example, the client
+        is requesting that <spanx style="verb">subStatus</spanx> be 
+        changed to <spanx style="verb">paused</spanx> for the EventStream
+        whose path is identified by the request URI path.</preamble>
+<artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":
+    ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+  "Operations": [{
+    "op":"replace",
+    "path":"subStatus",
+    "value":"paused"
+  }]
+}
+
+</artwork>
+<postamble>Upon receiving the request, the Event Transmitter would stop
+sending Events to the Receiver. Note that while the request MAY seem complex
+it avoids the need for the requestor to have all of the current EventStream
+values in order to make a PUT request. In other words, an HTTP PATCH can
+be typically done in a single request response whereas an HTTP POST usually
+is preceded by an HTTP GET.</postamble>
+            </figure>
+      </section>      
+    </section><section anchor="Security" title="Security Considerations" toc="default">
 
       <t>[TO BE COMPLETED]</t>
    </section>
