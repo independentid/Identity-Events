@@ -95,7 +95,7 @@
       <t>Security Events are not commands issued between parties. 
       A security event is a statement of fact from the perspective of an 
       issuer about the state of a security subject (e.g., a web 
-      resource, token, IP address, the issuer iteself) that the issuer controls or is aware 
+      resource, token, IP address, the issuer itself) that the issuer controls or is aware 
       of, that has changed in some way (explicitly or implicitly). A 
       security subject MAY be permanent (e.g., a user account) or 
       temporary (e.g., an HTTP session) in nature. A state change could 
@@ -130,7 +130,7 @@
       SETs, security events MUST NOT be assumed to be commands or requests. 
       The intent of this specification is to define a way of exchanging 
       statements of fact that subscribers may interpret for their own
-      purposes. As such, SETs have no capability for error signalling 
+      purposes. As such, SETs have no capability for error signaling 
       other to ensure the validation of a received SET. </t>
 
       <section anchor="notat" title="Notational Conventions" toc="default">
@@ -174,7 +174,7 @@
             some distribution method.  
           </t>
             
-          <t hangText="Subject"><vspace blankLines="0"/>A 
+          <t hangText="Subject"><vspace blankLines="0"/>
             A SET describes an event or state change that has occurred 
             about a Subject. A Subject may be a principal (e.g., 
             <xref target="RFC7519">Section 4.1.2</xref>), a web resource,
@@ -230,7 +230,7 @@
           information (e.g., threat type or level).</t>
           <t>An enhancement of an existing specifications the arise over time.</t>
           <t>An extension needed to link a potential series of events.</t>
-          <t>Localized specific purpose events URI used between a
+          <t>Localized specific purpose event URI used between a
           particular Event Transmitter and Receiver.</t>
         </list></t>
         
@@ -274,9 +274,9 @@
         claim, denoting the Event Transmitter.</t>
         <t>The <spanx style="verb">sub</spanx> claim specifies the SCIM 
         resource URI that was affected.</t>
-        <t>The <spanx style="verb">aud</spanx> claim specifies a JSON array
-        defining the intended audiences for the event. In practical terms, an audience may be 
-        the URI for an event feed that a client has subscribed to (see <xref target="RFC7519">Section 4.1.3</xref>).
+        <t>The <spanx style="verb">aud</spanx> claim specifies the 
+        intended audiences for the event. The syntax of the "aud" claim
+        is defined in <xref target="RFC7519">Section 4.1.3</xref>.
         </t>
       </list></t>
       
@@ -366,10 +366,10 @@
             <spanx style="verb">iss</spanx> value within the event "payload" 
             (see <spanx style="verb">events</spanx> claim). </t>
  
-            <t hangText="aud"><vspace blankLines="0"/>As defined in <xref target="RFC7519">Section 4.1.3</xref>,
-            an array containing the StringOrURI values representing the 
-            audience of the event. Values are typically URLs of
-            the feeds the event is associated with. This claim is RECOMMENDED.</t>
+            <t hangText="aud"><vspace blankLines="0"/>The syntax of the 
+            claim is as defined in <xref target="RFC7519">Section 4.1.3</xref>.
+            This claim MAY contains one or more audience identifiers 
+            for the SET. This claim is RECOMMENDED.</t>
             
             <t hangText="iat"><vspace blankLines="0"/>As defined by <xref target="RFC7519">Section 4.1.6</xref>,
             a value containing a NumericDate, which represents when the 
@@ -436,7 +436,7 @@
       <section anchor="eventMessage" title="Security Event Token Construction">
         <t>A SET is a JWT <xref target="RFC7519"/> that is 
         constructed by building a JSON structure that constitutes an event 
-        object and which is then used as the body of a JWT.</t>
+        object which is then used as the body of a JWT.</t>
         <t>While this specification uses JWT to convey a SET, implementers
         SHALL NOT use SETs to convey authentication or authorization assertions.</t>
 
@@ -518,7 +518,7 @@ Il0KICAgIH0KICB9Cn0
 </artwork>
           </figure></t>
 
-        <t>For the purpose of a simpler example in <xref target="eventToken"/> 
+        <t>For the purpose of a simpler example in <xref target="eventToken"/>, 
         an unencrypted token was shown. When SETs are not signed or
         encrypted, the Event Receiver MUST depend upon TLS and HTTP to 
         authenticate the sender and the security of the channel to 
@@ -799,7 +799,7 @@ Il0KICAgIH0KICB9Cn0
     <!-- <section anchor="Contributors" title="Contributors"/> Uncomment if and when this section is non-empty -->
 
     <section anchor="Acknowledgments" title="Acknowledgments">
-      <t>The editors would like to thanks the members of the SCIM WG which 
+      <t>The editors would like to thank the members of the SCIM WG which 
       began discussions of provisioning events starting with: draft-hunt-scim-notify-00 in 2015.</t>
       <t>The editors would like to thank the participants in the IETF id-event
       mailing list and related working groups for their support of this specification.</t>

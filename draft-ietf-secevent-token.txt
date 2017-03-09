@@ -5,12 +5,12 @@
 Security Events Working Group                               P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                              W. Denniss
-Expires: September 9, 2017                                        Google
+Expires: September 10, 2017                                       Google
                                                                M. Ansari
                                                                    Cisco
                                                                 M. Jones
                                                                Microsoft
-                                                           March 8, 2017
+                                                           March 9, 2017
 
 
                        Security Event Token (SET)
@@ -40,7 +40,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on September 9, 2017.
+   This Internet-Draft will expire on September 10, 2017.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hunt, et al.            Expires September 9, 2017               [Page 1]
+Hunt, et al.           Expires September 10, 2017               [Page 1]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -72,7 +72,7 @@ Table of Contents
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   4
    2.  The Security Event Token (SET)  . . . . . . . . . . . . . . .   5
      2.1.  Core SET Claims . . . . . . . . . . . . . . . . . . . . .   8
-     2.2.  Security Event Token Construction . . . . . . . . . . . .  10
+     2.2.  Security Event Token Construction . . . . . . . . . . . .   9
    3.  Security Considerations . . . . . . . . . . . . . . . . . . .  11
      3.1.  Confidentiality and Integrity . . . . . . . . . . . . . .  12
      3.2.  Delivery  . . . . . . . . . . . . . . . . . . . . . . . .  12
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Hunt, et al.            Expires September 9, 2017               [Page 2]
+Hunt, et al.           Expires September 10, 2017               [Page 2]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -122,7 +122,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
    Security Events are not commands issued between parties.  A security
    event is a statement of fact from the perspective of an issuer about
    the state of a security subject (e.g., a web resource, token, IP
-   address, the issuer iteself) that the issuer controls or is aware of,
+   address, the issuer itself) that the issuer controls or is aware of,
    that has changed in some way (explicitly or implicitly).  A security
    subject MAY be permanent (e.g., a user account) or temporary (e.g.,
    an HTTP session) in nature.  A state change could describe a direct
@@ -158,14 +158,14 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
    security events MUST NOT be assumed to be commands or requests.  The
    intent of this specification is to define a way of exchanging
    statements of fact that subscribers may interpret for their own
-   purposes.  As such, SETs have no capability for error signalling
-   other to ensure the validation of a received SET.
+   purposes.  As such, SETs have no capability for error signaling other
+   to ensure the validation of a received SET.
 
 
 
 
 
-Hunt, et al.            Expires September 9, 2017               [Page 3]
+Hunt, et al.           Expires September 10, 2017               [Page 3]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -207,8 +207,8 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
       distribution method.
 
    Subject
-      A A SET describes an event or state change that has occurred about
-      a Subject.  A Subject may be a principal (e.g., Section 4.1.2
+      A SET describes an event or state change that has occurred about a
+      Subject.  A Subject may be a principal (e.g., Section 4.1.2
       [RFC7519]), a web resource, an entity such as an IP address, or
       the issuer itself that a SET might reference.
 
@@ -221,7 +221,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
 
 
-Hunt, et al.            Expires September 9, 2017               [Page 4]
+Hunt, et al.           Expires September 10, 2017               [Page 4]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -269,7 +269,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
       *  An extension needed to link a potential series of events.
 
-      *  Localized specific purpose events URI used between a particular
+      *  Localized specific purpose event URI used between a particular
          Event Transmitter and Receiver.
 
 
@@ -277,7 +277,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
 
 
-Hunt, et al.            Expires September 9, 2017               [Page 5]
+Hunt, et al.           Expires September 10, 2017               [Page 5]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -320,10 +320,9 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
    o  The "sub" claim specifies the SCIM resource URI that was affected.
 
-   o  The "aud" claim specifies a JSON array defining the intended
-      audiences for the event.  In practical terms, an audience may be
-      the URI for an event feed that a client has subscribed to (see
-      Section 4.1.3 [RFC7519]).
+   o  The "aud" claim specifies the intended audiences for the event.
+      The syntax of the "aud" claim is defined in Section 4.1.3
+      [RFC7519].
 
    In this example, the SCIM event indicates that a password has been
    updated and the current password reset count is 5.  Notice that the
@@ -333,7 +332,8 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
 
 
-Hunt, et al.            Expires September 9, 2017               [Page 6]
+
+Hunt, et al.           Expires September 10, 2017               [Page 6]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -389,7 +389,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
 
 
-Hunt, et al.            Expires September 9, 2017               [Page 7]
+Hunt, et al.           Expires September 10, 2017               [Page 7]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -424,10 +424,9 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
       claim).
 
    aud
-      As defined in Section 4.1.3 [RFC7519], an array containing the
-      StringOrURI values representing the audience of the event.  Values
-      are typically URLs of the feeds the event is associated with.
-      This claim is RECOMMENDED.
+      The syntax of the claim is as defined in Section 4.1.3 [RFC7519].
+      This claim MAY contains one or more audience identifiers for the
+      SET.  This claim is RECOMMENDED.
 
    iat
       As defined by Section 4.1.6 [RFC7519], a value containing a
@@ -441,17 +440,15 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
       interpreted to mean a date in which the event is believed to have
       occurred (in the past) or will occur in the future.  Note: there
       MAY be some cases where "nbf" is still smaller than "iat" such as
+      when it took an extended time for a SET to be issued (for example
+      after some analysis).  This claim is OPTIONAL.
 
 
 
-
-Hunt, et al.            Expires September 9, 2017               [Page 8]
+Hunt, et al.           Expires September 10, 2017               [Page 8]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
-
-      when it took an extended time for a SET to be issued (for example
-      after some analysis).  This claim is OPTIONAL.
 
    sub  As defined by Section 4.1.2 [RFC7519], a String or URI value
       representing the principal or the subject of the SET.  This is
@@ -495,22 +492,19 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
       different event URIs, the transaction identifier MAY be used to
       correlate SETs to the same originating event or stateful change.
 
-
-
-
-
-
-
-Hunt, et al.            Expires September 9, 2017               [Page 9]
-
-Internet-Draft          draft-ietf-secevent-token             March 2017
-
-
 2.2.  Security Event Token Construction
 
    A SET is a JWT [RFC7519] that is constructed by building a JSON
-   structure that constitutes an event object and which is then used as
-   the body of a JWT.
+   structure that constitutes an event object which is then used as the
+   body of a JWT.
+
+
+
+
+Hunt, et al.           Expires September 10, 2017               [Page 9]
+
+Internet-Draft          draft-ietf-secevent-token             March 2017
+
 
    While this specification uses JWT to convey a SET, implementers SHALL
    NOT use SETs to convey authentication or authorization assertions.
@@ -557,7 +551,13 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
 
 
-Hunt, et al.            Expires September 9, 2017              [Page 10]
+
+
+
+
+
+
+Hunt, et al.           Expires September 10, 2017              [Page 10]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -594,10 +594,10 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
              Figure 5: Example Unsecured Security Event Token
 
-   For the purpose of a simpler example in Figure 5 an unencrypted token
-   was shown.  When SETs are not signed or encrypted, the Event Receiver
-   MUST depend upon TLS and HTTP to authenticate the sender and the
-   security of the channel to authenticate the SET and its sender.
+   For the purpose of a simpler example in Figure 5, an unencrypted
+   token was shown.  When SETs are not signed or encrypted, the Event
+   Receiver MUST depend upon TLS and HTTP to authenticate the sender and
+   the security of the channel to authenticate the SET and its sender.
 
    When validation (i.e. auditing), or additional transmission security
    is required, JWS Signing and JWS Encryption MAY be used.  To create
@@ -613,7 +613,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
 
 
-Hunt, et al.            Expires September 9, 2017              [Page 11]
+Hunt, et al.           Expires September 10, 2017              [Page 11]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -669,7 +669,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
 
 
-Hunt, et al.            Expires September 9, 2017              [Page 12]
+Hunt, et al.           Expires September 10, 2017              [Page 12]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -725,7 +725,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
 
 
-Hunt, et al.            Expires September 9, 2017              [Page 13]
+Hunt, et al.           Expires September 10, 2017              [Page 13]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -781,7 +781,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
 
 
-Hunt, et al.            Expires September 9, 2017              [Page 14]
+Hunt, et al.           Expires September 10, 2017              [Page 14]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -837,7 +837,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
 
 
-Hunt, et al.            Expires September 9, 2017              [Page 15]
+Hunt, et al.           Expires September 10, 2017              [Page 15]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -870,7 +870,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
 Appendix A.  Acknowledgments
 
-   The editors would like to thanks the members of the SCIM WG which
+   The editors would like to thank the members of the SCIM WG which
    began discussions of provisioning events starting with: draft-hunt-
    scim-notify-00 in 2015.
 
@@ -893,7 +893,7 @@ Appendix B.  Change Log
 
 
 
-Hunt, et al.            Expires September 9, 2017              [Page 16]
+Hunt, et al.           Expires September 10, 2017              [Page 16]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -949,7 +949,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2017
 
 
 
-Hunt, et al.            Expires September 9, 2017              [Page 17]
+Hunt, et al.           Expires September 10, 2017              [Page 17]
 
 Internet-Draft          draft-ietf-secevent-token             March 2017
 
@@ -1005,4 +1005,4 @@ Authors' Addresses
 
 
 
-Hunt, et al.            Expires September 9, 2017              [Page 18]
+Hunt, et al.           Expires September 10, 2017              [Page 18]
