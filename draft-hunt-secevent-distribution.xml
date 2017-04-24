@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-hunt-secevent-distribution-01"
+<rfc category="std" docName="draft-hunt-secevent-distribution-02"
 	ipr="trust200902">
 	<front>
 		<title abbrev="draft-hunt-secevent-distribution">
@@ -305,20 +305,29 @@
               SETs are received (e.g. via HTTP POST). Its format and usage requirements are 
               defined by the associated <spanx style="verb">methodUri</spanx>.</t>
 
+              <t hangText="iss"><vspace/>The URI for the publisher of the SETs 
+              that will be issued for the Event Stream. See 
+              <xref target="I-D.ietf-secevent-token">Section 2.1</xref>.
+              [[Editors Note: Are multiple publishers expected for the same
+              stream? Should iss be multi-valued?]]</t>
+              
               <t hangText="aud"><vspace blankLines="0" />An OPTIONAL 
               JSON Array of JSON String values which are URIs representing 
               the audience(s) of the Event Stream. The value SHALL be the value 
               of SET "aud" claim sent to the Event Receiver.
               </t>
 
-              <t hangText="feedJwk"><vspace blankLines="0" />An OPTIONAL 
-              public JSON Web Key (see <xref target="RFC7517" />) from 
-              the Event Transmitter that will be used by the Event 
+              <t hangText="iss_jwks_uri"><vspace blankLines="0" />An OPTIONAL 
+              String that contains the URL of the SET issuers public JSON 
+              Web Key Set <xref target="RFC7517"></xref>. This contains 
+              the signing key(s) the RP uses to validate SET signatures
+              from the Event Transmitter that will be used by the Event 
               Receiver to verify the authenticity of issued SETs. </t>
 
-              <t hangText="confidentialJwk"><vspace blankLines="0" />An OPTIONAL 
-              public JSON Web Key (see <xref target="RFC7517" />) for the
-              Event Receiver that MAY be used by the Feed Provider to 
+              <t hangText="confidential_Jwks_uri"><vspace blankLines="0" />An OPTIONAL 
+              JSON Web Key Set <xref target="7517"/> that contains the 
+              Event Receiver's encryption keys that MAY be used by the 
+              Event Transmitter to 
               encrypt SET tokens for the specified Event Receiver.</t>
 
               <t hangText="subStatus"><vspace blankLines="0" />An OPTIONAL 
@@ -420,8 +429,6 @@
             <t>Additional Event Stream metadata (attributes) MAY be defined
             as extensions. The method for adding new attributes is defined in 
             <xref target="RFC7643">Section 3.3</xref>.</t>
-            
-            
         </section>
         
         <section anchor="subState" title="Event Stream State Model">
@@ -775,7 +782,7 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
           <ttcol>Err Value</ttcol><ttcol>Description</ttcol>
           <c>jwtParse</c><c>Invalid or unparsable JWT or JSON structure.</c>
           <c>jwtHdr</c><c>In invalid JWT header was detected.</c>
-          <c>jwtCypto</c><c>Unable to parse due to unsupported algorithm.</c>
+          <c>jwtCrypto</c><c>Unable to parse due to unsupported algorithm.</c>
           <c>jws</c><c>Signature was not validated.</c>
           <c>jwe</c><c>Unable to decrypt JWE encoded data.</c>
           <c>jwtAud</c><c>Invalid audience value.</c>
@@ -1236,6 +1243,10 @@ is preceded by an HTTP GET.</postamble>
         <t>Reworked sections into Data Plane vs. Control Plane</t>
         <t>Removed method transmission registry in order to simplify the specification</t>
         <t>Made Create, Update operations optional for Control Plane (Read is MTI)</t>
+      </list></t>
+      <t>Draft 02 - PH <list style="symbols">
+        <t>Added iss metadata for Event Stream</t>
+        <t>Changed to using JWKS_uri for issuer and receiver.</t>
       </list></t>
       
     </section>

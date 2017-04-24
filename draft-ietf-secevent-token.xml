@@ -368,7 +368,7 @@
  
             <t hangText="aud"><vspace blankLines="0"/>The syntax of the 
             claim is as defined in <xref target="RFC7519">Section 4.1.3</xref>.
-            This claim MAY contains one or more audience identifiers 
+            This claim contains one or more audience identifiers 
             for the SET. This claim is RECOMMENDED.</t>
             
             <t hangText="iat"><vspace blankLines="0"/>As defined by <xref target="RFC7519">Section 4.1.6</xref>,
