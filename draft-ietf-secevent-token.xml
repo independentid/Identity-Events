@@ -485,16 +485,14 @@
             follows:</preamble>
 
             <artwork>
-e3sgIAogICJqdGkiOiAiNGQzNTU5ZWM2NzUwNGFhYmE2NWQ0MGIwMzYzZmFhZDgiLAog
-ICJpYXQiOiAxNDU4NDk2NDA0LAogICJpc3MiOiAiaHR0cHM6Ly9zY2ltLmV4YW1wbGUu
-Y29tIiwgIAogICJhdWQiOiBbCiAgICJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vRmVl
-ZHMvOThkNTI0NjFmYTViYmM4Nzk1OTNiNzc1NCIsCiAgICJodHRwczovL3NjaW0uZXhh
-bXBsZS5jb20vRmVlZHMvNWQ3NjA0NTE2YjFkMDg2NDFkNzY3NmVlNyIKICBdLCAgCiAg
-CiAgImV2ZW50cyI6IHsKICAgICJ1cm46aWV0ZjpwYXJhbXM6c2NpbTpldmVudDpjcmVh
-dGUiOiB7CiAgICAgICJyZWYiOgogICAgICAgICJodHRwczovL3NjaW0uZXhhbXBsZS5j
-b20vVXNlcnMvNDRmNjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIsCiAgICAgICJhdHRyaWJ1
-dGVzIjpbImlkIiwgIm5hbWUiLCAidXNlck5hbWUiLCAicGFzc3dvcmQiLCAiZW1haWxz
-Il0KICAgIH0KICB9Cn0</artwork>
+eyJqdGkiOiI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIsImlhdCI6MTQ1
+ODQ5NjQwNCwiaXNzIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwiYXVkIjpbImh0
+dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M2I3
+NzU0IiwiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIxZDA4
+NjQxZDc2NzZlZTciXSwiZXZlbnRzIjp7InVybjppZXRmOnBhcmFtczpzY2ltOmV2ZW50
+OmNyZWF0ZSI6eyJyZWYiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRm
+NjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIsImF0dHJpYnV0ZXMiOlsiaWQiLCJuYW1lIiwi
+dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19</artwork>
           </figure>
           <figure anchor="eventToken"
             title="Example Unsecured Security Event Token">
@@ -502,19 +500,15 @@ Il0KICAgIH0KICB9Cn0</artwork>
             Concatenating the parts yields:</preamble>
 
             <artwork>
-eyJhbGciOiJub25lIn0
-.
-e3sgIAogICJqdGkiOiAiNGQzNTU5ZWM2NzUwNGFhYmE2NWQ0MGIwMzYzZmFhZDgiLAog
-ICJpYXQiOiAxNDU4NDk2NDA0LAogICJpc3MiOiAiaHR0cHM6Ly9zY2ltLmV4YW1wbGUu
-Y29tIiwgIAogICJhdWQiOiBbCiAgICJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vRmVl
-ZHMvOThkNTI0NjFmYTViYmM4Nzk1OTNiNzc1NCIsCiAgICJodHRwczovL3NjaW0uZXhh
-bXBsZS5jb20vRmVlZHMvNWQ3NjA0NTE2YjFkMDg2NDFkNzY3NmVlNyIKICBdLCAgCiAg
-CiAgImV2ZW50cyI6IHsKICAgICJ1cm46aWV0ZjpwYXJhbXM6c2NpbTpldmVudDpjcmVh
-dGUiOiB7CiAgICAgICJyZWYiOgogICAgICAgICJodHRwczovL3NjaW0uZXhhbXBsZS5j
-b20vVXNlcnMvNDRmNjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIsCiAgICAgICJhdHRyaWJ1
-dGVzIjpbImlkIiwgIm5hbWUiLCAidXNlck5hbWUiLCAicGFzc3dvcmQiLCAiZW1haWxz
-Il0KICAgIH0KICB9Cn0
-.
+eyJhbGciOiJOT05FIn0.
+eyJqdGkiOiI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIsImlhdCI6MTQ1
+ODQ5NjQwNCwiaXNzIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwiYXVkIjpbImh0
+dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M2I3
+NzU0IiwiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIxZDA4
+NjQxZDc2NzZlZTciXSwiZXZlbnRzIjp7InVybjppZXRmOnBhcmFtczpzY2ltOmV2ZW50
+OmNyZWF0ZSI6eyJyZWYiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRm
+NjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIsImF0dHJpYnV0ZXMiOlsiaWQiLCJuYW1lIiwi
+dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19. 
 </artwork>
           </figure></t>
 
@@ -856,6 +850,10 @@ Il0KICAgIH0KICB9Cn0
         <t>Changed terminology away from pub-sub to transmitter/receiver based on WG feedback</t>
         <t>Cleaned up/removed some text about extensions (now only used as example)</t>
         <t>Clarify purpose of spec vs. future profiling specs that define actual events</t>
+      </list></t>
+      <t>Draft 02 - PH - Changes as follows:<list style="symbols">
+        <t>Corrected encoded claim example on page 10</t>
+        <t></t>
       </list></t>
     </section>
   </back>
