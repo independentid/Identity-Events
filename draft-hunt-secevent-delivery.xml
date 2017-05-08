@@ -54,14 +54,9 @@
       <t>
         This specification defines how a stream of SETs (see <xref target="I-D.ietf-secevent-token"/>)
         can be transmitted to a previously registered 
-        Event Receiver using HTTP POST <xref target="RFC7231"/>
-        over TLS. The specification defines the metadata the Event Transmitter
-        uses to describe the Event Receiver's HTTP endpoint and the SET token 
-        delivery configuration. The specification defines how
-        the Event Receiver may check the current configuration metadata 
-        and delivery status using HTTP GET over TLS. The specification 
-        also defines how delivery can be assured subject to the SET 
-        Token Receiver's need for assurance. 
+        Event Receiver using HTTP <xref target="RFC7231"/>
+        over TLS. The specification defines a method to push SETs via 
+        HTTP POST and to poll for SETs using HTTP GET. 
       			</t>
 
 			<figure anchor="notificationStream" title="SET Event Stream">
@@ -108,18 +103,16 @@
 |           +----------------------->            |
 +-----------+         Control Plane +------------+
       </artwork></figure>
-      <t>This specification contains two major sections:<list style="hanging">
-        <t hangText="Control Plane">The service through which Event 
-        Receivers can review and optionally managed Event Streams. 
-        It defines the metadata associated with Event Streams along 
-        with stream status reporting.</t>
-        <t hangText="Data Plane">Through which SET Events are
-        delivered by an Event Transmitter to an Event Receiver using 
-        a defined Event Stream. The Data Plane includes a verification 
-        process which tests and validates Event Stream configuration. 
-        The Data plan defines processing and error 
-        signaling used in the delivery of SETs.</t>
-      </list> </t>
+      <t>This specification defines the "Data Plane", through which SET 
+        Events are delivered by an Event Transmitter to an Event Receiver using 
+        a pre-defined Event Stream configuration. The Data Plane includes 
+        a verification process which tests and validates Event Stream configuration. 
+        The Data plan defines processing and error signaling used in the delivery of SETs.</t>
+        
+      <t>This specification does not define the "Control Plane", the API
+      through which Streams are defined, provisioned, managed, monitored,
+      and configured. [[This work is TBD by the SECEVENTS WG]]</t>
+      
       
 
 			<section anchor="notat" title="Notational Conventions" toc="default">
@@ -237,6 +230,10 @@
               IP address, an OAuth Client, a mobile device, or any identifiable
               thing referenced in security and authorization systems.
             </t>
+            
+            <t hangText="Event"><vspace/>An event is defined to be an 
+            event as represented by a security event token (SET).
+            See <xref target="I-D.ietf-secevent-token"/>.</t>
 
 					</list>
 				</t>
@@ -248,7 +245,7 @@
     series of SETs are delivered to a configured Event Receiver otherwise
     known as an Event Stream.</t>
     <section anchor="process" title="Event Delivery Process">
-			<t>When a Security Event occurs, the Feed Provider constructs a SET
+			<t>When an Event occurs, the Feed Provider constructs a SET
       token <xref target="I-D.ietf-secevent-token" /> that describes the	
       event. The SET issuer determines the Event Streams over which the
       SET should be distributed to.</t>
@@ -265,6 +262,8 @@
 				<t>The Event Transmitter uses an HTTP/1.1 POST to the Event 
         Receiver endpoint to deliver the SET;
 			  </t>
+        <t>The Event Transmitter queues up the SET in a buffer so that
+        an Event Receiver MAY poll for SETs using HTTP/1.1 GET.</t>
 
 			  <t>Or, the Feed Transmitter delivers the event through a different
         method not defined by this specification.
@@ -272,7 +271,7 @@
 			</list>
 			</t>
       
-      <t>Delivery of SETs MAY be delivered using one of two formats:
+      <t>Delivery of SETs MAY be delivered using one of two content formats:
       <list style="hanging">
         <t hangText="Single Event(application/jwt)"><vspace/>Where SETs are delivered
         one at a time (e.g. such as typical with HTTP POST) where the
@@ -285,47 +284,64 @@
         methods that poll based on a timeout or schedule (e.g. HTTP GET).</t>
       </list></t>
 
-			<t>Until successful delivery, Feed Transmitters SHALL NOT be 
-      required to main or record SETs. As such, transmitted SETs SHOULD 
-      be self-validating (e.g. signed).
+			<t>After successful delivery of SETs, Feed Transmitters SHOULD NOT be 
+      required to maintain or record SETs for recovery. Once a SET is 
+      delivered, the Event Receiver SHALL be responsible for retention
+      and recovery.</t>
+      
+      <t>Transmitted SETs SHOULD be self-validating (e.g. signed)
+      in order to verify they were issued by the Event Transmitter at a
+      later date when de-coupled from the original delivery via HTTP
+      where authenticity could be checked via the HTTP or 
+      TLS mutual authentication.
 			</t>
 
 			<t>
-				If delivery to any particular Event Receiver has been delayed for
-				an extended period of time, the Feed Transmitter MAY suspend the
-        affected Event Stream and even stop maintaining outstanding SETs for
-				the Event Receiver at its discretion and available resources. See Event Stream
-				<spanx style="verb">subState</spanx> in <xref target="subscribeMetadata" />.
+			If delivery to any particular Event Receiver has been delayed for
+			an extended period of time, the Feed Transmitter MAY suspend the
+      affected Event Stream and even stop maintaining outstanding SETs for
+			the Event Receiver at its discretion and available resources. The
+      method by which the Event Receiver discovers and recovers these 
+      SETs is out of scope of this specification.
 			</t>
 
 			<t>
-				Upon receiving a SET, the Event Receiver reads the SET and validates 
-        it. Based upon the content of the token, the Event Receiver decides what, 
-        if any, action needs to be taken in response to the received SET. For 
-        example, in response to a SCIM provisioning event <xref target="idevent-scim" /> 
-        indicating a changed resource, the Event Receiver might perform a 
-        SCIM GET request (see <xref target="RFC7644">Section 3.4</xref>)
-				to the affected resource URI in order to confidentially obtain 
-        the current state of the transmitter's affected SCIM resource in 
-        order to reconcile local corresponding state changes. 
+			Upon receiving a SET, the Event Receiver reads the SET and validates 
+      it. The receiver MUST then inform the Event transmitter, using the 
+      defined method of any authentication, configuration, parsing or JWT
+      validation errors that occur.</t>
+      
+      <t>
+      Based upon the content of the token, the Event Receiver decides what, 
+      if any, action needs to be taken in response to the received SET. For 
+      example, in response to a SCIM provisioning event <xref target="idevent-scim" /> 
+      indicating a changed resource, the Event Receiver might perform a 
+      SCIM GET request (see <xref target="RFC7644">Section 3.4</xref>)
+			to the affected resource URI in order to confidentially obtain 
+      the current state of the transmitter's affected SCIM resource in 
+      order to reconcile local corresponding state changes. 
       </t>
         
       <t>
-        The action a Event Receiver takes in response to a SET MAY be 
-        substantially different than merely copying the action of the 
-        SET issuer. 
-        A single SET can trigger one or more receiver actions or
-        it can be ignored. For example, upon receiving 
-        notification that a user resource has been added to a group, the 
-        Event Receiver may first determine that the user does not exist in the 
-        Event Receiver's domain. The Event Receiver translates the event into two 
-        actions:<list style="numbers">
-          <t>Retrieve the user (e.g. using SCIM GET) and then provisions 
-          the user locally. After enabling the user,</t>
-          <t>The Event Receiver then enables the user for the application 
+      The action a Event Receiver takes in response to a SET MAY be 
+      substantially different than merely copying the action of the 
+      SET issuer. 
+      A single SET can trigger one or more receiver actions or
+      it can be ignored. For example, upon receiving 
+      notification that a user resource has been added to a group, the 
+      Event Receiver may first determine that the user does not exist in the 
+      Event Receiver's domain. The Event Receiver translates the event into two 
+      actions:<list style="numbers">
+        <t>Retrieve the user (e.g. using SCIM GET) and then provisions 
+        the user locally. After enabling the user,</t>
+        <t>The Event Receiver then enables the user for the application 
         associated with membership in the issuer's group.</t>
         </list>  
 			</t>    
+      
+      <t>The Event Receiver SHALL NOT use the Event acknowledgement mechanism
+      to report Event errors other than related to the validation and 
+      parsing of the SET token itself.</t>
   </section>
   
      <section anchor="httpPost" title="HTTP POST Delivery">
