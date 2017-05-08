@@ -1,0 +1,666 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type='text/xsl' href='http://xml.resource.org/authoring/rfc2629.xslt' ?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<?rfc toc="yes"?>
+<?rfc tocompact="yes"?>
+<?rfc tocdepth="3"?>
+<?rfc tocindent="yes"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc comments="yes"?>
+<?rfc inline="yes"?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+<rfc category="std" docName="draft-hunt-secevent-delivery-00"
+	ipr="trust200902">
+	<front>
+		<title abbrev="draft-hunt-secevent-distribution">
+			SET Token Delivery Using HTTP</title>
+
+		<author fullname="Phil Hunt" initials="P." role="editor"
+			surname="Hunt">
+			<organization abbrev="Oracle">Oracle Corporation</organization>
+
+			<address>
+				<email>phil.hunt@yahoo.com</email>
+			</address>
+		</author>
+    
+    <author fullname="Marius Scurtescu" initials="M.S." surname="Scurtescu">
+      <organization abbrev="Google">Google</organization>
+
+      <address>
+        <email>mscurtescu@google.com</email>
+      </address>
+    </author>
+
+		<date year="2017" />
+
+		<keyword>Internet-Draft</keyword>
+
+		<abstract>
+			<t>
+				This specification defines how a series of security event tokens 
+        (SETs) may be delivered to a previously registered receiver 
+        using HTTP GET or POST over TLS. The specification also defines how delivery 
+        can be assured subject to the SET Token Receiver's need for assurance.
+        </t>
+		</abstract>
+	</front>
+
+	<middle>
+		<section anchor="intro" title="Introduction and Overview" toc="default">
+			
+      <t>
+        This specification defines how a stream of SETs (see <xref target="I-D.ietf-secevent-token"/>)
+        can be transmitted to a previously registered 
+        Event Receiver using HTTP POST <xref target="RFC7231"/>
+        over TLS. The specification defines the metadata the Event Transmitter
+        uses to describe the Event Receiver's HTTP endpoint and the SET token 
+        delivery configuration. The specification defines how
+        the Event Receiver may check the current configuration metadata 
+        and delivery status using HTTP GET over TLS. The specification 
+        also defines how delivery can be assured subject to the SET 
+        Token Receiver's need for assurance. 
+      			</t>
+
+			<figure anchor="notificationStream" title="SET Event Stream">
+          <preamble>The following diagram shows a typical SET Event 
+          Stream. A stream consists of a pair of HTTP endpoints, one for 
+          the event stream transmitter and one for the receiver. The 
+          receiver endpoint is used by the transmitter to deliver SET 
+          events via HTTPS POST and is known as the "Data Plane". The 
+          transmitter's HTTP endpoint is used by the receiver to perform 
+          HTTPS GET requests to check the stream status and is known as 
+          the "Control Plane". In the diagram, the arrow heads point
+        to the service provider (the direction of an HTTP request):</preamble>
+					<artwork align="center">
++-----------+ Data Plane            +----------+
+|Transmitter+------HTTP POST--------> Receiver |
+|           &lt;------HTTP GET---------+          |
++-----------+         Control Plane +----------+
+</artwork>
+        <postamble></postamble>
+			</figure>
+      <figure anchor="notificationIDP" title="Duplexed Streams"><preamble>
+        In some service provider relationships, for example between 
+        Identity Providers and Relying Parties, there may be a need to 
+        have bi-directional SET event exchange. This involves 
+        establishing a second event stream that works with transmitter 
+        and receiver roles reversed.
+      </preamble>
+      <artwork align="center">
+  Identity                             Relying
+  Provider                             Party
+
+                 IDP to RP Stream
+
++-----------+ Data Plane            +------------+
+|Transmitter+-----------------------> Receiver   |
+|           &lt;-----------------------+            |
++-----------+         Control Plane +------------+
+
+
+                 RP to IDP Stream
+
++-----------+ Data Plane            +------------+
+| Receiver  &lt;-----------------------+ Transmitter|
+|           +----------------------->            |
++-----------+         Control Plane +------------+
+      </artwork></figure>
+      <t>This specification contains two major sections:<list style="hanging">
+        <t hangText="Control Plane">The service through which Event 
+        Receivers can review and optionally managed Event Streams. 
+        It defines the metadata associated with Event Streams along 
+        with stream status reporting.</t>
+        <t hangText="Data Plane">Through which SET Events are
+        delivered by an Event Transmitter to an Event Receiver using 
+        a defined Event Stream. The Data Plane includes a verification 
+        process which tests and validates Event Stream configuration. 
+        The Data plan defines processing and error 
+        signaling used in the delivery of SETs.</t>
+      </list> </t>
+      
+
+			<section anchor="notat" title="Notational Conventions" toc="default">
+				<t>
+					The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+					"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in
+					this
+					document are to be interpreted as described in
+					<xref target="RFC2119" />
+					. These keywords are capitalized when used to
+					unambiguously specify requirements of the protocol or application
+					features and behavior that affect the inter-operability and security of
+					implementations. When these words are not capitalized, they are
+					meant
+					in their natural-language sense.
+				</t>
+
+				<t>
+					For purposes of readability examples are not URL encoded.
+					Implementers MUST percent encode URLs as described in
+					<xref target="RFC3986">Section 2.1 of</xref>
+					.
+				</t>
+
+				<t>Throughout this documents all figures MAY contain spaces and
+					extra
+					line-wrapping for readability and space limitations. Similarly, some
+					URI's contained within examples, have been shortened for space and
+					readability reasons.
+				</t>
+			</section>
+
+			<section anchor="defs" title="Definitions" toc="default">
+        <t>This specification assumes terminology defined in the Security
+        Event Token specification<xref target="I-D.ietf-secevent-token"/>
+        .</t>
+				<t>
+					The following definitions are defined for Security Event distribution:
+					<list style="hanging">
+          
+            <t hangText="Identity Provider"><vspace/>
+              An Identity Provider is a service provider that issues authentication
+              assertions that may be used by Relying Party service providers
+              to establish login sessions with users. Examples of Identity 
+              Providers are defined in: OpenID Connect 
+              <xref target="openid-connect-core"/> and SAML2 
+              <xref target="saml-core-2.0"/>. For the purpose of this 
+              specification an Identity Provider also includes any provider
+              of services where the compromise of an account may open up 
+              relying parties to attack. For example for the purposes of
+              security events, an email service provider could be 
+              considered an "implicit" Identity Provider.
+            </t>
+              
+            <t hangText="Relying Party"><vspace/>
+              A Relying Party is a service provider that accepts assertions 
+              from Identity Providers to establish sessions. Examples of 
+              Relying Parties are defined in: OpenID Connect 
+              <xref target="openid-connect-core"/> and SAML2 
+              <xref target="saml-core-2.0"/>
+            </t>          
+            
+            <t hangText="Event Transmitter"><vspace/>
+              A service provider that delivers SETs to other providers known
+              as Event Receivers. Some examples of Event Transmitters are 
+              Identity Providers and Relying Parties. An Event Transmitter
+              is responsible for offering a service that allows the Event
+              Receiver to check the Event Stream configuration and status
+              known as the "Control Plane". 
+            </t>
+            
+            <t hangText="Event Receiver"><vspace/>
+              A service provider that registers to receive SETs from 
+              an Event Transmitter and provides an endpoint to receive
+              SETs via HTTP POST (known as the "Data Plane"). 
+              Some examples of Event Receivers are 
+              Identity Providers and Relying Parties. Event Receivers
+              can check current Event Stream configuration and status by
+              accessing the Event Transmitters "Control Plane".
+            </t>
+  
+            <t hangText="Event Stream"><vspace/>
+              An Event Stream establishes Event Receiver communication
+              endpoints, security configuration and feed content that 
+              is used by an Event Transmitter to
+              send a series of SET Events to an Event Receiver. An Event 
+              Stream defines a "Data Plane" and "Control Plane" service
+              relationship between
+              an Event Transmitter and and Event Receiver. 
+            </t>
+              
+            <t hangText="Control Plane"><vspace/>
+              A Control Plane represents an service offered by an Event
+              Transmitter that lets an Event Receiver query the current
+              operational and/or error status of an Event Stream.  The
+              Control Plane MAY also be used to retrieve Event Stream
+              and SET configuration data.
+            </t>
+            
+            <t hangText="Data Plane"><vspace/>
+              The Data Plane represents the HTTP service offered by an 
+              Event Receiver that allows the Event Transmitter to 
+              deliver multiple SETs via HTTP POST as part of an Event
+              Stream.</t>
+            
+						<t hangText="Event Family"><vspace/>An Event Family is a 
+              URI that describes the set of events types be issued in 
+              an Event Stream.
+						</t>
+            
+            <t hangText="Subject"><vspace/>
+              The security subject around which a security event has 
+              occurred. For example, a security subject might per a user, 
+              a person, an email address, a service provider entity, an
+              IP address, an OAuth Client, a mobile device, or any identifiable
+              thing referenced in security and authorization systems.
+            </t>
+
+					</list>
+				</t>
+			</section>
+		</section>
+   
+  <section title="Data Plane">
+    <t>The data plane represents the communication channel over which a 
+    series of SETs are delivered to a configured Event Receiver otherwise
+    known as an Event Stream.</t>
+    <section anchor="process" title="Event Delivery Process">
+			<t>When a Security Event occurs, the Feed Provider constructs a SET
+      token <xref target="I-D.ietf-secevent-token" /> that describes the	
+      event. The SET issuer determines the Event Streams over which the
+      SET should be distributed to.</t>
+      <t> 
+      How SET Events are defined and the process by which events are identified for 
+      Event Receivers is out-of-scope of this	specification.
+			</t>
+
+			<t>
+			When a SET is available for a Event Receiver, the Feed Transmitter
+			attempts to deliver the SET based on the Event Receiver's registered
+			delivery mechanism:
+			<list style="symbols">
+				<t>The Event Transmitter uses an HTTP/1.1 POST to the Event 
+        Receiver endpoint to deliver the SET;
+			  </t>
+
+			  <t>Or, the Feed Transmitter delivers the event through a different
+        method not defined by this specification.
+			  </t>
+			</list>
+			</t>
+      
+      <t>Delivery of SETs MAY be delivered using one of two formats:
+      <list style="hanging">
+        <t hangText="Single Event(application/jwt)"><vspace/>Where SETs are delivered
+        one at a time (e.g. such as typical with HTTP POST) where the
+        data payload is just a JSON Web Token <xref target="RFC7519"/> 
+        (see xxxxxxx).</t>
+        
+        <t hangText="Multi-Event(application/secevents+json)">Where 
+        multiple SETs are delivered in a JSON structure (see xxxxxxxx). 
+        The use of Multi-Event format is typically used with delivery 
+        methods that poll based on a timeout or schedule (e.g. HTTP GET).</t>
+      </list></t>
+
+			<t>Until successful delivery, Feed Transmitters SHALL NOT be 
+      required to main or record SETs. As such, transmitted SETs SHOULD 
+      be self-validating (e.g. signed).
+			</t>
+
+			<t>
+				If delivery to any particular Event Receiver has been delayed for
+				an extended period of time, the Feed Transmitter MAY suspend the
+        affected Event Stream and even stop maintaining outstanding SETs for
+				the Event Receiver at its discretion and available resources. See Event Stream
+				<spanx style="verb">subState</spanx> in <xref target="subscribeMetadata" />.
+			</t>
+
+			<t>
+				Upon receiving a SET, the Event Receiver reads the SET and validates 
+        it. Based upon the content of the token, the Event Receiver decides what, 
+        if any, action needs to be taken in response to the received SET. For 
+        example, in response to a SCIM provisioning event <xref target="idevent-scim" /> 
+        indicating a changed resource, the Event Receiver might perform a 
+        SCIM GET request (see <xref target="RFC7644">Section 3.4</xref>)
+				to the affected resource URI in order to confidentially obtain 
+        the current state of the transmitter's affected SCIM resource in 
+        order to reconcile local corresponding state changes. 
+      </t>
+        
+      <t>
+        The action a Event Receiver takes in response to a SET MAY be 
+        substantially different than merely copying the action of the 
+        SET issuer. 
+        A single SET can trigger one or more receiver actions or
+        it can be ignored. For example, upon receiving 
+        notification that a user resource has been added to a group, the 
+        Event Receiver may first determine that the user does not exist in the 
+        Event Receiver's domain. The Event Receiver translates the event into two 
+        actions:<list style="numbers">
+          <t>Retrieve the user (e.g. using SCIM GET) and then provisions 
+          the user locally. After enabling the user,</t>
+          <t>The Event Receiver then enables the user for the application 
+        associated with membership in the issuer's group.</t>
+        </list>  
+			</t>    
+  </section>
+  
+     <section anchor="httpPost" title="HTTP POST Delivery">
+        
+       <t>This method allows a feed provider to use HTTP POST 
+       (<xref target="RFC7231">Section 4.3.3</xref>) to deliver
+       SETs to the registered web callback URI identified in the Event
+       Stream configuration. The Event Stream 
+       <spanx style="verb">methodUri</spanx> value for this method 
+       is <spanx style="verb">urn:ietf:params:set:method:HTTP:webCallback</spanx>.</t>
+            
+       <t>The SET to be delivered MAY be signed 
+       and/or encrypted as defined in <xref target="I-D.ietf-secevent-token" />.</t>
+           
+       <t>The Event Stream's <spanx style="verb">deliveryUri</spanx> 
+       attribute indicates the location of a Event Receiver provided 
+       endpoint which accepts HTTP POST requests (e.g. 
+       <spanx style="verb">https://notify.examplerp.com/Events</spanx>).</t>
+ 
+       <t>The content-type for the HTTP POST is 
+       <spanx style="verb">application/jwt</spanx> and SHALL consists of 
+       a single SET token (see <xref target="I-D.ietf-secevent-token" />).</t>
+       
+       <figure anchor="messageSet" title="Encoded SET To Be Transmitted">
+              <artwork>
+  eyJhbGciOiJub25lIn0
+  .
+  eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+  kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+  FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+  WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+  WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+  hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+  VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+  SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+  b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+  tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+  1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+  .
+</artwork>
+       </figure>
+            
+       <t>To deliver an event, the Event Transmitter generates an event delivery message
+       and uses HTTP POST to the EventStream configured endpoint. The content-type of the
+       message is <spanx style="verb">application/jwt</spanx> and the expected
+       response type (accept) is <spanx style="verb">application/json</spanx>.</t>
+      
+       <figure align="left" anchor="postSet" title="Example Web Callback POST Request">
+         <artwork align="left">POST /Events  HTTP/1.1
+
+Host: notify.examplerp.com
+Accept: application/json
+Content-Type: application/jwt
+"eyJhbGciOiJub25lIn0
+.
+eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+.</artwork>
+        </figure>
+            
+        <t>Upon receipt of the request, the Event Receiver SHALL validate the 
+        JWT structure of the SET as defined in <xref target="RFC7519">Section 7.2</xref>.
+        The Event Receiver SHALL also validate the SET information as described
+        in <xref target="I-D.ietf-secevent-token">Section 2</xref>.</t>
+        <t>If the SET is determined to be valid, the Event Receiver SHALL
+        indicate successful submission by responding with HTTP Status
+        202 as <spanx style="verb">Accepted</spanx> (see <xref target="RFC7231">Section 6.3.3</xref>).</t>
+            
+        <t>If SET or JWT is invalid, or there is an HTTP error, the Event Receiver
+        SHALL respond with the appropriate HTTP error or an HTTP Status
+        400 Bad Request error as follows:</t>
+        <texttable anchor="reqErrors" title="HTTP Status 400 Errors">
+          <ttcol>Err Value</ttcol><ttcol>Description</ttcol>
+          <c>jwtParse</c><c>Invalid or unparsable JWT or JSON structure.</c>
+          <c>jwtHdr</c><c>In invalid JWT header was detected.</c>
+          <c>jwtCrypto</c><c>Unable to parse due to unsupported algorithm.</c>
+          <c>jws</c><c>Signature was not validated.</c>
+          <c>jwe</c><c>Unable to decrypt JWE encoded data.</c>
+          <c>jwtAud</c><c>Invalid audience value.</c>
+          <c>jwtIss</c><c>Issuer not recognized.</c>
+          <c>setType</c><c>An unexpected event type was received.</c>
+          <c>setParse</c><c>Invalid structure was encountered such as inability
+          to parse SET event payload.</c>
+          <c>setData</c><c>SET event claims incomplete or invalid.</c>
+          <c>dup</c><c>A duplicate SET was received and has been ignored.</c>
+        </texttable>
+            
+        <figure anchor="goodPostResponse" title="Example Successful Delivery Response">
+        <preamble>The following is a non-normative example of a successful
+        receipt of a SET.</preamble>
+          <artwork>HTTP/1.1 202 Accepted</artwork>
+        </figure> 
+            
+        <t>An HTTP Status 400 Bad Request response includes a JSON
+        object which provides details about the error. The JSON object
+        includes the JSON attributes: <list style="hanging">
+          <t hangText="err"><vspace />A value which is a keyword that 
+          describes the error (see <xref target="reqErrors" />).</t>
+          <t hangText="description"><vspace />A human-readable text that provides
+          additional diagnostic information.</t>
+        </list> </t>
+        <figure anchor="badPostResponse" title="Example Bad Request Response">
+        <preamble>The following is an example non-normative Bad
+        Request error.</preamble>
+        <artwork>HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "err":"dup",
+  "description":"SET already received. Ignored."
+
+}</artwork>
+        </figure>
+       
+     </section>
+       
+     <section anchor="httpGet" title="Delivery using HTTP GET Polling">
+      <t>To be completed.</t>
+     
+     </section>
+     <section anchor="verifyStream" title="Event Stream Verification">
+  
+        <t>To confirm an Event Stream configuration, the Event
+        Transmitter SHALL send a
+        verification SET to the Event Receiver using the registered 
+        <spanx style="verb">methodUri</spanx> mechanism which in this case
+        is <spanx style="verb">urn:ietf:params:set:method:HTTP:webCallback</spanx>. 
+        </t>
+        
+        <t>The Verify SET contains the following attributes:<list style="hanging">
+          <t hangText="events">Set with a value of 
+          <spanx style="verb">[[this RFC URL]]#verify</spanx>.</t>
+
+          <t hangText="iss">Set to the URI defined in the Event Stream
+          metadata (see <xref target="subscribeMetadata"/>).</t>
+
+          <t hangText="aud">MUST be set to a value that matches the
+          EventStream <spanx style="verb">aud</spanx> value (see 
+          <xref target="subscribeMetadata"/>).</t>
+
+          <t hangText="exp">A value that indicates the
+          time the verification request will expire. Once expired, the
+          server will set the Event Stream state to <spanx style="verb">fail</spanx>.</t>
+          
+        </list>
+        </t>
+        
+        <t>
+        If the Event Stream <spanx style="verb">confidentialJWK</spanx>
+        value was supplied, then the SET SHOULD be encrypted with 
+        the provided key. Successful parsing of the
+        message confirms that provides confirmation of correct 
+        configuration and possession of keys.</t>
+          
+        <t>A payload attribute <spanx style="verb">confirmChallenge</spanx>
+        is provided with a JSON String value that the Event Receiver SHALL echo 
+        back in its response. The intent is to confirm that the Event Receiver 
+        has successfully parsed the SET and is not just echoing back 
+        HTTP success.</t>
+
+        <figure anchor="verifyPostEvent" title="Example Verification SET with Challenge">
+        <preamble>A non-normative JSON representation of an event to be
+        sent to a Event Receiver as a Event Stream confirmation. Note the
+        event is not yet encoded as a JWT token:</preamble>
+<artwork>{  
+  "jti": "4d3559ec67504aaba65d40b0363faad8",
+  "events":["[[this RFC URL]]#verify"],
+  "iat": 1458496404,
+  "iss": "https://scim.example.com",  
+  "exp": 1458497000,
+  "aud":[
+   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
+   "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
+  ], 
+  "[[this RFC URL]]#verify":{
+    "confirmChallenge":"ca2179f4-8936-479a-a76d-5486e2baacd7"
+  }  
+}</artwork>
+        </figure>
+        
+        <t>The above SET is encoded as a JWT and transmitted to the 
+        Event Receiver as shown in <xref target="postSet" />.</t>
+
+        <t>Upon receiving a verify SET, the Event Receiver SHALL 
+        respond with a JSON object that includes a 
+        <spanx style="verb">challengeResponse</spanx> attribute and 
+        the value that was provided in <spanx style="verb">confirmChallenge</spanx>.
+        The content type header is set to <spanx style="verb">application/json</spanx>.</t>
+        
+        <figure anchor="verifyPostResponse" title="Example Response to Verify SET with Challenge">
+          <preamble>
+The following is a non-normative example response to a Verify SET 
+received via HTTP/1.1 POST and includes a JSON object containing the 
+confirmation attribute and value.</preamble>
+<artwork>HTTP/1.1 200 OK
+Content-Type: application/json
+
+{  
+  "challengeResponse":"ca2179f4-8936-479a-a76d-5486e2baacd7"
+}</artwork>
+        </figure>
+
+        <t>
+        If the Event Receiver returns a non-matching value or an HTTP status
+        other than a 200 series response,  the Event Stream 
+        <spanx style="verb">state</spanx> SHALL be set to <spanx style="verb">fail</spanx>.
+        A declining Event Receiver MAY simply respond with any 400 series HTTP
+        error (e.g. 404).</t>
+          
+     </section>
+   </section><section anchor="Security" title="Security Considerations" toc="default">
+
+      <t>[TO BE COMPLETED]</t>
+   </section>
+
+    <section anchor="IANA" title="IANA Considerations">
+      
+      <section title="SCIM Schema Registration">
+        <t>As per the "SCIM Schema URIs for Data Resources" registry established
+        by <xref target="RFC7643">Section 10.3</xref>, the following defines and registers
+        the following SCIM URIs and Resource Types for Feeds and Event Streams.</t>
+        <texttable>
+        <ttcol>Schema URI</ttcol><ttcol>Name</ttcol><ttcol>ResourceType</ttcol><ttcol>Reference</ttcol>
+        
+        <c>urn:ietf:params:scim: schemas:event:2.0: EventStream</c>
+        <c>SET Event Stream</c>
+        <c>EventStream</c>
+        <c><xref target="subscribeMetadata"/></c>
+        
+        </texttable>
+      
+      </section>
+
+  
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml' ?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5988.xml' ?>
+      
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7517.xml' ?><!-- JWK -->
+   
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-token-00.xml'?>
+
+    </references>
+
+    <references title="Informative References">
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
+      
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml' ?><!-- SCIM API -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml' ?><!-- SCIM Schema -->
+
+      <reference anchor="openid-connect-core">
+        <front>
+          <title>OpenID Connect Core 1.0</title>
+          <author fullname="Nat Sakimura et al"><organization>NRI</organization></author>
+          <date day="8" month="Nov" year="2014"/>
+        </front>
+        <format type="HTML" target="http://openid.net/specs/openid-connect-core-1_0.html"/>
+      </reference>
+      <reference anchor="saml-core-2.0">
+        <front>
+          <title>Assertions and Protocols for the OASIS Security Assertion Markup Language (SAML) V2.0</title>
+          <author fullname="Scott Cantor et al"><organization>Internet2</organization></author>
+          <date day="15" month="March" year="2005"/>
+        </front>
+        <format type="PDF" target="http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf"/>
+      </reference>
+      <reference anchor="idevent-scim">
+        <front>
+          <title>SCIM Event Extensions (work in progress)</title>
+          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
+          <date/>
+        </front>  
+        <format type="TXT" target="draft-hunt-idevent-scim-00.txt"/>    
+      </reference>
+
+     <!-- 
+      <reference anchor="Order-Operations">
+        <front>
+          <title>Order of Operations: Programming Languages</title>
+
+          <author>
+            <organization>Wikipedia</organization>
+          </author>
+
+          <date/>
+        </front>
+
+        <format target="http://en.wikipedia.org/wiki/Order_of_operations#Programming_languages"
+                type="HTML"/>
+      </reference>
+       -->
+    </references>
+
+    
+
+    <section title="Acknowledgments">
+      <t>The editors would like to thanks the members of the SCIM WG which 
+      began discussions of provisioning events starting with: draft-hunt-scim-notify-00 in 2015.</t>
+      
+      <t>The editor would like to thank the participants in the the SECEVENTS
+      working group for their support of this specification.</t>
+    </section>
+
+    <section title="Change Log">
+      <t>Draft 00 - PH - First Draft based on reduced version of draft-hunt-idevent-distribution</t>
+      <t>Draft 01 - PH - <list style="symbols">
+        <t>Reworked terminology to match new WG Transmitter/Receiver terms</t>
+        <t>Reworked sections into Data Plane vs. Control Plane</t>
+        <t>Removed method transmission registry in order to simplify the specification</t>
+        <t>Made Create, Update operations optional for Control Plane (Read is MTI)</t>
+      </list></t>
+      <t>Draft 02 - PH <list style="symbols">
+        <t>Added iss metadata for Event Stream</t>
+        <t>Changed to using JWKS_uri for issuer and receiver.</t>
+        <t>Control Plane sections moved to draft-hunt-secevent-stream-mgmt</t>
+        <t>Added support for delivering multiple events using HTTP GET polling</t>
+      </list></t>
+      
+    </section>
+  </back>
+</rfc>
