@@ -59,59 +59,15 @@
         HTTP POST and to poll for SETs using HTTP GET. 
       			</t>
 
-			<figure anchor="notificationStream" title="SET Event Stream">
-          <preamble>The following diagram shows a typical SET Event 
-          Stream. A stream consists of a pair of HTTP endpoints, one for 
-          the event stream transmitter and one for the receiver. The 
-          receiver endpoint is used by the transmitter to deliver SET 
-          events via HTTPS POST and is known as the "Data Plane". The 
-          transmitter's HTTP endpoint is used by the receiver to perform 
-          HTTPS GET requests to check the stream status and is known as 
-          the "Control Plane". In the diagram, the arrow heads point
-        to the service provider (the direction of an HTTP request):</preamble>
-					<artwork align="center">
-+-----------+ Data Plane            +----------+
-|Transmitter+------HTTP POST--------> Receiver |
-|           &lt;------HTTP GET---------+          |
-+-----------+         Control Plane +----------+
-</artwork>
-        <postamble></postamble>
-			</figure>
-      <figure anchor="notificationIDP" title="Duplexed Streams"><preamble>
-        In some service provider relationships, for example between 
-        Identity Providers and Relying Parties, there may be a need to 
-        have bi-directional SET event exchange. This involves 
-        establishing a second event stream that works with transmitter 
-        and receiver roles reversed.
-      </preamble>
-      <artwork align="center">
-  Identity                             Relying
-  Provider                             Party
-
-                 IDP to RP Stream
-
-+-----------+ Data Plane            +------------+
-|Transmitter+-----------------------> Receiver   |
-|           &lt;-----------------------+            |
-+-----------+         Control Plane +------------+
-
-
-                 RP to IDP Stream
-
-+-----------+ Data Plane            +------------+
-| Receiver  &lt;-----------------------+ Transmitter|
-|           +----------------------->            |
-+-----------+         Control Plane +------------+
-      </artwork></figure>
-      <t>This specification defines the "Data Plane", through which SET 
-        Events are delivered by an Event Transmitter to an Event Receiver using 
-        a pre-defined Event Stream configuration. The Data Plane includes 
-        a verification process which tests and validates Event Stream configuration. 
-        The Data plan defines processing and error signaling used in the delivery of SETs.</t>
+      <t>This specification defines to methods of SET delivery in what
+      is known as Event Streams. The specification includes a 
+      verification process which tests and validates Event Stream 
+      configuration.</t>
         
-      <t>This specification does not define the "Control Plane", the API
-      through which Streams are defined, provisioned, managed, monitored,
-      and configured. [[This work is TBD by the SECEVENTS WG]]</t>
+      <t>This specification does not define the method by which Event 
+      Streams are defined, provisioned, managed, monitored,
+      and configured and is out of scope of this specification.
+      <vspace/>[[This work is TBD by the SECEVENTS WG]]</t>
       
       
 
@@ -195,29 +151,11 @@
             </t>
   
             <t hangText="Event Stream"><vspace/>
-              An Event Stream establishes Event Receiver communication
-              endpoints, security configuration and feed content that 
-              is used by an Event Transmitter to
-              send a series of SET Events to an Event Receiver. An Event 
-              Stream defines a "Data Plane" and "Control Plane" service
-              relationship between
-              an Event Transmitter and and Event Receiver. 
+              An Event Stream is a defined location, distribution method
+              and whereby an Event Transmitter and Event Receiver 
+              exchange a pre-defined family of SETs. 
             </t>
-              
-            <t hangText="Control Plane"><vspace/>
-              A Control Plane represents an service offered by an Event
-              Transmitter that lets an Event Receiver query the current
-              operational and/or error status of an Event Stream.  The
-              Control Plane MAY also be used to retrieve Event Stream
-              and SET configuration data.
-            </t>
-            
-            <t hangText="Data Plane"><vspace/>
-              The Data Plane represents the HTTP service offered by an 
-              Event Receiver that allows the Event Transmitter to 
-              deliver multiple SETs via HTTP POST as part of an Event
-              Stream.</t>
-            
+                          
 						<t hangText="Event Family"><vspace/>An Event Family is a 
               URI that describes the set of events types be issued in 
               an Event Stream.
@@ -240,7 +178,7 @@
 			</section>
 		</section>
    
-  <section title="Data Plane">
+  <section title="SET Delivery Data Plane">
     <t>The data plane represents the communication channel over which a 
     series of SETs are delivered to a configured Event Receiver otherwise
     known as an Event Stream.</t>
@@ -344,53 +282,34 @@
       parsing of the SET token itself.</t>
   </section>
   
-     <section anchor="httpPost" title="HTTP POST Delivery">
+  <section anchor="httpPost" title="HTTP POST Delivery">
         
-       <t>This method allows a feed provider to use HTTP POST 
-       (<xref target="RFC7231">Section 4.3.3</xref>) to deliver
-       SETs to the registered web callback URI identified in the Event
-       Stream configuration. The Event Stream 
-       <spanx style="verb">methodUri</spanx> value for this method 
-       is <spanx style="verb">urn:ietf:params:set:method:HTTP:webCallback</spanx>.</t>
-            
-       <t>The SET to be delivered MAY be signed 
-       and/or encrypted as defined in <xref target="I-D.ietf-secevent-token" />.</t>
+     <t>This method allows an Event Transmitter to use HTTP POST 
+     (<xref target="RFC7231">Section 4.3.3</xref>) to deliver
+     SETs to the registered web callback URI identified in the Event
+     Stream configuration. </t>
+          
+     <t>The SET to be delivered MAY be signed 
+     and/or encrypted as defined in <xref target="I-D.ietf-secevent-token" />.</t>
            
-       <t>The Event Stream's <spanx style="verb">deliveryUri</spanx> 
-       attribute indicates the location of a Event Receiver provided 
-       endpoint which accepts HTTP POST requests (e.g. 
-       <spanx style="verb">https://notify.examplerp.com/Events</spanx>).</t>
- 
-       <t>The content-type for the HTTP POST is 
-       <spanx style="verb">application/jwt</spanx> and SHALL consists of 
-       a single SET token (see <xref target="I-D.ietf-secevent-token" />).</t>
-       
-       <figure anchor="messageSet" title="Encoded SET To Be Transmitted">
-              <artwork>
-  eyJhbGciOiJub25lIn0
-  .
-  eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
-  kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
-  FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
-  WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
-  WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
-  hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
-  VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
-  SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
-  b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
-  tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
-  1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
-  .
-</artwork>
-       </figure>
-            
-       <t>To deliver an event, the Event Transmitter generates an event delivery message
-       and uses HTTP POST to the EventStream configured endpoint. The content-type of the
-       message is <spanx style="verb">application/jwt</spanx> and the expected
-       response type (accept) is <spanx style="verb">application/json</spanx>.</t>
-      
-       <figure align="left" anchor="postSet" title="Example Web Callback POST Request">
-         <artwork align="left">POST /Events  HTTP/1.1
+     <t>The Event Stream configuration defines a URI the of an Event 
+     Receiver provided endpoint which accepts HTTP POST requests (e.g. 
+     <spanx style="verb">https://notify.examplerp.com/Events</spanx>).</t>
+
+     <t>The HTTP Content-Type (see 
+     <xref target="RFC7231">Section 3.1.1.5</xref>) for the HTTP POST is 
+     <spanx style="verb">application/jwt</spanx> and SHALL consist of 
+     a single SET token (see <xref target="I-D.ietf-secevent-token" />).
+     As per <xref target="RFC7231">Section 5.3.2</xref>, the expected 
+     media type (<spanx style="verb">Accept</spanx> header) response is 
+     <spanx style="verb">application/json</spanx>.</t>
+     
+     <figure align="left" anchor="postSet" title="Example HTTP POST Request">
+     <preamble>To deliver an event, the Event Transmitter generates an event 
+     delivery message and uses HTTP POST to the configured endpoint with
+     the appropriate <spanx style="verb">Accept</spanx> and 
+     <spanx style="verb">Content-Type</spanx> headers.</preamble>
+<artwork align="left">POST /Events  HTTP/1.1
 
 Host: notify.examplerp.com
 Accept: application/json
@@ -409,20 +328,260 @@ b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
 tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
 1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
 .</artwork>
+     </figure>
+            
+     <t>Upon receipt of the request, the Event Receiver SHALL 
+     validate the JWT structure of the SET as defined in 
+     <xref target="RFC7519">Section 7.2</xref>. The Event Receiver 
+     SHALL also validate the SET information as described
+     in <xref target="I-D.ietf-secevent-token">Section 2</xref>.</t>
+     <t>If the SET is determined to be valid, the Event Receiver SHALL
+     indicate successful submission by responding with HTTP Status
+     202 as <spanx style="verb">Accepted</spanx> 
+     (see <xref target="RFC7231">Section 6.3.3</xref>).</t>
+     
+     <figure anchor="goodPostResponse" title="Example Successful Delivery Response">
+        <preamble>The following is a non-normative example of a successful
+        receipt of a SET.</preamble>
+        <artwork>HTTP/1.1 202 Accepted</artwork>
+     </figure> 
+          
+     <t>In the event of a general HTTP error condition, the Event Receiver
+     MAY respond with an appropriate HTTP Status code as defined in 
+     <xref target="RFC7231">Section 6</xref>.</t>
+     <t>When the Event Receiver detects an error parsing and 
+     validating a received SET, the Event Receiver SHALL indicate an 
+     HTTP Status 400 error with an error code as described in <xref target="errorResponse"/>.
+     </t>
+     
+     <figure anchor="badPostResponse" title="Example HTTP Status 400 Response">
+        <preamble>The following is an example non-normative Bad
+        Request error.</preamble>
+        <artwork>HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "err":"dup",
+  "description":"SET already received. Ignored."
+
+}</artwork>
+     </figure>    
+     </section>
+     
+     <section anchor="httpGet" title="Delivery using HTTP Polling">
+     
+       <t>This method allows an Event Receiver to use HTTP GET 
+       (<xref target="RFC7231">Section 4.3.1</xref>) to check
+       for and receive zero or more SETs at a periodic interval. To 
+       acknowledge receipt of provided SETs, the Event Receiver 
+       performs an HTTP POST to acknowledge successful transfer of SETs 
+       and/or to indicate appropriate errors as specified in 
+       <xref target="pollGetAck"/>.
+       </t>
+       
+       <t>This SET delivery method is primarily provided to support 
+       Event Receivers located behind firewalls and are not 
+       able to open HTTP endpoints to receive HTTP POST requests. For 
+       the purposes of this delivery method, it is assumed there is a 
+       single Event Receiver entity performing event polling. 
+       Considerations for multi-threaded polling are out of scope of 
+       this SET delivery method.
+       </t>
+            
+       <t>SETs to be delivered MAY be signed 
+       and/or encrypted as defined in <xref target="I-D.ietf-secevent-token" />.</t>
+       
+       <t>The delivery of SETs in this method is facilitated by a 
+       two-step method initiated by Event Receivers:<list style="numbers">
+        <t>The Event Receiver polls for available SETs using an 
+        HTTP GET to a pre-arranged endpoint provided by the Event 
+        Transmitter.</t>
+        <t>If any SETs are received in step 1, the Event Receiver 
+        acknowledges the SETs, using an HTTP POST to the same endpoint 
+        used to previously poll for SETs.</t>
+       </list></t>
+ 
+       <section anchor="pollGET" title="Step 1: Polling for SETs">
+       
+       <t>The Event Receiver MAY perform an HTTP GET to the pre-arranged 
+       polling endpoint URI to check for any new or unacknowledged SETs
+       that are available.</t>
+       
+       <figure anchor="pollRequest" title="Example Poll Request">
+       <preamble>The following is a non-normative example poll request to the
+       endpoint: <spanx style="verb">https://nofity.exampleidp.com/Events</spanx>.</preamble>
+       <artwork align="left">GET /Events  HTTP/1.1
+
+Host: notify.exampleidp.com
+Accept: application/json
+Authorization: Bearer h480djs93hd8
+</artwork>
+       </figure>
+       
+       <t>In response to the HTTP GET, the Event Transmitter checks for 
+       undelivered SET events and responds with a JSON document containing
+       the following attributes:
+       <list style="hanging">
+        <t hangText="sets"><vspace/>A required JSON attribute whose value is a JSON
+        object that contains zero or more nested JSON attributes. Each nested
+        attribute corresponds to the <spanx style="verb">jti</spanx> of
+        a SET to be delivered and whose value is a JSON String containing
+        the value of the encoded corresponding SET. If there are no
+        outstanding SETs to be transmitted, the JSON object SHALL be empty.</t>
+        <t hangText="since">An optional JSON attribute whose value SHOULD
+        indicate the time of the last SET that was successfully delivered. The
+        value MUST be a NumericDate value as defined in 
+        <xref target="errorResponse"/>.
+        </t>
+       </list>
+       </t>
+       
+       <figure anchor="pollResponse" title="Example Poll Response">
+       <preamble>The following is a non-normative example response to
+       the request shown <xref target="pollRequest"/>.</preamble>
+       <artwork align="left">HTTP/1.1 200 OK
+Content-Type: application/json
+Location: https://notify.exampleidp/Events
+
+{
+"sets":{
+  "4d3559ec67504aaba65d40b0363faad8":
+   "eyJhbGciOiJub25lIn0.
+   eyJqdGkiOiI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIsImlhdCI6MTQ
+   1ODQ5NjQwNCwiaXNzIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwiYXVkIjpbIm
+   h0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M
+   2I3NzU0IiwiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIx
+   ZDA4NjQxZDc2NzZlZTciXSwiZXZlbnRzIjp7InVybjppZXRmOnBhcmFtczpzY2ltOmV
+   2ZW50OmNyZWF0ZSI6eyJyZWYiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcn
+   MvNDRmNjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIsImF0dHJpYnV0ZXMiOlsiaWQiLCJuY
+   W1lIiwidXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.",
+  "3d0c3cf797584bd193bd0fb1bd4e7d30":
+   "eyJhbGciOiJub25lIn0.
+   eyJqdGkiOiIzZDBjM2NmNzk3NTg0YmQxOTNiZDBmYjFiZDRlN2QzMCIsImlhdCI6MTQ
+   1ODQ5NjAyNSwiaXNzIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwiYXVkIjpbIm
+   h0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M
+   2I3NzU0IiwiaHR0cHM6Ly9qaHViLmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIx
+   ZDA4NjQxZDc2NzZlZTciXSwic3ViIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL1V
+   zZXJzLzQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJldmVudHMiOnsidXJuOmlldG
+   Y6cGFyYW1zOnNjaW06ZXZlbnQ6cGFzc3dvcmRSZXNldCI6eyJpZCI6IjQ0ZjYxNDJkZ
+   jk2YmQ2YWI2MWU3NTIxZDkifSwiaHR0cHM6Ly9leGFtcGxlLmNvbS9zY2ltL2V2ZW50
+   L3Bhc3N3b3JkUmVzZXRFeHQiOnsicmVzZXRBdHRlbXB0cyI6NX19fQ."
+ },
+ "since":1458496025
+}</artwork></figure>
+       <t>In the above example, a two SETs whose <spanx style="verb">jti</spanx>
+       are <spanx style="verb">4d3559ec67504aaba65d40b0363faad8</spanx> 
+       and <spanx style="verb">3d0c3cf797584bd193bd0fb1bd4e7d30</spanx> 
+       are delivered.</t>
+       
+              <figure anchor="emptyPollResponse" title="Example No SETs Poll Response">
+       <preamble>The following is a non-normative example response to
+       the request shown <xref target="pollRequest"/> showing no new
+       SETs are available.</preamble>
+       <artwork align="left">HTTP/1.1 200 OK
+Content-Type: application/json
+Location: https://notify.exampleidp/Events
+
+{
+ "sets":{ },
+ "since":1458496025
+}</artwork></figure>
+       
+       <t>Upon receiving the JSON document, the Event Receiver parses
+       and verifies the received SETs and notifies the Event Transmitter 
+       via an HTTP POST back to the Event Transmitter as described in 
+       <xref target="pollGetAck"/>.</t>
+       </section>
+ 
+       <section anchor="pollGetAck" 
+       title="Step 2: Acknowledging Sets">
+        
+        <t>Upon receiving SETs from the Event Transmitter, the Event 
+        Receiver SHALL parse the JSON document received, and validate 
+        each SET received and SHALL acknowledge receipt in a timely 
+        (e.g. minutes) fashion so that the Event Transmitter may
+        mark the SETs as received. If necessary, Event Receivers SHOULD
+        acknowledge receipt before taking any local actions based on
+        the SETs to avoid unnecessary delay in acknowledgement where 
+        possible.</t>
+        
+        <t>In the case where no SETs were received in a previous poll (see 
+        <xref target="emptyPollResponse"/>), the Event Receiver SHALL
+        NOT perform any acknowledgment.</t>
+        
+        <t>To acknowledge receipt of SETs, the Event Receiver SHALL
+        use HTTP POST to the same endpoint it previously retrieved the SETs
+        from to deliver a JSON document containing the following JSON
+        attributes: <list style="hanging">
+          <t hangText="ack">Which contains an array of Strings that each
+          correspond to the <spanx style="verb">jti</spanx> of a 
+          successfully received SET. If there are no 
+        outstanding SETs to acknowledge, the attribute MAY be omitted. 
+        When acknowledging a SET, the Event Transmitter is released from
+        any obligation to retain the SET (e.g. for a future re-try to
+        receive).</t>
+          <t hangText="errs">Whose value is a JSON Object that contains 
+          one or more nested JSON attributes that correspond to the 
+          <spanx style="verb">jti</spanx> of each invalid SET received.
+          The value of each is a JSON object whose contents is an
+          <spanx>err</spanx> attribute and <spanx>description</spanx>
+          attribute whose value correspond to the errors described in 
+          <xref target="errorResponse"/>.</t>
+        </list>
+        </t>
+        
+        <figure anchor="pollGoodResponse" title="Example Poll Acknowledgement No Errors">
+        <preamble>The following is a non-normative example acknowledgement 
+        to the SETs received in <xref target="pollResponse"/>.</preamble>
+        <artwork>POST /Events  HTTP/1.1
+
+Host: notify.exampleidp.com
+Content-Type: application/json
+Authorization: Bearer h480djs93hd8
+
+{
+  "ack":[
+    "4d3559ec67504aaba65d40b0363faad8",
+    "3d0c3cf797584bd193bd0fb1bd4e7d30"
+  ]
+}</artwork>
         </figure>
-            
-        <t>Upon receipt of the request, the Event Receiver SHALL validate the 
-        JWT structure of the SET as defined in <xref target="RFC7519">Section 7.2</xref>.
-        The Event Receiver SHALL also validate the SET information as described
-        in <xref target="I-D.ietf-secevent-token">Section 2</xref>.</t>
-        <t>If the SET is determined to be valid, the Event Receiver SHALL
-        indicate successful submission by responding with HTTP Status
-        202 as <spanx style="verb">Accepted</spanx> (see <xref target="RFC7231">Section 6.3.3</xref>).</t>
-            
-        <t>If SET or JWT is invalid, or there is an HTTP error, the Event Receiver
-        SHALL respond with the appropriate HTTP error or an HTTP Status
-        400 Bad Request error as follows:</t>
-        <texttable anchor="reqErrors" title="HTTP Status 400 Errors">
+        
+        <figure anchor="pollErrorResponse" title="Example Poll Acknowledgement With Error">
+        <preamble>The following is a non-normative example error acknowledgement 
+        to the SETs received in <xref target="pollResponse"/>.</preamble>
+        <artwork>POST /Events  HTTP/1.1
+
+Host: notify.exampleidp.com
+Content-Type: application/json
+Authorization: Bearer h480djs93hd8
+
+{
+  "ack":["3d0c3cf797584bd193bd0fb1bd4e7d30"],
+  "setErrs":{
+    "4d3559ec67504aaba65d40b0363faad8":{
+      "err":"jwtAud",
+      "description":"The audience value was incorrect."
+    }
+  }
+}</artwork>
+        </figure>
+        
+        <t>In response to the acknowledgement POST request, the Event
+        Transmitter SHOULD respond with HTTP Status 202 (Accepted) if 
+        the acknowledgement is accepted, or another appropriate HTTP
+        response as defined in <xref target="RFC7231">Section 6</xref>.
+        </t>
+     
+     
+     </section>
+     
+     </section>
+     
+     <section anchor="errorResponse" title="Error Response Handling">
+        <t></t>
+        <t>If a SET is invalid, the following error codes are defined:</t>
+        <texttable anchor="reqErrors" title="SET Errors">
           <ttcol>Err Value</ttcol><ttcol>Description</ttcol>
           <c>jwtParse</c><c>Invalid or unparsable JWT or JSON structure.</c>
           <c>jwtHdr</c><c>In invalid JWT header was detected.</c>
@@ -438,39 +597,24 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
           <c>dup</c><c>A duplicate SET was received and has been ignored.</c>
         </texttable>
             
-        <figure anchor="goodPostResponse" title="Example Successful Delivery Response">
-        <preamble>The following is a non-normative example of a successful
-        receipt of a SET.</preamble>
-          <artwork>HTTP/1.1 202 Accepted</artwork>
-        </figure> 
-            
-        <t>An HTTP Status 400 Bad Request response includes a JSON
+        <t>An error response SHALL include a JSON
         object which provides details about the error. The JSON object
         includes the JSON attributes: <list style="hanging">
           <t hangText="err"><vspace />A value which is a keyword that 
           describes the error (see <xref target="reqErrors" />).</t>
           <t hangText="description"><vspace />A human-readable text that provides
           additional diagnostic information.</t>
-        </list> </t>
-        <figure anchor="badPostResponse" title="Example Bad Request Response">
-        <preamble>The following is an example non-normative Bad
-        Request error.</preamble>
-        <artwork>HTTP/1.1 400 Bad Request
-Content-Type: application/json
-
-{
-  "err":"dup",
-  "description":"SET already received. Ignored."
-
-}</artwork>
-        </figure>
+        </list>
+        When included as part of an HTTP Status 400 response, the above
+        JSON is the HTTP response body (see <xref target="badPostResponse"/>). 
+        When included as part of a batch of SETs, the above JSON is included
+        as part of the <spanx style="verb">setErrs</spanx> attribute as
+        defined in <xref target="pollGetAck"/></t>
        
-     </section>
-       
-     <section anchor="httpGet" title="Delivery using HTTP GET Polling">
-      <t>To be completed.</t>
+        
+        </section>  
+    
      
-     </section>
      <section anchor="verifyStream" title="Event Stream Verification">
   
         <t>To confirm an Event Stream configuration, the Event
@@ -485,11 +629,10 @@ Content-Type: application/json
           <spanx style="verb">[[this RFC URL]]#verify</spanx>.</t>
 
           <t hangText="iss">Set to the URI defined in the Event Stream
-          metadata (see <xref target="subscribeMetadata"/>).</t>
+          configuration.</t>
 
           <t hangText="aud">MUST be set to a value that matches the
-          EventStream <spanx style="verb">aud</spanx> value (see 
-          <xref target="subscribeMetadata"/>).</t>
+          EventStream <spanx style="verb">aud</spanx> value agreed to.</t>
 
           <t hangText="exp">A value that indicates the
           time the verification request will expire. Once expired, the
@@ -568,21 +711,7 @@ Content-Type: application/json
 
     <section anchor="IANA" title="IANA Considerations">
       
-      <section title="SCIM Schema Registration">
-        <t>As per the "SCIM Schema URIs for Data Resources" registry established
-        by <xref target="RFC7643">Section 10.3</xref>, the following defines and registers
-        the following SCIM URIs and Resource Types for Feeds and Event Streams.</t>
-        <texttable>
-        <ttcol>Schema URI</ttcol><ttcol>Name</ttcol><ttcol>ResourceType</ttcol><ttcol>Reference</ttcol>
-        
-        <c>urn:ietf:params:scim: schemas:event:2.0: EventStream</c>
-        <c>SET Event Stream</c>
-        <c>EventStream</c>
-        <c><xref target="subscribeMetadata"/></c>
-        
-        </texttable>
-      
-      </section>
+      <t>[TO BE COMPLETED]</t>
 
   
     </section>
