@@ -173,6 +173,18 @@
             event as represented by a security event token (SET).
             See <xref target="I-D.ietf-secevent-token"/>.</t>
 
+            <t hangText="NumericDate"><vspace/>
+            A JSON numeric value representing the number of seconds from
+            1970-01-01T00:00:00Z UTC until the specified UTC date/time,
+            ignoring leap seconds.  This is equivalent to the 
+            IEEE Std 1003.1, 2013 Edition <xref target="POSIX.1"/> 
+            definition "Seconds Since the Epoch", in which each day is 
+            accounted for by exactly 86400 seconds, other than that 
+            non-integer values can be represented.  See 
+            <xref target="RFC3339"/> for details regarding date/times 
+            in general and UTC in particular.</t>
+
+      
 					</list>
 				</t>
 			</section>
@@ -403,14 +415,52 @@ Content-Type: application/json
  
        <section anchor="pollGET" title="Step 1: Polling for SETs">
        
-       <t>The Event Receiver MAY perform an HTTP GET to the pre-arranged 
+       <t>The Event Receiver performs an HTTP GET to a pre-arranged 
        polling endpoint URI to check for any new or unacknowledged SETs
        that are available.</t>
+       
+       <t>The following polling parameters are supported:<list style="hanging">
+         <t hangText="maxEvents"><vspace/>an integer value indicating the 
+         maximum number of unacknowledged SETs that SHOULD be returned.
+         If more than the maximum number of SETs are available, the 
+         oldest SETs available SHOULD be returned first.</t>
+         <t hangText="since"><vspace/>An optional integer NumericDate value 
+         that indicates the oldest time of unacknowledged SETs to be 
+         returned. </t>
+         <t hangText="before"><vspace/>An optional integer NumericDate
+         value that indicates the earliest time of unacknowledged SETs
+         to be returned. </t>
+         <t hangText="returnImmediately"><vspace/>A boolean value
+         which indicates if the Event Transmitter SHALL return a response
+         immediately if no results are available. The default value is
+         <spanx style="verb">false</spanx> indicating the request will
+         wait pending availability of a SET or until the request
+         times out. The time out for the request is part of the Stream
+         configuration which is out of scope of this specification.</t>
+       </list></t>
+       
+       <t>In order to support multi-threaded polling, an Event 
+       Transmitter MAY choose to track undelivered versus unacknowledged
+       SETs internally. When multiple Event Receiver threads poll
+       simultaneously, the Event
+       Transmitter typically returns the maximum number of SETs allowed
+       in a response to the first thread request received. Each subsequent
+       request receives the next batch of SETs and so on.</t>
+       <t>To facilitate recovery of unacknowledged SETs, the Event
+       Receiver MAY use the parameter <spanx style="verb">before</spanx>
+       and/or <spanx style="verb">since</spanx>. Upon receipt of a 
+       request with these parameters, the Event Transmitter SHALL 
+       attempt to return all unacknowledged SETs, regardless of whether
+       the Event Transmitter believes they were previously distributed. 
+       Previously acknowledged SETS (see <xref target="pollGetAck"/>) are not 
+       typically returned and SHOULD NOT be recoverable.</t>
+       <t>[[TBD: WG to discuss merits of multi-threaded and recovery support and 
+       protocol signalling requirements.]]</t>
        
        <figure anchor="pollRequest" title="Example Poll Request">
        <preamble>The following is a non-normative example poll request to the
        endpoint: <spanx style="verb">https://nofity.exampleidp.com/Events</spanx>.</preamble>
-       <artwork align="left">GET /Events  HTTP/1.1
+       <artwork align="left">GET /Events?returnImmediately=true&amp;since=1458496025  HTTP/1.1
 
 Host: notify.exampleidp.com
 Accept: application/json
@@ -419,7 +469,7 @@ Authorization: Bearer h480djs93hd8
        </figure>
        
        <t>In response to the HTTP GET, the Event Transmitter checks for 
-       undelivered SET events and responds with a JSON document containing
+       available SET events and responds with a JSON document containing
        the following attributes:
        <list style="hanging">
         <t hangText="sets"><vspace/>A required JSON attribute whose value is a JSON
@@ -428,10 +478,18 @@ Authorization: Bearer h480djs93hd8
         a SET to be delivered and whose value is a JSON String containing
         the value of the encoded corresponding SET. If there are no
         outstanding SETs to be transmitted, the JSON object SHALL be empty.</t>
-        <t hangText="since">An optional JSON attribute whose value SHOULD
-        indicate the time of the last SET that was successfully delivered. The
-        value MUST be a NumericDate value as defined in 
-        <xref target="errorResponse"/>.
+        <t hangText="since"><vspace/>
+        An optional JSON attribute whose integer value
+        is a NumericDate and indicates the time of the oldest SET that 
+        was returned. 
+        </t>
+        <t hangText="before"><vspace/>
+        An optional JSON attribute whose integer
+        value is a NumericDate and indicates the time of the youngest
+        SET that was returned.</t>
+        <t hangText="moreAvailable"><vspace/>
+        An optional JSON attribute whose boolean value indicates if
+        more unacknowledged SETs are available to be returned. 
         </t>
        </list>
        </t>
@@ -732,11 +790,26 @@ Content-Type: application/json
     </references>
 
     <references title="Informative References">
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml' ?>
+    
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
       
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml' ?><!-- SCIM API -->
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml' ?><!-- SCIM Schema -->
+
+     <reference anchor="POSIX.1">
+  <front>
+    <title>The Open Group Base Specifications Issue 7</title>
+    <author>
+      <organization>Institute of Electrical and Electronics Engineers</organization>
+    </author>
+    <date year="2013"/>
+  </front>
+  <seriesInfo value="Std 1003.1, 2013 Edition" name="IEEE"/>
+  <format target="http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap04.html#tag_04_15"
+    type="HTML" />
+      </reference>
 
       <reference anchor="openid-connect-core">
         <front>
