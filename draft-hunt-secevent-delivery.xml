@@ -455,7 +455,7 @@ Content-Type: application/json
        Previously acknowledged SETS (see <xref target="pollGetAck"/>) are not 
        typically returned and SHOULD NOT be recoverable.</t>
        <t>[[TBD: WG to discuss merits of multi-threaded and recovery support and 
-       protocol signalling requirements.]]</t>
+       protocol signaling requirements.]]</t>
        
        <figure anchor="pollRequest" title="Example Poll Request">
        <preamble>The following is a non-normative example poll request to the

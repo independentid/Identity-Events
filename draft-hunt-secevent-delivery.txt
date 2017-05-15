@@ -496,7 +496,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
    recoverable.
 
    [[TBD: WG to discuss merits of multi-threaded and recovery support
-   and protocol signalling requirements.]]
+   and protocol signaling requirements.]]
 
 
 
