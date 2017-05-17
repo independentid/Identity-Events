@@ -294,6 +294,8 @@
       parsing of the SET token itself.</t>
   </section>
   
+    
+  
   <section anchor="httpPost" title="HTTP POST Delivery">
         
      <t>This method allows an Event Transmitter to use HTTP POST 
@@ -325,6 +327,7 @@
 
 Host: notify.examplerp.com
 Accept: application/json
+Authorization: Bearer h480djs93hd8
 Content-Type: application/jwt
 "eyJhbGciOiJub25lIn0
 .
@@ -348,27 +351,42 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
      SHALL also validate the SET information as described
      in <xref target="I-D.ietf-secevent-token">Section 2</xref>.</t>
      <t>If the SET is determined to be valid, the Event Receiver SHALL
-     indicate successful submission by responding with HTTP Status
+     "acknowledge" successful submission by responding with HTTP Status
      202 as <spanx style="verb">Accepted</spanx> 
-     (see <xref target="RFC7231">Section 6.3.3</xref>).</t>
+     (see <xref target="RFC7231">Section 6.3.3</xref>). In order
+     to maintain compatibility with other methods of transmission, the 
+     Event Receiver SHOULD NOT include a response body representation
+     of the submitted SET or what the SET's pending status is. The 
+     purpose of the response is solely to acknowledge successful receipt 
+     or to indicate any SET parsing, cryptographic errors.</t>
      
      <figure anchor="goodPostResponse" title="Example Successful Delivery Response">
         <preamble>The following is a non-normative example of a successful
         receipt of a SET.</preamble>
         <artwork>HTTP/1.1 202 Accepted</artwork>
      </figure> 
+     
+     <t>Note that the purpose of the "acknowledgement" is to let the 
+       Event Transmitter know that a SET has been delivered and the 
+       information no longer needs to be retained by the Event Transmitter. 
+       Before acknowledgement, Event Receivers SHOULD ensure they have 
+       validated received SETs and retained them in a manner appropriate 
+       to information retention requirements appropriate to the SET 
+       event types signaled. The level of retention and method of SETs
+       by Event Receivers is out-of-scope of this specification.</t>
           
      <t>In the event of a general HTTP error condition, the Event Receiver
      MAY respond with an appropriate HTTP Status code as defined in 
      <xref target="RFC7231">Section 6</xref>.</t>
-     <t>When the Event Receiver detects an error parsing and 
-     validating a received SET, the Event Receiver SHALL indicate an 
-     HTTP Status 400 error with an error code as described in <xref target="errorResponse"/>.
+     <t>When the Event Receiver detects an error parsing or 
+     validating a received SET (as defined by <xref target="I-D.ietf-secevent-token"/>), 
+     the Event Receiver SHALL indicate an HTTP Status 400 error with an 
+     error code as described in <xref target="errorResponse"/>.
      </t>
      
      <figure anchor="badPostResponse" title="Example HTTP Status 400 Response">
-        <preamble>The following is an example non-normative Bad
-        Request error.</preamble>
+        <preamble>The following is an example non-normative error 
+        response.</preamble>
         <artwork>HTTP/1.1 400 Bad Request
 Content-Type: application/json
 
@@ -384,38 +402,45 @@ Content-Type: application/json
      
        <t>This method allows an Event Receiver to use HTTP GET 
        (<xref target="RFC7231">Section 4.3.1</xref>) to check
-       for and receive zero or more SETs at a periodic interval. To 
-       acknowledge receipt of provided SETs, the Event Receiver 
-       performs an HTTP POST to acknowledge successful transfer of SETs 
+       for and receive zero or more SETs at a periodic interval or
+       to poll for SETs and wait pending availability.</t>
+       
+       <t>To acknowledge receipt of SETs, the Event Receiver 
+       performs an HTTP POST request to acknowledge successful transfer of SETs 
        and/or to indicate appropriate errors as specified in 
        <xref target="pollGetAck"/>.
        </t>
        
        <t>This SET delivery method is primarily provided to support 
-       Event Receivers located behind firewalls and are not 
+       Event Receivers located behind firewalls and may not 
        able to open HTTP endpoints to receive HTTP POST requests. For 
        the purposes of this delivery method, it is assumed there is a 
        single Event Receiver entity performing event polling. 
-       Considerations for multi-threaded polling are out of scope of 
-       this SET delivery method.
        </t>
-            
-       <t>SETs to be delivered MAY be signed 
-       and/or encrypted as defined in <xref target="I-D.ietf-secevent-token" />.</t>
-       
+                   
        <t>The delivery of SETs in this method is facilitated by a 
-       two-step method initiated by Event Receivers:<list style="numbers">
+       two-request method initiated by Event Receivers:<list style="numbers">
         <t>The Event Receiver polls for available SETs using an 
         HTTP GET to a pre-arranged endpoint provided by the Event 
         Transmitter.</t>
-        <t>If any SETs are received in step 1, the Event Receiver 
-        acknowledges the SETs, using an HTTP POST to the same endpoint 
-        used to previously poll for SETs.</t>
+        <t>If any SETs are received in the previous step, the Event Receiver 
+        "acknowledges" received SETs, using an HTTP POST to the same endpoint 
+        used to poll for SETs. </t>
        </list></t>
+       
+       <t>Note that the purpose of the "acknowledgement" is to let the 
+       Event Transmitter know that a SET has been delivered and the 
+       information no longer needs to be retained by the Event Transmitter. 
+       Before acknowledgement, Event Receivers SHOULD ensure they have 
+       validated received SETs and retained them in a manner appropriate 
+       to information retention requirements appropriate to the SET 
+       event types signaled. The level of retention and method of SETs
+       by Event Receivers is out-of-scope of this specification.</t>
  
        <section anchor="pollGET" title="Step 1: Polling for SETs">
        
-       <t>The Event Receiver performs an HTTP GET to a pre-arranged 
+       <t>The Event Receiver performs an HTTP GET (see
+       <xref target="RFC7231">Section 4.3.1</xref>) to a pre-arranged 
        polling endpoint URI to check for any new or unacknowledged SETs
        that are available.</t>
        
@@ -436,7 +461,8 @@ Content-Type: application/json
          <spanx style="verb">false</spanx> indicating the request will
          wait pending availability of a SET or until the request
          times out. The time out for the request is part of the Stream
-         configuration which is out of scope of this specification.</t>
+         configuration which is out of scope of this specification. For
+         more information see <xref target="RFC6202">Section 2</xref>.</t>
        </list></t>
        
        <t>In order to support multi-threaded polling, an Event 
@@ -463,6 +489,7 @@ Content-Type: application/json
        <artwork align="left">GET /Events?returnImmediately=true&amp;since=1458496025  HTTP/1.1
 
 Host: notify.exampleidp.com
+Authorization: Bearer h480djs93hd8
 Accept: application/json
 Authorization: Bearer h480djs93hd8
 </artwork>
@@ -492,7 +519,11 @@ Authorization: Bearer h480djs93hd8
         more unacknowledged SETs are available to be returned. 
         </t>
        </list>
-       </t>
+       Depending on the value of the parameter 
+       <spanx style="verb">returnImmediately</spanx>, the Event 
+       Transmitter MAY hold the connection open until one or more
+       SETs are available. The Event Transmitter and Receiver should
+       have an agreed upon timeout for such a request.</t>
        
        <figure anchor="pollResponse" title="Example Poll Response">
        <preamble>The following is a non-normative example response to
@@ -594,6 +625,7 @@ Location: https://notify.exampleidp/Events
         <artwork>POST /Events  HTTP/1.1
 
 Host: notify.exampleidp.com
+Authorization: Bearer h480djs93hd8
 Content-Type: application/json
 Authorization: Bearer h480djs93hd8
 
@@ -611,6 +643,7 @@ Authorization: Bearer h480djs93hd8
         <artwork>POST /Events  HTTP/1.1
 
 Host: notify.exampleidp.com
+Authorization: Bearer h480djs93hd8
 Content-Type: application/json
 Authorization: Bearer h480djs93hd8
 
@@ -762,15 +795,185 @@ Content-Type: application/json
         error (e.g. 404).</t>
           
      </section>
-   </section><section anchor="Security" title="Security Considerations" toc="default">
+   </section>
+   
+   <section anchor="aa" title="Authentication and Authorization" toc="default">
+      <t>The SET delivery methods described in this specification are
+      based upon HTTP and depend on the use of TLS and/or standard 
+      HTTP authentication and authorization schemes as per 
+      <xref target="RFC7235" />. For example, the following
+      methodologies could be used among others: <list style="hanging">
+          <t hangText="TLS Client Authentication"><vspace />Event delivery
+          endpoints MAY request TLS mutual client authentication. 
+          See <xref target="RFC5246">Section 7.3</xref>. </t>
 
-      <t>[TO BE COMPLETED]</t>
+          <t hangText="HOBA Authentication"><vspace />HTTP Origin-Bound
+          Authentication (HOBA) is a variation on TLS client authentication
+          and uses a digital-signature-based design for an HTTP authentication
+          method (see <xref target="RFC7486" />). The design can also be used
+          in JavaScript-based authentication embedded in HTML. HOBA is an
+          alternative to HTTP authentication schemes that require passwords
+          and therefore avoids all problems related to passwords, such as
+          leakage of server-side password databases.</t>
+
+          <t hangText="Bearer Tokens"><vspace />Bearer tokens <xref target="RFC6750" /> MAY be used when combined with TLS and a token
+          framework such as OAuth 2.0 <xref target="RFC6749" />. 
+          For security considerations regarding the use of bearer tokens in
+          SET delivery see <xref target="bearerConsiderations" />.</t>
+
+          <t hangText="Basic Authentication"><vspace />Usage of basic
+          authentication should be avoided due to its use of a single factor
+          that is based upon a relatively static, symmetric secret.
+          Implementers SHOULD combine the use of basic authentication with
+          other factors. The security considerations of HTTP BASIC, are well
+          documented in <xref target="RFC7617" /> and SHOULD be considered
+          along with using signed SETs (see SET Payload Authentication below).</t>
+          
+          <t hangText="SET Payload Authentication">In scenarios where SETs are signed and
+          the delivery method is HTTP POST (see <xref target="httpPost" />),
+          Event Receivers MAY elect to use Basic Authentication or not 
+          to use HTTP or TLS based authentication at all. See <xref target="payloadAuthentication" />
+          for considerations.</t>
+        </list></t>
+
+      <t>As per <xref target="RFC7235">Section 4.1 of</xref>, a SET
+      delivery endpoint SHALL indicate supported HTTP authentication 
+      schemes via the <spanx style="verb">WWW-Authenticate</spanx> header.</t>
+
+      <t>Because SET Delivery describes a simple function, authorization
+      for the ability to pick-up or deliver SETs can be derived by
+      considering the identity of the SET issuer, or via an authentication
+      method above. This specification considers authentication as a
+      feature to prevent denial-of-service attacks. Because SETs are
+      not commands (see ), Event Receivers are free to ignore SETs that 
+      are not of interest.</t>
+
+      <t>For illustrative purposes only, SET delivery examples show an OAuth2
+      bearer token value <xref target="RFC6750" /> in the authorization header.
+      This is not intended to imply that bearer tokens are
+      preferred. However, the use of bearer tokens in the specification does
+      reflect common implementation practice. </t>
+
+      <section anchor="authzTokens" title="Use of Tokens as Authorizations">
+        <t>When using bearer tokens or proof-of-possession tokens that
+        represent an authorization grant such as issued by OAuth (see <xref target="RFC6749" />), implementers SHOULD consider the type of
+        authorization granted, any authorized scopes (see Section 3.3 of <xref target="RFC6749" />), and the security subject(s) that SHOULD be mapped
+        from the authorization when considering local access control rules.
+        Section 6 of the OAuth Assertions draft <xref target="RFC7521" />, documents common scenarios for
+        authorization including:<list style="symbols">
+            <t>Clients using an assertion to authenticate and/or act on behalf
+            of itself;</t>
+
+            <t>Clients acting on behalf of a user; and,</t>
+
+            <t>A Client acting on behalf of an anonymous user (e.g., see next
+            section).</t>
+          </list>When using OAuth authorization tokens, implementers MUST take
+        into account the threats and countermeasures documented in the
+        security considerations for the use of client authorizations (see
+        Section 8 of <xref target="RFC7521" />). When using
+        other token formats or frameworks, implementers MUST take into account
+        similar threats and countermeasures, especially those documented by
+        the relevant specifications.</t>
+      </section>
+  
+  </section><section anchor="Security" title="Security Considerations" toc="default">
+      
+      <section anchor="payloadAuthentication" title="Authentication Using Signed SETs">
+      <t>In scenarios where HTTP authorization or TLS mutual authentication
+      are not used or are considered weak, JWS signed SETs SHOULD be 
+      used (see <xref target="RFC7515"/> and <xref target="I-D.ietf-secevent-token">
+      Security Considerations</xref>). This enables the Event Receiver
+      to validate that the SET issuer is authorized to deliver SETs.
+      </t>
+      </section>
+      <section title="HTTP Considerations">
+        <t>SET delivery depends on the use of Hypertext Transfer Protocol and thus
+        subject to the security considerations of HTTP <xref
+        target="RFC7230">Section 9</xref> and its related specifications.</t>
+
+        <t>As stated in <xref target="RFC7230">Section 2.7.1</xref>, an 
+        HTTP requestor MUST NOT generate the <spanx style="verb">userinfo</spanx>
+        (i.e., username and password) component (and its "@" delimiter) when
+        an "http" URI reference is generated with a message as they are now
+        disallowed in HTTP.</t>
+      </section>
+
+      <section title="TLS Support Considerations">
+        <t>SETs contain sensitive information that is considered PII
+        (e.g. subject claims). Therefore, Event Transmitters and
+        Event Receivers MUST require the use of a transport-layer 
+        security mechanism. Event delivery endpoints MUST support TLS 
+        1.2 <xref target="RFC5246"/> and MAY support additional 
+        transport-layer mechanisms meeting its security requirements. 
+        When using TLS, the client MUST perform a TLS/SSL server
+        certificate check, per <xref target="RFC6125"/>. Implementation
+        security considerations for TLS can be found in "Recommendations for
+        Secure Use of TLS and DTLS" <xref target="RFC7525"/>.</t>
+      </section>
+
+      <section title="Authorization Token Considerations">
+        <t>When using authorization tokens such as those issued by OAuth 2.0
+        <xref target="RFC6749"/>, implementers MUST take into account threats
+        and countermeasures documented in Section 8 of <xref
+        target="RFC7521"/>.</t>
+      </section>
+
+      <section anchor="bearerConsiderations"
+               title="Bearer and Cookie Considerations">
+        <t>Due to the possibility of interception, Bearer tokens and 
+        HTTP cookies MUST be exchanged using TLS.</t>
+
+        <t>Bearer tokens MUST have a limited lifetime that can be determined
+        directly or indirectly (e.g., by checking with a validation service)
+        by the service provider. By expiring tokens, clients are forced to
+        obtain a new token (which usually involves re-authentication) for
+        continued authorized access. For example, in OAuth2, a client MAY use
+        OAuth token refresh to obtain a new bearer token after authenticating
+        to an authorization server. See Section 6 of <xref
+        target="RFC6749"/>.</t>
+
+        <t>Implementations supporting OAuth bearer tokens need to factor in
+        security considerations of this authorization method <xref
+        target="RFC7521"/>. Since security is only as good
+        as the weakest link, implementers also need to consider authentication
+        choices coupled with OAuth bearer tokens. The security considerations
+        of the default authentication method for OAuth bearer tokens, HTTP
+        BASIC, are well documented in <xref
+        target="RFC7617"/>, therefore implementers
+        are encouraged to prefer stronger authentication methods. Designating
+        the specific methods of authentication and authorization are
+        out-of-scope for the delivery of SET tokens, however this 
+        information is provided as a resource to implementers.</t>
+      </section>
+      
+   </section>
+   
+   <section title="Privacy Considerations">
+   
+      <t>If a SET needs to be retained for audit purposes, JWS MAY 
+      be used to provide verification of its authenticity.</t>
+      
+      <t>Event Transmitters SHOULD attempt to specialize Event Streams 
+      so that the content is targeted to the specific business and 
+      protocol needs of subscribers.</t>
+      
+      <t>When sharing personally identifiable information or information
+      that is otherwise considered confidential to affected users, Event 
+      Transmitters and Receivers MUST have the appropriate legal agreements
+      and user consent or terms of service in place.</t>
+      
+      <t>The propagation of subject identifiers can be perceived as personally
+      identifiable information. Where possible, Event Transmitters and Receivers
+      SHOULD devise approaches that prevent propagation -- for example, the
+      passing of a hash value that requires the subscriber to already know
+      the subject.</t>
+
    </section>
 
     <section anchor="IANA" title="IANA Considerations">
       
-      <t>[TO BE COMPLETED]</t>
-
+      <t>There are no IANA considerations.</t>
   
     </section>
   </middle>
@@ -779,11 +982,17 @@ Content-Type: application/json
     <references title="Normative References">
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml' ?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5246.xml' ?><!-- TLS 1.2 -->
+
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5988.xml' ?>
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6125.xml' ?><!-- TLS Certs -->
+      
       
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7517.xml' ?><!-- JWK -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7525.xml' ?><!-- TLS Recos -->
    
       <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-token-00.xml'?>
 
@@ -792,8 +1001,21 @@ Content-Type: application/json
     <references title="Informative References">
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml' ?>
     
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6202.xml' ?><!-- HTTP Long Polling -->
+    
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6749.xml' ?><!-- OAuth -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6750.xml' ?><!-- OAuth Bearer-->
+      
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7521.xml' ?><!-- Client Auth Assertions -->
+      
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7230.xml' ?><!-- HTTP Msg -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7235.xml' ?><!-- HTTP Auth -->
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7486.xml' ?><!-- HOBA -->
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7617.xml' ?><!-- Basic Auth Update -->
       
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml' ?><!-- SCIM API -->
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml' ?><!-- SCIM Schema -->
@@ -865,6 +1087,15 @@ Content-Type: application/json
     </section>
 
     <section title="Change Log">
+      <t>Draft 00 - Based on draft-hunt-secevent.distribution with the 
+      following additions:<list style="symbols">
+        <t>Removed Control Plane from specification</t>
+        <t>Added new HTTP Polling delivery method</t>
+        <t>Added general HTTP security considerations</t>
+        <t>Added authentication and authorization</t>
+      </list></t>
+      
+      <t>draft-hunt-secevent revision history:<list style="symbols">
       <t>Draft 00 - PH - First Draft based on reduced version of draft-hunt-idevent-distribution</t>
       <t>Draft 01 - PH - <list style="symbols">
         <t>Reworked terminology to match new WG Transmitter/Receiver terms</t>
@@ -878,7 +1109,7 @@ Content-Type: application/json
         <t>Control Plane sections moved to draft-hunt-secevent-stream-mgmt</t>
         <t>Added support for delivering multiple events using HTTP GET polling</t>
       </list></t>
-      
+      </list></t>
     </section>
   </back>
 </rfc>
