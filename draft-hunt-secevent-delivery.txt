@@ -55,7 +55,7 @@ Copyright Notice
 
 Hunt & Scurtescu        Expires November 19, 2017               [Page 1]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    the Trust Legal Provisions and are provided without warranty as
@@ -111,7 +111,7 @@ Table of Contents
 
 Hunt & Scurtescu        Expires November 19, 2017               [Page 2]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    [[This work is TBD by the SECEVENTS WG]]
@@ -167,7 +167,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017               [Page 3]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    Event Transmitter
@@ -223,7 +223,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017               [Page 4]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 2.  SET Delivery Data Plane
@@ -279,7 +279,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017               [Page 5]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    a later date when de-coupled from the original delivery where
@@ -335,7 +335,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017               [Page 6]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    To deliver an Event, the Event Transmitter generates an event
@@ -391,7 +391,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017               [Page 7]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    The following is a non-normative example of a successful receipt of a
@@ -447,7 +447,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017               [Page 8]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    The delivery of SETs in this method is facilitated by a two-request
@@ -503,7 +503,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017               [Page 9]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    To facilitate recovery of unacknowledged SETs, the Event Receiver MAY
@@ -559,7 +559,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017              [Page 10]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
       An optional JSON attribute whose integer value is a NumericDate
@@ -615,7 +615,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017              [Page 11]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    The following is a non-normative example response to the request
@@ -671,7 +671,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017              [Page 12]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
       received.  The value of each is a JSON object whose contents is an
@@ -727,7 +727,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017              [Page 13]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    defined in Section 6 [RFC7231].  No HTTP response body content SHOULD
@@ -783,7 +783,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017              [Page 14]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    so that the Event Receiver can confirm end-to-end configuration of
@@ -839,7 +839,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017              [Page 15]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    A non-normative JSON representation of an Event to be sent to a Event
@@ -895,7 +895,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017              [Page 16]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
       considerations regarding the use of bearer tokens in SET delivery
@@ -951,7 +951,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017              [Page 17]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    o  Clients using an assertion to authenticate and/or act on behalf of
@@ -1007,7 +1007,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017              [Page 18]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 4.4.  Authorization Token Considerations
@@ -1063,7 +1063,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017              [Page 19]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    Receivers SHOULD devise approaches that prevent propagation -- for
@@ -1119,7 +1119,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017              [Page 20]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    [RFC7231]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
@@ -1175,7 +1175,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017              [Page 21]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
    [RFC6750]  Jones, M. and D. Hardt, "The OAuth 2.0 Authorization
@@ -1231,7 +1231,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 Hunt & Scurtescu        Expires November 19, 2017              [Page 22]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 Appendix A.  Acknowledgments
@@ -1287,7 +1287,7 @@ Appendix B.  Change Log
 
 Hunt & Scurtescu        Expires November 19, 2017              [Page 23]
 
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
       *  Added support for delivering multiple events using HTTP GET
