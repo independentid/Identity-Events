@@ -71,25 +71,25 @@ Table of Contents
      2.2.  HTTP POST Delivery  . . . . . . . . . . . . . . . . . . .   6
      2.3.  Delivery using HTTP Polling . . . . . . . . . . . . . . .   8
        2.3.1.  Step 1: Polling for SETs  . . . . . . . . . . . . . .   9
-       2.3.2.  Step 2: Acknowledging Sets  . . . . . . . . . . . . .  13
-     2.4.  Error Response Handling . . . . . . . . . . . . . . . . .  15
-     2.5.  Event Stream Verification . . . . . . . . . . . . . . . .  15
-   3.  Authentication and Authorization  . . . . . . . . . . . . . .  17
-     3.1.  Use of Tokens as Authorizations . . . . . . . . . . . . .  19
-   4.  Security Considerations . . . . . . . . . . . . . . . . . . .  19
-     4.1.  Authentication Using Signed SETs  . . . . . . . . . . . .  19
-     4.2.  HTTP Considerations . . . . . . . . . . . . . . . . . . .  19
-     4.3.  TLS Support Considerations  . . . . . . . . . . . . . . .  20
-     4.4.  Authorization Token Considerations  . . . . . . . . . . .  20
-     4.5.  Bearer and Cookie Considerations  . . . . . . . . . . . .  20
-   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  21
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  21
-   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  21
-     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  21
-     7.2.  Informative References  . . . . . . . . . . . . . . . . .  22
-   Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  24
-   Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  24
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  25
+       2.3.2.  Step 2: Acknowledging Sets  . . . . . . . . . . . . .  12
+     2.4.  Error Response Handling . . . . . . . . . . . . . . . . .  14
+     2.5.  Event Stream Verification . . . . . . . . . . . . . . . .  14
+   3.  Authentication and Authorization  . . . . . . . . . . . . . .  16
+     3.1.  Use of Tokens as Authorizations . . . . . . . . . . . . .  17
+   4.  Security Considerations . . . . . . . . . . . . . . . . . . .  18
+     4.1.  Authentication Using Signed SETs  . . . . . . . . . . . .  18
+     4.2.  HTTP Considerations . . . . . . . . . . . . . . . . . . .  18
+     4.3.  TLS Support Considerations  . . . . . . . . . . . . . . .  18
+     4.4.  Authorization Token Considerations  . . . . . . . . . . .  19
+       4.4.1.  Bearer Token Considerations . . . . . . . . . . . . .  19
+   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  19
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  20
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  20
+     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  20
+     7.2.  Informative References  . . . . . . . . . . . . . . . . .  21
+   Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  23
+   Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  23
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  24
 
 1.  Introduction and Overview
 
@@ -194,7 +194,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
       and encryption, and Event Families.
 
    Event Family
-      An Event Family is a URI that describes the set of events types be
+      An Event Family is a URI that describes the set of Events types be
       issued in an Event Stream.
 
    Subject
@@ -205,7 +205,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
       security and authorization systems.
 
    Event
-      An event is defined to be an event as represented by a security
+      An Event is defined to be an event as represented by a security
       event token (SET).  See [I-D.ietf-secevent-token].
 
    NumericDate
@@ -235,11 +235,11 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 2.1.  Event Delivery Process
 
    When an Event occurs, the Feed Provider constructs a SET token
-   [I-D.ietf-secevent-token] that describes the event.  The SET issuer
+   [I-D.ietf-secevent-token] that describes the Event.  The SET issuer
    determines the Event Streams over which the SET should be distributed
    to.
 
-   How SET Events are defined and the process by which events are
+   How SET Events are defined and the process by which Events are
    identified for Event Receivers is out-of-scope of this specification.
 
    When a SET is available for a Event Receiver, the Feed Transmitter
@@ -252,28 +252,28 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
    o  The Event Transmitter queues up the SET in a buffer so that an
       Event Receiver MAY poll for SETs using HTTP/1.1 GET.
 
-   o  Or, the Feed Transmitter delivers the event through a different
+   o  Or, the Feed Transmitter delivers the Event through a different
       method not defined by this specification.
 
    Delivery of SETs MAY be delivered using one of two content formats:
 
-   Single Event(application/jwt)
+   Single Event(Content-Type: application/jwt)
       Where SETs are delivered one at a time (e.g. such as typical with
       HTTP POST) where the data payload is just a JSON Web Token
       [RFC7519] (see xxxxxxx).
 
-   Multi-Event(application/json)  Where multiple SETs are delivered in a
-      JSON structure [RFC7159].  The use of Multi-Event format is
-      typically used with delivery methods that poll (e.g.  HTTP GET).
+   Multi-Event(Content-Type: application/json)  Where multiple SETs are
+      delivered in a JSON structure [RFC7159].  The use of Multi-Event
+      format is typically used with delivery methods that poll (e.g.
+      HTTP GET).
 
-   After successful delivery of SETs, Feed Transmitters SHOULD NOT be
-   required to maintain or record SETs for recovery.  Once a SET is
-   delivered, the Event Receiver SHALL be responsible for retention and
-   recovery.
+   After successful (acknowledged) SET delivery, Event Transmitters
+   SHOULD NOT be required to maintain or record SETs for recovery.  Once
+   a SET is acknowledged, the Event Receiver SHALL be responsible for
+   retention and recovery.
 
-   Transmitted SETs SHOULD be self-validating (e.g. signed) in order to
-   verify they were issued by the Event Transmitter at a later date when
-
+   Transmitted SETs SHOULD be self-validating (e.g. signed) if there is
+   a requirement to verify they were issued by the Event Transmitter at
 
 
 
@@ -282,43 +282,14 @@ Hunt & Scurtescu        Expires November 19, 2017               [Page 5]
 Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 
-   de-coupled from the original delivery via HTTP where authenticity
-   could be checked via the HTTP or TLS mutual authentication.
-
-   If delivery to any particular Event Receiver has been delayed for an
-   extended period of time, the Feed Transmitter MAY suspend the
-   affected Event Stream and even stop maintaining outstanding SETs for
-   the Event Receiver at its discretion and available resources.  The
-   method by which the Event Receiver discovers and recovers these SETs
-   is out of scope of this specification.
+   a later date when de-coupled from the original delivery where
+   authenticity could be checked via the HTTP or TLS mutual
+   authentication.
 
    Upon receiving a SET, the Event Receiver reads the SET and validates
-   it.  The receiver MUST then inform the Event transmitter, using the
-   defined method of any authentication, configuration, parsing or JWT
-   validation errors that occur.
-
-   Based upon the content of the token, the Event Receiver decides what,
-   if any, action needs to be taken in response to the received SET.
-   For example, in response to a SCIM provisioning event [idevent-scim]
-   indicating a changed resource, the Event Receiver might perform a
-   SCIM GET request (see Section 3.4 [RFC7644]) to the affected resource
-   URI in order to confidentially obtain the current state of the
-   transmitter's affected SCIM resource in order to reconcile local
-   corresponding state changes.
-
-   The action a Event Receiver takes in response to a SET MAY be
-   substantially different than merely copying the action of the SET
-   issuer.  A single SET can trigger one or more receiver actions or it
-   can be ignored.  For example, upon receiving notification that a user
-   resource has been added to a group, the Event Receiver may first
-   determine that the user does not exist in the Event Receiver's
-   domain.  The Event Receiver translates the event into two actions:
-
-   1.  Retrieve the user (e.g. using SCIM GET) and then provisions the
-       user locally.  After enabling the user,
-
-   2.  The Event Receiver then enables the user for the application
-       associated with membership in the issuer's group.
+   it.  The receiver MUST acknowledge receipt to the Event transmitter,
+   using the defined acknowledgement or error method depending on the
+   method of transfer.
 
    The Event Receiver SHALL NOT use the Event acknowledgement mechanism
    to report Event errors other than related to the validation and
@@ -329,14 +300,6 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
    This method allows an Event Transmitter to use HTTP POST
    (Section 4.3.3 [RFC7231]) to deliver SETs to the registered web
    callback URI identified in the Event Stream configuration.
-
-
-
-
-Hunt & Scurtescu        Expires November 19, 2017               [Page 6]
-
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
-
 
    The SET to be delivered MAY be signed and/or encrypted as defined in
    [I-D.ietf-secevent-token].
@@ -350,7 +313,32 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
    (see [I-D.ietf-secevent-token]).  As per Section 5.3.2 [RFC7231], the
    expected media type ("Accept" header) response is "application/json".
 
-   To deliver an event, the Event Transmitter generates an event
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt & Scurtescu        Expires November 19, 2017               [Page 6]
+
+Internet-Draft      draft-hunt-secevent-distribution            May 2017
+
+
+   To deliver an Event, the Event Transmitter generates an event
    delivery message and uses HTTP POST to the configured endpoint with
    the appropriate "Accept" and "Content-Type" headers.
 
@@ -384,8 +372,20 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
    If the SET is determined to be valid, the Event Receiver SHALL
    "acknowledge" successful submission by responding with HTTP Status
-   202 as "Accepted" (see Section 6.3.3 [RFC7231]).  In order to
-   maintain compatibility with other methods of transmission, the Event
+   202 as "Accepted" (see Section 6.3.3 [RFC7231]).
+
+   In order to maintain compatibility with other methods of
+   transmission, the Event Receiver SHOULD NOT include an HTTP response
+   body representation of the submitted SET or what the SET's pending
+   status is when acknowledging success.  In the case of an error (e.g.
+   HTTP Status 400), purpose of the HTTP response body is to indicate
+   any SET parsing, validation, or cryptographic errors.
+
+
+
+
+
+
 
 
 
@@ -394,11 +394,6 @@ Hunt & Scurtescu        Expires November 19, 2017               [Page 7]
 Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 
-   Receiver SHOULD NOT include a response body representation of the
-   submitted SET or what the SET's pending status is.  The purpose of
-   the response is solely to acknowledge successful receipt or to
-   indicate any SET parsing, cryptographic errors.
-
    The following is a non-normative example of a successful receipt of a
    SET.
 
@@ -406,16 +401,16 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
               Figure 2: Example Successful Delivery Response
 
-   Note that the purpose of the "acknowledgement" is to let the Event
-   Transmitter know that a SET has been delivered and the information no
-   longer needs to be retained by the Event Transmitter.  Before
-   acknowledgement, Event Receivers SHOULD ensure they have validated
-   received SETs and retained them in a manner appropriate to
+   Note that the purpose of the "acknowledgement" response is to let the
+   Event Transmitter know that a SET has been delivered and the
+   information no longer needs to be retained by the Event Transmitter.
+   Before acknowledgement, Event Receivers SHOULD ensure they have
+   validated received SETs and retained them in a manner appropriate to
    information retention requirements appropriate to the SET event types
    signaled.  The level of retention and method of SETs by Event
    Receivers is out-of-scope of this specification.
 
-   In the event of a general HTTP error condition, the Event Receiver
+   In the Event of a general HTTP error condition, the Event Receiver
    MAY respond with an appropriate HTTP Status code as defined in
    Section 6 [RFC7231].
 
@@ -441,7 +436,12 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
    This method allows an Event Receiver to use HTTP GET (Section 4.3.1
    [RFC7231]) to check for and receive zero or more SETs at a periodic
+   interval (short polling) or to poll for SETs and wait pending
+   availability also known as long polling (see Section 2 [RFC6202]).
 
+   To acknowledge receipt of SETs, the Event Receiver performs an HTTP
+   POST request to acknowledge successful transfer of SETs and/or to
+   indicate appropriate errors as specified in Section 2.3.2.
 
 
 
@@ -449,13 +449,6 @@ Hunt & Scurtescu        Expires November 19, 2017               [Page 8]
 
 Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
-
-   interval (short polling) or to poll for SETs and wait pending
-   availability also known as long polling (see Section 2 [RFC6202]).
-
-   To acknowledge receipt of SETs, the Event Receiver performs an HTTP
-   POST request to acknowledge successful transfer of SETs and/or to
-   indicate appropriate errors as specified in Section 2.3.2.
 
    The delivery of SETs in this method is facilitated by a two-request
    method initiated by the Event Receiver:
@@ -498,14 +491,6 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
       An optional integer NumericDate value that indicates the earliest
       time of unacknowledged SETs to be returned.
 
-
-
-
-Hunt & Scurtescu        Expires November 19, 2017               [Page 9]
-
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
-
-
    returnImmediately
       A boolean value which indicates if the Event Transmitter SHALL
       return a response immediately if no results are available (short
@@ -513,6 +498,13 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
       to be treated as a long poll (see Section 2 [RFC6202]).  The time
       out for the request is part of the Stream configuration which is
       out of scope of this specification.
+
+
+
+Hunt & Scurtescu        Expires November 19, 2017               [Page 9]
+
+Internet-Draft      draft-hunt-secevent-distribution            May 2017
+
 
    To facilitate recovery of unacknowledged SETs, the Event Receiver MAY
    use the parameter "before" and/or "since".  Upon receipt of a request
@@ -553,6 +545,14 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
       contains zero or more nested JSON attributes.  Each nested
       attribute corresponds to the "jti" of a SET to be delivered and
       whose value is a JSON String containing the value of the encoded
+      corresponding SET.  If there are no outstanding SETs to be
+      transmitted, the JSON object SHALL be empty.
+
+   since
+      An optional JSON attribute whose integer value is a NumericDate
+      and indicates the time of the oldest SET that was returned.
+
+   before
 
 
 
@@ -562,61 +562,12 @@ Hunt & Scurtescu        Expires November 19, 2017              [Page 10]
 Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 
-      corresponding SET.  If there are no outstanding SETs to be
-      transmitted, the JSON object SHALL be empty.
-
-   since
-      An optional JSON attribute whose integer value is a NumericDate
-      and indicates the time of the oldest SET that was returned.
-
-   before
       An optional JSON attribute whose integer value is a NumericDate
       and indicates the time of the youngest SET that was returned.
 
    moreAvailable
       An optional JSON attribute whose boolean value indicates if more
       unacknowledged SETs are available to be returned.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt & Scurtescu        Expires November 19, 2017              [Page 11]
-
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
-
 
    The following is a non-normative example response to the request
    shown Figure 4.  This example shows two SETs are returned.
@@ -662,14 +613,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 
 
-
-
-
-
-
-
-
-Hunt & Scurtescu        Expires November 19, 2017              [Page 12]
+Hunt & Scurtescu        Expires November 19, 2017              [Page 11]
 
 Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
@@ -711,26 +655,27 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
    POST to the same endpoint it previously retrieved the SETs from to
    deliver a JSON document containing the following JSON attributes:
 
-   ack  Which contains an array of Strings that each correspond to the
+   ack
+      Which contains an array of Strings that each correspond to the
       "jti" of a successfully received SET.  If there are no outstanding
       SETs to acknowledge, the attribute MAY be omitted.  When
       acknowledging a SET, the Event Transmitter is released from any
       obligation to retain the SET (e.g. for a future re-try to
       receive).
 
-   errs  Whose value is a JSON Object that contains one or more nested
-      JSON attributes that correspond to the "jti" of each invalid SET
-      received.  The value of each is a JSON object whose contents is an
+   errs
+      Whose value is a JSON Object that contains one or more nested JSON
+      attributes that correspond to the "jti" of each invalid SET
 
 
 
-
-Hunt & Scurtescu        Expires November 19, 2017              [Page 13]
+Hunt & Scurtescu        Expires November 19, 2017              [Page 12]
 
 Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 
-      _err_ attribute and _description_ attribute whose value correspond
+      received.  The value of each is a JSON object whose contents is an
+      "err" attribute and "description" attribute whose value correspond
       to the errors described in Section 2.4.
 
    The following is a non-normative example acknowledgement to the SETs
@@ -780,8 +725,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 
 
-
-Hunt & Scurtescu        Expires November 19, 2017              [Page 14]
+Hunt & Scurtescu        Expires November 19, 2017              [Page 13]
 
 Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
@@ -803,9 +747,10 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
    | jwe       | Unable to decrypt JWE encoded data.                   |
    | jwtAud    | Invalid audience value.                               |
    | jwtIss    | Issuer not recognized.                                |
-   | setType   | An unexpected event type was received.                |
-   | setParse  | Invalid structure was encountered such as inability   |
-   |           | to parse SET event payload.                           |
+   | setType   | An unexpected Event type was received.                |
+   | setParse  | Invalid structure was encountered such as an          |
+   |           | inability to parse or an incomplete set of Event      |
+   |           | claims.                                               |
    | setData   | SET event claims incomplete or invalid.               |
    | dup       | A duplicate SET was received and has been ignored.    |
    +-----------+-------------------------------------------------------+
@@ -833,15 +778,15 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
    request to the Event Transmitter to verify the Stream.  The Event
    Receiver provides a "confirm" value and a "nonce" value that the
    Event Transmitter is expected to return in the body of a Verify Event
-   so that the Event Receiver can confirm end-to-end configuration of
 
 
 
-Hunt & Scurtescu        Expires November 19, 2017              [Page 15]
+Hunt & Scurtescu        Expires November 19, 2017              [Page 14]
 
 Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 
+   so that the Event Receiver can confirm end-to-end configuration of
    SET delivery including proper signing and encryption depending on the
    configuration of the Stream.  For example, can the Event Transmitter
    send a encrypted SET that the Receiver can decode?  The method by
@@ -892,14 +837,13 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 
 
-
-Hunt & Scurtescu        Expires November 19, 2017              [Page 16]
+Hunt & Scurtescu        Expires November 19, 2017              [Page 15]
 
 Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 
-   A non-normative JSON representation of an event to be sent to a Event
-   Receiver as a Event Stream confirmation.  Note the event is not yet
+   A non-normative JSON representation of an Event to be sent to a Event
+   Receiver as a Event Stream confirmation.  Note the Event is not yet
    encoded as a JWT token:
 
    {
@@ -943,28 +887,19 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
       Event delivery endpoints MAY request TLS mutual client
       authentication.  See Section 7.3 [RFC5246].
 
-   HOBA Authentication
-      HTTP Origin-Bound Authentication (HOBA) is a variation on TLS
-      client authentication and uses a digital-signature-based design
+   Bearer Tokens
+      Bearer tokens [RFC6750] MAY be used when combined with TLS and a
+      token framework such as OAuth 2.0 [RFC6749].  For security
 
 
 
-Hunt & Scurtescu        Expires November 19, 2017              [Page 17]
+Hunt & Scurtescu        Expires November 19, 2017              [Page 16]
 
 Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
 
-      for an HTTP authentication method (see [RFC7486]).  The design can
-      also be used in JavaScript-based authentication embedded in HTML.
-      HOBA is an alternative to HTTP authentication schemes that require
-      passwords and therefore avoids all problems related to passwords,
-      such as leakage of server-side password databases.
-
-   Bearer Tokens
-      Bearer tokens [RFC6750] MAY be used when combined with TLS and a
-      token framework such as OAuth 2.0 [RFC6749].  For security
       considerations regarding the use of bearer tokens in SET delivery
-      see Section 4.5.
+      see Section 4.4.1.
 
    Basic Authentication
       Usage of basic authentication should be avoided due to its use of
@@ -975,11 +910,11 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
       considered along with using signed SETs (see SET Payload
       Authentication below).
 
-   SET Payload Authentication  In scenarios where SETs are signed and
-      the delivery method is HTTP POST (see Section 2.2), Event
-      Receivers MAY elect to use Basic Authentication or not to use HTTP
-      or TLS based authentication at all.  See Section 4.1 for
-      considerations.
+   SET Payload Authentication
+      In scenarios where SETs are signed and the delivery method is HTTP
+      POST (see Section 2.2), Event Receivers MAY elect to use Basic
+      Authentication or not to use HTTP or TLS based authentication at
+      all.  See Section 4.1 for considerations.
 
    As per Section 4.1 of [RFC7235], a SET delivery endpoint SHALL
    indicate supported HTTP authentication schemes via the "WWW-
@@ -997,18 +932,7 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
    bearer token value [RFC6750] in the authorization header.  This is
    not intended to imply that bearer tokens are preferred.  However, the
    use of bearer tokens in the specification does reflect common
-   implementation practice.
-
-
-
-
-
-
-
-Hunt & Scurtescu        Expires November 19, 2017              [Page 18]
-
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
-
+   practice.
 
 3.1.  Use of Tokens as Authorizations
 
@@ -1020,6 +944,15 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
    considering local access control rules.  Section 6 of the OAuth
    Assertions draft [RFC7521], documents common scenarios for
    authorization including:
+
+
+
+
+
+Hunt & Scurtescu        Expires November 19, 2017              [Page 17]
+
+Internet-Draft      draft-hunt-secevent-distribution            May 2017
+
 
    o  Clients using an assertion to authenticate and/or act on behalf of
       itself;
@@ -1058,14 +991,6 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
    its "@" delimiter) when an "http" URI reference is generated with a
    message as they are now disallowed in HTTP.
 
-
-
-
-Hunt & Scurtescu        Expires November 19, 2017              [Page 19]
-
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
-
-
 4.3.  TLS Support Considerations
 
    SETs contain sensitive information that is considered PII (e.g.
@@ -1078,16 +1003,23 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
    considerations for TLS can be found in "Recommendations for Secure
    Use of TLS and DTLS" [RFC7525].
 
+
+
+Hunt & Scurtescu        Expires November 19, 2017              [Page 18]
+
+Internet-Draft      draft-hunt-secevent-distribution            May 2017
+
+
 4.4.  Authorization Token Considerations
 
    When using authorization tokens such as those issued by OAuth 2.0
    [RFC6749], implementers MUST take into account threats and
    countermeasures documented in Section 8 of [RFC7521].
 
-4.5.  Bearer and Cookie Considerations
+4.4.1.  Bearer Token Considerations
 
-   Due to the possibility of interception, Bearer tokens and HTTP
-   cookies MUST be exchanged using TLS.
+   Due to the possibility of interception, Bearer tokens MUST be
+   exchanged using TLS.
 
    Bearer tokens MUST have a limited lifetime that can be determined
    directly or indirectly (e.g., by checking with a validation service)
@@ -1110,18 +1042,6 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
    SET tokens, however this information is provided as a resource to
    implementers.
 
-
-
-
-
-
-
-
-Hunt & Scurtescu        Expires November 19, 2017              [Page 20]
-
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
-
-
 5.  Privacy Considerations
 
    If a SET needs to be retained for audit purposes, JWS MAY be used to
@@ -1138,6 +1058,14 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
 
    The propagation of subject identifiers can be perceived as personally
    identifiable information.  Where possible, Event Transmitters and
+
+
+
+Hunt & Scurtescu        Expires November 19, 2017              [Page 19]
+
+Internet-Draft      draft-hunt-secevent-distribution            May 2017
+
+
    Receivers SHOULD devise approaches that prevent propagation -- for
    example, the passing of a hash value that requires the subscriber to
    already know the subject.
@@ -1170,14 +1098,6 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
               DOI 10.17487/RFC5246, August 2008,
               <http://www.rfc-editor.org/info/rfc5246>.
 
-
-
-
-Hunt & Scurtescu        Expires November 19, 2017              [Page 21]
-
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
-
-
    [RFC5988]  Nottingham, M., "Web Linking", RFC 5988,
               DOI 10.17487/RFC5988, October 2010,
               <http://www.rfc-editor.org/info/rfc5988>.
@@ -1192,6 +1112,15 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
    [RFC7159]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
               Interchange Format", RFC 7159, DOI 10.17487/RFC7159, March
               2014, <http://www.rfc-editor.org/info/rfc7159>.
+
+
+
+
+
+Hunt & Scurtescu        Expires November 19, 2017              [Page 20]
+
+Internet-Draft      draft-hunt-secevent-distribution            May 2017
+
 
    [RFC7231]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
               Protocol (HTTP/1.1): Semantics and Content", RFC 7231,
@@ -1225,15 +1154,6 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
               Open Group Base Specifications Issue 7", IEEE Std 1003.1,
               2013 Edition, 2013.
 
-
-
-
-
-Hunt & Scurtescu        Expires November 19, 2017              [Page 22]
-
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
-
-
    [RFC3339]  Klyne, G. and C. Newman, "Date and Time on the Internet:
               Timestamps", RFC 3339, DOI 10.17487/RFC3339, July 2002,
               <http://www.rfc-editor.org/info/rfc3339>.
@@ -1247,6 +1167,16 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
    [RFC6749]  Hardt, D., Ed., "The OAuth 2.0 Authorization Framework",
               RFC 6749, DOI 10.17487/RFC6749, October 2012,
               <http://www.rfc-editor.org/info/rfc6749>.
+
+
+
+
+
+
+Hunt & Scurtescu        Expires November 19, 2017              [Page 21]
+
+Internet-Draft      draft-hunt-secevent-distribution            May 2017
+
 
    [RFC6750]  Jones, M. and D. Hardt, "The OAuth 2.0 Authorization
               Framework: Bearer Token Usage", RFC 6750,
@@ -1263,11 +1193,6 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
               DOI 10.17487/RFC7235, June 2014,
               <http://www.rfc-editor.org/info/rfc7235>.
 
-   [RFC7486]  Farrell, S., Hoffman, P., and M. Thomas, "HTTP Origin-
-              Bound Authentication (HOBA)", RFC 7486,
-              DOI 10.17487/RFC7486, March 2015,
-              <http://www.rfc-editor.org/info/rfc7486>.
-
    [RFC7515]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
               Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May
               2015, <http://www.rfc-editor.org/info/rfc7515>.
@@ -1280,15 +1205,6 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
               "Assertion Framework for OAuth 2.0 Client Authentication
               and Authorization Grants", RFC 7521, DOI 10.17487/RFC7521,
               May 2015, <http://www.rfc-editor.org/info/rfc7521>.
-
-
-
-
-
-Hunt & Scurtescu        Expires November 19, 2017              [Page 23]
-
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
-
 
    [RFC7617]  Reschke, J., "The 'Basic' HTTP Authentication Scheme",
               RFC 7617, DOI 10.17487/RFC7617, September 2015,
@@ -1309,6 +1225,15 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
               Security Assertion Markup Language (SAML) V2.0", March
               2005.
 
+
+
+
+
+Hunt & Scurtescu        Expires November 19, 2017              [Page 22]
+
+Internet-Draft      draft-hunt-secevent-distribution            May 2017
+
+
 Appendix A.  Acknowledgments
 
    The editors would like to thanks the members of the SCIM WG which
@@ -1320,7 +1245,7 @@ Appendix A.  Acknowledgments
 
 Appendix B.  Change Log
 
-   Draft 00 - Based on draft-hunt-secevent.distribution with the
+   Draft 00 - PH - Based on draft-hunt-secevent.distribution with the
    following additions:
 
    o  Removed Control Plane from specification
@@ -1331,20 +1256,14 @@ Appendix B.  Change Log
 
    o  Added authentication and authorization
 
-   draft-hunt-secevent revision history:
+   o  Revised Verify Event to work with both types of delivery
+
+   draft-hunt-secevent.distribution revision history:
 
    o  Draft 00 - PH - First Draft based on reduced version of draft-
       hunt-idevent-distribution
 
    o  Draft 01 - PH -
-
-
-
-
-Hunt & Scurtescu        Expires November 19, 2017              [Page 24]
-
-Internet-Draft      draft-hunt-secevent-distribution            May 2017
-
 
       *  Reworked terminology to match new WG Transmitter/Receiver terms
 
@@ -1363,6 +1282,13 @@ Internet-Draft      draft-hunt-secevent-distribution            May 2017
       *  Changed to using JWKS_uri for issuer and receiver.
 
       *  Control Plane sections moved to draft-hunt-secevent-stream-mgmt
+
+
+
+Hunt & Scurtescu        Expires November 19, 2017              [Page 23]
+
+Internet-Draft      draft-hunt-secevent-distribution            May 2017
+
 
       *  Added support for delivering multiple events using HTTP GET
          polling
@@ -1397,4 +1323,22 @@ Authors' Addresses
 
 
 
-Hunt & Scurtescu        Expires November 19, 2017              [Page 25]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt & Scurtescu        Expires November 19, 2017              [Page 24]
