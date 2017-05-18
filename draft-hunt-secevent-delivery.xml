@@ -153,7 +153,10 @@
             <t hangText="Event Stream"><vspace/>
               An Event Stream is a defined location, distribution method
               and whereby an Event Transmitter and Event Receiver 
-              exchange a pre-defined family of SETs. 
+              exchange a pre-defined family of SETs. A Stream is assumed
+              to have configuration data such as HTTP endpoints, timeouts,
+              public key sets for signing and encryption, and 
+              Event Families.
             </t>
                           
 						<t hangText="Event Family"><vspace/>An Event Family is a 
@@ -228,10 +231,10 @@
         data payload is just a JSON Web Token <xref target="RFC7519"/> 
         (see xxxxxxx).</t>
         
-        <t hangText="Multi-Event(application/secevents+json)">Where 
-        multiple SETs are delivered in a JSON structure (see xxxxxxxx). 
+        <t hangText="Multi-Event(application/json)">Where 
+        multiple SETs are delivered in a JSON structure <xref target="RFC7159"/>. 
         The use of Multi-Event format is typically used with delivery 
-        methods that poll based on a timeout or schedule (e.g. HTTP GET).</t>
+        methods that poll (e.g. HTTP GET).</t>
       </list></t>
 
 			<t>After successful delivery of SETs, Feed Transmitters SHOULD NOT be 
@@ -399,42 +402,36 @@ Content-Type: application/json
      </section>
      
      <section anchor="httpGet" title="Delivery using HTTP Polling">
-     
+ 
        <t>This method allows an Event Receiver to use HTTP GET 
        (<xref target="RFC7231">Section 4.3.1</xref>) to check
-       for and receive zero or more SETs at a periodic interval or
-       to poll for SETs and wait pending availability.</t>
+       for and receive zero or more SETs at a periodic interval (short
+       polling) or to poll for SETs and wait pending availability 
+       also known as long polling (see <xref target="RFC6202">Section 2</xref>).</t>
        
-       <t>To acknowledge receipt of SETs, the Event Receiver 
-       performs an HTTP POST request to acknowledge successful transfer of SETs 
+       <t>To acknowledge receipt of SETs, the Event Receiver performs 
+       an HTTP POST request to acknowledge successful transfer of SETs 
        and/or to indicate appropriate errors as specified in 
        <xref target="pollGetAck"/>.
        </t>
-       
-       <t>This SET delivery method is primarily provided to support 
-       Event Receivers located behind firewalls and may not 
-       able to open HTTP endpoints to receive HTTP POST requests. For 
-       the purposes of this delivery method, it is assumed there is a 
-       single Event Receiver entity performing event polling. 
-       </t>
                    
        <t>The delivery of SETs in this method is facilitated by a 
-       two-request method initiated by Event Receivers:<list style="numbers">
+       two-request method initiated by the Event Receiver:<list style="numbers">
         <t>The Event Receiver polls for available SETs using an 
         HTTP GET to a pre-arranged endpoint provided by the Event 
         Transmitter.</t>
-        <t>If any SETs are received in the previous step, the Event Receiver 
-        "acknowledges" received SETs, using an HTTP POST to the same endpoint 
+        <t>If any SETs are received, the Event Receiver "acknowledges" 
+        received SETs, using an HTTP POST to the same endpoint 
         used to poll for SETs. </t>
        </list></t>
        
        <t>Note that the purpose of the "acknowledgement" is to let the 
        Event Transmitter know that a SET has been delivered and the 
-       information no longer needs to be retained by the Event Transmitter. 
-       Before acknowledgement, Event Receivers SHOULD ensure they have 
-       validated received SETs and retained them in a manner appropriate 
-       to information retention requirements appropriate to the SET 
-       event types signaled. The level of retention and method of SETs
+       SET no longer needs to be retained by the Event Transmitter for
+       recovery or retransmission. Before acknowledgement, Event 
+       Receivers SHOULD ensure they have validated received SETs and 
+       retained them in a manner appropriate to the receivers information 
+       retention requirements. The level and method of retention of SETs
        by Event Receivers is out-of-scope of this specification.</t>
  
        <section anchor="pollGET" title="Step 1: Polling for SETs">
@@ -449,29 +446,25 @@ Content-Type: application/json
          maximum number of unacknowledged SETs that SHOULD be returned.
          If more than the maximum number of SETs are available, the 
          oldest SETs available SHOULD be returned first.</t>
+         
          <t hangText="since"><vspace/>An optional integer NumericDate value 
          that indicates the oldest time of unacknowledged SETs to be 
          returned. </t>
+         
          <t hangText="before"><vspace/>An optional integer NumericDate
          value that indicates the earliest time of unacknowledged SETs
          to be returned. </t>
+         
          <t hangText="returnImmediately"><vspace/>A boolean value
          which indicates if the Event Transmitter SHALL return a response
-         immediately if no results are available. The default value is
-         <spanx style="verb">false</spanx> indicating the request will
-         wait pending availability of a SET or until the request
-         times out. The time out for the request is part of the Stream
-         configuration which is out of scope of this specification. For
-         more information see <xref target="RFC6202">Section 2</xref>.</t>
+         immediately if no results are available (short polling). The 
+         default value is <spanx style="verb">false</spanx> indicating 
+         the request is to be treated as a long poll (see 
+         <xref target="RFC6202">Section 2</xref>). The time out for the 
+         request is part of the Stream configuration which is out of 
+         scope of this specification.</t>
        </list></t>
-       
-       <t>In order to support multi-threaded polling, an Event 
-       Transmitter MAY choose to track undelivered versus unacknowledged
-       SETs internally. When multiple Event Receiver threads poll
-       simultaneously, the Event
-       Transmitter typically returns the maximum number of SETs allowed
-       in a response to the first thread request received. Each subsequent
-       request receives the next batch of SETs and so on.</t>
+
        <t>To facilitate recovery of unacknowledged SETs, the Event
        Receiver MAY use the parameter <spanx style="verb">before</spanx>
        and/or <spanx style="verb">since</spanx>. Upon receipt of a 
@@ -480,8 +473,17 @@ Content-Type: application/json
        the Event Transmitter believes they were previously distributed. 
        Previously acknowledged SETS (see <xref target="pollGetAck"/>) are not 
        typically returned and SHOULD NOT be recoverable.</t>
-       <t>[[TBD: WG to discuss merits of multi-threaded and recovery support and 
-       protocol signaling requirements.]]</t>
+       
+       <t>To support possible multi-threaded polling, an Event 
+       Transmitter may choose to track unacknowledged vs undelivered 
+       SETs internally. When multiple Event Receiver threads poll 
+       simultaneously, the Event Transmitter is expected to return the 
+       maximum number of SETs allowed in a response to the first thread 
+       request received. Each subsequent request receives the next batch 
+       of undelivered SETs and so on.</t>
+       
+       <t>[[WG Discuss: Discuss merits of multi-threaded and recovery 
+       support and additional protocol requirements.]]</t>
        
        <figure anchor="pollRequest" title="Example Poll Request">
        <preamble>The following is a non-normative example poll request to the
@@ -495,16 +497,17 @@ Authorization: Bearer h480djs93hd8
 </artwork>
        </figure>
        
-       <t>In response to the HTTP GET, the Event Transmitter checks for 
+       <t>In response to a HTTP GET request, the Event Transmitter checks for 
        available SET events and responds with a JSON document containing
        the following attributes:
        <list style="hanging">
-        <t hangText="sets"><vspace/>A required JSON attribute whose value is a JSON
-        object that contains zero or more nested JSON attributes. Each nested
-        attribute corresponds to the <spanx style="verb">jti</spanx> of
-        a SET to be delivered and whose value is a JSON String containing
-        the value of the encoded corresponding SET. If there are no
-        outstanding SETs to be transmitted, the JSON object SHALL be empty.</t>
+        <t hangText="sets"><vspace/>A required JSON attribute whose value 
+        is a JSON object that contains zero or more nested JSON 
+        attributes. Each nested attribute corresponds to the 
+        <spanx style="verb">jti</spanx> of a SET to be delivered and 
+        whose value is a JSON String containing the value of the encoded 
+        corresponding SET. If there are no outstanding SETs to be 
+        transmitted, the JSON object SHALL be empty.</t>
         <t hangText="since"><vspace/>
         An optional JSON attribute whose integer value
         is a NumericDate and indicates the time of the oldest SET that 
@@ -519,15 +522,12 @@ Authorization: Bearer h480djs93hd8
         more unacknowledged SETs are available to be returned. 
         </t>
        </list>
-       Depending on the value of the parameter 
-       <spanx style="verb">returnImmediately</spanx>, the Event 
-       Transmitter MAY hold the connection open until one or more
-       SETs are available. The Event Transmitter and Receiver should
-       have an agreed upon timeout for such a request.</t>
+       </t>
        
        <figure anchor="pollResponse" title="Example Poll Response">
        <preamble>The following is a non-normative example response to
-       the request shown <xref target="pollRequest"/>.</preamble>
+       the request shown <xref target="pollRequest"/>. This example
+       shows two SETs are returned.</preamble>
        <artwork align="left">HTTP/1.1 200 OK
 Content-Type: application/json
 Location: https://notify.exampleidp/Events
@@ -566,7 +566,7 @@ Location: https://notify.exampleidp/Events
               <figure anchor="emptyPollResponse" title="Example No SETs Poll Response">
        <preamble>The following is a non-normative example response to
        the request shown <xref target="pollRequest"/> showing no new
-       SETs are available.</preamble>
+       SETs or unacknowledged SETs are available.</preamble>
        <artwork align="left">HTTP/1.1 200 OK
 Content-Type: application/json
 Location: https://notify.exampleidp/Events
@@ -589,7 +589,7 @@ Location: https://notify.exampleidp/Events
         Receiver SHALL parse the JSON document received, and validate 
         each SET received and SHALL acknowledge receipt in a timely 
         (e.g. minutes) fashion so that the Event Transmitter may
-        mark the SETs as received. If necessary, Event Receivers SHOULD
+        mark the SETs as received. Event Receivers SHOULD
         acknowledge receipt before taking any local actions based on
         the SETs to avoid unnecessary delay in acknowledgement where 
         possible.</t>
@@ -637,9 +637,11 @@ Authorization: Bearer h480djs93hd8
 }</artwork>
         </figure>
         
-        <figure anchor="pollErrorResponse" title="Example Poll Acknowledgement With Error">
-        <preamble>The following is a non-normative example error acknowledgement 
-        to the SETs received in <xref target="pollResponse"/>.</preamble>
+        <figure anchor="pollErrorResponse" 
+        title="Example Poll Acknowledgement With Error">
+        <preamble>The following is a non-normative example of a response
+        acknowledging 1 error and 1 receipt of two SETs received 
+        in <xref target="pollResponse"/>.</preamble>
         <artwork>POST /Events  HTTP/1.1
 
 Host: notify.exampleidp.com
@@ -662,9 +664,9 @@ Authorization: Bearer h480djs93hd8
         Transmitter SHOULD respond with HTTP Status 202 (Accepted) if 
         the acknowledgement is accepted, or another appropriate HTTP
         response as defined in <xref target="RFC7231">Section 6</xref>.
+        No HTTP response body content SHOULD be provided or expected.
         </t>
-     
-     
+    
      </section>
      
      </section>
@@ -701,49 +703,60 @@ Authorization: Bearer h480djs93hd8
         When included as part of a batch of SETs, the above JSON is included
         as part of the <spanx style="verb">setErrs</spanx> attribute as
         defined in <xref target="pollGetAck"/></t>
-       
-        
+         
         </section>  
-    
-     
+       
      <section anchor="verifyStream" title="Event Stream Verification">
   
+        <t>In the verify process, the Event Receiver organization initiates
+        a request to the Event Transmitter to verify the Stream. The 
+        Event Receiver provides a <spanx style="verb">confirm</spanx> value and a 
+        <spanx style="verb">nonce</spanx> value that the Event Transmitter is expected
+        to return in the body of a Verify Event so that the Event Receiver
+        can confirm end-to-end configuration of SET delivery including
+        proper signing and encryption depending on the configuration of
+        the Stream.  For example, can the Event Transmitter send a encrypted SET
+        that the Receiver can decode? The method by which this is initiated
+        is out-of-scope of this specification and MAY be provided by a
+        profiling specification, or by administrative interfaces offered
+        by the Event Transmitter.</t>
+        
         <t>To confirm an Event Stream configuration, the Event
         Transmitter SHALL send a
-        verification SET to the Event Receiver using the registered 
-        <spanx style="verb">methodUri</spanx> mechanism which in this case
-        is <spanx style="verb">urn:ietf:params:set:method:HTTP:webCallback</spanx>. 
-        </t>
+        Verify SET to the Event Receiver using the registered 
+        <spanx style="verb">methodUri</spanx> mechanism.</t>
         
         <t>The Verify SET contains the following attributes:<list style="hanging">
-          <t hangText="events">Set with a value of 
+          <t hangText="events"><vspace/>Set with a value of 
           <spanx style="verb">[[this RFC URL]]#verify</spanx>.</t>
 
-          <t hangText="iss">Set to the URI defined in the Event Stream
+          <t hangText="iss"><vspace/>Set to the URI defined in the Event Stream
           configuration.</t>
 
-          <t hangText="aud">MUST be set to a value that matches the
+          <t hangText="aud"><vspace/>MUST be set to a value that matches the
           EventStream <spanx style="verb">aud</spanx> value agreed to.</t>
 
-          <t hangText="exp">A value that indicates the
+          <t hangText="exp"><vspace/>A value that indicates the
           time the verification request will expire. Once expired, the
           server will set the Event Stream state to <spanx style="verb">fail</spanx>.</t>
           
+          <t hangText="confirm"><vspace/>The value given by the Event Receiver to
+          the Event Transmitter to return in the Verify Event.</t>
+          
+          <t hangText="nonce"><vspace/>A value given by the Event Receiver
+          or otherwise agreed up to return which SHOULD be unique to the 
+          Stream and SHOULD change with each test in order to distinguish 
+          tests uniquely.</t>
         </list>
         </t>
         
         <t>
-        If the Event Stream <spanx style="verb">confidentialJWK</spanx>
-        value was supplied, then the SET SHOULD be encrypted with 
+        If the Event Stream is configured to encrypt SETs for the 
+        Event Receiver, then the SET SHOULD be encrypted with 
         the provided key. Successful parsing of the
         message confirms that provides confirmation of correct 
         configuration and possession of keys.</t>
-          
-        <t>A payload attribute <spanx style="verb">confirmChallenge</spanx>
-        is provided with a JSON String value that the Event Receiver SHALL echo 
-        back in its response. The intent is to confirm that the Event Receiver 
-        has successfully parsed the SET and is not just echoing back 
-        HTTP success.</t>
+         
 
         <figure anchor="verifyPostEvent" title="Example Verification SET with Challenge">
         <preamble>A non-normative JSON representation of an event to be
@@ -756,44 +769,29 @@ Authorization: Bearer h480djs93hd8
   "iss": "https://scim.example.com",  
   "exp": 1458497000,
   "aud":[
-   "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
-   "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
+   "https://event.example.com/Feeds/98d52461fa5bbc879593b7754"
   ], 
   "[[this RFC URL]]#verify":{
-    "confirmChallenge":"ca2179f4-8936-479a-a76d-5486e2baacd7"
+    "confirm":"ca2179f4-8936-479a-a76d-5486e2baacd7",
+    "nonce":"1668c993e95849869e4b3506cccdf9bf"
   }  
 }</artwork>
         </figure>
         
         <t>The above SET is encoded as a JWT and transmitted to the 
-        Event Receiver as shown in <xref target="postSet" />.</t>
+        Event Receiver using the configured delivery method.</t>
 
-        <t>Upon receiving a verify SET, the Event Receiver SHALL 
-        respond with a JSON object that includes a 
-        <spanx style="verb">challengeResponse</spanx> attribute and 
-        the value that was provided in <spanx style="verb">confirmChallenge</spanx>.
-        The content type header is set to <spanx style="verb">application/json</spanx>.</t>
-        
-        <figure anchor="verifyPostResponse" title="Example Response to Verify SET with Challenge">
-          <preamble>
-The following is a non-normative example response to a Verify SET 
-received via HTTP/1.1 POST and includes a JSON object containing the 
-confirmation attribute and value.</preamble>
-<artwork>HTTP/1.1 200 OK
-Content-Type: application/json
-
-{  
-  "challengeResponse":"ca2179f4-8936-479a-a76d-5486e2baacd7"
-}</artwork>
-        </figure>
-
+        <t>Upon receiving a verify SET, the Event Receiver SHALL parse
+        the SET and verify its claims. In particular, the Event Receiver
+        SHALL confirm that the values for <spanx style="verb">confirm</spanx> 
+        and <spanx style="verb">nonce</spanx> are as expected. If they
+        do not match, an error response of <spanx style="verb">setData</spanx>
+        SHOULD be returned (see <xref target="errorResponse"/>).</t>
         <t>
-        If the Event Receiver returns a non-matching value or an HTTP status
-        other than a 200 series response,  the Event Stream 
-        <spanx style="verb">state</spanx> SHALL be set to <spanx style="verb">fail</spanx>.
-        A declining Event Receiver MAY simply respond with any 400 series HTTP
-        error (e.g. 404).</t>
-          
+        In many cases, Event Transmitters MAY disable or suspend an Event
+        Stream that fails to successfully verify based on the acknowledgment
+        or lack of acknowledgment by the Event Receiver.
+        </t>         
      </section>
    </section>
    
@@ -988,6 +986,7 @@ Content-Type: application/json
 
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6125.xml' ?><!-- TLS Certs -->
       
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7159.xml' ?><!-- JSON -->
       
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
