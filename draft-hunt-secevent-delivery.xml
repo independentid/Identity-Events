@@ -974,9 +974,6 @@ Authorization: Bearer h480djs93hd8
 
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7617.xml' ?><!-- Basic Auth Update -->
       
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml' ?><!-- SCIM API -->
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml' ?><!-- SCIM Schema -->
-
      <reference anchor="POSIX.1">
   <front>
     <title>The Open Group Base Specifications Issue 7</title>
@@ -1006,31 +1003,7 @@ Authorization: Bearer h480djs93hd8
         </front>
         <format type="PDF" target="http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf"/>
       </reference>
-      <reference anchor="idevent-scim">
-        <front>
-          <title>SCIM Event Extensions (work in progress)</title>
-          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
-          <date/>
-        </front>  
-        <format type="TXT" target="draft-hunt-idevent-scim-00.txt"/>    
-      </reference>
 
-     <!-- 
-      <reference anchor="Order-Operations">
-        <front>
-          <title>Order of Operations: Programming Languages</title>
-
-          <author>
-            <organization>Wikipedia</organization>
-          </author>
-
-          <date/>
-        </front>
-
-        <format target="http://en.wikipedia.org/wiki/Order_of_operations#Programming_languages"
-                type="HTML"/>
-      </reference>
-       -->
     </references>
 
     
