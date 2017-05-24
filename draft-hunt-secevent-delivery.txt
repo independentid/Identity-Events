@@ -5,8 +5,8 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                            M. Scurtescu
-Expires: November 20, 2017                                        Google
-                                                            May 19, 2017
+Expires: November 25, 2017                                        Google
+                                                            May 24, 2017
 
 
                      SET Token Delivery Using HTTP
@@ -35,7 +35,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on November 20, 2017.
+   This Internet-Draft will expire on November 25, 2017.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017               [Page 1]
+Hunt & Scurtescu        Expires November 25, 2017               [Page 1]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -70,26 +70,28 @@ Table of Contents
      2.1.  Event Delivery Process  . . . . . . . . . . . . . . . . .   5
      2.2.  HTTP POST Delivery  . . . . . . . . . . . . . . . . . . .   6
      2.3.  Delivery using HTTP Polling . . . . . . . . . . . . . . .   8
-       2.3.1.  Step 1: Polling for SETs  . . . . . . . . . . . . . .   9
-       2.3.2.  Step 2: Acknowledging Sets  . . . . . . . . . . . . .  12
-     2.4.  Error Response Handling . . . . . . . . . . . . . . . . .  14
-     2.5.  Event Stream Verification . . . . . . . . . . . . . . . .  14
-   3.  Authentication and Authorization  . . . . . . . . . . . . . .  16
-     3.1.  Use of Tokens as Authorizations . . . . . . . . . . . . .  17
-   4.  Security Considerations . . . . . . . . . . . . . . . . . . .  18
-     4.1.  Authentication Using Signed SETs  . . . . . . . . . . . .  18
-     4.2.  HTTP Considerations . . . . . . . . . . . . . . . . . . .  18
-     4.3.  TLS Support Considerations  . . . . . . . . . . . . . . .  18
-     4.4.  Authorization Token Considerations  . . . . . . . . . . .  19
-       4.4.1.  Bearer Token Considerations . . . . . . . . . . . . .  19
-   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  19
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  20
-   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  20
-     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  20
-     7.2.  Informative References  . . . . . . . . . . . . . . . . .  21
-   Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  22
-   Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  22
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  23
+       2.3.1.  Polling Request JSON Attributes . . . . . . . . . . .   9
+       2.3.2.  Polling Response JSON Attributes  . . . . . . . . . .  10
+       2.3.3.  Step 1: Initial Poll for SETs . . . . . . . . . . . .  11
+       2.3.4.  Step 2: Polling with Acknowledgement  . . . . . . . .  13
+     2.4.  Error Response Handling . . . . . . . . . . . . . . . . .  15
+     2.5.  Event Stream Verification . . . . . . . . . . . . . . . .  15
+   3.  Authentication and Authorization  . . . . . . . . . . . . . .  17
+     3.1.  Use of Tokens as Authorizations . . . . . . . . . . . . .  18
+   4.  Security Considerations . . . . . . . . . . . . . . . . . . .  19
+     4.1.  Authentication Using Signed SETs  . . . . . . . . . . . .  19
+     4.2.  HTTP Considerations . . . . . . . . . . . . . . . . . . .  19
+     4.3.  TLS Support Considerations  . . . . . . . . . . . . . . .  19
+     4.4.  Authorization Token Considerations  . . . . . . . . . . .  20
+       4.4.1.  Bearer Token Considerations . . . . . . . . . . . . .  20
+   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  20
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  21
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  21
+     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  21
+     7.2.  Informative References  . . . . . . . . . . . . . . . . .  22
+   Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  23
+   Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  23
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  24
 
 1.  Introduction and Overview
 
@@ -103,17 +105,18 @@ Table of Contents
    known as Event Streams.  The specification includes a verification
    process which tests and validates Event Stream configuration.
 
-   This specification does not define the method by which Event Streams
-   are defined, provisioned, managed, monitored, and configured and is
-   out of scope of this specification.
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017               [Page 2]
+
+Hunt & Scurtescu        Expires November 25, 2017               [Page 2]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
+   This specification does not define the method by which Event Streams
+   are defined, provisioned, managed, monitored, and configured and is
+   out of scope of this specification.
    [[This work is TBD by the SECEVENTS WG]]
 
 1.1.  Notational Conventions
@@ -159,16 +162,16 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
    Relying Party
       A Relying Party is a service provider that accepts assertions from
       Identity Providers to establish sessions.  Examples of Relying
-      Parties are defined in: OpenID Connect [openid-connect-core] and
-      SAML2 [saml-core-2.0]
 
 
 
-
-Hunt & Scurtescu        Expires November 20, 2017               [Page 3]
+Hunt & Scurtescu        Expires November 25, 2017               [Page 3]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
+
+      Parties are defined in: OpenID Connect [openid-connect-core] and
+      SAML2 [saml-core-2.0]
 
    Event Transmitter
       A service provider that delivers SETs to other providers known as
@@ -214,17 +217,17 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
       ignoring leap seconds.  This is equivalent to the IEEE Std 1003.1,
       2013 Edition [POSIX.1] definition "Seconds Since the Epoch", in
       which each day is accounted for by exactly 86400 seconds, other
-      than that non-integer values can be represented.  See [RFC3339]
-      for details regarding date/times in general and UTC in particular.
 
 
 
 
-
-Hunt & Scurtescu        Expires November 20, 2017               [Page 4]
+Hunt & Scurtescu        Expires November 25, 2017               [Page 4]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
+
+      than that non-integer values can be represented.  See [RFC3339]
+      for details regarding date/times in general and UTC in particular.
 
 2.  SET Delivery Data Plane
 
@@ -272,16 +275,15 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
    a SET is acknowledged, the Event Receiver SHALL be responsible for
    retention and recovery.
 
-   Transmitted SETs SHOULD be self-validating (e.g. signed) if there is
-   a requirement to verify they were issued by the Event Transmitter at
 
 
-
-Hunt & Scurtescu        Expires November 20, 2017               [Page 5]
+Hunt & Scurtescu        Expires November 25, 2017               [Page 5]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
+   Transmitted SETs SHOULD be self-validating (e.g. signed) if there is
+   a requirement to verify they were issued by the Event Transmitter at
    a later date when de-coupled from the original delivery where
    authenticity could be checked via the HTTP or TLS mutual
    authentication.
@@ -331,9 +333,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-
-
-Hunt & Scurtescu        Expires November 20, 2017               [Page 6]
+Hunt & Scurtescu        Expires November 25, 2017               [Page 6]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -389,7 +389,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017               [Page 7]
+Hunt & Scurtescu        Expires November 25, 2017               [Page 7]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -434,31 +434,30 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 2.3.  Delivery using HTTP Polling
 
-   This method allows an Event Receiver to use HTTP GET (Section 4.3.1
-   [RFC7231]) to check for and receive zero or more SETs at a periodic
-   interval (short polling) or to poll for SETs and wait pending
-   availability also known as long polling (see Section 2 [RFC6202]).
+   This method allows an Event Receiver to use HTTP POST (Section 4.3.3
+   [RFC7231]) to acknowledge SETs and to check for and receive zero or
+   more SETs.  Requests MAY be made at a periodic interval (short
+   polling) or requests MAY wait pending availability of new SETs using
+   long polling (see Section 2 [RFC6202]).
 
-   To acknowledge receipt of SETs, the Event Receiver performs an HTTP
-   POST request to acknowledge successful transfer of SETs and/or to
-   indicate appropriate errors as specified in Section 2.3.2.
+   The delivery of SETs in this method is facilitated by a two-step
+   method initiated by the Event Receiver:
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017               [Page 8]
+Hunt & Scurtescu        Expires November 25, 2017               [Page 8]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
-   The delivery of SETs in this method is facilitated by a two-request
-   method initiated by the Event Receiver:
+   1.  The Event Receiver makes an initial request for available SETs
+       using an HTTP POST to a pre-arranged endpoint provided by the
+       Event Transmitter.
 
-   1.  The Event Receiver polls for available SETs using an HTTP GET to
-       a pre-arranged endpoint provided by the Event Transmitter.
-
-   2.  If any SETs are received, the Event Receiver "acknowledges"
-       received SETs, using an HTTP POST to the same endpoint used to
-       poll for SETs.
+   2.  After validating the received SETs, the Event Receiver initiates
+       another poll request using HTTP POST that includes acknowledgment
+       of previous SETs, and waits for the next batch of SETs.  When the
+       next response is received, the process repeats at step 2.
 
    Note that the purpose of the "acknowledgement" is to let the Event
    Transmitter know that a SET has been delivered and the SET no longer
@@ -469,49 +468,117 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
    requirements.  The level and method of retention of SETs by Event
    Receivers is out-of-scope of this specification.
 
-2.3.1.  Step 1: Polling for SETs
+2.3.1.  Polling Request JSON Attributes
 
-   The Event Receiver performs an HTTP GET (see Section 4.3.1 [RFC7231])
-   to a pre-arranged polling endpoint URI to check for any new or
-   unacknowledged SETs that are available.
+   When initiating a poll request, the Event Receiver constructs a JSON
+   document that consists of polling request parameters and SET
+   acknowledgment parameters in the form of JSON attributes.
 
-   The following polling parameters are supported:
+   The request payloads are delivered in one of two forms as described
+   in Section 2.3.3 and Section 2.3.4
+
+   When making a request, the HTTP header "Content-Type" is set to
+   "application/json".
+
+   The following JSON Attributes are used as request parameters:
 
    maxEvents
-      an integer value indicating the maximum number of unacknowledged
-      SETs that SHOULD be returned.  If more than the maximum number of
-      SETs are available, the oldest SETs available SHOULD be returned
-      first.
+      an OPTIONAL JSON integer value indicating the maximum number of
+      unacknowledged SETs that SHOULD be returned.  If more than the
+      maximum number of SETs are available, the oldest SETs available
+      SHOULD be returned first.
 
    since
-      An optional integer NumericDate value that indicates the oldest
-      time of unacknowledged SETs to be returned.
+      An OPTIONAL JSON integer NumericDate value that indicates the
+      oldest time of unacknowledged SETs to be returned.
 
    before
-      An optional integer NumericDate value that indicates the earliest
-      time of unacknowledged SETs to be returned.
+      An OPTIONAL JSON integer NumericDate value that indicates the
+      earliest time of unacknowledged SETs to be returned.
 
    returnImmediately
-      A boolean value which indicates if the Event Transmitter SHALL
-      return a response immediately if no results are available (short
-      polling).  The default value is "false" indicating the request is
-      to be treated as a long poll (see Section 2 [RFC6202]).  The time
-      out for the request is part of the Stream configuration which is
-      out of scope of this specification.
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017               [Page 9]
+
+Hunt & Scurtescu        Expires November 25, 2017               [Page 9]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
-   To facilitate recovery of unacknowledged SETs, the Event Receiver MAY
-   use the parameter "before" and/or "since".  Upon receipt of a request
-   with these parameters, the Event Transmitter SHALL attempt to return
-   all unacknowledged SETs, regardless of whether the Event Transmitter
+      A OPTIONAL JSON boolean value which indicates if the Event
+      Transmitter SHALL return a response immediately if no results are
+      available (short polling).  The default value is "false"
+      indicating the request is to be treated as a long poll (see
+      Section 2 [RFC6202]).  The time out for the request is part of the
+      Stream configuration which is out of scope of this specification.
+
+   To acknowledge receipt of SETs the following JSON attributes MAY be
+   used:
+
+   ack
+      Which is an array of Strings that each correspond to the "jti" of
+      a successfully received SET.  If there are no outstanding SETs to
+      acknowledge, the attribute MAY be omitted.  When acknowledging a
+      SET, the Event Transmitter is released from any obligation to
+      retain the SET (e.g. for a future re-try to receive).
+
+   errs
+      A JSON Object that contains one or more nested JSON attributes
+      that correspond to the "jti" of each invalid SET received.  The
+      value of each is a JSON object whose contents is an "err"
+      attribute and "description" attribute whose value correspond to
+      the errors described in Section 2.4.
+
+2.3.2.  Polling Response JSON Attributes
+
+   In response to a poll request, the Event Transmitter checks for
+   available SET events and responds with a JSON document containing the
+   following JSON attributes:
+
+   sets
+      A JSON object that contains zero or more nested JSON attributes.
+      Each nested attribute corresponds to the "jti" of a SET to be
+      delivered and whose value is a JSON String containing the value of
+      the encoded corresponding SET.  If there are no outstanding SETs
+      to be transmitted, the JSON object SHALL be empty.
+
+   since
+      A JSON integer value that is a NumericDate and indicates the time
+      of the oldest SET that was returned.
+
+   before
+      A JSON integer value that is a NumericDate and indicates the time
+      of the youngest SET that was returned.
+
+   moreAvailable
+      A JSON boolean value that indicates if more unacknowledged SETs
+      are available to be returned.
+
+
+
+Hunt & Scurtescu        Expires November 25, 2017              [Page 10]
+
+Internet-Draft        draft-hunt-secevent-delivery              May 2017
+
+
+   When making a response, the "Content-Type" is set to "application/
+   json".
+
+2.3.3.  Step 1: Initial Poll for SETs
+
+   The Event Receiver performs an HTTP POST (see Section 4.3.4
+   [RFC7231]) to a pre-arranged polling endpoint URI to check for SETs
+   that are available.  Because the Event Receiver has no prior SETs to
+   acknowledge, the "ack" and "errs" request parameters are omitted.
+
+   To facilitate recovery of unacknowledged SETs (e.g. due to a system
+   failure or reconciliation check), the Event Receiver MAY use the
+   parameter "before" and/or "since".  Upon receipt of a request with
+   these parameters, the Event Transmitter SHALL attempt to return all
+   unacknowledged SETs, regardless of whether the Event Transmitter
    believes they were previously distributed.  Previously acknowledged
-   SETS (see Section 2.3.2) are not typically returned and SHOULD NOT be
+   SETS (see Section 2.3.4) are not typically returned and SHOULD NOT be
    recoverable.
 
    To support possible multi-threaded polling, an Event Transmitter may
@@ -527,47 +594,29 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
    The following is a non-normative example poll request to the
    endpoint: "https://nofity.exampleidp.com/Events".
 
-   GET /Events?returnImmediately=true&since=1458496025  HTTP/1.1
+   POST /Events  HTTP/1.1
 
    Host: notify.exampleidp.com
    Authorization: Bearer h480djs93hd8
    Accept: application/json
-   Authorization: Bearer h480djs93hd8
 
-                      Figure 4: Example Poll Request
+   {
+    "returnImmediately":true,
+    "since":1458496025
+   }
 
-   In response to a HTTP GET request, the Event Transmitter checks for
-   available SET events and responds with a JSON document containing the
-   following attributes:
+                  Figure 4: Example Initial Poll Request
 
-   sets
-      A required JSON attribute whose value is a JSON object that
-      contains zero or more nested JSON attributes.  Each nested
-      attribute corresponds to the "jti" of a SET to be delivered and
-      whose value is a JSON String containing the value of the encoded
-      corresponding SET.  If there are no outstanding SETs to be
-      transmitted, the JSON object SHALL be empty.
-
-   since
-      An optional JSON attribute whose integer value is a NumericDate
-      and indicates the time of the oldest SET that was returned.
-
-   before
+   In response to the above request, since there are no prior SETs to
+   mark as acknowledged, the Event Transmitter returns any available
+   SETs based on the request parameters.
 
 
 
-
-Hunt & Scurtescu        Expires November 20, 2017              [Page 10]
+Hunt & Scurtescu        Expires November 25, 2017              [Page 11]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
-
-      An optional JSON attribute whose integer value is a NumericDate
-      and indicates the time of the youngest SET that was returned.
-
-   moreAvailable
-      An optional JSON attribute whose boolean value indicates if more
-      unacknowledged SETs are available to be returned.
 
    The following is a non-normative example response to the request
    shown Figure 4.  This example shows two SETs are returned.
@@ -613,7 +662,14 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017              [Page 11]
+
+
+
+
+
+
+
+Hunt & Scurtescu        Expires November 25, 2017              [Page 12]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -633,53 +689,49 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
                   Figure 6: Example No SETs Poll Response
 
-   Upon receiving the JSON document, the Event Receiver parses and
-   verifies the received SETs and notifies the Event Transmitter via an
-   HTTP POST back to the Event Transmitter as described in
-   Section 2.3.2.
+   Upon receiving the JSON document (e.g. as shown in Figure 5), the
+   Event Receiver parses and verifies the received SETs and notifies the
+   Event Transmitter via the next poll request to the Event Transmitter
+   as described in Section 2.3.4.
 
-2.3.2.  Step 2: Acknowledging Sets
+2.3.4.  Step 2: Polling with Acknowledgement
 
-   Upon receiving SETs from the Event Transmitter, the Event Receiver
-   SHALL parse the JSON document received, and validate each SET
-   received and SHALL acknowledge receipt in a timely (e.g. minutes)
+   Having previously received SETs from the Event Transmitter, the Event
+   Receiver SHALL parse the JSON document received, and validate each
+   SET received and SHALL acknowledge receipt in a timely (e.g. minutes)
    fashion so that the Event Transmitter may mark the SETs as received.
    Event Receivers SHOULD acknowledge receipt before taking any local
    actions based on the SETs to avoid unnecessary delay in
    acknowledgement where possible.
 
    In the case where no SETs were received in a previous poll (see
-   Figure 6), the Event Receiver SHALL NOT perform any acknowledgment.
-
-   To acknowledge receipt of SETs, the Event Receiver SHALL use HTTP
-   POST to the same endpoint it previously retrieved the SETs from to
-   deliver a JSON document containing the following JSON attributes:
-
-   ack
-      Which contains an array of Strings that each correspond to the
-      "jti" of a successfully received SET.  If there are no outstanding
-      SETs to acknowledge, the attribute MAY be omitted.  When
-      acknowledging a SET, the Event Transmitter is released from any
-      obligation to retain the SET (e.g. for a future re-try to
-      receive).
-
-   errs
-      Whose value is a JSON Object that contains one or more nested JSON
-      attributes that correspond to the "jti" of each invalid SET
+   Figure 6), the Event Receiver simply polls without any
+   acknowledgement parameters as shown in Step 1.
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017              [Page 12]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt & Scurtescu        Expires November 25, 2017              [Page 13]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
-      received.  The value of each is a JSON object whose contents is an
-      "err" attribute and "description" attribute whose value correspond
-      to the errors described in Section 2.4.
-
-   The following is a non-normative example acknowledgement to the SETs
-   received in Figure 5.
+   The following is a non-normative example poll with acknowledgment to
+   the SETs received in Figure 5.
 
    POST /Events  HTTP/1.1
 
@@ -692,10 +744,15 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
      "ack":[
        "4d3559ec67504aaba65d40b0363faad8",
        "3d0c3cf797584bd193bd0fb1bd4e7d30"
-     ]
+     ],
+     "returnImmediately":false
    }
 
-             Figure 7: Example Poll Acknowledgement No Errors
+         Figure 7: Example Poll With Acknowledgement and No Errors
+
+   In the above acknowledgment, the Event Receiver has acknowledged
+   receipt of two SETs and has indicated it wants to wait until the next
+   SET is available.
 
    The following is a non-normative example of a response acknowledging
    1 error and 1 receipt of two SETs received in Figure 5.
@@ -714,24 +771,24 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
          "err":"jwtAud",
          "description":"The audience value was incorrect."
        }
-     }
+     },
+     "returnImmediately":true
    }
 
              Figure 8: Example Poll Acknowledgement With Error
 
-   In response to the acknowledgement POST request, the Event
-   Transmitter SHOULD respond with HTTP Status 202 (Accepted) if the
-   acknowledgement is accepted, or another appropriate HTTP response as
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017              [Page 13]
+
+Hunt & Scurtescu        Expires November 25, 2017              [Page 14]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
-   defined in Section 6 [RFC7231].  No HTTP response body content SHOULD
-   be provided or expected.
+   In the above response, the Event Receiver has indicated an error and
+   is asking the Event Transmitter to respond immediately regardless of
+   whether there are available SETs.
 
 2.4.  Error Response Handling
 
@@ -770,22 +827,22 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
    When included as part of an HTTP Status 400 response, the above JSON
    is the HTTP response body (see Figure 3).  When included as part of a
    batch of SETs, the above JSON is included as part of the "setErrs"
-   attribute as defined in Section 2.3.2
+   attribute as defined in Section 2.3.4
 
 2.5.  Event Stream Verification
 
    In the verify process, the Event Receiver organization initiates a
    request to the Event Transmitter to verify the Stream.  The Event
    Receiver provides a "confirm" value and a "nonce" value that the
-   Event Transmitter is expected to return in the body of a Verify Event
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017              [Page 14]
+Hunt & Scurtescu        Expires November 25, 2017              [Page 15]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
+   Event Transmitter is expected to return in the body of a Verify Event
    so that the Event Receiver can confirm end-to-end configuration of
    SET delivery including proper signing and encryption depending on the
    configuration of the Stream.  For example, can the Event Transmitter
@@ -836,8 +893,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-
-Hunt & Scurtescu        Expires November 20, 2017              [Page 15]
+Hunt & Scurtescu        Expires November 25, 2017              [Page 16]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -893,7 +949,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017              [Page 16]
+Hunt & Scurtescu        Expires November 25, 2017              [Page 17]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -949,7 +1005,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017              [Page 17]
+Hunt & Scurtescu        Expires November 25, 2017              [Page 18]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -1005,7 +1061,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017              [Page 18]
+Hunt & Scurtescu        Expires November 25, 2017              [Page 19]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -1061,7 +1117,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017              [Page 19]
+Hunt & Scurtescu        Expires November 25, 2017              [Page 20]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -1117,7 +1173,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017              [Page 20]
+Hunt & Scurtescu        Expires November 25, 2017              [Page 21]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -1173,7 +1229,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017              [Page 21]
+Hunt & Scurtescu        Expires November 25, 2017              [Page 22]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -1229,7 +1285,7 @@ Appendix B.  Change Log
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017              [Page 22]
+Hunt & Scurtescu        Expires November 25, 2017              [Page 23]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -1285,4 +1341,4 @@ Authors' Addresses
 
 
 
-Hunt & Scurtescu        Expires November 20, 2017              [Page 23]
+Hunt & Scurtescu        Expires November 25, 2017              [Page 24]
