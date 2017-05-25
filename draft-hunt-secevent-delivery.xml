@@ -42,7 +42,8 @@
 			<t>
 				This specification defines how a series of security event tokens 
         (SETs) may be delivered to a previously registered receiver 
-        using HTTP GET or POST over TLS. The specification also defines how delivery 
+        using HTTP POST over TLS initiated as a push to the receiver, or
+        as a poll by the receiver. The specification also defines how delivery 
         can be assured subject to the SET Token Receiver's need for assurance.
         </t>
 		</abstract>
@@ -56,7 +57,7 @@
         can be transmitted to a previously registered 
         Event Receiver using HTTP <xref target="RFC7231"/>
         over TLS. The specification defines a method to push SETs via 
-        HTTP POST and to poll for SETs using HTTP GET. 
+        HTTP POST and to poll for SETs using HTTP POST. 
       			</t>
 
       <t>This specification defines to methods of SET delivery in what
@@ -216,7 +217,7 @@
         Receiver endpoint to deliver the SET;
 			  </t>
         <t>The Event Transmitter queues up the SET in a buffer so that
-        an Event Receiver MAY poll for SETs using HTTP/1.1 GET.</t>
+        an Event Receiver MAY poll for SETs using HTTP/1.1 POST.</t>
 
 			  <t>Or, the Feed Transmitter delivers the Event through a different
         method not defined by this specification.
@@ -234,7 +235,7 @@
         <t hangText="Multi-Event(Content-Type: application/json)">Where 
         multiple SETs are delivered in a JSON structure <xref target="RFC7159"/>. 
         The use of Multi-Event format is typically used with delivery 
-        methods that poll (e.g. HTTP GET).</t>
+        methods that poll (e.g. HTTP POST).</t>
       </list></t>
 
 			<t>After successful (acknowledged) SET delivery, Event 
@@ -1109,7 +1110,7 @@ Location: https://notify.exampleidp/Events
         <t>Added iss metadata for Event Stream</t>
         <t>Changed to using JWKS_uri for issuer and receiver.</t>
         <t>Control Plane sections moved to draft-hunt-secevent-stream-mgmt</t>
-        <t>Added support for delivering multiple events using HTTP GET polling</t>
+        <t>Added support for delivering multiple events using HTTP POST polling</t>
       </list></t>
       </list></t>
     </section>

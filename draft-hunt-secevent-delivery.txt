@@ -5,8 +5,8 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                            M. Scurtescu
-Expires: November 25, 2017                                        Google
-                                                            May 24, 2017
+Expires: November 26, 2017                                        Google
+                                                            May 25, 2017
 
 
                      SET Token Delivery Using HTTP
@@ -16,9 +16,9 @@ Abstract
 
    This specification defines how a series of security event tokens
    (SETs) may be delivered to a previously registered receiver using
-   HTTP GET or POST over TLS.  The specification also defines how
-   delivery can be assured subject to the SET Token Receiver's need for
-   assurance.
+   HTTP POST over TLS initiated as a push to the receiver, or as a poll
+   by the receiver.  The specification also defines how delivery can be
+   assured subject to the SET Token Receiver's need for assurance.
 
 Status of This Memo
 
@@ -35,7 +35,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on November 25, 2017.
+   This Internet-Draft will expire on November 26, 2017.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017               [Page 1]
+Hunt & Scurtescu        Expires November 26, 2017               [Page 1]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -99,7 +99,7 @@ Table of Contents
    [I-D.ietf-secevent-token]) can be transmitted to a previously
    registered Event Receiver using HTTP [RFC7231] over TLS.  The
    specification defines a method to push SETs via HTTP POST and to poll
-   for SETs using HTTP GET.
+   for SETs using HTTP POST.
 
    This specification defines to methods of SET delivery in what is
    known as Event Streams.  The specification includes a verification
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017               [Page 2]
+Hunt & Scurtescu        Expires November 26, 2017               [Page 2]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -165,7 +165,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017               [Page 3]
+Hunt & Scurtescu        Expires November 26, 2017               [Page 3]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -221,7 +221,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017               [Page 4]
+Hunt & Scurtescu        Expires November 26, 2017               [Page 4]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -253,7 +253,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
       endpoint to deliver the SET;
 
    o  The Event Transmitter queues up the SET in a buffer so that an
-      Event Receiver MAY poll for SETs using HTTP/1.1 GET.
+      Event Receiver MAY poll for SETs using HTTP/1.1 POST.
 
    o  Or, the Feed Transmitter delivers the Event through a different
       method not defined by this specification.
@@ -268,7 +268,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
    Multi-Event(Content-Type: application/json)  Where multiple SETs are
       delivered in a JSON structure [RFC7159].  The use of Multi-Event
       format is typically used with delivery methods that poll (e.g.
-      HTTP GET).
+      HTTP POST).
 
    After successful (acknowledged) SET delivery, Event Transmitters
    SHOULD NOT be required to maintain or record SETs for recovery.  Once
@@ -277,7 +277,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017               [Page 5]
+Hunt & Scurtescu        Expires November 26, 2017               [Page 5]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -333,7 +333,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017               [Page 6]
+Hunt & Scurtescu        Expires November 26, 2017               [Page 6]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -389,7 +389,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017               [Page 7]
+Hunt & Scurtescu        Expires November 26, 2017               [Page 7]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -445,7 +445,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017               [Page 8]
+Hunt & Scurtescu        Expires November 26, 2017               [Page 8]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -501,7 +501,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017               [Page 9]
+Hunt & Scurtescu        Expires November 26, 2017               [Page 9]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -557,7 +557,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 10]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 10]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -613,7 +613,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 11]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 11]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -669,7 +669,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 12]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 12]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -725,7 +725,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 13]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 13]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -781,7 +781,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 14]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 14]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -837,7 +837,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 15]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 15]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -893,7 +893,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 16]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 16]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -949,7 +949,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 17]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 17]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -1005,7 +1005,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 18]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 18]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -1061,7 +1061,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 19]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 19]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -1117,7 +1117,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 20]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 20]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -1173,7 +1173,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 21]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 21]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -1229,7 +1229,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 22]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 22]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -1285,7 +1285,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 23]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 23]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -1341,7 +1341,7 @@ Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 24]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 24]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
@@ -1397,12 +1397,12 @@ Appendix B.  Change Log
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 25]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 25]
 
 Internet-Draft        draft-hunt-secevent-delivery              May 2017
 
 
-      *  Added support for delivering multiple events using HTTP GET
+      *  Added support for delivering multiple events using HTTP POST
          polling
 
 Authors' Addresses
@@ -1453,4 +1453,4 @@ Authors' Addresses
 
 
 
-Hunt & Scurtescu        Expires November 25, 2017              [Page 26]
+Hunt & Scurtescu        Expires November 26, 2017              [Page 26]
