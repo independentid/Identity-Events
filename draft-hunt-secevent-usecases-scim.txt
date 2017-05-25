@@ -5,8 +5,8 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                              A. Nadalin
-Expires: November 24, 2017                                     Microsoft
-                                                            May 23, 2017
+Expires: November 25, 2017                                     Microsoft
+                                                            May 24, 2017
 
 
                       SCIM Use Cases for SECEVENTS
@@ -32,7 +32,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on November 24, 2017.
+   This Internet-Draft will expire on November 25, 2017.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hunt & Nadalin          Expires November 24, 2017               [Page 1]
+Hunt & Nadalin          Expires November 25, 2017               [Page 1]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
@@ -82,20 +82,23 @@ Table of Contents
      8.2.  Informative References  . . . . . . . . . . . . . . . . .  17
    Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  18
    Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  18
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  18
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  19
 
 1.  Introduction and Overview
 
-   SCIM is an extensible provisioning protocol intended for provisioning
+   SCIM is a extensible data format based on JSON [RFC7643] and a
+   profile of HTTP protocol [RFC7644] intended for provisioning
    identities and other objects across security domains such as
-   enterprise to a cloud based service provider.  The service provider
-   could be an application supporting the SCIM API or it may be a
-   service provider directory upon which applications are integrated.
-   SCIM is defined by two RFCS: [RFC7643] and [RFC7644].
+   enterprise user and customers to a cloud based service providers.
+   Service providers could be applications supporting the SCIM HTTP
+   profile or may be a service provider directory upon which
+   applications are integrated.
 
    This document defines the operational requirements SCIM deployers
-   have for the use of asynchronous events and the dependencies on
-   current SCIM architectural assumptions.
+   have for the use of triggers, as defined in the SCIM Use Cases
+   specification [RFC7642], and used in the form of security events and
+   the requirements for management based on SCIM architectural
+   assumptions.
 
 1.1.  Notational Conventions
 
@@ -103,17 +106,16 @@ Table of Contents
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
    document are to be interpreted as described in [RFC2119] . These
    keywords are capitalized when used to unambiguously specify
-   requirements of the protocol or application features and behavior
-   that affect the inter-operability and security of implementations.
 
 
 
-
-Hunt & Nadalin          Expires November 24, 2017               [Page 2]
+Hunt & Nadalin          Expires November 25, 2017               [Page 2]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
+   requirements of the protocol or application features and behavior
+   that affect the inter-operability and security of implementations.
    When these words are not capitalized, they are meant in their
    natural-language sense.
 
@@ -143,13 +145,14 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 2.  SCIM Background
 
-   [RFC7643] is an extensible schema specification for JSON [RFC7159]
-   that defines attribute types, mutability, format and composition can
-   be used to define Users and Groups common to most service providers.
-   SCIM establishes a neutral set of attribute definitions that can be
-   mapped to SAML [saml-core-2.0] and to OpenID Connect
-   [openid-connect-core] as well as application specific attributes.
-   The schema extension mechanism has proven popular in:
+   [RFC7643] is a profile of JSON [RFC7159] that defines attribute
+   types, mutability, data format, composite, and multi-value attributes
+   can be used to define Users, Groups, and other resource types common
+   to most service providers.  SCIM establishes a common set of
+   attribute definitions that can be mapped to SAML [saml-core-2.0] and
+   to OpenID Connect [openid-connect-core] as well as application
+   specific attributes.  The schema extension mechanism has proven
+   popular in:
 
    o  Being extended to describe many security objects such as OAuth
       Clients, Applications, IoT objects, among others.
@@ -157,18 +160,19 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
    o  Enabling common standard objects to have local extensions without
       compromising inter-operability.
 
-   [RFC7644] describes a RESTful profile of HTTP that defines the life-
-   cycle for resources.  It follows Jon Postel's "Robustness Principle"
-   in its HTTP processing rules (see Section 2.10 [RFC761]) in order to
-   improve simplicity and interoperability.  Typically SCIM clients make
-   HTTP calls to SCIM service providers to:
+   [RFC7644] describes a RESTful profile of HTTP [RFC7231] that defines
+   the life-cycle for resources.  It follows Jon Postel's "Robustness
 
 
 
-Hunt & Nadalin          Expires November 24, 2017               [Page 3]
+Hunt & Nadalin          Expires November 25, 2017               [Page 3]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
+
+   Principle" in its HTTP processing rules (see Section 2.10 [RFC761])
+   in order to improve simplicity and inter-operability.  Typically SCIM
+   clients make HTTP calls to SCIM service providers to:
 
    o  Query for resources (users and groups) based on filters using HTTP
       GET or confidentially using HTTP POST.
@@ -186,17 +190,17 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
    In defining this profile, the specification had to deal with issues
    such as:
 
-   o  Complex or composite attributes that contain multiple values
-      including how to express filters and update operations to change
-      specific sub-attributes of a specific value of an attribute
-      contained by a resource.  An example of a composite attribute in
-      SCIM is: addresses.  In SECEVENTs an example complex attribute is
-      an OpenID Connect user which is identified by both 'sub' and
-      'iss'.
+   o  Complex or composite attributes that contain multiple values and
+      the need to select and update specific values.  This includes how
+      to express sub-attributes and values in filters and the ability to
+      change them as part of a resource.  An example of a composite
+      attribute in SCIM is: addresses.  Note: In SECEVENTs a
+      corresponding example complex attribute is an OpenID Connect user
+      which is identified by both 'sub' and 'iss'.
 
-   o  How to handle attributes that are immutable in the context of
-      operations like PUT.  How to handle attributes that are hashed or
-      write-only and cannot be retrieved.
+   o  How to handle attributes that are immutable or read-only in the
+      context of operations like PUT.  How to handle attributes that are
+      hashed or write-only and cannot be retrieved.
 
    o  Flexibility for web applications to take what they want without
       having traditional schema enforcement as with XML Schema.
@@ -206,84 +210,80 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
    o  Referential stability of resources over time.
 
-   In summary, while SCIM's protocol specifications are extensive, the
-   pay-off has been to dramatically reduce efforts by client developers
-   who seek to write code to work with many different service provider
-   implementations.  In general experience, most developers can follow a
-   few simple patterns while expecting interoperability with
-   applications and directories of highly varying schemas and design.
+   In summary, while SCIM's protocol specifications are thorough, the
+   specification strikes a balance to ensure inter-operability while
+   maintaining an easy-to-use experience.
 
-   SCIM's need for Events arises from a requirement for triggers
-   identified in the SCIM Use Case specification [RFC7642].  In the real
-   world, clients and service providers that operate across security
-   domains support independent management that complicates simplistic
-   state transfer between two entities.  In the world of identity
+   SCIM's need for Security Events arises from a requirement for
+   triggers identified in the SCIM Use Case specification [RFC7642].
+   Clients and service providers that operate across security domains
+   have independent resource management that causes co-ordination and
 
 
 
-Hunt & Nadalin          Expires November 24, 2017               [Page 4]
+Hunt & Nadalin          Expires November 25, 2017               [Page 4]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
-   management, this creates a need to have triggers that alert clients
-   to state changes within service providers that may be of interest to
-   SCIM clients.  This enables multiple SCIM entities to co-ordinate and
-   improve the governance of security entities.
+   governance challenges between domains.  The use of triggers is
+   intended to alert clients (e.g. enterprises) of state changes within
+   service providers that may be of interest to SCIM clients that can be
+   reconciled across domains.
 
    As a general example, a change to a resource that occurs within a
-   Cloud SaaS provider generates an Event to be sent to a registered
-   recipient via an Event Stream.  Upon receipt of the event, the
-   Receiver MAY perform a SCIM GET to obtain additional information and
-   then decide if a local update or action is required.
+   cloud software as a service (SaaS) provider generates an Event to be
+   sent to a registered recipient via an Event Stream.  Upon receipt of
+   the event, the receiver performs a SCIM GET to obtain additional
+   information and then decide if a local update or other action is
+   required.
 
    Some other relevant information:
 
-      SCIM Polling Draft form Craig McMurtry [I-D.mcmurtry-scim-polling]
+   o  SCIM Polling Draft form Craig McMurtry [I-D.mcmurtry-scim-polling]
 
-      Early SCIM Events proposal [I-D.hunt-idevent-scim]
+   o  Early SCIM Events proposal [I-D.hunt-idevent-scim]
 
 3.  High-Level Requirements
 
 3.1.  SCIM Security Model and Considerations
 
-   SCIM follows normal authentication and authorization practices for
-   HTTP (See Sections 2 and 7 [RFC7644]).  In typical deployed cases,
-   access to SCIM endpoints is managed by OAuth authorization in both
-   cross-domain provisioning, delegated administration, and self-service
-   applications.  Many integrators also support basic authentication,
-   and TLS mutual authentication.  SCIM is often accessed in a couple of
-   ways:
+   Authentication and Authorization
+      SCIM follows normal authentication and authorization practices for
+      HTTP (See Sections 2 and 7 [RFC7644]).  In typical deployed cases,
+      access to SCIM endpoints is managed by OAuth authorization in both
+      cross-domain provisioning, delegated administration, and self-
+      service applications.  Many integrators also support basic
+      authentication, and TLS mutual authentication.  SCIM is often
+      accessed in a couple of ways:
 
-   o  Self-service (e.g. as facilitated via a /Me endpoint) via a self-
-      service web application or Javascript client.
+      *  Self-service (e.g. as facilitated via a /Me endpoint) via a
+         self-service web application or Javascript client.
 
-   o  Administrative - where an administrative credential has access to
-      groups of objects they are entitled to administer.
+      *  Administrative - where an administrative credential has access
+         to groups of objects they are entitled to administer.
 
-   o  Server-to-server, where identity provisioning systems implementing
-      management workflows initiate commands across domains using OAuth
-      enabled authorization.
-
-   Other considerations as follows:
+      *  Server-to-server, where identity provisioning systems
+         implementing management workflows initiate commands across
+         domains using OAuth enabled authorization.
 
    PII Confidentiality
-      Querying using PII information comes with some privacy concerns
-      when using HTTP GET.  The problem is that the HTTP specifications
-      do not allow for payloads on an HTTP GET - thus HTTP GET based
-      queries as to be passed as part of the URL.  If queries contain
-      PII (most will in the case of RISC, then there are security issues
-      (e.g. leakage via audit logs and browser histories) relating to
+      Querying using personally identifiable information (PII) comes w
+      ith some privacy concerns when using HTTP GET.  Since HTTP
+      [RFC7231] does not allow for payloads on an HTTP GET, query
+      parameters and filters are passed as part of the URL.  When
+      queries contain PII (most will in the case of RISC), there are
+      security issues (e.g. leakage via audit logs and browser
 
 
 
-Hunt & Nadalin          Expires November 24, 2017               [Page 5]
+Hunt & Nadalin          Expires November 25, 2017               [Page 5]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
-      passing filter terms that contain PII in URLs.  See [RFC7642]
-      Security Considerations, section 7.5.2.
+      histories) relating to passing filter terms that contain PII in
+      URLs.  See [RFC7642] Security Considerations, section 7.5.2.
 
    Scale
       One of the concerns the SCIM WG had when developing SCIM was the
@@ -307,17 +307,18 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 3.2.  Control Plane Assumptions
 
-   In the original SCIM proposals, the "Control Plane" functionality was
-   expected to be delivered by SCIM itself.  SCIM would be used to
-   configure and provisioning "streams" that deliver events.  It would
-   also be used to allow Event Receivers to check for delivery problems
-   by interrogating the Stream "status" which would be an attribute of
-   the configuration.  It would also enable Event Recipients to initiate
-   Verify sequences by having the Receiver or an authorized
-   administrator to modify the configuration to "request" a verify.  For
-   example, the administrator would patch the Event Stream "status"
-   attribute and set it to "verify".  In SCIM the subjects in a stream
-   can be identified by a number of methods:
+   In the original SCIM identity event proposals, "Control Plane"
+   functionality was accomplished by SCIM.  SCIM would be used to
+   configure and provisioning "streams" that deliver events.  SCIM also
+   allowed Event Receivers to check for delivery problems by
+   interrogating the Stream "status" which is an attribute of the Stream
+   configuration resource type.  Updates to the Stream resource type
+   also enables Event Recipients to initiate Verify sequences by having
+   the Receiver or an authorized administrator to modify the
+   configuration to "request" a verify.  For example, the administrator
+   would patch the Event Stream "status" attribute and set it to
+   "verify".  In SCIM the subjects in a stream can be identified by a
+   number of methods:
 
    o  Members of a Group
 
@@ -332,8 +333,7 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
 
-
-Hunt & Nadalin          Expires November 24, 2017               [Page 6]
+Hunt & Nadalin          Expires November 25, 2017               [Page 6]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
@@ -342,12 +342,13 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
    following is already defined (and any alternative proposal would have
    to support):
 
-   o  Defined handling attributes with each HTTP method.  For example,
-      the handling of omitted attributes in a PUT or POST operation.  Is
-      a value intended to be defaulted or set to null?
+   o  Defined processing of attributes based on type, mutability, etc
+      for each HTTP method.  For example, the handling of omitted
+      attributes in a PUT or POST operation.  Is a value intended to be
+      defaulted or set to null?
 
-   o  Handling of extensions and new attributes by other profiling
-      specifications.
+   o  Handling of new resource types (objects) and addition of new
+      attributes by other profiling specifications.
 
    o  The ability of a service provider to override or modify client
       provider asserted values.
@@ -364,7 +365,7 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
       support for write-only/compare-only schema or access control).
 
    o  Standardized error control, handling and processing rules.  See
-      Section 3.12 [RFC7644].
+      Section 3.12 [RFC7644] and [RFC7231].
 
 3.3.  Network and Protocol Operational
 
@@ -388,8 +389,7 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
 
-
-Hunt & Nadalin          Expires November 24, 2017               [Page 7]
+Hunt & Nadalin          Expires November 25, 2017               [Page 7]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
@@ -445,7 +445,7 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
 
-Hunt & Nadalin          Expires November 24, 2017               [Page 8]
+Hunt & Nadalin          Expires November 25, 2017               [Page 8]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
@@ -501,7 +501,7 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
 
-Hunt & Nadalin          Expires November 24, 2017               [Page 9]
+Hunt & Nadalin          Expires November 25, 2017               [Page 9]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
@@ -557,7 +557,7 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
 
-Hunt & Nadalin          Expires November 24, 2017              [Page 10]
+Hunt & Nadalin          Expires November 25, 2017              [Page 10]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
@@ -613,7 +613,7 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
 
-Hunt & Nadalin          Expires November 24, 2017              [Page 11]
+Hunt & Nadalin          Expires November 25, 2017              [Page 11]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
@@ -669,7 +669,7 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
 
-Hunt & Nadalin          Expires November 24, 2017              [Page 12]
+Hunt & Nadalin          Expires November 25, 2017              [Page 12]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
@@ -725,7 +725,7 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
 
-Hunt & Nadalin          Expires November 24, 2017              [Page 13]
+Hunt & Nadalin          Expires November 25, 2017              [Page 13]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
@@ -781,7 +781,7 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
 
-Hunt & Nadalin          Expires November 24, 2017              [Page 14]
+Hunt & Nadalin          Expires November 25, 2017              [Page 14]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
@@ -837,7 +837,7 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
 
-Hunt & Nadalin          Expires November 24, 2017              [Page 15]
+Hunt & Nadalin          Expires November 25, 2017              [Page 15]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
@@ -893,7 +893,7 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
 
-Hunt & Nadalin          Expires November 24, 2017              [Page 16]
+Hunt & Nadalin          Expires November 25, 2017              [Page 16]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
@@ -949,7 +949,7 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
 
-Hunt & Nadalin          Expires November 24, 2017              [Page 17]
+Hunt & Nadalin          Expires November 25, 2017              [Page 17]
 
 Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
@@ -957,6 +957,11 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
    [RFC7159]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
               Interchange Format", RFC 7159, DOI 10.17487/RFC7159, March
               2014, <http://www.rfc-editor.org/info/rfc7159>.
+
+   [RFC7231]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
+              Protocol (HTTP/1.1): Semantics and Content", RFC 7231,
+              DOI 10.17487/RFC7231, June 2014,
+              <http://www.rfc-editor.org/info/rfc7231>.
 
    [RFC761]   USC, "TRANSMISSION CONTROL PROTOCOL", January 1980.
 
@@ -994,20 +999,23 @@ Appendix B.  Change Log
 
    Draft 00 - PH - Initial draft
 
+
+
+
+
+
+
+Hunt & Nadalin          Expires November 25, 2017              [Page 18]
+
+Internet-Draft        draft-hunt-secevent-usecases              May 2017
+
+
 Authors' Addresses
 
    Phil Hunt (editor)
    Oracle Corporation
 
    Email: phil.hunt@yahoo.com
-
-
-
-
-
-Hunt & Nadalin          Expires November 24, 2017              [Page 18]
-
-Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
    Anthony Nadalin
@@ -1053,12 +1061,4 @@ Internet-Draft        draft-hunt-secevent-usecases              May 2017
 
 
 
-
-
-
-
-
-
-
-
-Hunt & Nadalin          Expires November 24, 2017              [Page 19]
+Hunt & Nadalin          Expires November 25, 2017              [Page 19]
