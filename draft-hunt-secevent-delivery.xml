@@ -34,6 +34,30 @@
       </address>
     </author>
 
+    <author fullname="Morteza Ansari" initials="M." surname="Ansari">
+      <organization abbrev="Cisco">Cisco</organization>
+
+      <address>
+        <email>morteza.ansari@cisco.com</email>
+      </address>
+    </author>
+    
+    <author fullname="Anthony Nadalin" initials="A." surname="Nadalin">
+      <organization abbrev="Microsoft">Microsoft</organization>
+
+      <address>
+        <email>tonynad@microsoft.com</email>
+      </address>
+    </author>
+    
+    <author fullname="Annabelle Richard Backman" initials="A.R." surname="Backman">
+      <organization abbrev="Amazon">Amazon</organization>
+
+      <address>
+        <email>richanna@amazon.com</email>
+      </address>
+    </author>
+
 		<date year="2017" />
 
 		<keyword>Internet-Draft</keyword>
@@ -194,10 +218,9 @@
 			</section>
 		</section>
    
-  <section title="SET Delivery Data Plane">
-    <t>The data plane represents the communication channel over which a 
-    series of SETs are delivered to a configured Event Receiver otherwise
-    known as an Event Stream.</t>
+  <section title="SET Event Stream Protocol">
+    <t>An Event Stream represents the communication channel over which a 
+    series of SETs are delivered to a configured Event Receiver. </t>
     <section anchor="process" title="Event Delivery Process">
 			<t>When an Event occurs, the Feed Provider constructs a SET
       token <xref target="I-D.ietf-secevent-token" /> that describes the	
@@ -225,17 +248,20 @@
 			</list>
 			</t>
       
-      <t>Delivery of SETs MAY be delivered using one of two content formats:
+      <t>Delivery of SETs MAY be delivered using one of two modes:
       <list style="hanging">
-        <t hangText="Single Event(Content-Type: application/jwt)"><vspace/>Where SETs are delivered
-        one at a time (e.g. such as typical with HTTP POST) where the
+        <t hangText="PUSH"><vspace/>In which SETs are delivered
+        one at a time using HTTP POST request by the Event Transmitter 
+        to an Event Receiver where the
         data payload is just a JSON Web Token <xref target="RFC7519"/> 
-        (see xxxxxxx).</t>
+        with a <spanx style="verb">Content-Type</spanx> header of 
+        <spanx style="verb">application/jwt</spanx>.</t>
         
-        <t hangText="Multi-Event(Content-Type: application/json)">Where 
-        multiple SETs are delivered in a JSON structure <xref target="RFC7159"/>. 
-        The use of Multi-Event format is typically used with delivery 
-        methods that poll (e.g. HTTP POST).</t>
+        <t hangText="POLLING">Where 
+        multiple SETs are delivered in a JSON document <xref target="RFC7159"/>
+        to an Event Receiver in response to an HTTP POST request to the 
+        Event Transmitter. The response <spanx style="verb">Content-Type</spanx> 
+        is <spanx style="verb">application/json</spanx>.</t>
       </list></t>
 
 			<t>After successful (acknowledged) SET delivery, Event 
@@ -263,12 +289,13 @@
   
     
   
-  <section anchor="httpPost" title="HTTP POST Delivery">
+  <section anchor="httpPost" title="Push Delivery using HTTP">
         
      <t>This method allows an Event Transmitter to use HTTP POST 
      (<xref target="RFC7231">Section 4.3.3</xref>) to deliver
-     SETs to the registered web callback URI identified in the Event
-     Stream configuration. </t>
+     SETs to a previously registered web callback URI supplied by the
+     Event Receiver as part of an Event Stream configuration process 
+     (not defined by this document).</t>
           
      <t>The SET to be delivered MAY be signed 
      and/or encrypted as defined in <xref target="I-D.ietf-secevent-token" />.</t>
@@ -368,7 +395,7 @@ Content-Type: application/json
      </figure>    
      </section>
      
-     <section anchor="httpPoll" title="Delivery using HTTP Polling">
+     <section anchor="httpPoll" title="Polling Delivery using HTTP">
  
        <t>This method allows an Event Receiver to use HTTP POST 
        (<xref target="RFC7231">Section 4.3.3</xref>) to acknowledge
@@ -392,8 +419,8 @@ Content-Type: application/json
        Event Transmitter know that a SET has been delivered and the 
        SET no longer needs to be retained by the Event Transmitter for
        recovery or retransmission. Before acknowledgement, Event 
-       Receivers SHOULD ensure they have validated received SETs and 
-       retained them in a manner appropriate to the receivers information 
+       Receivers SHOULD ensure they have validated and 
+       persisted received SETs in a manner appropriate to the receiver's information 
        retention requirements. The level and method of retention of SETs
        by Event Receivers is out-of-scope of this specification.</t>
  
@@ -409,7 +436,9 @@ Content-Type: application/json
        <t>When making a request, the HTTP header <spanx style="verb">Content-Type</spanx>
        is set to <spanx style="verb">application/json</spanx>.</t>
        
-       <t>The following JSON Attributes are used as request parameters:<list style="hanging">
+       <t>The following JSON Attributes are used in a polling request:
+       <list style="hanging">
+       
          <t hangText="maxEvents"><vspace/>an OPTIONAL JSON integer value 
          indicating the maximum number of unacknowledged SETs that 
          SHOULD be returned. If more than the maximum number of SETs 
@@ -420,37 +449,46 @@ Content-Type: application/json
          NumericDate value that indicates the oldest time of 
          unacknowledged SETs to be returned. </t>
          
-         <t hangText="before"><vspace/>An OPTIONAL JSON integer NumericDate
-         value that indicates the earliest time of unacknowledged SETs
-         to be returned. </t>
+         <t hangText="before"><vspace/>An OPTIONAL JSON integer 
+         NumericDate value that indicates the earliest time of 
+         unacknowledged SETs to be returned. </t>
          
-         <t hangText="returnImmediately"><vspace/>A OPTIONAL JSON boolean value
-         which indicates if the Event Transmitter SHALL return a response
-         immediately if no results are available (short polling). The 
-         default value is <spanx style="verb">false</spanx> indicating 
-         the request is to be treated as a long poll (see 
+         <t hangText="returnImmediately"><vspace/>An OPTIONAL JSON 
+         boolean value that indicates the Event Transmitter SHOULD return
+         an immediate response even if no results are available 
+         (short polling). The default value is <spanx style="verb">false</spanx> 
+         indicates the request is to be treated as an HTTP Long Poll (see 
          <xref target="RFC6202">Section 2</xref>). The time out for the 
          request is part of the Stream configuration which is out of 
-         scope of this specification.</t>       
-       </list></t>
-       
-       <t>To acknowledge receipt of SETs the following JSON
-        attributes MAY be used: <list style="hanging">
-          <t hangText="ack"><vspace/>Which is an array of Strings that each
-          correspond to the <spanx style="verb">jti</spanx> of a 
-          successfully received SET. If there are no 
-          outstanding SETs to acknowledge, the attribute MAY be omitted. 
-          When acknowledging a SET, the Event Transmitter is released from
-          any obligation to retain the SET (e.g. for a future re-try to
-          receive).</t>
+         scope of this specification.</t> 
+           
+         <t hangText="ack"><vspace/>Which is an array of Strings that each
+         correspond to the <spanx style="verb">jti</spanx> of a 
+         successfully received SET. If there are no 
+         outstanding SETs to acknowledge, the attribute MAY be omitted. 
+         When acknowledging a SET, the Event Transmitter is released from
+         any obligation to retain the SET (e.g. for a future re-try to
+         receive).</t>
           
-          <t hangText="errs"><vspace/>A JSON Object that contains 
-          one or more nested JSON attributes that correspond to the 
-          <spanx style="verb">jti</spanx> of each invalid SET received.
-          The value of each is a JSON object whose contents is an
-          <spanx style="verb">err</spanx> attribute and 
-          <spanx style="verb">description</spanx> attribute whose value 
-          correspond to the errors described in <xref target="errorResponse"/>.</t> 
+         <t hangText="errs"><vspace/>A JSON Object that contains 
+         one or more nested JSON attributes that correspond to the 
+         <spanx style="verb">jti</spanx> of each invalid SET received.
+         The value of each is a JSON object whose contents is an
+         <spanx style="verb">err</spanx> attribute and 
+         <spanx style="verb">description</spanx> attribute whose value 
+         correspond to the errors described in <xref target="errorResponse"/>.</t> 
+          
+         <t hangText="ackOnly"><vspace/>An OPTIONAL JSON boolean value
+         where a value of <spanx style="verb">true</spanx> indicates 
+         that the Event Receiver is acknowledging
+         received SETs and does not wish to receive new SETs in the 
+         current request. The default value is <spanx style="verb">false</spanx>.
+         This option MAY be used by Event Receivers that would like
+         to use a separate or distinct request for acknowledgement (e.g.
+         to separate receiver threads from acknowledgement threads).
+         When specified the value of the attribute 
+         <spanx style="verb">returnImmediately</spanx> SHALL be ignored 
+         as an immediate response is expected.</t>             
         </list>
         </t>
        </section>
