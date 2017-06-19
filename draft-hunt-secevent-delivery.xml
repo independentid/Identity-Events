@@ -439,19 +439,14 @@ Content-Type: application/json
        <t>The following JSON Attributes are used in a polling request:
        <list style="hanging">
        
-         <t hangText="maxEvents"><vspace/>an OPTIONAL JSON integer value 
+         <!-- Request parameters -->
+         <t hangText="Request Processing Parameters"><list style="hanging">
+         
+          <t hangText="maxEvents"><vspace/>an OPTIONAL JSON integer value 
          indicating the maximum number of unacknowledged SETs that 
          SHOULD be returned. If more than the maximum number of SETs 
          are available, the oldest SETs available SHOULD be returned 
          first.</t>
-         
-         <t hangText="since"><vspace/>An OPTIONAL JSON integer 
-         NumericDate value that indicates the oldest time of 
-         unacknowledged SETs to be returned. </t>
-         
-         <t hangText="before"><vspace/>An OPTIONAL JSON integer 
-         NumericDate value that indicates the earliest time of 
-         unacknowledged SETs to be returned. </t>
          
          <t hangText="returnImmediately"><vspace/>An OPTIONAL JSON 
          boolean value that indicates the Event Transmitter SHOULD return
@@ -461,7 +456,25 @@ Content-Type: application/json
          <xref target="RFC6202">Section 2</xref>). The time out for the 
          request is part of the Stream configuration which is out of 
          scope of this specification.</t> 
-           
+
+         <t hangText="ackOnly"><vspace/>An OPTIONAL JSON boolean value
+         where a value of <spanx style="verb">true</spanx> indicates 
+         that the Event Receiver is acknowledging
+         received SETs and does not wish to receive new SETs in the 
+         current request. The default value is <spanx style="verb">false</spanx>.
+         This option MAY be used by Event Receivers that would like
+         to use a separate or distinct request for acknowledgement (e.g.
+         to separate receiver threads from acknowledgement threads).
+         When specified the value of the attribute 
+         <spanx style="verb">returnImmediately</spanx> SHALL be ignored 
+         as an immediate response is expected.</t>             
+ 
+         </list></t>
+         
+         <t hangText="SET Acknowledgment Parameters"><list style="hanging">
+ 
+         <!-- Acknowledgement parameters -->     
+ 
          <t hangText="ack"><vspace/>Which is an array of Strings that each
          correspond to the <spanx style="verb">jti</spanx> of a 
          successfully received SET. If there are no 
@@ -477,18 +490,9 @@ Content-Type: application/json
          <spanx style="verb">err</spanx> attribute and 
          <spanx style="verb">description</spanx> attribute whose value 
          correspond to the errors described in <xref target="errorResponse"/>.</t> 
-          
-         <t hangText="ackOnly"><vspace/>An OPTIONAL JSON boolean value
-         where a value of <spanx style="verb">true</spanx> indicates 
-         that the Event Receiver is acknowledging
-         received SETs and does not wish to receive new SETs in the 
-         current request. The default value is <spanx style="verb">false</spanx>.
-         This option MAY be used by Event Receivers that would like
-         to use a separate or distinct request for acknowledgement (e.g.
-         to separate receiver threads from acknowledgement threads).
-         When specified the value of the attribute 
-         <spanx style="verb">returnImmediately</spanx> SHALL be ignored 
-         as an immediate response is expected.</t>             
+         
+         </list></t>
+                
         </list>
         </t>
        </section>
@@ -535,37 +539,48 @@ Content-Type: application/json
        acknowledge, the <spanx style="verb">ack</spanx> and 
        <spanx style="verb">errs</spanx> request parameters are omitted.</t>
 
-       <t>To facilitate recovery of unacknowledged SETs (e.g. due to
-       a system failure or reconciliation check), the Event
-       Receiver MAY use the parameter <spanx style="verb">before</spanx>
-       and/or <spanx style="verb">since</spanx>. Upon receipt of a 
-       request with these parameters, the Event Transmitter SHALL 
-       attempt to return all unacknowledged SETs, regardless of whether
-       the Event Transmitter believes they were previously distributed. 
-       Previously acknowledged SETS (see <xref target="pollGetAck"/>) are not 
-       typically returned and SHOULD NOT be recoverable.</t>
+       <t>If after a period of time, negotiated between the Event 
+       Transmitter and Receiver, an Event Transmitter MAY re-issue SETs
+       it has previously delivered. The Event Receiver SHOULD accept
+       repeat SETs and acknowledge the SETs regardless of whether the
+       Receiver believes it has already acknowledged the SETs previously.
+       An Event Transmitter MAY limit the number of times it attempts to
+       deliver a SET. Upon abandoning delivery of a SET, the Event Transmitter
+       SHOULD have a method to notify the Event Receiver of the loss
+       such as through a status service (not defined by this specification).
+       </t>
        
-       <t>To support possible multi-threaded polling, an Event 
-       Transmitter may choose to track unacknowledged vs undelivered 
-       SETs internally. When multiple Event Receiver threads poll 
-       simultaneously, the Event Transmitter is expected to return the 
-       maximum number of SETs allowed in a response to the first thread 
-       request received. Each subsequent request receives the next batch 
-       of undelivered SETs and so on.</t>
-       
-       <t>[[WG Discuss: Discuss merits of multi-threaded and recovery 
-       support and additional protocol requirements.]]</t>
-       
-        <t>If the Event Receiver has previously received SETs from the 
-        Event Transmitter, the Event Receiver SHALL parse and validate 
-        the SETs received and acknowledges receipt in a 
-        timely (e.g. minutes) fashion so that the Event Transmitter may
-        mark the SETs as received. Event Receivers SHOULD
+        <t>If the Event Receiver has received SETs from the 
+        Event Transmitter, the Event Receiver SHOULD parse and validate 
+        received SETs to meet its own requirements and SHOULD acknowledge 
+        receipt in a timely (e.g. minutes) fashion so that the Event 
+        Transmitter may mark the SETs as received. Event Receivers SHOULD
         acknowledge receipt before taking any local actions based on
         the SETs to avoid unnecessary delay in acknowledgement where 
         possible.</t>
+        
+        <t>Poll requests have three variations:
+        <list style="hanging">
+          <t hangText="Poll Only"><vspace/>In which an Event Receiver 
+          asks for the next set of Events where no previous SET deliveries 
+          are acknowledged (such as in the initial poll request).</t>
+          <t hangText="Acknowledge Only"><vspace/>In which an Event 
+          Receiver sets the <spanx style="verb">ackOnly</spanx> 
+          attribute to <spanx style="verb">true</spanx> along with 
+          <spanx style="verb">ack</spanx> and
+          <spanx style="verb">err</spanx> attributes indicating the 
+          Event Receiver is acknowledging previously received SETs and 
+          does not want to receive any new SETs in response to the 
+          request. </t>
+          <t hangText="Combined Acknowledge and Poll"><vspace/>In 
+          which an Event Receiver is both acknowledging previously
+          received SETs using the <spanx style="verb">ack</spanx> and
+          <spanx style="verb">err</spanx> attributes
+          and will wait for the next group of SETs in the Event Transmitters
+          response.</t>
+        </list></t>
        
-       <section title="Basic Poll Request">
+       <section title="Poll Only Request">
        <t>In the case where no SETs were received in a previous poll (see 
         <xref target="emptyPollResponse"/>), the Event Receiver simply
         polls without acknowledgement parameters (<spanx style="verb">sets</spanx>
@@ -585,10 +600,8 @@ Authorization: Bearer h480djs93hd8
 Accept: application/json
 
 {
- "returnImmediately":true,
- "since":1458496025
-}
-</artwork>
+ "returnImmediately":true
+}</artwork>
        </figure>
        
        <t>An Event Receiver MAY poll with no parameters at all by passing
@@ -603,13 +616,47 @@ Host: notify.exampleidp.com
 Authorization: Bearer h480djs93hd8
 Accept: application/json
 
-{}
-</artwork>
+{}</artwork>
        </figure>
        
        </section>
        
+       <section title="Acknowledge Only Request">
+       <t>In this variation, the Event Receiver acknowledges previously 
+       received SETs and indicates it does not want to receive SETs in 
+       response using the <spanx style="verb">ackOnly</spanx> attribute.</t>
+       
+       <t>This variation is typically used when an Event Receiver needs to 
+       acknowledge received SETs independently (e.g. on separate threads)
+       from the process of receiving SETs.</t>
+       
+       <figure anchor="pollAckOnly" title="Example Acknowledge Only equest">
+        <preamble>The following is a non-normative example poll with acknowledgement 
+        of SETs received (for example as shown in 
+        <xref target="pollResponse"/>).</preamble>
+        <artwork>POST /Events  HTTP/1.1
+
+Host: notify.exampleidp.com
+Authorization: Bearer h480djs93hd8
+Content-Type: application/json
+Authorization: Bearer h480djs93hd8
+
+{
+  "ack":[
+    "4d3559ec67504aaba65d40b0363faad8",
+    "3d0c3cf797584bd193bd0fb1bd4e7d30"
+  ],
+  "ackOnly":true
+}</artwork>
+        </figure>
+       
+       </section>
+       
        <section anchor="pollAck" title="Poll with Acknowledgement">
+       
+       <t>This variation allows a receiver thread to simultaneously 
+       acknowledge previously received SETs and wait for the next
+       group of SETs in a single request.</t>
      
         <figure anchor="pollGoodResponse" title="Example Poll With Acknowledgement and No Errors">
         <preamble>The following is a non-normative example poll with acknowledgement 
@@ -664,11 +711,8 @@ Authorization: Bearer h480djs93hd8
   },
   "returnImmediately":true
 }</artwork>
-        </figure>
-       
+        </figure>       
        </section>
-        
-       
        </section>
  
        <section anchor="pollGetAck" 
