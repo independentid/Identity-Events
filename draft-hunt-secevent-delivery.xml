@@ -1160,7 +1160,60 @@ Location: https://notify.exampleidp/Events
 
     </references>
 
+    <section title="Other Streaming Specifications">
+    <t>[[EDITORS NOTE: This section to be removed prior to publication]]</t>
     
+    <t>The following pub/sub, queuing, streaming systems were reviewed 
+    as possible solutions or as input to the current draft:</t>
+    
+    <t>XMPP Events</t>
+    <t>The WG considered the XMPP events ands its ability to provide a single
+    messaging solution without the need for both polling and push modes.
+    The feeling was the size and methodology of XMPP was to far apart from
+    the current capabilities of the SECEVENTs community which focuses in
+    on HTTP based service delivery and authorization.</t>
+    
+    <t>Amazon Simple Notification Service</t>
+    <t>Simple Notification Service, is a pub/sub messaging product from 
+    AWS. SNS supports a variety of subscriber types: HTTP/HTTPS endpoints, 
+    AWS Lambda functions, email addresses (as JSON or plain text), phone 
+    numbers (via SMS), and AWS SQS standard queues. It doesn’t directly 
+    support pull, but subscribers can get the pull model by creating an 
+    SQS queue and subscribing it to the topic. Note that this puts the 
+    cost of pull support back onto the subscriber, just as it is in the 
+    push model. It is not clear that one way is strictly better than the 
+    other; larger, sophisticated developers may be happy to own message 
+    persistence so they can have their own internal delivery guarantees. 
+    The long tail of OIDC clients may not care about that, or may fail 
+    to get it right. Regardless, I think we can learn something from the 
+    Delivery Policies supported by SNS, as well as the delivery controls 
+    that SQS offers (e.g. Visibility Timeout, Dead-Letter Queues). I’m 
+    not suggesting that we need all of these things in the spec, but 
+    they give an idea of what features people have found useful.</t>
+    <t>Other information:<list style="symbols">
+     <t>API Reference: http://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/Welcome.html</t>
+     <t>Visibility Timeouts: http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html</t>
+    </list></t>
+    
+    <t>Apache Kafka</t>
+    <t>Apache Kafka is an Apache open source project based upon TCP for 
+    distributed streaming. It prescribes some interesting general 
+    purpose features that seem to extend far beyond the simpler 
+    streaming model SECEVENTs is after. A comment from MS has been that 
+    Kafka does an acknowledge with poll combination event which seems 
+    to be a performance advantage. See: https://kafka.apache.org/intro</t>
+    
+    <t>Google Pub/Sub</t>
+    <t>Google Pub Sub system favours a model whereby polling and acknowledgement
+    of events is done as separate endpoints as separate functions.</t>
+    <t>Information:<list style="symbols">
+      <t>Cloud Overview - https://cloud.google.com/pubsub/</t>
+      <t>Subscriber Overview - https://cloud.google.com/pubsub/docs/subscriber</t>
+      <t>Subscriber Pull(poll) - https://cloud.google.com/pubsub/docs/pull</t>
+    </list></t>
+    
+    
+    </section>
 
     <section title="Acknowledgments">
       <t>The editors would like to thanks the members of the SCIM WG which 
@@ -1178,6 +1231,7 @@ Location: https://notify.exampleidp/Events
         <t>Added general HTTP security considerations</t>
         <t>Added authentication and authorization</t>
         <t>Revised Verify Event to work with both types of delivery</t>
+ 
       </list></t>
       
       <t>draft-hunt-secevent.distribution revision history:<list style="symbols">

@@ -94,9 +94,10 @@ Table of Contents
    7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  23
      7.1.  Normative References  . . . . . . . . . . . . . . . . . .  23
      7.2.  Informative References  . . . . . . . . . . . . . . . . .  24
-   Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  26
-   Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  26
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  27
+   Appendix A.  Other Streaming Specifications . . . . . . . . . . .  26
+   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  27
+   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  27
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  28
 
 1.  Introduction and Overview
 
@@ -105,7 +106,6 @@ Table of Contents
    registered Event Receiver using HTTP [RFC7231] over TLS.  The
    specification defines a method to push SETs via HTTP POST and to poll
    for SETs using HTTP POST.
-
 
 
 
@@ -1402,7 +1402,83 @@ Hunt, et al.            Expires December 21, 2017              [Page 25]
 Internet-Draft        draft-hunt-secevent-delivery             June 2017
 
 
-Appendix A.  Acknowledgments
+Appendix A.  Other Streaming Specifications
+
+   [[EDITORS NOTE: This section to be removed prior to publication]]
+
+   The following pub/sub, queuing, streaming systems were reviewed as
+   possible solutions or as input to the current draft:
+
+   XMPP Events
+
+   The WG considered the XMPP events ands its ability to provide a
+   single messaging solution without the need for both polling and push
+   modes.  The feeling was the size and methodology of XMPP was to far
+   apart from the current capabilities of the SECEVENTs community which
+   focuses in on HTTP based service delivery and authorization.
+
+   Amazon Simple Notification Service
+
+   Simple Notification Service, is a pub/sub messaging product from AWS.
+   SNS supports a variety of subscriber types: HTTP/HTTPS endpoints, AWS
+   Lambda functions, email addresses (as JSON or plain text), phone
+   numbers (via SMS), and AWS SQS standard queues.  It doesn't directly
+   support pull, but subscribers can get the pull model by creating an
+   SQS queue and subscribing it to the topic.  Note that this puts the
+   cost of pull support back onto the subscriber, just as it is in the
+   push model.  It is not clear that one way is strictly better than the
+   other; larger, sophisticated developers may be happy to own message
+   persistence so they can have their own internal delivery guarantees.
+   The long tail of OIDC clients may not care about that, or may fail to
+   get it right.  Regardless, I think we can learn something from the
+   Delivery Policies supported by SNS, as well as the delivery controls
+   that SQS offers (e.g.  Visibility Timeout, Dead-Letter Queues).  I'm
+   not suggesting that we need all of these things in the spec, but they
+   give an idea of what features people have found useful.
+
+   Other information:
+
+   o  API Reference:
+      http://docs.aws.amazon.com/AWSSimpleQueueService/latest/
+      APIReference/Welcome.html
+
+   o  Visibility Timeouts:
+      http://docs.aws.amazon.com/AWSSimpleQueueService/latest/
+      SQSDeveloperGuide/sqs-visibility-timeout.html
+
+   Apache Kafka
+
+   Apache Kafka is an Apache open source project based upon TCP for
+   distributed streaming.  It prescribes some interesting general
+
+
+
+Hunt, et al.            Expires December 21, 2017              [Page 26]
+
+Internet-Draft        draft-hunt-secevent-delivery             June 2017
+
+
+   purpose features that seem to extend far beyond the simpler streaming
+   model SECEVENTs is after.  A comment from MS has been that Kafka does
+   an acknowledge with poll combination event which seems to be a
+   performance advantage.  See: https://kafka.apache.org/intro
+
+   Google Pub/Sub
+
+   Google Pub Sub system favours a model whereby polling and
+   acknowledgement of events is done as separate endpoints as separate
+   functions.
+
+   Information:
+
+   o  Cloud Overview - https://cloud.google.com/pubsub/
+
+   o  Subscriber Overview - https://cloud.google.com/pubsub/docs/
+      subscriber
+
+   o  Subscriber Pull(poll) - https://cloud.google.com/pubsub/docs/pull
+
+Appendix B.  Acknowledgments
 
    The editors would like to thanks the members of the SCIM WG which
    began discussions of provisioning events starting with: draft-hunt-
@@ -1411,7 +1487,7 @@ Appendix A.  Acknowledgments
    The editor would like to thank the participants in the the SECEVENTS
    working group for their support of this specification.
 
-Appendix B.  Change Log
+Appendix C.  Change Log
 
    Draft 00 - PH - Based on draft-hunt-secevent.distribution with the
    following additions:
@@ -1430,6 +1506,13 @@ Appendix B.  Change Log
 
    o  Draft 00 - PH - First Draft based on reduced version of draft-
       hunt-idevent-distribution
+
+
+
+Hunt, et al.            Expires December 21, 2017              [Page 27]
+
+Internet-Draft        draft-hunt-secevent-delivery             June 2017
+
 
    o  Draft 01 - PH -
 
@@ -1450,13 +1533,6 @@ Appendix B.  Change Log
       *  Changed to using JWKS_uri for issuer and receiver.
 
       *  Control Plane sections moved to draft-hunt-secevent-stream-mgmt
-
-
-
-Hunt, et al.            Expires December 21, 2017              [Page 26]
-
-Internet-Draft        draft-hunt-secevent-delivery             June 2017
-
 
       *  Added support for delivering multiple events using HTTP POST
          polling
@@ -1487,6 +1563,13 @@ Authors' Addresses
    Email: tonynad@microsoft.com
 
 
+
+
+Hunt, et al.            Expires December 21, 2017              [Page 28]
+
+Internet-Draft        draft-hunt-secevent-delivery             June 2017
+
+
    Annabelle Richard Backman
    Amazon
 
@@ -1509,4 +1592,33 @@ Authors' Addresses
 
 
 
-Hunt, et al.            Expires December 21, 2017              [Page 27]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.            Expires December 21, 2017              [Page 29]
