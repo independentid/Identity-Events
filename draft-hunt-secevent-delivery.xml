@@ -149,11 +149,21 @@
             </t>
               
             <t hangText="Relying Party"><vspace/>
-              A Relying Party is a service provider that accepts assertions 
-              from Identity Providers to establish sessions. Examples of 
-              Relying Parties are defined in: OpenID Connect 
-              <xref target="openid-connect-core"/> and SAML2 
-              <xref target="saml-core-2.0"/>
+              Relying Parties come in multiple forms generally classified 
+              as "Explicit" or "Implicit". An Explicit Relying Party is a 
+              service provider that accepts a standard security 
+              assertion (e.g. a JWT access tokens <xref target="RFC7519"/>)
+              from an Identity Provider to establish a session or 
+              authorization. An Implicit Relying Party (implicit) uses 
+              a personal identifier such as an email address or telephone 
+              number from another provider to establish a Subject's 
+              identity. Examples of Explicit Relying Parties are defined 
+              in: OpenID Connect <xref target="openid-connect-core"/> and 
+              SAML2 <xref target="saml-core-2.0"/>. Implicit relying 
+              parties are verified by a common channel associated with 
+              the identifier. For example, an email or a text message is
+              sent with a unique link to establish ownership of the
+              identifier by the Subject.
             </t>          
             
             <t hangText="Event Transmitter"><vspace/>
@@ -446,7 +456,14 @@ Content-Type: application/json
          indicating the maximum number of unacknowledged SETs that 
          SHOULD be returned. If more than the maximum number of SETs 
          are available, the oldest SETs available SHOULD be returned 
-         first.</t>
+         first. A value of <spanx style="verb">0</spanx> MAY be used by 
+         Event Receivers that would like to perform an acknowledge only
+         request. This enables the Receiver to use separate HTTP requests
+         for acknowledgement and reception of SETs. When zero returned
+         events is requested, the value of the attribute 
+         <spanx style="verb">returnImmediately</spanx> SHALL be ignored 
+         as an immediate response is expected.
+         </t>
          
          <t hangText="returnImmediately"><vspace/>An OPTIONAL JSON 
          boolean value that indicates the Event Transmitter SHOULD return
@@ -457,6 +474,7 @@ Content-Type: application/json
          request is part of the Stream configuration which is out of 
          scope of this specification.</t> 
 
+<!-- Removed in favoour of maxEvents=0
          <t hangText="ackOnly"><vspace/>An OPTIONAL JSON boolean value
          where a value of <spanx style="verb">true</spanx> indicates 
          that the Event Receiver is acknowledging
@@ -468,7 +486,7 @@ Content-Type: application/json
          When specified the value of the attribute 
          <spanx style="verb">returnImmediately</spanx> SHALL be ignored 
          as an immediate response is expected.</t>             
- 
+  -->
          </list></t>
          
          <t hangText="SET Acknowledgment Parameters"><list style="hanging">
@@ -483,9 +501,17 @@ Content-Type: application/json
          any obligation to retain the SET (e.g. for a future re-try to
          receive).</t>
           
-         <t hangText="errs"><vspace/>A JSON Object that contains 
+         <t hangText="setErrs"><vspace/>A JSON Object that contains 
          one or more nested JSON attributes that correspond to the 
          <spanx style="verb">jti</spanx> of each invalid SET received.
+         The value of each is a JSON object whose contents is an
+         <spanx style="verb">err</spanx> attribute and 
+         <spanx style="verb">description</spanx> attribute whose value 
+         correspond to the errors described in <xref target="errorResponse"/>.</t> 
+         
+         <t hangText="docErrs"><vspace/>A JSON Object that contains 
+         one or more nested JSON attributes that correspond to the 
+         <spanx style="verb">docId</spanx> of a previous polling response.
          The value of each is a JSON object whose contents is an
          <spanx style="verb">err</spanx> attribute and 
          <spanx style="verb">description</spanx> attribute whose value 
@@ -503,6 +529,11 @@ Content-Type: application/json
        available SET events and responds with a JSON document containing
        the following JSON attributes:
        <list style="hanging">
+         <t hangText="docId"><vspace/>A REQUIRED JSON String that contains
+         a value which can be used to identify the current response
+         document. This value is used primarily to acknowledge document
+         level errors by the Event Receiver.</t>
+         
          <t hangText="sets"><vspace/>A JSON object that contains zero 
          or more nested JSON attributes. Each nested attribute 
          corresponds to the <spanx style="verb">jti</spanx> of a SET to 
@@ -510,7 +541,7 @@ Content-Type: application/json
          value of the encoded corresponding SET. If there are no 
          outstanding SETs to be transmitted, the JSON object SHALL be 
          empty.</t>
-         
+<!--  drop before and since         
          <t hangText="since"><vspace/>A JSON integer value that
          is a NumericDate and indicates the time of the oldest SET that 
          was returned. 
@@ -519,7 +550,8 @@ Content-Type: application/json
          <t hangText="before"><vspace/>A JSON integer value that is a 
          NumericDate and indicates the time of the youngest SET that was 
          returned.</t>
-         
+    -->
+    
          <t hangText="moreAvailable"><vspace/>A JSON boolean value that 
          indicates if more unacknowledged SETs are available to be returned. 
          </t>     
@@ -565,8 +597,8 @@ Content-Type: application/json
           asks for the next set of Events where no previous SET deliveries 
           are acknowledged (such as in the initial poll request).</t>
           <t hangText="Acknowledge Only"><vspace/>In which an Event 
-          Receiver sets the <spanx style="verb">ackOnly</spanx> 
-          attribute to <spanx style="verb">true</spanx> along with 
+          Receiver sets the <spanx style="verb">maxEvents</spanx> 
+          attribute to <spanx style="verb">0</spanx> along with 
           <spanx style="verb">ack</spanx> and
           <spanx style="verb">err</spanx> attributes indicating the 
           Event Receiver is acknowledging previously received SETs and 
@@ -624,7 +656,8 @@ Accept: application/json
        <section title="Acknowledge Only Request">
        <t>In this variation, the Event Receiver acknowledges previously 
        received SETs and indicates it does not want to receive SETs in 
-       response using the <spanx style="verb">ackOnly</spanx> attribute.</t>
+       response by setting the <spanx style="verb">maxEvents</spanx> 
+       attribute to <spanx style="verb">0</spanx>.</t>
        
        <t>This variation is typically used when an Event Receiver needs to 
        acknowledge received SETs independently (e.g. on separate threads)
@@ -646,7 +679,7 @@ Authorization: Bearer h480djs93hd8
     "4d3559ec67504aaba65d40b0363faad8",
     "3d0c3cf797584bd193bd0fb1bd4e7d30"
   ],
-  "ackOnly":true
+  "maxEvents":0
 }</artwork>
         </figure>
        
@@ -711,7 +744,28 @@ Authorization: Bearer h480djs93hd8
   },
   "returnImmediately":true
 }</artwork>
-        </figure>       
+        </figure>     
+        
+        <figure anchor="pollDocErrorAck" 
+        title="Example Poll Acknowledgement With Document Error">
+        <preamble>The following is a non-normative example of a response
+        acknowledging a document parsing error from a previous poll.</preamble>
+        <artwork>POST /Events  HTTP/1.1
+
+Host: notify.exampleidp.com
+Authorization: Bearer h480djs93hd8
+Content-Type: application/json
+Authorization: Bearer h480djs93hd8
+
+{
+  "docErrs":{
+    "1c7cb28146f24b08aba8ac1aaf27fece":{
+      "err":"json",
+      "description":"Received document was not a valid JSON document."
+    }
+  }
+}</artwork>
+        </figure>               
        </section>
        </section>
  
@@ -738,6 +792,7 @@ Content-Type: application/json
 Location: https://notify.exampleidp/Events
 
 {
+"docId":"262ed470a39846ba8efe4c2e27fe82f5",
 "sets":{
   "4d3559ec67504aaba65d40b0363faad8":
    "eyJhbGciOiJub25lIn0.
@@ -760,8 +815,7 @@ Location: https://notify.exampleidp/Events
    Y6cGFyYW1zOnNjaW06ZXZlbnQ6cGFzc3dvcmRSZXNldCI6eyJpZCI6IjQ0ZjYxNDJkZ
    jk2YmQ2YWI2MWU3NTIxZDkifSwiaHR0cHM6Ly9leGFtcGxlLmNvbS9zY2ltL2V2ZW50
    L3Bhc3N3b3JkUmVzZXRFeHQiOnsicmVzZXRBdHRlbXB0cyI6NX19fQ."
- },
- "since":1458496025
+ }
 }</artwork></figure>
        <t>In the above example, a two SETs whose <spanx style="verb">jti</spanx>
        are <spanx style="verb">4d3559ec67504aaba65d40b0363faad8</spanx> 
@@ -777,8 +831,8 @@ Content-Type: application/json
 Location: https://notify.exampleidp/Events
 
 {
- "sets":{ },
- "since":1458496025
+ "docId":"00e8713fd2e34b52acbcdca695dd3715",
+ "sets":{ }
 }</artwork></figure>
        
        <t>Upon receiving the JSON document (e.g. as shown in 
@@ -796,6 +850,7 @@ Location: https://notify.exampleidp/Events
         <t>If a SET is invalid, the following error codes are defined:</t>
         <texttable anchor="reqErrors" title="SET Errors">
           <ttcol>Err Value</ttcol><ttcol>Description</ttcol>
+          <c>json</c><c>Invalid JSON document or JSON object.</c>
           <c>jwtParse</c><c>Invalid or unparsable JWT or JSON structure.</c>
           <c>jwtHdr</c><c>In invalid JWT header was detected.</c>
           <c>jwtCrypto</c><c>Unable to parse due to unsupported algorithm.</c>
