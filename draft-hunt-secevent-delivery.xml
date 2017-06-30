@@ -261,17 +261,26 @@
       <t>Delivery of SETs MAY be delivered using one of two modes:
       <list style="hanging">
         <t hangText="PUSH"><vspace/>In which SETs are delivered
-        one at a time using HTTP POST request by the Event Transmitter 
-        to an Event Receiver where the
-        data payload is just a JSON Web Token <xref target="RFC7519"/> 
-        with a <spanx style="verb">Content-Type</spanx> header of 
-        <spanx style="verb">application/jwt</spanx>.</t>
+        one at a time using HTTP POST requests by an Event Transmitter 
+        to an Event Receiver. The HTTP request body is a JSON Web Token 
+        <xref target="RFC7519"/> with a <spanx style="verb">Content-Type</spanx> 
+        header of <spanx style="verb">application/secevent+jwt</spanx> 
+        as defined in Section 2.2 and 6.2 of 
+        <xref target="I-D.ietf-secevent-token"/>. Upon receipt, the 
+        Event Receiver acknowledges receipt with an HTTP response which 
+        is a JSON document with a <spanx style="verb">Content-Type</spanx> header of 
+        <spanx style="verb">application/json</spanx> (see Section 11 of
+        <xref target="RFC7159"/>) as described below in <xref target="httpPost"/>.</t>
         
         <t hangText="POLLING">Where 
         multiple SETs are delivered in a JSON document <xref target="RFC7159"/>
         to an Event Receiver in response to an HTTP POST request to the 
-        Event Transmitter. The response <spanx style="verb">Content-Type</spanx> 
-        is <spanx style="verb">application/json</spanx>.</t>
+        Event Transmitter. Then in a following request, the Event Receiver
+        acknowledges received SETs and MAY poll for more. In POLLING mode, 
+        all requests and responses are JSON documents and use a 
+        <spanx style="verb">Content-Type</spanx> of 
+        <spanx style="verb">application/json</spanx> as described in
+        <xref target="httpPoll"/>.</t>
       </list></t>
 
 			<t>After successful (acknowledged) SET delivery, Event 
@@ -293,8 +302,8 @@
       transfer.</t>
       
       <t>The Event Receiver SHALL NOT use the Event acknowledgement mechanism
-      to report Event errors other than related to the validation and 
-      parsing of the SET token itself.</t>
+      to report Event errors other than relating to the parsing and validation
+      of the SET token.</t>
   </section>
   
     
@@ -332,8 +341,8 @@
 Host: notify.examplerp.com
 Accept: application/json
 Authorization: Bearer h480djs93hd8
-Content-Type: application/jwt
-"eyJhbGciOiJub25lIn0
+Content-Type: application/secevent+jwt
+eyJhbGciOiJub25lIn0
 .
 eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
 kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
@@ -425,16 +434,15 @@ Content-Type: application/json
         of SETs.</t>
        </list></t>
        
-       <t>Note that the purpose of the "acknowledgement" is to let the 
-       Event Transmitter know that a SET has been delivered and the 
-       SET no longer needs to be retained by the Event Transmitter for
-       recovery or retransmission. Before acknowledgement, Event 
-       Receivers SHOULD ensure they have validated and 
-       persisted received SETs in a manner appropriate to the receiver's information 
+       <t>The purpose of the "acknowledgement" is to inform the 
+       Event Transmitter that has successfully been delivered and attempts
+       to re-deliver are no longer required. Before acknowledgement, Event 
+       Receivers SHOULD ensure received SETs have been validated and 
+       retained in a manner appropriate to the receiver's  
        retention requirements. The level and method of retention of SETs
        by Event Receivers is out-of-scope of this specification.</t>
  
-       <section anchor="pollReqAttrs" title="Polling Request JSON Attributes">
+       <section anchor="pollReqAttrs" title="Polling HTTP Request Attributes">
        
        <t>When initiating a poll request, the Event Receiver constructs
        a JSON document that consists of polling request parameters
@@ -509,6 +517,7 @@ Content-Type: application/json
          <spanx style="verb">description</spanx> attribute whose value 
          correspond to the errors described in <xref target="errorResponse"/>.</t> 
          
+         <!-- Removed will try to avoid using docId
          <t hangText="docErrs"><vspace/>A JSON Object that contains 
          one or more nested JSON attributes that correspond to the 
          <spanx style="verb">docId</spanx> of a previous polling response.
@@ -516,6 +525,7 @@ Content-Type: application/json
          <spanx style="verb">err</spanx> attribute and 
          <spanx style="verb">description</spanx> attribute whose value 
          correspond to the errors described in <xref target="errorResponse"/>.</t> 
+          -->
          
          </list></t>
                 
@@ -523,17 +533,22 @@ Content-Type: application/json
         </t>
        </section>
        
-       <section anchor="pollRespAttrs" title="Polling Response JSON Attributes">
+       <section anchor="pollRespAttrs" title="Polling HTTP Response Attributes">
        
        <t>In response to a poll request, the Event Transmitter checks for 
        available SET events and responds with a JSON document containing
        the following JSON attributes:
        <list style="hanging">
+       
+         <!-- If we use docId, it should probably be in a header
+         
          <t hangText="docId"><vspace/>A REQUIRED JSON String that contains
          a value which can be used to identify the current response
          document. This value is used primarily to acknowledge document
          level errors by the Event Receiver.</t>
          
+          -->
+          
          <t hangText="sets"><vspace/>A JSON object that contains zero 
          or more nested JSON attributes. Each nested attribute 
          corresponds to the <spanx style="verb">jti</spanx> of a SET to 
@@ -541,6 +556,7 @@ Content-Type: application/json
          value of the encoded corresponding SET. If there are no 
          outstanding SETs to be transmitted, the JSON object SHALL be 
          empty.</t>
+         
 <!--  drop before and since         
          <t hangText="since"><vspace/>A JSON integer value that
          is a NumericDate and indicates the time of the oldest SET that 
@@ -746,6 +762,7 @@ Authorization: Bearer h480djs93hd8
 }</artwork>
         </figure>     
         
+        <!-- DocId errors removed from current version
         <figure anchor="pollDocErrorAck" 
         title="Example Poll Acknowledgement With Document Error">
         <preamble>The following is a non-normative example of a response
@@ -766,6 +783,8 @@ Authorization: Bearer h480djs93hd8
   }
 }</artwork>
         </figure>               
+         -->
+         
        </section>
        </section>
  
@@ -792,7 +811,6 @@ Content-Type: application/json
 Location: https://notify.exampleidp/Events
 
 {
-"docId":"262ed470a39846ba8efe4c2e27fe82f5",
 "sets":{
   "4d3559ec67504aaba65d40b0363faad8":
    "eyJhbGciOiJub25lIn0.
@@ -831,7 +849,6 @@ Content-Type: application/json
 Location: https://notify.exampleidp/Events
 
 {
- "docId":"00e8713fd2e34b52acbcdca695dd3715",
  "sets":{ }
 }</artwork></figure>
        
@@ -850,7 +867,7 @@ Location: https://notify.exampleidp/Events
         <t>If a SET is invalid, the following error codes are defined:</t>
         <texttable anchor="reqErrors" title="SET Errors">
           <ttcol>Err Value</ttcol><ttcol>Description</ttcol>
-          <c>json</c><c>Invalid JSON document or JSON object.</c>
+          <c>json</c><c>Invalid JSON object.</c>
           <c>jwtParse</c><c>Invalid or unparsable JWT or JSON structure.</c>
           <c>jwtHdr</c><c>In invalid JWT header was detected.</c>
           <c>jwtCrypto</c><c>Unable to parse due to unsupported algorithm.</c>
