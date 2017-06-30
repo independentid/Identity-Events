@@ -5,8 +5,8 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                               M. Ansari
-Expires: December 8, 2017                                          Cisco
-                                                            June 6, 2017
+Expires: January 1, 2018                                           Cisco
+                                                           June 30, 2017
 
 
                       SCIM Use Cases for SECEVENTS
@@ -32,7 +32,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on December 8, 2017.
+   This Internet-Draft will expire on January 1, 2018.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hunt & Ansari           Expires December 8, 2017                [Page 1]
+Hunt & Ansari            Expires January 1, 2018                [Page 1]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
@@ -61,15 +61,16 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
 Table of Contents
 
    1.  Introduction and Overview . . . . . . . . . . . . . . . . . .   2
-     1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   2
+     1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   3
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   3
    2.  SCIM Background . . . . . . . . . . . . . . . . . . . . . . .   3
    3.  High-Level Requirements . . . . . . . . . . . . . . . . . . .   5
      3.1.  SCIM Event Trigger Requirements . . . . . . . . . . . . .   5
      3.2.  SCIM Security Model Considerations  . . . . . . . . . . .   5
      3.3.  Control Plane Assumptions . . . . . . . . . . . . . . . .   6
-     3.4.  Network and Protocol Operational Considerations . . . . .   7
-     3.5.  Directory and Applcation Provisioning . . . . . . . . . .   8
+     3.4.  Network and Protocol Operational Considerations . . . . .   8
+     3.5.  Dynamic Filtering Considerations  . . . . . . . . . . . .   8
+     3.6.  Directory and Application Provisioning  . . . . . . . . .   8
    4.  Use Cases . . . . . . . . . . . . . . . . . . . . . . . . . .   9
      4.1.  Scenario 1[P0]: Cloud-to-Enterprise PUSH and Cloud-to-
            Cloud PUSH  . . . . . . . . . . . . . . . . . . . . . . .   9
@@ -101,19 +102,23 @@ Table of Contents
    the requirements for management based on SCIM architectural
    assumptions.
 
+
+
+
+
+
+
+
+Hunt & Ansari            Expires January 1, 2018                [Page 2]
+
+Internet-Draft        draft-hunt-secevent-usecases             June 2017
+
+
 1.1.  Notational Conventions
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
    document are to be interpreted as described in [RFC2119] . These
-
-
-
-Hunt & Ansari           Expires December 8, 2017                [Page 2]
-
-Internet-Draft        draft-hunt-secevent-usecases             June 2017
-
-
    keywords are capitalized when used to unambiguously specify
    requirements of the protocol or application features and behavior
    that affect the inter-operability and security of implementations.
@@ -157,18 +162,16 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
    specific attributes.  The core schema specification provides an
    extension mechanism which has been popular in:
 
-   o  Being extended to describe many security objects such as OAuth
-      Clients, Applications, IoT objects, among others.
 
 
 
-
-
-
-Hunt & Ansari           Expires December 8, 2017                [Page 3]
+Hunt & Ansari            Expires January 1, 2018                [Page 3]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
+
+   o  Being extended to describe many security objects such as OAuth
+      Clients, Applications, IoT objects, among others.
 
    o  Enabling localized extensions to standard resource types (e.g.
       Users) without compromising inter-operability of existing
@@ -215,16 +218,16 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
       context of operations like PUT.  How to handle attributes that are
       hashed or write-only and cannot be retrieved.
 
-   o  Flexibility for web applications to take what they want without
-      having traditional schema enforcement as with XML Schema.
 
 
 
-
-Hunt & Ansari           Expires December 8, 2017                [Page 4]
+Hunt & Ansari            Expires January 1, 2018                [Page 4]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
+
+   o  Flexibility for web applications to take what they want without
+      having traditional schema enforcement as with XML Schema.
 
    o  How to handle identifiers between clients and service providers
       and across domains.
@@ -271,16 +274,16 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
       *  End-user servers (e.g. as facilitated via a /Me endpoint) via a
          self-service web application or Javascript client.
 
-      *  Administrative - where an administrative credential has access
-         to groups of objects they are entitled to administer.
 
 
 
-
-Hunt & Ansari           Expires December 8, 2017                [Page 5]
+Hunt & Ansari            Expires January 1, 2018                [Page 5]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
+
+      *  Administrative - where an administrator identity has access to
+         groups of objects they are entitled to administer.
 
       *  Server-to-server, where identity provisioning systems
          implementing management workflows initiate commands across
@@ -327,17 +330,17 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
    protocols or profiles.  The SCIM proposal allowed Event Receivers to
    check for delivery problems by retrieving Stream "resources" (which
    contain the stream configuration attributes) of which "status" is an
-   attribute that could be used to report operational state of a stream.
-   Updates to Stream resource enable Event Recipients to do things like
-   rotate credentials, or suspend streams.  To initiate a verification
 
 
 
-Hunt & Ansari           Expires December 8, 2017                [Page 6]
+Hunt & Ansari            Expires January 1, 2018                [Page 6]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
 
+   attribute that could be used to report operational state of a stream.
+   Updates to Stream resource enable Event Recipients to do things like
+   rotate credentials, or suspend streams.  To initiate a verification
    to test a stream is functional, the Receiver or an authorized
    administrator can modify the Stream resource to "request" a verify by
    changing the value of "status" to "verify".  In SCIM the subjects in
@@ -361,8 +364,10 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
       attributes in a PUT or POST operation.  Is a value intended to be
       defaulted or set to null?
 
-   o  Handling of new resource types (objects) and addition of new
-      attributes by other profiling specifications.
+   o  Handling of extensibility semantics as defined in the SCIM
+      specifications such as the definition of new resource types
+      (objects) and addition of new attributes by other profiling
+      specifications.
 
    o  The ability of a service provider to override or modify client
       provider asserted values.
@@ -381,19 +386,19 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
    o  Standardized error control, handling and processing rules.  See
       Section 3.12 [RFC7644] and [RFC7231].
 
+
+
+
+Hunt & Ansari            Expires January 1, 2018                [Page 7]
+
+Internet-Draft        draft-hunt-secevent-usecases             June 2017
+
+
 3.4.  Network and Protocol Operational Considerations
 
    The SCIM WG discussed that transmission (now called data-plane or
    stream) can have much simpler semantics and error conditions and thus
    did not need to profile JSON beyond simple SET transfer (no need for
-
-
-
-Hunt & Ansari           Expires December 8, 2017                [Page 7]
-
-Internet-Draft        draft-hunt-secevent-usecases             June 2017
-
-
    attribute types, filters, etc).  The SCIM WG also anticipated some
    varied requirements for delivery that include:
 
@@ -404,12 +409,22 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
    o  PUSH delivery via messaging systems like APNS, GMS, SMS, etc -
       many of these had to do with provisioning and entitlement signals
-      for mobile applications (e.g.  WebEx).  I'm not sure the nature of
-      these, but they seem focused on auto provisioning of clients so
-      they know how to connect to their service providers and gain
-      correct entitlements.
+      for mobile applications (e.g.  WebEx).  For example user contacts
+      synchronization where after a change to a user's contact list, an
+      application can receive an Event notification through the mobile
+      platform's messaging solution as a trigger to fetch changes.
 
-3.5.  Directory and Applcation Provisioning
+3.5.  Dynamic Filtering Considerations
+
+   When defining filtered Streams, SCIM has to consider some special
+   cases when the contents of a Stream is based upon a filter (query) to
+   define which affected resources are included.  For example, if the
+   contents of a Stream is defined as Events related to resources where
+   "emails.value sw "A"" and a resource is deleted, then the deleted
+   resource won't match the filter anymore but notification may still
+   need to be sent.
+
+3.6.  Directory and Application Provisioning
 
    Network relationships for connections are typically:
 
@@ -420,13 +435,21 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
    o  Enterprise or Cloud to Cloud Application (applications used by
       many users).
 
-   o  Enterprise or CLoud to Mobile Application (applications running on
+   o  Enterprise or Cloud to Mobile Application (applications running on
       a device controlled by a single user).
 
    An enterprise directory is typically (but not always) legacy-LDAP.
    In the cloud, a directory is simply any shared centralized profile
    store (e.g.  Google Dir, Azure Directory/OpenGraph, SCIM Directory,
    etc).  Important: While for many organizations LDAP remains the
+
+
+
+Hunt & Ansari            Expires January 1, 2018                [Page 8]
+
+Internet-Draft        draft-hunt-secevent-usecases             June 2017
+
+
    center of administrative control, it is important to note that cloud
    directories and applications hold significantly more PII than
    enterprise directories.  This creates a challenge for enterprise
@@ -440,15 +463,6 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
    data, etc (the list goes on).  While some cloud providers centralize
    others are tenancy structured with different directory endpoints per
    tenancy (e.g.  Oracle).
-
-
-
-
-
-Hunt & Ansari           Expires December 8, 2017                [Page 8]
-
-Internet-Draft        draft-hunt-secevent-usecases             June 2017
-
 
    As described above, because data, particularly PII, is being
    independently managed across multiple domains, there is a need to
@@ -487,21 +501,7 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt & Ansari           Expires December 8, 2017                [Page 9]
+Hunt & Ansari            Expires January 1, 2018                [Page 9]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
@@ -537,7 +537,7 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
    To create a Stream, the Event Receiver (or an administrator) uses
    their SCIM access credential to access the SCIM endpoint and creates
-   a Stream resource coniguration:
+   a Stream resource configuration:
 
    POST /Streams
    Host: scim.bighost.com
@@ -557,7 +557,7 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
 
 
-Hunt & Ansari           Expires December 8, 2017               [Page 10]
+Hunt & Ansari            Expires January 1, 2018               [Page 10]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
@@ -588,10 +588,10 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
      "status":"on"
    }
 
-   Note that in the above figure, the Location URI is the permanent
-   reference to the Stream.  Administrative users and Event Receiver
-   entities MAY use the location to check status or update configuration
-   as needed.
+   Note that in the above figure, the Location URI is the fixed
+   reference to the Stream for as long as it exists.  Administrative
+   users and Event Receiver entities MAY use the location to check
+   status or update configuration as needed.
 
                     Figure 3: Stream Creation Response
 
@@ -613,7 +613,7 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
 
 
-Hunt & Ansari           Expires December 8, 2017               [Page 11]
+Hunt & Ansari            Expires January 1, 2018               [Page 11]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
@@ -623,7 +623,7 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
    Conversely an Event Receiver should be able to initiate a
    verification request and may provide a confirmation challenge and
    nonce to verify the relationship from the Event Receiver's
-   perpsective.
+   perspective.
 
    Delivery:
 
@@ -669,7 +669,7 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
 
 
-Hunt & Ansari           Expires December 8, 2017               [Page 12]
+Hunt & Ansari            Expires January 1, 2018               [Page 12]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
@@ -725,7 +725,7 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
 
 
-Hunt & Ansari           Expires December 8, 2017               [Page 13]
+Hunt & Ansari            Expires January 1, 2018               [Page 13]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
@@ -781,7 +781,7 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
 
 
-Hunt & Ansari           Expires December 8, 2017               [Page 14]
+Hunt & Ansari            Expires January 1, 2018               [Page 14]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
@@ -837,13 +837,13 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
 
 
-Hunt & Ansari           Expires December 8, 2017               [Page 15]
+Hunt & Ansari            Expires January 1, 2018               [Page 15]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
 
    {
-     "accepts":[
+     "ack":[
        "39e48e70e9f84d90b5fdbf2fbd826219",
        "8e1ed13b871547ffa332f7027a0fdd91",
        "0a02c62529e34541a8b3c5c7941fa545"
@@ -893,7 +893,7 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
 
 
-Hunt & Ansari           Expires December 8, 2017               [Page 16]
+Hunt & Ansari            Expires January 1, 2018               [Page 16]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
@@ -949,7 +949,7 @@ Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
 
 
-Hunt & Ansari           Expires December 8, 2017               [Page 17]
+Hunt & Ansari            Expires January 1, 2018               [Page 17]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
@@ -1005,7 +1005,7 @@ Appendix B.  Change Log
 
 
 
-Hunt & Ansari           Expires December 8, 2017               [Page 18]
+Hunt & Ansari            Expires January 1, 2018               [Page 18]
 
 Internet-Draft        draft-hunt-secevent-usecases             June 2017
 
@@ -1061,4 +1061,4 @@ Authors' Addresses
 
 
 
-Hunt & Ansari           Expires December 8, 2017               [Page 19]
+Hunt & Ansari            Expires January 1, 2018               [Page 19]

@@ -226,7 +226,7 @@
           <list style="symbols">
             <t>End-user servers (e.g. as facilitated via a /Me endpoint) via 
             a self-service web application or Javascript client.</t>
-            <t>Administrative - where an administrative credential has 
+            <t>Administrative - where an administrator identity has 
             access to groups of objects they are entitled to administer.  
             </t>
             <t>Server-to-server, where identity provisioning systems 
@@ -303,7 +303,8 @@
         for each HTTP method. For example,
         the handling of omitted attributes in a PUT or POST operation. Is
         a value intended to be defaulted or set to null?</t>
-        <t>Handling of new resource types (objects) and addition of
+        <t>Handling of extensibility semantics as defined in the SCIM
+        specifications such as the definition of new resource types (objects) and addition of
         new attributes by other profiling specifications.</t>
         <t>The ability of a service provider to override or modify client
         provider asserted values.</t>
@@ -331,23 +332,34 @@
      <t>POLLING (to enable delivery across firewalls) using HTTP GET.</t>
      <t>PUSH delivery via messaging systems like APNS, GMS, SMS, etc - 
      many of these had to do with provisioning and entitlement signals 
-     for mobile applications (e.g. WebEx). I’m not sure the nature of 
-     these, but they seem focused on auto provisioning of clients so 
-     they know how to connect to their service providers and gain 
-     correct entitlements.</t>
+     for mobile applications (e.g. WebEx). For example user contacts
+     synchronization where after a change to a user's contact list, an
+     application can receive an Event notification through the mobile 
+     platform's messaging solution as a trigger to fetch changes.</t>
    </list>
    </t>
    
    </section>
    
-   <section title="Directory and Applcation Provisioning">
+   <section title="Dynamic Filtering Considerations">
+   <t>When defining filtered Streams, SCIM has to consider some special
+   cases when the contents of a Stream is based upon a filter (query)
+   to define which affected resources are included. For example,
+   if the contents of a Stream is defined as Events related to resources
+   where <spanx style="verb">emails.value sw "A"</spanx> and a resource
+   is deleted, then the deleted resource won't match the filter anymore but
+   notification may still need to be sent. </t>
+   
+   </section>
+   
+   <section title="Directory and Application Provisioning">
    <t>Network relationships for connections are typically:
    <list style="symbols">
      <t>Enterprise Directory to Cloud Directory. </t>
      <t>Cloud Directory to Cloud Directory.</t>
      <t>Enterprise or Cloud to Cloud Application (applications used by 
      many users).</t>
-     <t>Enterprise or CLoud to Mobile Application (applications 
+     <t>Enterprise or Cloud to Mobile Application (applications 
      running on a device controlled by a single user).</t>
    </list></t>
    
@@ -435,7 +447,7 @@
    <figure anchor="pushStreamPost" title="Stream Creation Operation">
    <preamble>To create a Stream, the Event Receiver (or an administrator)
    uses their SCIM access credential to access the SCIM endpoint and creates
-   a Stream resource coniguration:</preamble>
+   a Stream resource configuration:</preamble>
    <artwork>POST /Streams
 Host: scim.bighost.com
 Authorization: Bearer h480djs93hd8 
@@ -475,7 +487,8 @@ Location: https://events.bighost.com/Streams/2819c223-7f76-453a
   ”status”:”on"
 }</artwork>
 <postamble>Note that in the above figure, the Location URI is the 
-permanent reference to the Stream. Administrative users and Event Receiver
+fixed reference to the Stream for as long as it exists. Administrative 
+users and Event Receiver
 entities MAY use the location to check status or update configuration 
 as needed.</postamble>
    </figure>
@@ -498,7 +511,7 @@ as needed.</postamble>
    
    <t>Conversely an Event Receiver should be able to initiate a verification
    request and may provide a confirmation challenge and nonce to verify
-   the relationship from the Event Receiver's perpsective.</t>
+   the relationship from the Event Receiver's perspective.</t>
    
    <t>Delivery:<vspace blankLines="1"/>Delivery is accomplished by doing 
    a simple HTTP POST to the registered endpoint of the receiver. The 
@@ -651,7 +664,7 @@ Location: https://events.bighost.com/Streams/2819c223-7f76-453a
    
    <figure anchor="pollAckResponse" title="Poll Acknowledgement Response">
    <artwork>{
-  “accepts”:[
+  "ack":[
     “39e48e70e9f84d90b5fdbf2fbd826219”,
     “8e1ed13b871547ffa332f7027a0fdd91”,
     “0a02c62529e34541a8b3c5c7941fa545”
