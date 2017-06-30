@@ -32,7 +32,6 @@
         <email>wdenniss@google.com</email>
       </address>
     </author>
-    
 
     <author fullname="Morteza Ansari" initials="M.A." surname="Ansari">
       <organization abbrev="Cisco">Cisco</organization>
@@ -135,7 +134,7 @@
 
       <section anchor="notat" title="Notational Conventions" toc="default">
         <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-        "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+        "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this
         document are to be interpreted as described in <xref
         target="RFC2119"/>. These keywords are capitalized when used to
         unambiguously specify requirements of the protocol or application
@@ -438,6 +437,23 @@
         </list></t>
       </section>
 
+      <section anchor="ExplicitTyping" title="Explicit Typing of SETs">
+	<t>
+	  This specification registers the <spanx style="verb">application/secevent+jwt</spanx>
+	  media type, which can be used to indicate that the content is a SET.
+	  SETs MAY include this media type in the <spanx style="verb">typ</spanx> header parameter
+	  of the JWT representing the SET to explicitly declare that the JWT is a SET.
+	  This MUST be included if the SET could be used in an application context in which
+	  it could be confused with other kinds of JWTs.
+	</t>
+	<t>
+	  Per the definition of <spanx style="verb">typ</spanx> in Section 4.1.9 of <xref target="RFC7515"/>,
+	  it is RECOMMENDED that the "application/" prefix be omitted.
+	  Therefore, the <spanx style="verb">typ</spanx> value used SHOULD be
+	  <spanx style="verb">secevent+jwt</spanx>.
+	</t>
+      </section>
+
       <section anchor="eventMessage" title="Security Event Token Construction">
         <t>A SET is a JWT <xref target="RFC7519"/> that is 
         constructed by building a JSON structure that constitutes an event 
@@ -476,17 +492,17 @@
      
         <t><figure>
             <preamble>The following is an example of a SCIM Event expressed as
-            an unsecured JWT. The JWT header of:</preamble>
+            an unsecured JWT. The JOSE Header is:</preamble>
 
-            <artwork>{"alg":"none"}</artwork>
+            <artwork>{"typ":"secevent+jwt","alg":"none"}</artwork>
           </figure><figure>
             <preamble>Base64url encoding of the octets of the UTF-8
-            representation of the header yields:</preamble>
+            representation of the JOSE Header yields:</preamble>
 
-            <artwork>eyJhbGciOiJub25lIn0</artwork>
+            <artwork>eyJ0eXAiOiJzZWNldmVudCtqd3QiLCJhbGciOiJub25lIn0</artwork>
           </figure>
 	  <figure>
-            <preamble>The example JSON Event Data is encoded as
+            <preamble>The example JWT Claims Set is encoded as
             follows:</preamble>
 
             <artwork>
@@ -505,7 +521,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19</artwork>
             Concatenating the parts yields:</preamble>
 
             <artwork>
-eyJhbGciOiJOT05FIn0.
+eyJ0eXAiOiJzZWNldmVudCtqd3QiLCJhbGciOiJub25lIn0.
 eyJqdGkiOiI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIsImlhdCI6MTQ1
 ODQ5NjQwNCwiaXNzIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwiYXVkIjpbImh0
 dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M2I3
@@ -518,16 +534,15 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
           </figure></t>
 
         <t>For the purpose of a simpler example in <xref target="eventToken"/>, 
-        an unencrypted token was shown. When SETs are not signed or
-        encrypted, the Event Receiver MUST depend upon TLS and HTTP to 
-        authenticate the sender and the security of the channel to 
-        authenticate the SET and its sender.
+        an unsecured token was shown. When SETs are not signed or
+        encrypted, the Event Receiver MUST employ other mechanisms
+	such as TLS and HTTP to provide integrity, confidentiality,
+	and issuer validation, as needed by the application.
         </t>
         <t>When validation (i.e. auditing), or additional transmission
-        security is required, JWS Signing and JWS Encryption MAY be used. 
-        To create and or validate a signed or encrypted SET, follow
-        the instructions in section 7 of <xref
-        target="RFC7519"/>.</t>
+        security is required, JWS signing and/or JWE encryption MAY be used. 
+        To create and or validate a signed and/or encrypted SET, follow
+        the instructions in Section 7 of <xref target="RFC7519"/>.</t>
       </section>
     </section>
 
@@ -557,6 +572,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
     <section anchor="Security" title="Security Considerations" toc="default">
       
       <section anchor="ConfidentialityIntegrity" title="Confidentiality and Integrity">
+
       <t>SETs may often contain sensitive information. Therefore,
       methods for distribution of events SHOULD require the use of a 
       transport-layer security mechanism when distributing events. 
@@ -575,12 +591,13 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       as via TLS (<xref target="RFC5246"/> and <xref target="RFC6125"/>), 
       and/or OAuth 2.0 <xref target="RFC6749"/>, or Basic Authentication <xref target="RFC7617"/>,
       MUST be signed using JWS <xref target="RFC7515"></xref> so
-      that individual events MAY be authenticated and validated by the 
-      Event Receiver.</t>    
-        
+      that individual events can be authenticated and validated by the 
+      Event Receiver.</t>
+
       </section>
-      
+
       <section anchor="Delivery" title="Delivery">
+
       <t>This specification does not define a delivery mechanism by itself.
       In addition to confidentiality and integrity (discussed above), implementers
       and Profile Specifications MUST consider the consequences of delivery 
@@ -591,6 +608,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       </section>
       
       <section anchor="Sequencing" title="Sequencing">
+
         <t>As defined in this specification, there is no defined way to order
         multiple SETs in a sequence. Depending on the type and nature of SET
         event, order may or may not matter. For example, in provisioning, 
@@ -610,6 +628,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       </section>
       
       <section anchor="Timing" title="Timing Issues">
+
         <t>When SETs are delivered asynchronously and/or out-of-band with respect to
         the original action that incurred the security event, it is important
         to consider that a SET might be delivered to a Subscriber in advance
@@ -625,11 +644,11 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
         that allows new sessions to be started immediately after a stated 
         logout event time.</t>
       </section>
-      
+
       <section anchor="SETsAndIDTokens" title="Distinguishing SETs from ID Tokens">
         <t>
-	  Because <xref target="RFC7519"/> states that <spanx style="verb">all claims that are not understood
-	  by implementations MUST be ignored</spanx>, there is a consideration that 
+	  Because <xref target="RFC7519"/> states that "all claims that are not understood
+	  by implementations MUST be ignored", there is a consideration that 
 	  a SET token might be confused with ID Token <xref target="OpenID.Core"/>
 	  if a SET is mistakenly or intentionally used in a context requiring an ID Token.
 	  If a SET could otherwise be interpreted as a valid ID Token
@@ -641,12 +660,17 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	  valid ID Token implementations will reject such a SET if presented as if it were an ID Token.
 	</t>
 	<t>
-	  Note that excluding <spanx style="verb">exp</spanx> from SETs that
+	  Excluding <spanx style="verb">exp</spanx> from SETs that
 	  could otherwise be confused with ID Tokens is actually defense in depth.
 	  In any OpenID Connect contexts in which an attacker could attempt to substitute a SET for an ID Token,
 	  the SET would actually already be rejected as an ID Token
 	  because it would not contain the correct <spanx style="verb">nonce</spanx> claim value
 	  for the ID Token to be accepted in that context.
+	</t>
+	<t>
+	  Note that the use of explicit typing, as described in <xref target="ExplicitTyping"/>,
+	  will not achieve disambiguation between ID Tokens and SETs, as the ID Token validation rules
+	  do not use the <spanx style="verb">typ</spanx> header parameter value.
 	</t>
       </section>
 
@@ -676,6 +700,11 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	      security event tokens. This is particularly useful if the same endpoint
 	      may receive both types of tokens.
 	    </t>
+	    <t>
+	      Employ explicit typing, as described in <xref target="ExplicitTyping"/>,
+	      and modify access token validation systems to use the
+	      <spanx style="verb">typ</spanx> header parameter value.
+	    </t>
 	  </list>
 	</t>
       </section>
@@ -698,6 +727,13 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	  The most direct way to ensure that a SET is not confused with another kind of JWT
 	  is to have the JWT validation logic reject JWTs containing an <spanx style="verb">events</spanx> claim
 	  unless the JWT is intended to be a SET.
+	  This approach can be employed for new systems but may not be applicable to existing systems.
+	</t>
+	<t>
+	  Another direct way to prevent confusion is to
+	  employ explicit typing, as described in <xref target="ExplicitTyping"/>,
+	  and modify applicable token validation systems to use the
+	  <spanx style="verb">typ</spanx> header parameter value.
 	  This approach can be employed for new systems but may not be applicable to existing systems.
 	</t>
 	<t>
@@ -766,19 +802,98 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	      <t>
 		Specification Document(s): <xref target="events"/> of [[ this specification ]]
 	      <vspace blankLines="1"/></t>
-        
-        <t>
-    Claim Name: <spanx style="verb">txn</spanx>
-        </t>
-        <t>
-    Claim Description: Transaction Identifier
-        </t>
-        <t>
-    Change Controller: IESG
-        </t>
-        <t>
-    Specification Document(s): <xref target="events"/> of [[ this specification ]]
-        </t>
+	      
+	      <t>
+		Claim Name: <spanx style="verb">txn</spanx>
+	      </t>
+	      <t>
+		Claim Description: Transaction Identifier
+	      </t>
+	      <t>
+		Change Controller: IESG
+	      </t>
+	      <t>
+		Specification Document(s): <xref target="events"/> of [[ this specification ]]
+	      </t>
+	    </list>
+	  </t>
+	</section>
+	<?rfc subcompact="no"?>
+      </section>
+
+      <section title="Media Type Registration" anchor="MediaReg">
+	<section title="Registry Contents" anchor="MediaContents">
+	  <t>
+	    This section registers the <spanx style="verb">application/secevent+jwt</spanx>
+	    media type <xref target="RFC2046"/>
+	    in the "Media Types" registry <xref target="IANA.MediaTypes"/>
+	    in the manner described in <xref target="RFC6838"/>,
+	    which can be used to indicate that the content is a SET.
+	  </t>
+	  <t> <?rfc subcompact="yes"?>
+	    <list style="symbols">
+	      <t>
+		Type name: application
+	      </t>
+	      <t>
+		Subtype name: secevent+jwt
+	      </t>
+	      <t>
+		Required parameters: n/a
+	      </t>
+	      <t>
+		Optional parameters: n/a
+	      </t>
+	      <t>
+		Encoding considerations: 8bit;
+		A SET is a JWT;
+		JWT values are encoded as a
+		series of base64url-encoded values (some of which may be the
+		empty string) separated by period ('.') characters.
+	      </t>
+	      <t>
+		Security considerations: See the Security Considerations section of [[ this specification ]]
+	      </t>
+	      <t>
+		Interoperability considerations: n/a
+	      </t>
+	      <t>
+		Published specification: <xref target="ExplicitTyping"/> of [[ this specification ]]
+	      </t>
+	      <t>
+		Applications that use this media type:
+		TBD
+	      </t>
+	      <t>
+		Fragment identifier considerations: n/a
+	      </t>
+	      <t>
+		Additional information:<list style="empty">
+	        <t>Magic number(s): n/a</t>
+		<t>File extension(s): n/a</t>
+		<t>Macintosh file type code(s): n/a </t></list>
+<vspace/>
+	      </t>
+	      <t>
+		Person &amp; email address to contact for further information:
+<vspace/>
+		Michael B.&nbsp;Jones, mbj@microsoft.com
+	      </t>
+	      <t>
+		Intended usage: COMMON
+	      </t>
+	      <t>
+		Restrictions on usage: none
+	      </t>
+	      <t>
+		Author: Michael B.&nbsp;Jones, mbj@microsoft.com
+	      </t>
+	      <t>
+		Change controller: IESG
+	      </t>
+	      <t>
+		Provisional registration? No
+	      </t>
 	    </list>
 	  </t>
 	</section>
@@ -786,6 +901,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       </section>
       
     </section>
+
   </middle>
 
   <back>
@@ -821,9 +937,21 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
         </front>
       </reference>
 
+      <reference anchor="IANA.MediaTypes" target="http://www.iana.org/assignments/media-types">
+        <front>
+          <title>Media Types</title>
+          <author>
+            <organization>IANA</organization>
+          </author>
+	  <date/>
+        </front>
+      </reference>
+
     </references>
  
     <references title="Informative References">
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2046.xml' ?><!-- MIME -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6838.xml' ?><!-- MIME Registration -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7009.xml'?><!-- OAuth Revocation -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7515.xml'?><!-- JWS -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7516.xml'?><!-- JWE -->
@@ -895,8 +1023,8 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
     <!-- <section anchor="Contributors" title="Contributors"/> Uncomment if and when this section is non-empty -->
 
     <section anchor="Acknowledgments" title="Acknowledgments">
-      <t>The editors would like to thank the members of the SCIM WG which 
-      began discussions of provisioning events starting with: draft-hunt-scim-notify-00 in 2015.</t>
+      <t>The editors would like to thank the members of the IETF SCIM working group, which 
+      began discussions of provisioning events starting with draft-hunt-scim-notify-00 in 2015.</t>
       <t>The editors would like to thank the participants in the IETF id-event
       mailing list and related working groups for their support of this specification.</t>
     </section>
@@ -957,14 +1085,19 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	Draft 02 - Changes are as follows:
 	<list style="symbols">
 	  <t>
-	    PH -
-	    Corrected encoded claim example on page 10.
+	    mbj -
+	    Added the Requirements for SET Profiles section.
 	  </t>
 	  <t>
 	    mbj -
 	    Expanded the Security Considerations section to describe
 	    how to prevent confusion of SETs with ID Tokens, access tokens,
 	    and other kinds of JWTs.
+	  </t>
+	  <t>
+	    mbj -
+	    Registered the <spanx style="verb">application/secevent+jwt</spanx> media type
+	    and defined how to use it for explicit typing of SETs.
 	  </t>
 	  <t>
 	    mbj -
@@ -975,6 +1108,10 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	    mbj -
 	    Added a note explicitly acknowledging that some SET profiles
 	    may choose to convey event subject information in the event payload.
+	  </t>
+	  <t>
+	    PH -
+	    Corrected encoded claim example on page 10.
 	  </t>
 	  <t>
 	    mbj -
