@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-hunt-secevent-usecases-00"
+<rfc category="std" docName="draft-hunt-secevent-usecases-scim-00"
 	ipr="trust200902">
 	<front>
 		<title abbrev="draft-hunt-secevent-usecases">
