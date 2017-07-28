@@ -13,7 +13,7 @@
 <?rfc subcompact="no"?>
 <rfc category="std" docName="draft-ietf-secevent-delivery-00"
 	ipr="trust200902">
-	<front>
+	<front> 
 		<title abbrev="draft-ietf-secevent-delivery">
 			SET Token Delivery Using HTTP</title>
 
