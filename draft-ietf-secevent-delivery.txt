@@ -18,7 +18,7 @@ Expires: January 29, 2018                                         Google
                      SET Token Delivery Using HTTP
                     draft-ietf-secevent-delivery-00
 
-Abstract 
+Abstract
 
    This specification defines how a series of security event tokens
    (SETs) may be delivered to a previously registered receiver using
