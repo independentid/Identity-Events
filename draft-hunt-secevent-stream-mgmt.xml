@@ -1,0 +1,1421 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type='text/xsl' href='http://xml.resource.org/authoring/rfc2629.xslt' ?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<?rfc toc="yes"?>
+<?rfc tocompact="yes"?>
+<?rfc tocdepth="3"?>
+<?rfc tocindent="yes"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc comments="yes"?>
+<?rfc inline="yes"?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+<rfc category="std" docName="draft-hunt-secevent-stream-mgmt-00"
+	ipr="trust200902">
+	<front>
+		<title abbrev="draft-hunt-secevent-distribution">
+			SET Security Event Stream Management and Provisioning</title>
+
+		<author fullname="Phil Hunt" initials="P." role="editor"
+			surname="Hunt">
+			<organization abbrev="Oracle">Oracle Corporation</organization>
+
+			<address>
+				<email>phil.hunt@yahoo.com</email>
+			</address>
+		</author>
+     <author fullname="Anthony Nadalin" initials="A." surname="Nadalin">
+      <organization abbrev="Microsoft">Microsoft</organization>
+
+      <address>
+        <email>tonynad@microsoft.com</email>
+      </address>
+    </author>
+    <author fullname="Morteza Ansari" initials="M." surname="Ansari">
+      <organization abbrev="Cisco">Cisco</organization>
+
+      <address>
+        <email>moransar@cisco.com</email>
+      </address>
+    </author>
+   
+
+		<date year="2017" />
+
+		<keyword>Internet-Draft</keyword>
+
+		<abstract>
+			<t>
+				This specification defines how an Event Receiver may register to establish,
+        monitor, and manage the provisioning of a Security Event Token
+        Stream.
+        </t>
+		</abstract>
+	</front>
+
+	<middle>
+		<section anchor="intro" title="Introduction and Overview" toc="default">
+			
+      <t>
+      This specification defines a "Control Plane" service that defines 
+      how an Event Receiver or its agent may provision, monitor, and manage 
+      the configuration of a Stream that delivers Security Event Tokens 
+      (see <xref target="I-D.ietf-secevent-token"/>) using delivery 
+      methods such as specified in the SET Delivery Using HTTP 
+      Specification (see <xref target="I-D.ietf-secevent-delivery"/>).
+      </t>
+      <t> 
+      The specification defines the metadata the Event Transmitter
+      uses to describe the HTTP service endpoints, method, optional
+      signing and encryption modes, and the type and contents of SETs
+      delivered over the Stream. The specification defines how
+      the Event Receiver may review and update the current configuration 
+      and confirm operational delivery status using HTTP over TLS. 
+      </t>    
+      
+      <t>This specification uses a limited profile of SCIM (see 
+      <xref target="RFC7643"/> and <xref target="RFC7644"/>). While the
+      full specification is not required (that is, support for Users and
+      Groups), this specification does leverage the
+      protocol and schema mechanism to ease adaptability
+    to different underlying data systems and SET profile types. In 
+    particular, <xref target="RFC7643">Section 2</xref>
+    SHALL provide the processing rules that enable Control Plane 
+    providers and clients negotiate specific attributes (metadata) and
+    resource types. This includes differing provider definitions of 
+    attribute types, mutability, cardinality, or returnability that MAY
+    differ between deployments and SET Event type profiles. 
+    For HTTP method handling and error signaling, the 
+    processing rules in <xref target="RFC7644"/> SHALL be applied. </t>  
+
+			<section anchor="notat" title="Notational Conventions" toc="default">
+				<t>
+					The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+					"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in
+					this
+					document are to be interpreted as described in
+					<xref target="RFC2119" />
+					. These keywords are capitalized when used to
+					unambiguously specify requirements of the protocol or application
+					features and behavior that affect the inter-operability and security of
+					implementations. When these words are not capitalized, they are
+					meant
+					in their natural-language sense.
+				</t>
+
+				<t>
+					For purposes of readability examples are not URL encoded.
+					Implementers MUST percent encode URLs as described in
+					<xref target="RFC3986">Section 2.1 of</xref>
+					.
+				</t>
+
+				<t>Throughout this documents all figures MAY contain spaces and
+					extra
+					line-wrapping for readability and space limitations. Similarly, some
+					URI's contained within examples, have been shortened for space and
+					readability reasons.
+				</t>
+			</section>
+
+			<section anchor="defs" title="Definitions" toc="default">
+        <t>This specification assumes terminology defined in the Security
+        Event Token specification<xref target="I-D.ietf-secevent-token"/>
+        .</t>
+				<t>
+					The following definitions are defined for Security Event distribution:
+					<list style="hanging">
+          
+            <t hangText="Identity Provider"><vspace/>
+              An Identity Provider is a service provider that issues authentication
+              assertions that may be used by Relying Party service providers
+              to establish login sessions with users. Examples of Identity 
+              Providers are defined in: OpenID Connect 
+              <xref target="openid-connect-core"/> and SAML2 
+              <xref target="saml-core-2.0"/>. For the purpose of this 
+              specification an Identity Provider also includes any provider
+              of services where the compromise of an account may open up 
+              relying parties to attack. For example for the purposes of
+              security events, an email service provider could be 
+              considered an "implicit" Identity Provider.
+            </t>
+              
+            <t hangText="Relying Party"><vspace/>
+              A Relying Party is a service provider that accepts assertions 
+              from Identity Providers to establish sessions. Examples of 
+              Relying Parties are defined in: OpenID Connect 
+              <xref target="openid-connect-core"/> and SAML2 
+              <xref target="saml-core-2.0"/>
+            </t>          
+            
+            <t hangText="Event Transmitter"><vspace/>
+              A service provider that delivers SETs to other providers known
+              as Event Receivers. Some examples of Event Transmitters are 
+              Identity Providers and Relying Parties. An Event Transmitter
+              is responsible for offering a service that allows the Event
+              Receiver to check the Event Stream configuration and status
+              known as the "Control Plane". 
+            </t>
+            
+            <t hangText="Event Receiver"><vspace/>
+              A service provider that registers to receive SETs from 
+              an Event Transmitter and provides an endpoint to receive
+              SETs via HTTP POST (known as the "Data Plane"). 
+              Some examples of Event Receivers are 
+              Identity Providers and Relying Parties. Event Receivers
+              can check current Event Stream configuration and status by
+              accessing the Event Transmitters "Control Plane".
+            </t>
+  
+            <t hangText="Event Stream"><vspace/>
+              An Event Stream establishes Event Receiver communication
+              endpoints, security configuration and feed content that 
+              is used by an Event Transmitter to
+              send a series of SET Events to an Event Receiver. An Event 
+              Stream defines a "Data Plane" and "Control Plane" service
+              relationship between
+              an Event Transmitter and and Event Receiver. 
+            </t>
+              
+            <t hangText="Control Plane"><vspace/>
+              A Control Plane represents an service offered by an Event
+              Transmitter that lets an Event Receiver query the current
+              operational and/or error status of an Event Stream.  The
+              Control Plane MAY also be used to retrieve Event Stream
+              and SET configuration data.
+            </t>
+            
+            <t hangText="Data Plane"><vspace/>
+              The Data Plane represents the HTTP service offered by an 
+              Event Receiver that allows the Event Transmitter to 
+              deliver multiple SETs via HTTP POST as part of an Event
+              Stream.</t>
+            
+						<t hangText="Event Family"><vspace/>An Event Family is a 
+              URI that describes the set of events types be issued in 
+              an Event Stream.
+						</t>
+            
+            <t hangText="Subject"><vspace/>
+              The security subject around which a security event has 
+              occurred. For example, a security subject might per a user, 
+              a person, an email address, a service provider entity, an
+              IP address, an OAuth Client, a mobile device, or any identifiable
+              thing referenced in security and authorization systems.
+            </t>
+
+					</list>
+				</t>
+			</section>
+		</section>
+    
+
+    <section title="Control Plane - Monitoring and Configuration">
+  
+    <t>The Control Plane is an HTTP service provided by an Event 
+    Transmitter that allows Event Receivers to check the Event Stream 
+    configuration and monitor for transmission errors. The specification
+    also defines optional management features for automated
+    provisioning and updating of streams as described in 
+    <xref target="streamManagement"/>. This section describes the mandatory
+    to implement functionality to enable Event Receivers to detect
+    SET delivery problems that may occur when an Event Transmitter fails
+    to deliver SETs.</t>
+   
+    <section anchor="getStatus" title="Checking Stream Configuration and Stream State">
+      <t>An Event Receiver MAY check the current status of a Stream
+      with the Event Transmitter, by performing an HTTP GET using the
+      provided URI from the Transmitter either through an administrative
+      process or via the optional Stream creation response defined in 
+      <xref target="createSub"/>.</t>
+      <t>The format of the Stream GET request and response is defined 
+      by <xref target="RFC7644">Section 3.4</xref>.
+      </t>
+      
+      <t>In addition to the basic attributes defined in 
+      <xref target="RFC7643">Section 2</xref> common to all resource 
+      types, Streams use the attributes defined in
+      <xref target="subscribeMetadata" />.  In particular, the Stream
+      configuration includes JSON attributes <spanx style="verb">schemas</spanx>
+      and <spanx style="verb">id</spanx>. <list style="hanging">
+        <t hangText="schemas"><vspace/>Is an array of Strings with at 
+        least a single value of 
+        <spanx style="verb">urn:ietf:params:scim:schemas:event:2.0:EventStream</spanx>.</t>
+        <t hangText="id"><vspace/>Is a String which is a permanent unique 
+        identifier for the Stream. The value which is also used to define
+        the Stream Resource URI is permanent and provides referential
+        integrity over time as it SHALL NOT change.</t>
+      </list>
+      These attributes are provided to enable SCIM client
+      compatibility and informs the client of the type of JSON 
+      object being returned. Service providers may offer additional 
+      attributes by adding additional schema values as per <xref target="RFC7644" />.
+      </t>
+      
+      <figure anchor="getRequest" title="Example SCIM EventStream HTTP GET Request">
+        <preamble>The example below retrieves a specific <spanx style="verb">EventStream</spanx> resource whose 
+        <spanx style="verb">id</spanx> is <spanx style="verb">548b7c3f77c8bab33a4fef40</spanx>.</preamble>
+        <artwork>GET /EventStreams/767aad7853d240debc8e3c962051c1c0
+Host: example.com
+Accept: application/json
+Authorization: Bearer h480djs93hd8</artwork>
+</figure>
+         
+<figure anchor="streamResponse" title="Example Stream GET Response">
+<preamble>The response below shows an example response to Stream retrieval
+made in <xref target="getRequest"/>.</preamble>
+<artwork>HTTP/1.1 200 OK
+Content-Type: application/scim+json
+Location: 
+ https://example.com/EventStreams/767aad7853d240debc8e3c962051c1c0
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
+  "id":"767aad7853d240debc8e3c962051c1c0",
+  "feedName":"OIDCLogoutFeed",
+  "feedUri":
+    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
+  "aud":"https://sets.myexamplerp.com",
+  "status":"fail",
+  "txErr":"connection",
+  "txErrDesc":"TCP connect error to notify.examplerp.com.",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "description":"Logout events from oidc.example.com",
+  "meta":{
+     ... SCIM meta attributes ...
+  }
+}</artwork>
+</figure>  
+      <t>In the above figure, the Event Stream is showing a failed
+      status due to a TCP connection error. The Event Receiver is
+      able to discover that its endpoint was unavailable and has been
+      marked failed by the Event Transmitter. Typically, with this 
+      type of error, appropriate operations staff would be alerted and some 
+      corrective action would be taken to check for a configuration
+      error or service outage..</t>
+      
+      <t>The frequency with which Event Receivers poll the
+      Event Stream status depends on the following factors: <list style="symbols">
+      <t>The level of technical fault tolerance and availability of the 
+      receiving endpoint.</t>
+      <t>A frequency appropriate to the amount of risk that can be tolerated for lost
+      events. For example, if Security Events are considered informational,
+      then infrequent (hourly or daily) may be sufficient.</t>
+      </list>
+      In most cases Event Stream status monitoring can be triggered on a 
+      timeout basis. Event Receivers would typically poll if they have not
+      received a SET for some period during which SETs would be expected
+      based on past experience.
+      </t>
+  
+      <t>Receivers MAY use the resource type endpoint 
+      <spanx style="verb">EventStreams</spanx> to retrieve available
+      Streams based on the provided <spanx style="verb">Authorization</spanx> 
+      header. 
+      </t>
+      <figure anchor="getCommonRequest" title="Example Stream HTTP GET Request From Common Endpoint">
+        <preamble>The example below retrieves a <spanx style="verb">EventStream</spanx> resource whose 
+        <spanx style="verb">id</spanx> is <spanx style="verb">548b7c3f77c8bab33a4fef40</spanx>.</preamble>
+        <artwork>GET /EventStreams/
+Host: example.com
+Accept: application/json
+Authorization: Bearer h480djs93hd8</artwork>
+</figure>
+      <figure anchor="getListResponse" title="Example Event Stream List/Query Response Form">
+        <artwork>   HTTP/1.1 200 OK
+   Content-Type: application/scim+json
+   Location: https://example.com/.search
+
+   {
+     "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+     "totalResults":1,
+     "itemsPerPage":10,
+     "startIndex":1,
+     "Resources":[
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
+  "id":"767aad7853d240debc8e3c962051c1c0",
+  "feedName":"OIDCLogoutFeed",
+  "feedUri":
+    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
+  "aud":"https://sets.myexamplerp.com",
+  "status":"fail",
+  "txErr":"connection",
+  "txErrDesc":"TCP connect error to notify.examplerp.com.",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "description":"Logout events from oidc.example.com",
+  "meta":{
+     ... SCIM meta attributes ...
+  }
+     ]
+   }
+        </artwork>
+      </figure>      
+          
+  </section>
+  
+  <section anchor="subscribeMetadata" title="Event Stream Configuration">
+      
+      <t>
+      An Event Stream is a resource whose configuration are defined by 
+      the following metadata attributes:
+      <list style="hanging">
+      
+        <t hangText="eventUris"><vspace/>An array of JSON String values
+        which are the URIs of events issued in this Stream.</t>
+        
+        <!-- Not really needed
+        <t hangText="feedUri"><vspace />A JSON String value containing the URI
+        for a feed supported by the feed provider. It describes the 
+        content of the feed and MAY also be a resolvable URI where the
+        feed meta data may be returned as a JSON object. REQUIRED.</t>
+         -->
+
+        <t hangText="methodUri"><vspace />A REQUIRED JSON String value
+        which is a URI with a prefix of <spanx style="verb">urn:ietf:params:set:method</spanx>.
+        This specification defines HTTP POST delivery method:
+        <spanx style="verb">urn:ietf:params:set:method:HTTP:webCallback</spanx>
+        <vspace blankLines="0" /> in which the Feed Provider delivers events 
+        using HTTP POST to a specified callback URI.</t>
+        
+        <t hangText="deliveryUri"><vspace />A JSON String value
+        containing a URI that describes the location where
+        SETs are received (e.g. via HTTP POST). Its format and usage requirements are 
+        defined by the associated <spanx style="verb">methodUri</spanx>.</t>
+
+        <t hangText="iss"><vspace/>The URI for the publisher of the SETs 
+        that will be issued for the Event Stream. See 
+        <xref target="I-D.ietf-secevent-token">Section 2.1</xref>.</t>
+        
+        <t hangText="aud"><vspace blankLines="0" />An OPTIONAL 
+        JSON Array of JSON String values which are URIs representing 
+        the audience(s) of the Event Stream. The value SHALL be the value 
+        of SET "aud" claim sent to the Event Receiver.
+        </t>
+
+        <t hangText="iss_jwksUri"><vspace blankLines="0" />An OPTIONAL 
+        String that contains the URL of the SET issuers public JSON 
+        Web Key Set <xref target="RFC7517"></xref>. This contains 
+        the signing key(s) the Event Receiver uses to validate SET 
+        signatures from the Event Transmitter that will be used by the 
+        Event Receiver to verify the authenticity of issued SETs. </t>
+
+        <t hangText="aud_jwksUri"><vspace blankLines="0" />An OPTIONAL 
+        JSON Web Key Set <xref target="RFC7517"/> that contains the 
+        Event Receiver's encryption keys that MAY be used by the 
+        Event Transmitter to 
+        encrypt SET tokens for the specified Event Receiver.</t>
+
+        <t hangText="status"><vspace blankLines="0" />An OPTIONAL 
+        JSON String keyword that indicates the current state of an Event Stream.
+        More information on the Event Stream state can be found in 
+        <xref target="subState"/>. Valid keywords are:<list>
+            <t><spanx style="verb">on</spanx> - indicates the Event Stream
+            has been verified and that the Feed Provider MAY pass 
+            SETs to the Event Receiver.</t>
+
+            <!-- No longer used with client initiated verify
+            <t><spanx style="verb">verify</spanx> - indicates the 
+            Event Stream is pending verification. While in "verify", 
+            SETs, except for the verify SET (see 
+            <xref target="verifyStream"/>) are not delivered to the 
+            Event Receiver. Once verified, the status returns to 
+            <spanx style="verb">on</spanx>.</t>
+             -->
+
+            <t><spanx style="verb">paused</spanx> - indicates the
+            Event Stream is temporarily suspended. While 
+            <spanx style="verb">paused</spanx>, SETs SHOULD be 
+            retained and delivered when state returns to 
+            <spanx style="verb">on</spanx>. If delivery is paused
+            for an extended period defined by the Event Transmitter,
+            the Event Transmitter MAY change the state to 
+            <spanx style="verb">off</spanx> indicating SETs are
+            no longer retained.</t>
+
+            <t><spanx style="verb">off</spanx> - indicates that the
+            Event Stream is no longer passing SETs. While in off mode,
+            the Event Stream metadata is maintained, but new events 
+            are ignored, not delivered or retained. Before returning
+            to <spanx style="verb">on</spanx>, a verification MUST
+            be performed.</t>
+
+            <t><spanx style="verb">fail</spanx> - indicates that the
+            Event Stream was unable to deliver SETs to the
+            Event Receiver due an unrecoverable error or for an 
+            extended period of time. Unlike paused
+            status, a failed Event Stream does not retain existing
+            or new SETs that are issued. Before returning
+            to <spanx style="verb">on</spanx>, a verification MUST
+            be performed.</t>
+          </list></t>
+          
+        <t hangText="maxRetries"><vspace blankLines="0" />An OPTIONAL 
+        JSON number indicating the 
+        maximum number of attempts to deliver a SET. A value of '0'
+        indicates there is no maximum. Upon reaching the maximum, the 
+        Event Stream <spanx style="verb">status</spanx> attribute is set
+        to <spanx style="verb">failed</spanx>.</t>
+        
+        <t hangText="maxDeliveryTime"><vspace/>
+        An OPTIONAL number indicating
+        the maximum amount of time in seconds a SET MAY take for
+        successful delivery per request or cumulatively across 
+        multiple retries.  Upon reaching the maximum, the 
+        Event Stream <spanx style="verb">status</spanx> is set
+        to <spanx style="verb">failed</spanx>. If undefined, there 
+        is no maximum time.</t>
+        
+        <t hangText="minDeliveryInterval"><vspace/>
+        An OPTIONAL JSON integer that represents the minimum 
+        interval in seconds between deliveries. A value of '0'
+        indicates delivery should happen immediately. When delivery is
+        a polling method (e.g. HTTP GET), it is the expected time between Event Receiver attempts.
+        When in push mode (e.g. HTTP POST), it is the interval the server
+        will wait before sending a new event or events.</t>
+        
+        <t hangText="txErr"><vspace />
+        An OPTIONAL JSON String keyword value. 
+        When the Event Stream has <spanx style="verb">subState</spanx>
+        set to <spanx style="verb">fail</spanx>, one of the following
+        error keywords is set:<list>
+        
+          <t><spanx style="verb">connection</spanx> indicates an
+          error occurred attempting to open a TCP connection with
+          the assigned endpoint.</t>
+          <t><spanx style="verb">tls</spanx> indicates an error
+          occurred establishing a TLS connection with the assigned
+          endpoint.</t>
+          <t><spanx style="verb">dnsname</spanx> indicates an error
+          occurred establishing a TLS connection where the dnsname
+          was not validated.</t>
+          <t><spanx style="verb">receiver</spanx> indicates an error
+          occurred whereby the Event Receiver has indicated an error
+          for which the Event Transmitter is unable to correct.</t>
+       
+        </list>
+        </t>
+        
+        <t hangText="txErrDesc"><vspace/>
+        An OPTIONAL String value that is
+        usually human readable that provides further diagnostic
+        detail by the indicated <spanx style="verb">txErr</spanx>
+        error code.</t>
+        
+        <t hangText="members"><vspace/>
+        An OPTIONAL complex attribute containing sub objects whose 
+        sub-attributes define subjects against which SETs may be issued.
+        The following sub-attributes are defined:<list style="hanging">
+          <t hangText="value">A String which uniquely identifies a 
+          subject (or set of subjects) to be included in the Stream.
+          The format and type of value is defined by the 'type' 
+          sub-attribute.</t>
+          <t hangText="type">A case-insensitive canonical String value 
+          which defines the contents of the attribute 'value'. Valid 
+          type values are:<list style="hanging">
+            <t hangText="OIDC">A String value representing an OpenID
+            Connect subject. The value is a JSON object
+            where 'sub' is the identifier of a user, and 'iss' is the
+            OpenID Connect issuer.</t>
+            <t hangText="SAML">A String value that is a URI that
+            represents the subject of a SAML Identity Provider.</t>
+            <t hangText="EMAIL">A String Value that is the Email 
+            addresses for a subject. The value SHOULD be specified
+            according to <xref target="RFC5321"/>.</t>
+            <t hangText="PHIONE">Phone numbers for the user. The value 
+            SHOULD be specified according to the format defined in 
+            <xref target="RFC3966"/>, e.g., 'tel:+1-201-555-0123'.</t>
+            <t hangText="User">A SCIM User where value is the 'id' of a 
+            User resource in the local SCIM service provider.</t>
+            <t hangText="Group">A SCIM Group where the value is the 'id'
+            of a Group resource in the local SCIM service provider.</t>
+            <t hangText="URI">A miscellaneous subject that can be
+            identified by a URI.</t>
+          </list></t>
+          
+        </list></t>
+      </list></t>
+      
+      <t>Additional Event Stream metadata (attributes) MAY be defined
+      as extensions. The method for adding new attributes is defined in 
+      <xref target="RFC7643">Section 3.3</xref>.</t>
+  </section>
+        
+    <section anchor="subState" title="Event Stream State Model">
+      <t>The Event Stream configuration attribute <spanx style="verb">status</spanx>
+      reports the state of an Event Stream with regards to
+      whether the stream is operational or is in a suspended or failed state.
+      Additionally, the <spanx style="verb">stream</spanx> attribute 
+      can be used to pause or stop streams using the stream configuration
+      update functions described in <xref target="streamManagement"/>.</t>
+      
+      <figure anchor="stateDiag" title="Event Stream States at Event Transmitter">
+      <preamble>The following is the state machine representation of a
+      Event Stream on a Event Transmitter. Note that a Event Stream cannot
+      be made active until a verification process has been completed. As 
+      such, a newly created Event Stream begins with state 
+      <spanx style="verb">verify</spanx>.</preamble>
+      <artwork>                          +
+                       Create
+                          |
++--------+         +------v-----+          +--------+
+|        +-Restart->            +--Suspend->        |
+|  fail  |         |     on     |          | paused |
+|        &lt;--Error--+            &lt;--Resume--+        |
++--------+         +-+-------^--+          +---+----+
+                     |       |                 |
+                  Disable  Enable              |
+                     |       |                 |
+                   +-v-------+--+              |
+                   |     off    &lt;--Limited-----+
+                   +------------+</artwork>
+      </figure>
+      <t>In <xref target="stateDiag"/>, the following actions impact the
+      operational state of an Event Stream. <spanx style="verb">status</spanx> 
+      values are shown in the boxes, and change based on the following 
+      actions:<list style="hanging">
+      
+        <t hangText="Create"><vspace />A Event Receiver or an administrator creates
+        a new Event Stream using SCIM as described in <xref target="createSub"></xref>.
+        The initial state is <spanx style="verb">verify</spanx>.</t>
+        
+       
+        <!-- No used now that receiver verifies success
+        <t hangText="Confirm Fail"><vspace />If the confirmation fails,
+        the Event Transmitter sets the state to <spanx style="verb">fail</spanx>
+        requiring administrative action to correct the issue and 
+        <spanx style="verb">Restart</spanx>.</t>
+         -->
+        
+        <t hangText="Error"><vspace />An Event Transmitter that has not been
+        able to deliver a SET over one or more retries which has reached
+        a limit of attempts (<spanx style="verb">maxRetries</spanx>) 
+        or time (<spanx style="verb">maxDeliveryTime</spanx>)
+        MAY set the Event Stream state to <spanx style="verb">fail</spanx>.
+        What stream status is set to <spanx style="verb">failed</spanx>,
+        the Event Transmitter is indicating that SETs are being lost
+        and may not be recoverable.</t>
+        
+        <t hangText="Limited"><vspace/>A paused Event Stream has reached
+        the transmitters ability to retain SETs for delivery. The Event 
+        Transmitter changes the state to <spanx style="verb">off</spanx>
+        indicating SET loss is potentially occurring.</t>
+        
+        <t hangText="Restart"><vspace />An administrator having corrected the 
+        failed delivery condition modifies the Event Stream state to
+        <spanx style="verb">on</spanx> (e.g. see <xref target="patchSub" />).
+        </t>
+        
+        <t hangText="Suspend and Resume"><vspace />An Event Stream MAY be 
+        suspended and resumed by updating the Event Stream state to
+        <spanx style="verb">paused</spanx> or <spanx style="verb">on</spanx>. For
+        example, see see <xref target="patchSub" />. While suspended,
+        the Event Transmitter retains undelivered SETs for a period of time
+        and resources specified by the Event Transmitter (see 
+        <spanx style="verb">Limited</spanx>).</t>
+        
+        <t hangText="Enable and Disable"><vspace />A Event Stream MAY be
+        disabled and enabled by updating the Event Stream <spanx style="verb">state</spanx> to
+        <spanx style="verb">off</spanx> or <spanx style="verb">on</spanx>. For
+        example, see see <xref target="patchSub" />. While the Event Stream
+        is disabled, all SETs that occur at the Event Transmitter are lost.</t>
+      </list></t>
+    
+     </section>
+  
+   </section>
+			
+   <section anchor="streamManagement" title="Control Plane - Management and Provisioning">
+      <t>This section describes optional Stream management provisioning
+      features that allow receivers or provisioning systems to create 
+      streams and update configuration to perform actions such as
+      rotation, and operational state (e.g. suspend, stop, or resume)
+      management.</t>
+      
+      <t>The operations specified in this section are based on <xref target="RFC7644"/>.
+      As such, extension declarations for Event Streams are defined in 
+      <xref target="eventResourceType"/>. Basic processing rules are
+      provided by <xref target="RFC7644"/> along with additional
+      profiling specific to the needs for Stream management.</t>          
+      
+      
+      <section anchor="createSub" title="Creating An Event Stream">
+        <t>To define an Event Stream, the Event Receiver or its administrator
+        (known as the 'client') first obtains an authorization credential 
+        allowing the ability to define a new Stream. Note: the process 
+        for registering to obtain credentials and permission to register 
+        is out-of-scope of this specification.</t>
+        
+        <t>Upon obtaining authorization, the client issues an HTTP POST 
+        request as defined in <xref target="RFC7644">Section 3.3</xref>. 
+        To complete the request, the administrative entity provides the 
+        required Stream configuration metadata (attributes) as specified 
+        in <xref target="subscribeMetadata"/>, the delivery method 
+        <xref target="I-D.ietf-secevent-delivery"/> and any additional 
+        configuration specified by the SET Event Specifications that are 
+        being used.</t>
+         
+        <t>The client MAY discover the Event Transmitter's 
+        Control Plane service for the schema requirement for an 
+        <spanx style="verb">EventStream</spanx> resource type using 
+        service configuration and schema discovery of 
+        <xref target="RFC7644">Section 4</xref>.
+        </t>
+        
+        <t>The process to create an Event Stream is as follows:<list style="numbers">
+          <t>The client initiates an HTTP POST to the Control Plane 
+          endpoint and provides a 
+          JSON document defining an EventStream which contains information
+          about the Event Receivers endpoints, settings, and keys.</t>
+          <t>Upon validating the request, the Event Transmitters control
+          plane provisions the stream and updates the EventStream configuration
+          with the corresponding Event Transmitter information.</t>
+          <t>The Control Plane responds to the request from step 1 and 
+          returns the final representation of the Event Stream configuration
+          along with a pointer to the created EventStream resource that
+          the client MAY use to monitor status and update configuration.</t>
+          <t>Upon receiving the response, the client completes the 
+          client side configuration and provisioning based upon the 
+          returned EventStream configuration.</t>
+        </list></t>
+        <figure anchor="createSubscription" title="Example Create Event Stream Request">
+        <preamble>In the following non-normative example, a request to 
+        create a new <spanx style="verb">EventStream</spanx> is 
+        submitted.</preamble>
+ <artwork>POST /EventStreams
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
+  "feedName":"OIDCLogoutFeed",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
+  "aud":"https://sets.myexamplerp.com",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "description":"Logout events from oidc.example.com"
+}</artwork>
+        </figure>
+        <figure anchor="createSubscriptionResponse" title="Example Response to Create EventStream Request">
+        <preamble>In following non-normative response, the Control
+        Plane provider has automatically assigned an HTTP addressable 
+        location for the EventStream resource as well as an
+        <spanx style="verb">id</spanx>. Additionally, the Control Plane
+        response below includes additional configuration data for 
+        <spanx style="verb">iss</spanx> and 
+        <spanx style="verb">iss_jwksUri</spanx>.</preamble>
+<artwork>HTTP/1.1 201 Created
+Content-Type: application/scim+json
+Location: 
+ https://example.com/v2/EventStreams/767aad7853d240debc8e3c962051c1c0
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
+  "id":"767aad7853d240debc8e3c962051c1c0",
+  "feedName":"OIDCLogoutFeed",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
+  "aud":"https://sets.myexamplerp.com",
+  "status":"on",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "iss":"oidc.example.com"
+  "iss_jwksUri":"https://example.com/keys/oidc-example-com.jwks"
+  "description":"Logout events from oidc.example.com",
+  "meta":{
+     ... SCIM meta attributes ...
+  }
+}</artwork>
+        </figure>
+      </section>
+      
+      <section anchor="patchSub" title="Updating An Event Stream">
+      
+        <t>Two HTTP methods are available to update an Event Stream 
+        configuration. <list>
+          <t>The HTTP PUT operation accepts a JSON Document
+        representing an existing EventStream configuration and replaces
+        it.</t>
+          <t>An optional HTTP PATCH operation uses a JSON Patch 
+          <xref target="RFC6902"/> style request format to allow manipulation
+          of specific EventStream configuration such as
+          (but not limited to) <spanx style="verb">status</spanx>, and 
+          <spanx style="verb">members</spanx>.</t>
+        </list>  </t>
+
+        <section title="Update using HTTP PUT">
+          <t>The HTTP PUT method allows a client having previously 
+          received the EventStream JSON document to modify the document
+          and replace the Control Plane provider's copy. In using this
+          method, the client is not required to remove data normally
+          asserted or defined by the Event Stream Control Plane provider.
+          The robust processing rules of <xref target="RFC7644"/> enable the
+          client to "put back" what was previously received allowing
+          the Control Plane to figure out what needs to be updated and
+          ignored.  For example, while "id" is immutable, the Control
+          Plane provider will simply ignore attempts to replace its value.</t>
+          
+          <figure anchor="putSubscription" title="Example Replace Event Stream Request">
+          <preamble>In the following non-normative example, a request to 
+          replace the existing EventStream <spanx style="verb">EventStream</spanx> is 
+          submitted. In this example, the change shown is the status
+          is now set to <spanx style="verb">off</spanx>.</preamble>
+   <artwork>PUT /EventStreams/767aad7853d240debc8e3c962051c1c0
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+  
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
+  "id":"767aad7853d240debc8e3c962051c1c0",
+  "feedName":"OIDCLogoutFeed",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
+  "aud":"https://sets.myexamplerp.com",
+  "status":"off",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "iss":"oidc.example.com"
+  "iss_jwksUri":"https://example.com/keys/oidc-example-com.jwks"
+  "description":"Logout events from oidc.example.com",
+  "meta":{
+     ... SCIM meta attributes ...
+  }
+}</artwork>
+          </figure>
+
+        <figure anchor="putSubscriptionResponse" title="Example Response to PUT EventStream Request">
+        <preamble>In following non-normative response, the Control
+        Plane provider responds with the accepted and revised state
+        of the submitted EventStream.</preamble>
+<artwork>HTTP/1.1 200 OK
+Content-Type: application/scim+json
+Location: 
+ https://example.com/v2/EventStreams/767aad7853d240debc8e3c962051c1c0
+
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
+  "id":"767aad7853d240debc8e3c962051c1c0",
+  "feedName":"OIDCLogoutFeed",
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
+  "aud":"https://sets.myexamplerp.com",
+  "status":"off",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "iss":"oidc.example.com"
+  "iss_jwksUri":"https://example.com/keys/oidc-example-com.jwks"
+  "description":"Logout events from oidc.example.com",
+  "meta":{
+     ... SCIM meta attributes ...
+  }
+}</artwork>
+        </figure>
+        
+        </section>
+
+            
+        <section title="Update using HTTP PATCH">
+        <t>Periodically, Event Receivers MAY have need to update an
+        EventStream configuration for the purpose of:<list style="symbols">
+        <t>Rotating access credentials or keys</t>
+        <t>Updating endpoint configuration</t>
+        <t>Making operational changes such as pausing, resetting, or 
+        disabling an Event Stream.</t>
+        <t>Other operations (e.g. such as adding or removing subjects)
+        as defined by profiling Event specifications.</t></list></t>
+
+        <t>As documented in <xref target="RFC7644">Section 3.5.2</xref>,
+        one or more JSON Patch style (see <xref target="RFC6902"/>) 
+        operations can be made against a single EventStream resource. 
+        The update is expressed as a JSON document. The JSON document
+        contains an attribute <spanx style="verb">Operations</spanx>
+        which contains an array of JSON objects which each have the 
+        following attributes:<list style="hanging">
+          <t hangText="op">A JSON attribute whose value is one of
+          <spanx style="verb">add</spanx>, <spanx style="verb">remove</spanx>,
+          or <spanx style="verb">replace</spanx>.</t>
+          <t hangText="path">A JSON attribute whose value is a document
+          attribute path (see <xref target="RFC7644">Section 3.5.2</xref>) 
+          describing the attribute or sub-attribute or
+          value to be updated in the case of multi-valued complex attributes
+          such as <spanx style="verb">members</spanx>.</t>
+          <t hangText="value">The value to be assigned to the JSON 
+          document attribute defined in <spanx style="verb">path</spanx>.</t>
+        </list></t>
+
+        <figure anchor="subscriptionPatch" title="Example EventStream PATCH Request">
+        <preamble>In the following non-normative example, the client
+        is requesting that <spanx style="verb">status</spanx> be 
+        changed to <spanx style="verb">paused</spanx> for the EventStream
+        whose path is identified by the request URI path.</preamble>
+<artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":
+    ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+  "Operations": [{
+    "op":"replace",
+    "path":"status",
+    "value":"paused"
+  }]
+}</artwork>
+<postamble>Upon receiving the request, the Event Transmitter would stop
+sending Events to the Receiver. Note that while the request MAY seem complex
+it avoids the need for the requestor to have all of the current EventStream
+values in order to make a PUT request. In other words, an HTTP PATCH can
+be typically done in a single request response whereas an HTTP POST usually
+is preceded by an HTTP GET.</postamble>
+            </figure>
+            
+       <figure anchor="memberPatch" title="Example Changing the Members of EventStream">
+        <preamble>In the following non-normative example, the client
+        is request the addition and removal of two subjects
+        from an existing EventStream.</preamble>
+<artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":
+    ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+  "Operations": [{
+    "op":"add",
+    "path":"members",
+    "value":{
+      "type":"EMAIL",
+      "value":"alice@example.com"
+    }
+  },
+  { 
+    "op":remove",
+    "path":"members[value eq \"bob@example.com\"]
+  }]
+}</artwork>
+<postamble>In the above request, the remove operation uses a value
+filter which provides a matching expression against one or more
+sub-attributes of a parent attributes (members). In this case the 
+composite value of members which contains the sub-attribute 
+<spanx style="verb">type</spanx> and <spanx style="verb">value</spanx>
+attribute is removed based on matching the "value" sub-attribute.
+Upon receiving the request, the EventStream members attribute would be 
+updated to reflect the changes. </postamble>
+            </figure>
+                    
+        </section>
+        
+      </section>      
+    </section>
+   
+    <section anchor="verifyStream" title="Event Stream Verification">
+  
+        <t>In the verify process, the Event Receiver organization initiates
+        a request to the Event Transmitter to verify the Stream. The 
+        Event Receiver provides a <spanx style="verb">confirm</spanx> value and a 
+        <spanx style="verb">nonce</spanx> value that the Event Transmitter is expected
+        to return in the body of a Verify Event so that the Event Receiver
+        can confirm end-to-end configuration of SET delivery including
+        proper signing and encryption depending on the configuration of
+        the Stream.  For example, can the Event Transmitter send a encrypted SET
+        that the Receiver can decode? The method by which this is initiated
+        is out-of-scope of this specification and MAY be provided by a
+        profiling specification, or by administrative interfaces offered
+        by the Event Transmitter.</t>
+        
+        <t>To confirm an Event Stream configuration, the Event
+        Transmitter SHALL send a
+        Verify SET to the Event Receiver using the registered 
+        <spanx style="verb">methodUri</spanx> mechanism.</t>
+        
+        <t>The Verify SET contains the following attributes:<list style="hanging">
+          <t hangText="events"><vspace/>Set with a value of 
+          <spanx style="verb">[[this RFC URL]]#verify</spanx>.</t>
+
+          <t hangText="iss"><vspace/>Set to the URI defined in the Event Stream
+          configuration.</t>
+
+          <t hangText="aud"><vspace/>MUST be set to a value that matches the
+          EventStream <spanx style="verb">aud</spanx> value agreed to.</t>
+
+          <t hangText="exp"><vspace/>A value that indicates the
+          time the verification request will expire. Once expired, the
+          server will set the Event Stream state to <spanx style="verb">fail</spanx>.</t>
+          
+          <t hangText="confirm"><vspace/>The value given by the Event Receiver to
+          the Event Transmitter to return in the Verify Event.</t>
+          
+          <t hangText="nonce"><vspace/>A value given by the Event Receiver
+          or otherwise agreed up to return which SHOULD be unique to the 
+          Stream and SHOULD change with each test in order to distinguish 
+          tests uniquely.</t>
+        </list>
+        </t>
+        
+        <t>
+        If the Event Stream is configured to encrypt SETs for the 
+        Event Receiver, then the SET SHOULD be encrypted with 
+        the provided key. Successful parsing of the
+        message confirms that provides confirmation of correct 
+        configuration and possession of keys.</t>
+         
+
+        <figure anchor="verifyPostEvent" title="Example Verification SET with Challenge">
+        <preamble>A non-normative JSON representation of an Event to be
+        sent to a Event Receiver as a Event Stream confirmation. Note the
+        Event is not yet encoded as a JWT token:</preamble>
+<artwork>{  
+  "jti": "4d3559ec67504aaba65d40b0363faad8",
+  "events":["[[this RFC URL]]#verify"],
+  "iat": 1458496404,
+  "iss": "https://scim.example.com",  
+  "exp": 1458497000,
+  "aud":[
+   "https://event.example.com/Feeds/98d52461fa5bbc879593b7754"
+  ], 
+  "[[this RFC URL]]#verify":{
+    "confirm":"ca2179f4-8936-479a-a76d-5486e2baacd7",
+    "nonce":"1668c993e95849869e4b3506cccdf9bf"
+  }  
+}</artwork>
+        </figure>
+        
+        <t>The above SET is encoded as a JWT and transmitted to the 
+        Event Receiver using the configured delivery method.</t>
+
+        <t>Upon receiving a verify SET, the Event Receiver SHALL parse
+        the SET and verify its claims. In particular, the Event Receiver
+        SHALL confirm that the values for <spanx style="verb">confirm</spanx> 
+        and <spanx style="verb">nonce</spanx> are as expected. If they
+        do not match, an error response of <spanx style="verb">setData</spanx>
+        SHOULD be returned [[TO BE UPDATED]].</t>
+        <t>
+        In many cases, Event Transmitters MAY disable or suspend an Event
+        Stream that fails to successfully verify based on the acknowledgement
+        or lack of acknowledgement by the Event Receiver.
+        </t>         
+     </section>
+   
+   
+   <section anchor="Security" title="Security Considerations" toc="default">
+
+      <t>[TO BE COMPLETED]</t>
+   </section>
+
+    <section anchor="IANA" title="IANA Considerations">
+      
+      <section title="SCIM Schema Registration">
+        <t>As per the "SCIM Schema URIs for Data Resources" registry established
+        by <xref target="RFC7643">Section 10.3</xref>, the following defines and registers
+        the following SCIM URIs and Resource Types for Feeds and Event Streams.</t>
+        <texttable>
+        <ttcol>Schema URI</ttcol><ttcol>Name</ttcol><ttcol>ResourceType</ttcol><ttcol>Reference</ttcol>
+        
+        <c>urn:ietf:params:scim: schemas:event:2.0: EventStream</c>
+        <c>SET Event Stream</c>
+        <c>EventStream</c>
+        <c><xref target="subscribeMetadata"/></c>
+        
+        </texttable>
+      
+      </section>
+
+  
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml' ?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5988.xml' ?>
+      
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7517.xml' ?><!-- JWK -->
+   
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-token-02.xml'?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-delivery-00.xml'?>
+
+    </references>
+
+    <references title="Informative References">
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3966.xml' ?><!-- JWS -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5321.xml' ?><!-- JWS -->
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6902.xml' ?><!-- JWS -->
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
+      
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7644.xml' ?><!-- SCIM API -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7643.xml' ?><!-- SCIM Schema -->
+
+      <reference anchor="openid-connect-core">
+        <front>
+          <title>OpenID Connect Core 1.0</title>
+          <author fullname="Nat Sakimura et al"><organization>NRI</organization></author>
+          <date day="8" month="Nov" year="2014"/>
+        </front>
+        <format type="HTML" target="http://openid.net/specs/openid-connect-core-1_0.html"/>
+      </reference>
+      <reference anchor="saml-core-2.0">
+        <front>
+          <title>Assertions and Protocols for the OASIS Security Assertion Markup Language (SAML) V2.0</title>
+          <author fullname="Scott Cantor et al"><organization>Internet2</organization></author>
+          <date day="15" month="March" year="2005"/>
+        </front>
+        <format type="PDF" target="http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf"/>
+      </reference>
+      <reference anchor="idevent-scim">
+        <front>
+          <title>SCIM Event Extensions (work in progress)</title>
+          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
+          <date/>
+        </front>  
+        <format type="TXT" target="draft-hunt-idevent-scim-00.txt"/>    
+      </reference>
+
+     <!-- 
+      <reference anchor="Order-Operations">
+        <front>
+          <title>Order of Operations: Programming Languages</title>
+
+          <author>
+            <organization>Wikipedia</organization>
+          </author>
+
+          <date/>
+        </front>
+
+        <format target="http://en.wikipedia.org/wiki/Order_of_operations#Programming_languages"
+                type="HTML"/>
+      </reference>
+       -->
+    </references>
+
+    <section anchor="eventResourceType" title="Event Stream Resource Type Definition">
+             
+        <t>The <spanx style="verb">EventStream</spanx> resource type definition 
+        is defined as follows:
+<figure anchor="subscriptionType" title="SCIM EventStream Resource Type Definition">
+<artwork>{
+  "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
+  "id": "EventStream",
+  "name": "EventStream",
+  "endpoint": "/EventStreams",
+  "description": "Endpoint and event configuration and status for SEC EVENT streams.",
+  "schema": "urn:ietf:params:scim:schemas:event:2.0:EventStream",
+  "schemaExtensions": []
+}</artwork>
+<postamble>The resource type above is discoverable in the 
+<spanx style="verb">/ResourceTypes</spanx> endpoint of a SCIM service
+provider and informs SCIM clients about
+the endpoint location of EventStream resources and the SCIM schema used
+to define the resource.  The corresponding schema for the EventStream
+resource MAY be retrieved from the SCIM <spanx style="verb">/Schemas</spanx> 
+endpoint (see <xref target="RFC7644">Section 3.2</xref>).</postamble>
+        </figure>
+        </t>
+       
+        <t>The attributes for the EventStream resource type are defined in
+        <xref target="subscribeMetadata"/>.</t>
+        
+        <figure>
+        <artwork>  {
+    "id" : "urn:ietf:params:scim:schemas:event:2.0:EventStream",
+    "name" : "EventStream",
+    "description" : "Event Stream Configuration",
+    "attributes" : [
+      {
+        "name" : "feedUri",
+        "type" : "string",
+        "multiValued" : false,
+        "description" : "An optional String value containing a logical
+        unique URI for the feed assigned by the provider.",
+        "required" : false,
+        "caseExact" : false,
+        "mutability" : "immutable",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+      {
+        "name" : "methodUri",
+        "type" : "string",
+        "multiValued" : false,
+        "description" : "A String value containing the URI for the
+        method used to deliver SET events. The method used indicates
+        the required metadata and configuration parameters for an
+        operational Event Stream configuration.",
+        "required" : true,
+        "caseExact" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+      {
+        "name" : "deliveryUri",
+        "type" : "string",
+        "multiValued" : false,
+        "description" : "A String value containing the URI for a
+        feed endpoint used to pick up or deliver SET events based on
+        a configured method.",
+        "required" : true,
+        "caseExact" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+      {
+        "name" : "iss",
+        "type" : "string",
+        "multiValued" : false,
+        "description" : "The URI for the publisher of the SETs that will 
+        be issued for the Event Stream.",
+        "required" : true,
+        "caseExact" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+      {
+        "name" : "aud",
+        "type" : "string",
+        "multiValued" : true,
+        "description" : "An OPTIONAL Array of JSON String values which 
+        are URIs representing the audience(s) of the Event Stream.  
+        Values SHALL be the value of SET "aud" claim sent to the Event 
+        Receiver.",
+        "required" : true,
+        "caseExact" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+      {
+        "name" : "iss_jwksUri",
+        "type" : "string",
+        "multiValued" : false,
+        "description" : "An OPTIONAL 
+        String that contains the URL of the SET issuers public JSON 
+        Web Key Set [RFC7517]. This contains the signing key(s) the 
+        Event Receiver uses to validate SET signatures from the Event 
+        Transmitter that will be used by the Event Receiver to verify 
+        the authenticity of issued SETs.",
+        "required" : false,
+        "caseExact" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+      {
+        "name" : "aud_jwksUri",
+        "type" : "string",
+        "multiValued" : false,
+        "description" : "An OPTIONAL JSON Web Key Set [RFC7517] that 
+        contains the Event Receiver's encryption keys that MAY be used 
+        by the Event Transmitter to encrypt SET tokens for the specified 
+        Event Receiver.",
+        "required" : false,
+        "caseExact" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+      {
+        "name" : "status",
+        "type" : "string",
+        "multiValued" : false,
+        "description" : "An OPTIONAL JSON String keyword that indicates 
+        the current state of an Event Stream.  More information on the E
+        vent Stream state can be found in Section 2.3.",
+        "required" : false,
+        "caseExact" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none",
+        "canonicalValues" : [
+              "on",
+              "off",
+              "verify",
+              "paused",
+              "fail"
+            ]
+      },
+      {
+        "name" : "maxRetries",
+        "type" : "integer",
+        "multiValued" : false,
+        "description" : "An OPTIONAL JSON number indicating the maximum 
+        number of attempts to deliver a SET.  A value of '0' indicates 
+        there is no maximum. Upon reaching the maximum, the Event Stream 
+        'status' attribute is set to 'failed'.",
+        "required" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+      {
+        "name" : "maxDeliveryTime",
+        "type" : "integer",
+        "multiValued" : false,
+        "description" : "An OPTIONAL number indicating the maximum 
+        amount of time in seconds a SET MAY take for successful delivery 
+        per request or cumulatively across multiple retries.  Upon 
+        reaching the maximum, the Event Stream 'status' is set to 
+        'failed'.  If undefined, there is no maximum time.",
+        "required" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+      {
+        "name" : "minDeliveryInterval",
+        "type" : "integer",
+        "multiValued" : false,
+        "description" : "An OPTIONAL JSON integer that represents the 
+        minimum interval in seconds between deliveries.  A value of '0' 
+        indicates delivery should happen immediately.  When delivery is 
+        a polling method (e.g.  HTTP GET), it is the expected time 
+        between Event Receiver attempts.  When in push mode (e.g. 
+        HTTP POST), it is the interval the server will wait before 
+        sending a new event or events.",
+        "required" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+      {
+        "name" : "txErr",
+        "type" : "string",
+        "multiValued" : false,
+        "description" : "An OPTIONAL JSON String keyword value.  When 
+        the Event Stream has 'status' set to 'fail', a keyword condition
+        is set.",
+        "required" : false,
+        "caseExact" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none",
+        "canonicalValues" : [
+              "connection",
+              "tls",
+              "dnsname",
+              "receiver",
+              "other"
+            ]        
+      },
+      {
+        "name" : "txErrDesc",
+        "type" : "string",
+        "multiValued" : false,
+        "description" : "An OPTIONAL String value that is usually human 
+        readable that provides further diagnostic detail by the 
+        indicated 'txErr' error code.",
+        "required" : false,
+        "caseExact" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+
+      {
+        "name" : "members",
+        "type" : "complex",
+        "multiValued" : true,
+        "description" : "An optional list of subjects that are part of
+        the Stream.",
+        "required" : false,
+        "subAttributes" : [
+          {
+            "name" : "value",
+            "type" : "string",
+            "multiValued" : false,
+            "description" : "Identifier of the member of this Group.
+            The contents of this parameter are determined by the value
+            of the sub-attribute 'type'.",
+            "required" : false,
+            "caseExact" : false,
+            "mutability" : "immutable",
+            "returned" : "default",
+            "uniqueness" : "none"
+          },
+          {
+            "name" : "type",
+            "type" : "string",
+            "multiValued" : false,
+            "description" : "A label indicating the type of resource,
+            e.g., OIDC Connect Subject, SAML Subject, Email address,
+            Telephone Number, SCIM User or SCIM Group, or the URI
+            of some other network addressable subject.",
+            "required" : false,
+            "caseExact" : false,
+            "canonicalValues" : [
+              "User",
+              "Group",
+              "OIDC",
+              "SAML"
+              "EMIL",
+              "PHONE",
+              "URI"
+            ],
+            "mutability" : "immutable",
+            "returned" : "default",
+            "uniqueness" : "none"
+          }
+        ],
+        "mutability" : "readWrite",
+        "returned" : "default"
+      }
+    ],
+    
+    "meta" : {
+      "resourceType" : "Schema",
+      "location" :
+        "/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:Group"
+    }
+  },
+        </artwork>
+        </figure>            
+      </section>
+      
+      <section title="Acknowledgments">
+      <t>The editors would like to thanks the members of the SCIM WG which 
+      began discussions of provisioning events starting with: draft-hunt-scim-notify-00 in 2015.</t>
+      
+      <t>The editor would like to thank the participants in the the SECEVENTS
+      working group for their support of this specification.</t>
+    </section>
+
+    <section title="Change Log">
+      <t>Draft 00 - PH - First Draft based on reduced version of draft-hunt-idevent-distribution</t>
+      <t>Draft 01 - PH - <list style="symbols">
+        <t>Reworked terminology to match new WG Transmitter/Receiver terms</t>
+        <t>Reworked sections into Data Plane vs. Control Plane</t>
+        <t>Removed method transmission registry in order to simplify the specification</t>
+        <t>Made Create, Update operations optional for Control Plane (Read is MTI)</t>
+      </list></t>
+      <t>Draft 02 - PH <list style="symbols">
+        <t>Added iss metadata for Event Stream</t>
+        <t>Changed to using JWKS_uri for issuer and receiver.</t>
+      </list></t>
+      
+    </section>
+  </back>
+</rfc>
