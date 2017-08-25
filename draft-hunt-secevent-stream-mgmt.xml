@@ -147,7 +147,7 @@
 		</section>
     
 
-    <section title="Control Plane - Monitoring and Configuration">
+    <section title="Stream Monitoring and Configuration Retrieval">
   
     <t>The Control Plane is an HTTP service associated with an Event 
     Transmitter that enables the provisioning, and monitoring of Event 
@@ -397,7 +397,7 @@ Authorization: Bearer h480djs93hd8</artwork>
 </figure>
          
 <figure anchor="streamResponse" title="Example Stream GET Response">
-<preamble>The response below shows an example response to Stream retrieval
+<preamble>Below is an example response to Stream retrieval
 made in <xref target="getRequest"/>.</preamble>
 <artwork>HTTP/1.1 200 OK
 Content-Type: application/scim+json
@@ -452,116 +452,48 @@ Location:
       header. 
       </t>
       <figure anchor="getCommonRequest" title="Example Stream HTTP GET Request From Common Endpoint">
-        <preamble>The example below retrieves a <spanx style="verb">EventStream</spanx> resource whose 
-        <spanx style="verb">id</spanx> is <spanx style="verb">548b7c3f77c8bab33a4fef40</spanx>.</preamble>
+        <preamble>The example below retrieves any <spanx style="verb">EventStream</spanx> 
+        resources based solely on the requestor's authorization header.
+        </preamble>
         <artwork>GET /EventStreams/
 Host: example.com
 Accept: application/json
 Authorization: Bearer h480djs93hd8</artwork>
 </figure>
       <figure anchor="getListResponse" title="Example Event Stream List/Query Response Form">
-        <artwork>   HTTP/1.1 200 OK
-   Content-Type: application/scim+json
-   Location: https://example.com/.search
+        <artwork>HTTP/1.1 200 OK
+Content-Type: application/scim+json
+Location: 
+  https://example.com/EventStreams/767aad7853d240debc8e3c962051c1c0
 
-   {
-     "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
-     "totalResults":1,
-     "itemsPerPage":10,
-     "startIndex":1,
-     "Resources":[
 {
-  "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
-  "id":"767aad7853d240debc8e3c962051c1c0",
-  "feedName":"OIDCLogoutFeed",
-  "feedUri":
-    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
-  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
-  "deliveryUri":"https://notify.examplerp.com/Events",
-  "aud":"https://sets.myexamplerp.com",
-  "status":"fail",
-  "txErr":"connection",
-  "txErrDesc":"TCP connect error to notify.examplerp.com.",
-  "maxDeliveryTime":3600,
-  "minDeliveryInterval":0,
-  "description":"Logout events from oidc.example.com",
-  "meta":{
-     ... SCIM meta attributes ...
-  }
-     ]
-   }
-        </artwork>
+  "schemas": ["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+  "totalResults":1,
+  "itemsPerPage":10,
+  "startIndex":1,
+  "Resources":[
+  {
+    "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
+    "id":"767aad7853d240debc8e3c962051c1c0",
+    "feedName":"OIDCLogoutFeed",
+    "feedUri":
+      "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+    "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+    "deliveryUri":"https://notify.examplerp.com/Events",
+    "aud":"https://sets.myexamplerp.com",
+    "status":"fail",
+    "txErr":"connection",
+    "txErrDesc":"TCP connect error to notify.examplerp.com.",
+    "maxDeliveryTime":3600,
+    "minDeliveryInterval":0,
+    "description":"Logout events from oidc.example.com",
+    "meta":{
+       ... SCIM meta attributes ...
+  }]
+}</artwork>
       </figure>      
           
-  </section>
-  <section title="Checking Subscriber Membership">
-      <t>At the option of the Control Plane service provider, the
-      Event Stream configuration attribute <spanx style="verb">subscriber</spanx> 
-      is typically not returned when querying Event Stream configurations. This 
-      is because the number of values may be too large
-      and reveals significant personal information.</t>
-      
-      <t>The ability to return attributes such as <spanx style="verb">subscribers</spanx>
-      is indicated by Control Plane service providers in schema discovery 
-      (see <xref target="RFC7644">Section 4</xref>) as the schema attribute 
-      <spanx style="verb">returned</spanx>. For <spanx style="verb">subscribers</spanx>
-      this attribute SHOULD be set to <spanx style="verb">request</spanx> or 
-      <spanx style="verb">never</spanx>.  In <spanx style="verb">request</spanx> mode,
-      the client must specifically request the attribute <spanx style="verb">subscribers</spanx>
-      to have it enumerated. If the mode is <spanx style="emph">never</spanx>,
-      the attribute SHALL NOT be returned to clients. In all cases however,
-      a client MAY execute a query to verify the presence of a subscriber:</t>
-
-      <figure anchor="verifySubscriber" title="Determining if a Subject is in an Event Stream Example">
-      <preamble>In the following non-normative example, a client queries
-      the Control Plane to see if Alice@example.com is part of any
-      defined stream configuration. In the request, only the attribute 
-      <spanx style="verb">id</spanx> is requested as the client
-      does not need to see the rest of the configuration. Note, for
-      readability, the URL is not encoded.</preamble> 
-<artwork>GET /EventStreams?filter=(subscribers.value eq "alice@example.com")&amp;attributes=id
-Host: example.com
-Accept: application/scim+json
-Authorization: Bearer h480djs93hd8</artwork>
-      </figure>
-
-      <figure anchor="verifyNoMatch" title="Example Response With No Subscriber Match">
-      <preamble>In this non-normative response, the subject is confirmed
-      as not part of any Event Streams associated with the requestor. In
-      this case an empty list is returned with no values and <spanx style="verb">totalResults</spanx> is 
-      <spanx style="verb">0</spanx>.</preamble>
-      <artwork>HTTP/1.1 200 OK
-   Content-Type: application/scim+json
-
-   {
-     "schemas":["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
-     "totalResults":0,
-     "Resources":[]
-   }</artwork>
-      </figure>   
-      
-      <figure anchor="verifyMatch" title="Example Response With Single Match">
-      <preamble>In the response below, a match for subject <spanx style="verb">alice@example.com</spanx> 
-      is found and the <spanx style="verb">id</spanx> of the 
-      Event Stream configuration that contains the subject is returned is 
-      <spanx style="verb">767aad7853d240debc8e3c962051c1c0</spanx>.</preamble>
-      <artwork>HTTP/1.1 200 OK
-   Content-Type: application/scim+json
-
-   {
-     "schemas":["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
-     "totalResults":1,
-     "Resources":[
-       {
-         "id":"767aad7853d240debc8e3c962051c1c0",
-       }
-     ]
-   }
-      </artwork>
-      </figure>   
-  </section>
-  
-  
+    </section>
         
     <section anchor="subState" title="Event Stream State Model">
       <t>The Event Stream configuration attribute <spanx style="verb">status</spanx>
@@ -577,7 +509,7 @@ Authorization: Bearer h480djs93hd8</artwork>
       be made active until a verification process has been completed. As 
       such, a newly created Event Stream begins with state 
       <spanx style="verb">verify</spanx>.</preamble>
-      <artwork>                          +
+      <artwork align="center">                          +
                        Create
                           |
 +--------+         +------v-----+          +--------+
@@ -647,7 +579,7 @@ Authorization: Bearer h480djs93hd8</artwork>
   
    </section>
 			
-   <section anchor="streamManagement" title="Control Plane - Management and Provisioning">
+   <section anchor="streamManagement" title="Stream Management and Provisioning">
       <t>This section describes optional Stream management provisioning
       features that allow receivers or provisioning systems to create 
       streams and update configuration to perform actions such as
@@ -841,7 +773,7 @@ Location:
         </section>
 
             
-        <section title="Update using HTTP PATCH">
+        <section anchor="updatePatch" title="Update using HTTP PATCH">
         <t>Periodically, Event Receivers MAY have need to update an
         EventStream configuration for the purpose of:<list style="symbols">
         <t>Rotating access credentials or keys</t>
@@ -938,8 +870,238 @@ updated to reflect the changes. </postamble>
         
       </section>      
     </section>
+    
+   <section anchor="manageSubjects" title="Managing Stream Subjects">
    
-    <section anchor="verifyStream" title="Event Stream Verification">
+   <t>This section describes possible methods based on <xref target="RFC7644"/>
+   that the subjects that are part of a stream can be queried and 
+   managed. This section describes a few possible techniques of many
+   that are possible for drafts that profile the Security Event Token
+   specification <xref target="I-D.ietf-secevent-token"/> to handle 
+   subject management. In this section, examples are given using the 
+   <spanx style="verb">subject</spanx> attribute of Event Stream 
+   configuration described in <xref target="subscribeMetadata"/></t>
+   
+   <section title="Considerations for Managing Subjects">
+      <t>It is expected, but not required, that most deployments
+      will not allow the subjects that are part of an Event Stream
+      to be enumerated. In practice, the Event Stream configuration 
+      attribute <spanx style="verb">subscriber</spanx> 
+      is typically not returned when querying Event Stream configurations
+      (see <xref target="getStatus"/>). This is because the number of 
+      values may be too large (e.g. great than 100k values or even 
+      in the billions or more). Further, depending on the Security
+      Event types being exchanged, Event Receivers MAY confirm that a 
+      subject is part of a stream for privacy reasons. </t>
+      
+      <t>The ability to return attributes such as <spanx style="verb">subscribers</spanx>
+      is indicated by Control Plane service providers in schema discovery 
+      (see <xref target="RFC7644">Section 4</xref>) as the schema attribute 
+      <spanx style="verb">returned</spanx>. For <spanx style="verb">subscribers</spanx>
+      this attribute SHOULD be set to <spanx style="verb">request</spanx> or 
+      <spanx style="verb">never</spanx>.  In <spanx style="verb">request</spanx> mode,
+      the client must specifically request the attribute <spanx style="verb">subscribers</spanx>
+      to have it enumerated. If the mode is <spanx style="emph">never</spanx>,
+      the attribute SHALL NOT be returned to clients. In all cases however,
+      a client MAY execute a query to verify the presence of a subscriber:</t>
+      
+   </section>
+   
+   <section title="Checking Subscriber Membership">
+
+      <section title="Email Based Subjects">
+        <t>In this section, values have been added to the 
+        <spanx style="verb">subject</spanx> attribute are email addresses
+        which clients to the Control Plane would like to verify are 
+        present. The values <spanx style="verb">subject</spanx> have sub-attribute
+        <spanx style="verb">type</spanx> set to <spanx style="verb">EMAIL</spanx>
+        and the sub-attribute <spanx style="verb">value</spanx> contains
+        an email address.</t>
+
+        <figure anchor="verifySubscriber" title="Determining if a Subject is in an Event Stream Example">
+        <preamble>In the following non-normative example, a client queries
+        the Control Plane to see if Alice@example.com is part of any
+        defined stream configuration. In the request, only the attribute 
+        <spanx style="verb">id</spanx> is requested as the client
+        does not need to see the rest of the configuration. Note, for
+        readability, the URL is not encoded.</preamble> 
+  <artwork>GET /EventStreams?filter=(subscribers.value eq "alice@example.com")&amp;attributes=id
+Host: example.com
+Accept: application/scim+json
+Authorization: Bearer h480djs93hd8</artwork>
+        </figure>
+  
+        <figure anchor="verifyNoMatch" title="Example Response With No Subscriber Match">
+        <preamble>In this non-normative response, the subject is confirmed
+        as not part of any Event Streams associated with the requestor. In
+        this case an empty list is returned with no values and <spanx style="verb">totalResults</spanx> is 
+        <spanx style="verb">0</spanx>.</preamble>
+        <artwork>HTTP/1.1 200 OK
+Content-Type: application/scim+json
+  
+{
+  "schemas":["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+  "totalResults":0,
+  "Resources":[]
+}</artwork>
+        </figure>   
+        
+        <figure anchor="verifyMatch" title="Example Response With Single Match">
+        <preamble>In the response below, a match for subject <spanx style="verb">alice@example.com</spanx> 
+        is found and the <spanx style="verb">id</spanx> of the 
+        Event Stream configuration that contains the subject is returned is 
+        <spanx style="verb">767aad7853d240debc8e3c962051c1c0</spanx>.</preamble>
+        <artwork>HTTP/1.1 200 OK
+Content-Type: application/scim+json
+  
+{
+  "schemas":["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+  "totalResults":1,
+  "Resources":[
+    {
+      "id":"767aad7853d240debc8e3c962051c1c0",
+    }
+  ]
+}
+        </artwork>
+        </figure>   
+        
+      </section>
+      
+      <section title="OIDC Based Subjects">
+        <t>In this section, values have been added to the 
+        <spanx style="verb">subject</spanx> attribute are OIDC users
+        which clients to the Control Plane would like to verify are 
+        present. The values <spanx style="verb">subject</spanx> have sub-attribute
+        <spanx style="verb">type</spanx> set to <spanx style="verb">OIDC</spanx>
+        and the sub-attribute <spanx style="verb">value</spanx> contains
+        an OIDC <spanx style="verb">sub</spanx> value and the 
+        <spanx style="verb">iss</spanx> sub-attribute contains the 
+        corresponding OIDC Provider <spanx style="verb">iss</spanx> value.
+        For this example, the OIDC <spanx style="verb">iss</spanx> is
+        <spanx style="verb">op.example.com</spanx> and the 
+        <spanx style="verb">sub</spanx> is <spanx style="verb">123456</spanx>.</t>
+
+        <figure anchor="verifyOidcSubscriber" title="Determining if an OIDC Subject is in an Event Stream Example">
+        <preamble>In the following non-normative example, a client queries
+        the Control Plane to see if the above OIDC user is part of any
+        defined stream configuration. In the request, only the attribute 
+        <spanx style="verb">id</spanx> is requested as the client
+        does not need to see the rest of the configuration. Note, for
+        readability, the URL is not encoded.</preamble> 
+  <artwork>GET /EventStreams?filter=(subscribers[value eq "123456" and
+  iss eq "op.example.com"])&amp;attributes=id
+Host: example.com
+Accept: application/scim+json
+Authorization: Bearer h480djs93hd8</artwork>
+        </figure>
+  
+        <t>In the above request note that <spanx style="verb">type</spanx>
+        and <spanx style="verb">value</spanx> are enclosed within
+        square brackets. This is done, per <xref target="RFC7644"/> to
+        ensure the matching condition within "[" and "]" is matched
+        against the same value record.  If the filter was expressed as
+<spanx style="verb">(subscribers.value eq "123456" and subscribers.iss eq "op.example.com")</spanx>
+        Then an improper match can occur because a composite value of 
+        <spanx style="verb">subjects</spanx>
+        may have <spanx style="verb">123456</spanx> while another has 
+        <spanx style="verb">op.example.com</spanx>.</t>
+
+        <t>For examples of responses to <xref target="verifyOidcSubscriber"/>,
+        see <xref target="verifyNoMatch"/> and <xref target="verifyMatch"/></t>
+        
+      </section>
+  </section>
+  
+    <section title="Adding and Removing Subjects to a Stream">
+      <t>Adding and removing subjects to an Event Stream is performed
+      using the HTTP PATCH method described in <xref target="updatePatch"/>.
+      The following provides examples of adding and removing subjects
+      based on EMAIL and OIDC subects. </t>    
+    
+      <figure anchor="addEmailSubject" title="Example Adding an EMAIL Subject to a Stream">
+      <preamble>In the following non-normative example, the client
+      is request the addition of a subject identified by an EMAIL address
+      to an existing EventStream. The composite value of subscribers
+      has the sub-attributes <spanx style="verb">type</spanx> and <spanx style="verb">value</spanx>
+      which are assigned.</preamble>
+<artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":
+    ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+  "Operations": [{
+    "op":"add",
+    "path":"subscribers",
+    "value":{
+      "type":"EMAIL",
+      "value":"alice@example.com"
+    }
+  }]
+}</artwork>
+<postamble> </postamble>
+      </figure>
+      
+      <figure anchor="addOidcSubject" title="Example Adding an OIDC Provider Subject to a Stream">
+      <preamble>In the following non-normative example, the client
+      is request the addition of a subject 
+      to an existing EventStream. The composite value of subscribers
+      has the sub-attributes <spanx style="verb">type</spanx>, 
+      <spanx style="verb">iss</spanx> and <spanx style="verb">value</spanx>
+      which are assigned.</preamble>
+<artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":
+    ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+  "Operations": [{
+    "op":"add",
+    "path":"subscribers",
+    "value":{
+      "type":"OIDC",
+      "value":"123456",
+      "iss":"op.example.com"
+    }
+  }]
+}</artwork>
+<postamble> </postamble>
+      </figure>
+    
+      <figure anchor="removeOidcSubjects" title="Example Removing an OIDC Provider Subject from a Stream">
+      <preamble>In the following non-normative example, the client
+      is request the removal of a subject selected by using a 
+      filter from the <spanx style="verb">subjects</spanx> attribute.</preamble>
+<artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":
+    ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+  "Operations": [{
+    "op":"remove",
+    "path":"subscribers[value eq \"123456\" and iss eq \"op.example.com\"]",
+  }]
+}</artwork>
+<postamble> </postamble>
+      </figure>
+    
+    </section>    
+  
+  
+  </section>
+
+   <section anchor="verifyStream" title="Event Stream Verification">
   
         <t>In the verify process, the Event Receiver organization initiates
         a request to the Event Transmitter to verify the Stream. The 
