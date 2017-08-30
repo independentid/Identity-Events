@@ -5,10 +5,10 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                              A. Nadalin
-Expires: February 26, 2018                                     Microsoft
+Expires: March 3, 2018                                         Microsoft
                                                                M. Ansari
                                                                    Cisco
-                                                         August 25, 2017
+                                                         August 30, 2017
 
 
          SET Security Event Stream Management and Provisioning
@@ -16,9 +16,9 @@ Expires: February 26, 2018                                     Microsoft
 
 Abstract
 
-   This specification defines how an Event Receiver may register to
-   establish, monitor, and manage the provisioning of a Security Event
-   Token Stream.
+   This specification defines a "control plane" service which enables a
+   client (e.g. an Event Receiver) to establish, monitor, and manage a
+   Security Event Token Stream.
 
 Status of This Memo
 
@@ -35,7 +35,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on February 26, 2018.
+   This Internet-Draft will expire on March 3, 2018.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hunt, et al.            Expires February 26, 2018               [Page 1]
+Hunt, et al.              Expires March 3, 2018                 [Page 1]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -68,7 +68,7 @@ Table of Contents
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   3
    2.  Stream Monitoring and Configuration Retrieval . . . . . . . .   4
      2.1.  Event Stream Configuration Attributes . . . . . . . . . .   4
-     2.2.  Checking Stream Configuration and Stream State  . . . . .   7
+     2.2.  Checking Stream Configuration and Stream State  . . . . .   8
      2.3.  Event Stream State Model  . . . . . . . . . . . . . . . .  11
    3.  Stream Management and Provisioning  . . . . . . . . . . . . .  13
      3.1.  Creating An Event Stream  . . . . . . . . . . . . . . . .  13
@@ -79,19 +79,23 @@ Table of Contents
      4.1.  Considerations for Managing Subjects  . . . . . . . . . .  20
      4.2.  Checking Subscriber Membership  . . . . . . . . . . . . .  20
        4.2.1.  Email Based Subjects  . . . . . . . . . . . . . . . .  20
-       4.2.2.  OIDC Based Subjects . . . . . . . . . . . . . . . . .  21
+       4.2.2.  OIDC Based Subjects . . . . . . . . . . . . . . . . .  22
      4.3.  Adding and Removing Subjects to a Stream  . . . . . . . .  22
    5.  Event Stream Verification . . . . . . . . . . . . . . . . . .  25
-   6.  Security Considerations . . . . . . . . . . . . . . . . . . .  26
-   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  26
-     7.1.  SCIM Schema Registration  . . . . . . . . . . . . . . . .  26
-   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  27
-     8.1.  Normative References  . . . . . . . . . . . . . . . . . .  27
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .  28
-   Appendix A.  Event Stream Resource Type Definition  . . . . . . .  29
-   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  34
-   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  35
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  35
+   6.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  26
+     6.1.  Subject Management  . . . . . . . . . . . . . . . . . . .  27
+   7.  Security Considerations . . . . . . . . . . . . . . . . . . .  27
+     7.1.  Multi-Party Access to Streams . . . . . . . . . . . . . .  27
+   8.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  28
+     8.1.  Registration of Verify Event URI  . . . . . . . . . . . .  28
+     8.2.  SCIM Schema Registration  . . . . . . . . . . . . . . . .  28
+   9.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  28
+     9.1.  Normative References  . . . . . . . . . . . . . . . . . .  28
+     9.2.  Informative References  . . . . . . . . . . . . . . . . .  29
+   Appendix A.  Event Stream Resource Type Definition  . . . . . . .  30
+   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  36
+   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  36
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  36
 
 1.  Introduction and Overview
 
@@ -102,30 +106,32 @@ Table of Contents
    in the SET Delivery Using HTTP Specification (see
    [I-D.ietf-secevent-delivery]).
 
-   The specification defines the metadata the Event Transmitter uses to
-   describe the HTTP service endpoints, method, optional signing and
-   encryption modes, and the type and contents of SETs delivered over
-   the Stream.  The specification defines how the Event Receiver may
 
 
 
-Hunt, et al.            Expires February 26, 2018               [Page 2]
+Hunt, et al.              Expires March 3, 2018                 [Page 2]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
-   review and update the current configuration and confirm operational
-   delivery status using HTTP over TLS.
+   The specification defines the common metadata Event Transmitters and
+   Receivers use to describe HTTP service endpoints, methods, optional
+   signing and encryption modes, as well as the type and content of SETs
+   delivered over a Stream.  The specification defines how the Event
+   Receiver parties may review and update the current configuration and
+   confirm operational delivery status using HTTP over TLS.
 
-   This specification uses a limited profile of SCIM (see [RFC7643] and
-   [RFC7644]).  While the full specification is not required (that is,
-   support for Users and Groups), this specification does leverage the
-   protocol and schema mechanism to ease adaptability to different
-   underlying data systems and SET profile types.  In particular,
-   Section 2 [RFC7643] SHALL provide the processing rules that enable
-   Control Plane providers and clients negotiate specific attributes
-   (metadata) and resource types.  This includes differing provider
-   definitions of attribute types, mutability, cardinality, or
+   The mandatory part of this specification (see Section 2) uses a
+   limited profile of SCIM (see [RFC7643] and [RFC7644]) to implement
+   Stream configuration monitoring and retrieval using HTTP GET
+   Section 4.3.1 [RFC7231].  While full SCIM implementation is not
+   required (that is, support for Users and Groups), this specification
+   does leverage the protocol and schema mechanism to ease adaptability
+   to different underlying data systems and SET profile types.  In
+   particular, Section 2 [RFC7643] SHALL provide the processing rules
+   that enable Control Plane providers and clients negotiate specific
+   attributes (metadata) and resource types.  This includes differing
+   provider definitions of attribute types, mutability, cardinality, or
    returnability that MAY differ between deployments and SET Event type
    profiles.  For HTTP method handling and error signaling, the
    processing rules in [RFC7644] SHALL be applied.
@@ -156,20 +162,20 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
    Token specification [I-D.ietf-secevent-token] and SET Token Delivery
    specification [I-D.ietf-secevent-delivery].
 
+
+
+
+Hunt, et al.              Expires March 3, 2018                 [Page 3]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
+
    The following definitions are defined for Security Event
    distribution:
 
    Control Plane
       A Control Plane represents an service offered by an Event
       Transmitter that lets an Event Receiver query the current
-
-
-
-Hunt, et al.            Expires February 26, 2018               [Page 3]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
-
       operational and/or error status of an Event Stream.  The Control
       Plane MAY also be used to retrieve Event Stream and SET
       configuration data.
@@ -178,6 +184,12 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
       The Data Plane represents the HTTP service offered by an Event
       Receiver that allows the Event Transmitter to deliver multiple
       SETs via HTTP POST as part of an Event Stream.
+
+   Client  A Client is any actor, typically represented by an
+      authorization credential, authorized to make changes to an Event
+      Stream.  Verify often this is an actor belonging to the Event
+      Receiver organization.  Actors can be servers, monitoring
+      services, and administrators.
 
 2.  Stream Monitoring and Configuration Retrieval
 
@@ -190,7 +202,8 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
    fails to deliver SETs.
 
    This specification also defines optional Control Plane services to
-   create and update streams in the next section (see Section 3).
+   create and update streams in the next sections (see Section 3 and
+   Section 4).
 
 2.1.  Event Stream Configuration Attributes
 
@@ -202,12 +215,16 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
       in this Stream.
 
    methodUri
-      A REQUIRED JSON String value which is a URI with a prefix of
-      "urn:ietf:params:set:method".  This specification defines HTTP
-      POST delivery method:
-      "urn:ietf:params:set:method:HTTP:webCallback"
-      in which the Feed Provider delivers events using HTTP POST to a
-      specified callback URI.
+      A REQUIRED JSON String value which represents the method used to
+      transfer SETs to the Event Receiver.  See
+      [I-D.ietf-secevent-delivery].
+
+
+
+Hunt, et al.              Expires March 3, 2018                 [Page 4]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
 
    deliveryUri
       A JSON String value containing a URI that describes the location
@@ -217,14 +234,6 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
    iss
       The URI for the publisher of the SETs that will be issued for the
       Event Stream.  See Section 2.1 [I-D.ietf-secevent-token].
-
-
-
-
-Hunt, et al.            Expires February 26, 2018               [Page 4]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
 
    aud
       An OPTIONAL JSON Array of JSON String values which are URIs
@@ -265,6 +274,14 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
          retained.  Before returning to "on", a verification MUST be
          performed.
 
+
+
+
+Hunt, et al.              Expires March 3, 2018                 [Page 5]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
+
          "fail" - indicates that the Event Stream was unable to deliver
          SETs to the Event Receiver due an unrecoverable error or for an
          extended period of time.  Unlike paused status, a failed Event
@@ -274,14 +291,6 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
    maxRetries
       An OPTIONAL JSON number indicating the maximum number of attempts
       to deliver a SET.  A value of '0' indicates there is no maximum.
-
-
-
-Hunt, et al.            Expires February 26, 2018               [Page 5]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
-
       Upon reaching the maximum, the Event Stream "status" attribute is
       set to "failed".
 
@@ -319,24 +328,33 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
          is unable to correct.
 
    txErrDesc
+
+
+
+
+
+Hunt, et al.              Expires March 3, 2018                 [Page 6]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
+
       An OPTIONAL String value that is usually human readable that
       provides further diagnostic detail by the indicated "txErr" error
       code.
+
+   verifyNonce  A String value that when changed or set by a Control
+      Plane client will cause the Event Transmitter to issue a single
+      Verify Event based on the nonce value provided (see Section 5).
+      The intent of the value is to allow the Event Receiver to confirm
+      the Verify Event received matches the value set in the
+      configuration.  While this value MAY be updated (see Section 5),
+      its value is usually not returned as part of an Event Stream
+      configuration.
 
    subscribers
       An OPTIONAL complex attribute containing sub objects whose sub-
       attributes define subjects against which SETs may be issued.  The
       following sub-attributes are defined:
-
-
-
-
-
-
-Hunt, et al.            Expires February 26, 2018               [Page 6]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
 
       value  A String which uniquely identifies a subject (or set of
          subjects) to be included in the Stream.  The format and type of
@@ -367,6 +385,15 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
          User  A SCIM User where value is the 'id' of a User resource in
             the local SCIM service provider.
 
+
+
+
+
+Hunt, et al.              Expires March 3, 2018                 [Page 7]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
+
          Group  A SCIM Group where the value is the 'id' of a Group
             resource in the local SCIM service provider.
 
@@ -385,14 +412,6 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
    The format of the Stream GET request and response is defined by
    Section 3.4 [RFC7644].
-
-
-
-
-Hunt, et al.            Expires February 26, 2018               [Page 7]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
 
    In addition to the basic attributes defined in Section 2 [RFC7643]
    common to all resource types, Streams use the attributes defined in
@@ -426,26 +445,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.            Expires February 26, 2018               [Page 8]
+Hunt, et al.              Expires March 3, 2018                 [Page 8]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -501,7 +501,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.            Expires February 26, 2018               [Page 9]
+Hunt, et al.              Expires March 3, 2018                 [Page 9]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -557,7 +557,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.            Expires February 26, 2018              [Page 10]
+Hunt, et al.              Expires March 3, 2018                [Page 10]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -613,7 +613,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.            Expires February 26, 2018              [Page 11]
+Hunt, et al.              Expires March 3, 2018                [Page 11]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -669,7 +669,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.            Expires February 26, 2018              [Page 12]
+Hunt, et al.              Expires March 3, 2018                [Page 12]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -725,7 +725,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.            Expires February 26, 2018              [Page 13]
+Hunt, et al.              Expires March 3, 2018                [Page 13]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -781,7 +781,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.            Expires February 26, 2018              [Page 14]
+Hunt, et al.              Expires March 3, 2018                [Page 14]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -837,7 +837,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.            Expires February 26, 2018              [Page 15]
+Hunt, et al.              Expires March 3, 2018                [Page 15]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -893,7 +893,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.            Expires February 26, 2018              [Page 16]
+Hunt, et al.              Expires March 3, 2018                [Page 16]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -949,7 +949,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.            Expires February 26, 2018              [Page 17]
+Hunt, et al.              Expires March 3, 2018                [Page 17]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -1005,7 +1005,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.            Expires February 26, 2018              [Page 18]
+Hunt, et al.              Expires March 3, 2018                [Page 18]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -1056,15 +1056,24 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
    section, examples are given using the "subject" attribute of Event
    Stream configuration described in Section 2.1
 
+   The following sections assume subject membership within streams is
+   defined by the "subjects" attribute of the Event Stream
 
 
 
-
-
-Hunt, et al.            Expires February 26, 2018              [Page 19]
+Hunt, et al.              Expires March 3, 2018                [Page 19]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
+
+   configuration.  This is one possible way of many that subjects can be
+   associated with an Event Stream.  It is important to note [RFC7643]
+   enables substantial flexibility to model membership in a number of
+   other ways through extensions to existing objects (e.g.  "Users") or
+   through the creation of new resource types (see [RFC7643]).
+   Specifications that are profiling the use of Security Events MAY
+   represent Stream contents in other ways as per the extension
+   mechanisms defined in [RFC7643] and [RFC7644].
 
 4.1.  Considerations for Managing Subjects
 
@@ -1097,6 +1106,22 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
    set to "EMAIL" and the sub-attribute "value" contains an email
    address.
 
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 20]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
+
    In the following non-normative example, a client queries the Control
    Plane to see if Alice@example.com is part of any defined stream
    configuration.  In the request, only the attribute "id" is requested
@@ -1109,18 +1134,6 @@ Accept: application/scim+json
 Authorization: Bearer h480djs93hd8
 
      Figure 12: Determining if a Subject is in an Event Stream Example
-
-
-
-
-
-
-
-
-Hunt, et al.            Expires February 26, 2018              [Page 20]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
 
    In this non-normative response, the subject is confirmed as not part
    of any Event Streams associated with the requestor.  In this case an
@@ -1156,6 +1169,15 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
                Figure 14: Example Response With Single Match
 
+
+
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 21]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
+
 4.2.2.  OIDC Based Subjects
 
    In this section, values have been added to the "subject" attribute
@@ -1165,18 +1187,6 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
    value and the "iss" sub-attribute contains the corresponding OIDC
    Provider "iss" value.  For this example, the OIDC "iss" is
    "op.example.com" and the "sub" is "123456".
-
-
-
-
-
-
-
-
-Hunt, et al.            Expires February 26, 2018              [Page 21]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
 
    In the following non-normative example, a client queries the Control
    Plane to see if the above OIDC user is part of any defined stream
@@ -1219,17 +1229,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.            Expires February 26, 2018              [Page 22]
+Hunt, et al.              Expires March 3, 2018                [Page 22]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -1285,7 +1285,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.            Expires February 26, 2018              [Page 23]
+Hunt, et al.              Expires March 3, 2018                [Page 23]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -1341,7 +1341,7 @@ Authorization: Bearer h480djs93hd8
 
 
 
-Hunt, et al.            Expires February 26, 2018              [Page 24]
+Hunt, et al.              Expires March 3, 2018                [Page 24]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
@@ -1349,114 +1349,194 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 5.  Event Stream Verification
 
    In the verify process, the Event Receiver organization initiates a
-   request to the Event Transmitter to verify the Stream.  The Event
-   Receiver provides a "confirm" value and a "nonce" value that the
-   Event Transmitter is expected to return in the body of a Verify Event
-   so that the Event Receiver can confirm end-to-end configuration of
-   SET delivery including proper signing and encryption depending on the
-   configuration of the Stream.  For example, can the Event Transmitter
-   send a encrypted SET that the Receiver can decode?  The method by
-   which this is initiated is out-of-scope of this specification and MAY
-   be provided by a profiling specification, or by administrative
-   interfaces offered by the Event Transmitter.
+   request to the Event Transmitter to verify the Stream is working
+   correctly.  This can be used to both test for configuration errors
+   (e.g. incorrect keys for signing and/or encryption, endpoints) and to
+   verify operational state by using a Verify Event as an occasional
+   'ping' test.
 
-   To confirm an Event Stream configuration, the Event Transmitter SHALL
-   send a Verify SET to the Event Receiver using the registered
-   "methodUri" mechanism.
+   To initiate a Verify Event, the Event Receiver organization using the
+   Control Plane to set a nonce value for the Stream Configuration
+   attribute "verifyConfirm".  Once set, the Event Transmitter SHALL
+   issue a Verify SET the includes the client specified nonce value.
+
+   In the following non-normative example, the client requests a Verify
+   Event by setting the attribute "verifyNonce" as part of the Event
+   Stream configuration.
+
+   PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
+   Host: example.com
+   Accept: application/scim+json
+   Content-Type: application/scim+json
+   Authorization: Bearer h480djs93hd8
+
+   {
+     "schemas":
+       ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+     "Operations": [{
+       "op":"replace",
+       "path":"verifyNonce",
+       "value":"VGhpcyBpcyBhbi"
+     }]
+   }
+
+                Figure 19: Requesting a Verify using PATCH
+
+   Upon the changing of the Event Stream configuration attribute
+   "verifyNonce", the Event Transmitter sends a Verify Event SET to the
+   Event Receiver using the registered "methodUri" mechanism.
 
    The Verify SET contains the following attributes:
 
    events
-      Set with a value of "[[this RFC URL]]#verify".
+      Set with an event attribute of
+      "urn:ietf:params:secevent:verification" and contains the sub-
+      attribute "nonce" which contains the value of "verifyNonce" .
 
    iss
+
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 25]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
+
       Set to the URI defined in the Event Stream configuration.
 
    aud
       MUST be set to a value that matches the EventStream "aud" value
       agreed to.
 
-   exp
-      A value that indicates the time the verification request will
-      expire.  Once expired, the server will set the Event Stream state
-      to "fail".
-
-   confirm
-      The value given by the Event Receiver to the Event Transmitter to
-      return in the Verify Event.
-
-   nonce
-      A value given by the Event Receiver or otherwise agreed up to
-      return which SHOULD be unique to the Stream and SHOULD change with
-      each test in order to distinguish tests uniquely.
-
    If the Event Stream is configured to encrypt SETs for the Event
-   Receiver, then the SET SHOULD be encrypted with the provided key.
+   Receiver, then the SET MUST be encrypted with the provided key.
    Successful parsing of the message confirms that provides confirmation
    of correct configuration and possession of keys.
 
-
-
-Hunt, et al.            Expires February 26, 2018              [Page 25]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
-
-   A non-normative JSON representation of an Event to be sent to a Event
-   Receiver as a Event Stream confirmation.  Note the Event is not yet
-   encoded as a JWT token:
+   The following is a non-normative JSON representation of a Verify
+   Event issued to an Event Receiver.  Included in the SET is an example
+   nonce value "VGhpcyBpcyBhbi".
 
    {
-     "jti": "4d3559ec67504aaba65d40b0363faad8",
-     "events":["[[this RFC URL]]#verify"],
-     "iat": 1458496404,
-     "iss": "https://scim.example.com",
-     "exp": 1458497000,
-     "aud":[
-      "https://event.example.com/Feeds/98d52461fa5bbc879593b7754"
+     "jti": "123456",
+     "iss": "https://transmitter.example.com",
+     "aud": "receiver.example.com",
+     "iat": "1493856000",
+     "events": [
+       "urn:ietf:params:secevent:verification" : {
+         "nonce": "VGhpcyBpcyBhbi",
+       },
      ],
-     "[[this RFC URL]]#verify":{
-       "confirm":"ca2179f4-8936-479a-a76d-5486e2baacd7",
-       "nonce":"1668c993e95849869e4b3506cccdf9bf"
-     }
    }
 
-            Figure 19: Example Verification SET with Challenge
+                    Figure 20: Example Verification SET
 
    The above SET is encoded as a JWT and transmitted to the Event
    Receiver using the configured delivery method.
 
    Upon receiving a verify SET, the Event Receiver SHALL parse the SET
    and verify its claims.  In particular, the Event Receiver SHALL
-   confirm that the values for "confirm" and "nonce" are as expected.
-   If they do not match, an error response of "setData" SHOULD be
-   returned [[TO BE UPDATED]].
+   confirm that the values for "nonce" match the value assigned to
+   "verifyNonce" in the Event Stream Configuration via the Control
+   Plane.  If the values do not match, administrative action should be
+   taken to address the mis-configuration.  Similarly if the SET is not
+   received or is unparseable, the Event Receiver organization can check
+   Event Stream configuration and check for errors by reviewing the
+   Stream configuration attributes "status" and "txErr".
 
-   In many cases, Event Transmitters MAY disable or suspend an Event
-   Stream that fails to successfully verify based on the acknowledgement
-   or lack of acknowledgement by the Event Receiver.
+6.  Privacy Considerations
 
-6.  Security Considerations
+   See Section 7.5 [RFC7644] for protocol specific privacy
+   considerations.
 
-   [TO BE COMPLETED]
 
-7.  IANA Considerations
 
-7.1.  SCIM Schema Registration
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 26]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
+
+   The Privacy Considerations of SET Token Specification
+   [I-D.ietf-secevent-token] and the SET Token Delivery specification
+   [I-D.ietf-secevent-delivery] SHALL apply.
+
+6.1.  Subject Management
+
+   The exact set of subject entities upon which SETs can be issued
+   SHOULD NOT be made available to any single party.  This is because a
+   subject's relationship with an Event Transmitter MAY change over time
+   and may not be known to the Event Receiver.  A design consideration
+   is that an Event Receiver MUST already know personal identifiers
+   before asking an Event Transmitter if there is an existing
+   relationship by asking if that personal identifier is part of a
+   stream.  Accordingly the "subjects" attribute of an Event Stream can
+   not normally be returned.  Instead, a Control Plane provider MAY
+   confirm a subject is part of a stream.  See Section 4.1 and
+   Section 4.2.
+
+   When receiving a request from a Control Plane client to add a
+   subject, the provider SHOULD consider if the subject is appropriate
+   to the purpose of the Event Stream being managed.  For example, for
+   an OpenID Connect Provider, was consent obtained to share security
+   data with the Relying Party.  Such authorization may have been
+   previously authorized by a user via the OpenID consent process.
+   Having obtained consent, the Control Plane provider SHOULD consider
+   if the SET Events being requested to be streamed are appropriate.
+
+7.  Security Considerations
+
+   This specification depends on the Security Considerations of
+   [RFC7644].
+
+7.1.  Multi-Party Access to Streams
+
+   Implementations SHOULD support access roles which enable different
+   types of access to Event Streams via the Control Plane service.  A
+   minimal suggested set of roles includes:
+
+   Monitor  For clients to retrieve Event Stream configuration and
+      obtain current status.  Access is limited to read-only operations.
+
+   Control  Adds the ability to modify the "status" attribute to control
+      the operational state of the Event Stream in addition to the
+      rights granted by "Monitor".
+
+   Manage  Provides the ability to list, create and manage Event Streams
+      including updating and verifying subjects.
+
+
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 27]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
+
+   Typically these roles are rights or scopes associated with the
+   security credential presented in the HTTP Authorization header of
+   requests (see Section 7 [RFC7644]).  The method by which these roles
+   are implemented is out of scope of this specification.
+
+8.  IANA Considerations
+
+8.1.  Registration of Verify Event URI
+
+   IANA is requested to add an entry to the 'IETF URN Sub-namespace for
+   Registered Protocol Parameter Identifiers' registry and create a sub-
+   namespace for the Registered Parameter Identifier as per [RFC3553]:
+   "urn:ietf:params:secevent:verification".
+
+   The identifier is used to indicate a Verify Event as defined in
+   Section 5 for use in the "events" attribute defined in
+   [I-D.ietf-secevent-token].
+
+8.2.  SCIM Schema Registration
 
    As per the "SCIM Schema URIs for Data Resources" registry established
    by Section 10.3 [RFC7643], the following defines and registers the
    following SCIM URIs and Resource Types for Feeds and Event Streams.
-
-
-
-
-
-
-Hunt, et al.            Expires February 26, 2018              [Page 26]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
 
    +---------------------------+----------+--------------+-------------+
    | Schema URI                | Name     | ResourceType | Reference   |
@@ -1466,14 +1546,29 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
    | EventStream               | Stream   |              |             |
    +---------------------------+----------+--------------+-------------+
 
-8.  References
+   Attributes for SET Event Streams are defined in Section 2.1
 
-8.1.  Normative References
+   SCIM Schema and ResourceType definitions are defined in Appendix A
+
+9.  References
+
+9.1.  Normative References
 
    [I-D.ietf-secevent-delivery]
               Hunt, P., Scurtescu, M., Ansari, M., Nadalin, A., and A.
               Backman, "SET Token Delivery Using HTTP", draft-ietf-
               secevent-delivery-00 (work in progress), July 2017.
+
+
+
+
+
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 28]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
 
    [I-D.ietf-secevent-token]
               Hunt, P., Denniss, W., Ansari, M., and M. Jones, "Security
@@ -1507,25 +1602,29 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
               <https://www.rfc-editor.org/info/rfc7519>.
 
-
-
-Hunt, et al.            Expires February 26, 2018              [Page 27]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
-
-8.2.  Informative References
-
-   [idevent-scim]
-              Oracle Corporation, "SCIM Event Extensions (work in
-              progress)".
+9.2.  Informative References
 
    [openid-connect-core]
               NRI, "OpenID Connect Core 1.0", Nov 2014.
 
+   [RFC3553]  Mealling, M., Masinter, L., Hardie, T., and G. Klyne, "An
+              IETF URN Sub-namespace for Registered Protocol
+              Parameters", BCP 73, RFC 3553, DOI 10.17487/RFC3553, June
+              2003, <https://www.rfc-editor.org/info/rfc3553>.
+
    [RFC3966]  Schulzrinne, H., "The tel URI for Telephone Numbers",
               RFC 3966, DOI 10.17487/RFC3966, December 2004,
               <https://www.rfc-editor.org/info/rfc3966>.
+
+
+
+
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 29]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
 
    [RFC5321]  Klensin, J., "Simple Mail Transfer Protocol", RFC 5321,
               DOI 10.17487/RFC5321, October 2008, <https://www.rfc-
@@ -1553,23 +1652,6 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
               Management: Protocol", RFC 7644, DOI 10.17487/RFC7644,
               September 2015, <https://www.rfc-editor.org/info/rfc7644>.
 
-   [saml-core-2.0]
-              Internet2, "Assertions and Protocols for the OASIS
-              Security Assertion Markup Language (SAML) V2.0", March
-              2005.
-
-
-
-
-
-
-
-
-Hunt, et al.            Expires February 26, 2018              [Page 28]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
-
 Appendix A.  Event Stream Resource Type Definition
 
    The "EventStream" resource type definition is defined as follows:
@@ -1591,7 +1673,14 @@ Appendix A.  Event Stream Resource Type Definition
    EventStream resource MAY be retrieved from the SCIM "/Schemas"
    endpoint (see Section 3.2 [RFC7644]).
 
-           Figure 20: SCIM EventStream Resource Type Definition
+           Figure 21: SCIM EventStream Resource Type Definition
+
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 30]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
 
    The attributes for the EventStream resource type are defined in
    Section 2.1.
@@ -1618,14 +1707,6 @@ Appendix A.  Event Stream Resource Type Definition
         "type" : "string",
         "multiValued" : false,
         "description" : "A String value containing the URI for the
-
-
-
-Hunt, et al.            Expires February 26, 2018              [Page 29]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
-
         method used to deliver SET events. The method used indicates
         the required configuration parameters for an
         operational Event Stream configuration.",
@@ -1649,6 +1730,14 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
         "uniqueness" : "none"
       },
       {
+
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 31]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
+
         "name" : "iss",
         "type" : "string",
         "multiValued" : false,
@@ -1674,14 +1763,6 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
         "returned" : "default",
         "uniqueness" : "none"
       },
-
-
-
-Hunt, et al.            Expires February 26, 2018              [Page 30]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
-
       {
         "name" : "iss_jwksUri",
         "type" : "string",
@@ -1705,6 +1786,14 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
         "description" : "An OPTIONAL JSON Web Key Set [RFC7517] that
         contains the Event Receiver's encryption keys that MAY be used
         by the Event Transmitter to encrypt SET tokens for the specified
+
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 32]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
+
         Event Receiver.",
         "required" : false,
         "caseExact" : false,
@@ -1730,14 +1819,6 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
               "verify",
               "paused",
               "fail"
-
-
-
-Hunt, et al.            Expires February 26, 2018              [Page 31]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
-
             ]
       },
       {
@@ -1761,6 +1842,14 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
         amount of time in seconds a SET MAY take for successful delivery
         per request or cumulatively across multiple retries.  Upon
         reaching the maximum, the Event Stream 'status' is set to
+
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 33]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
+
         'failed'.  If undefined, there is no maximum time.",
         "required" : false,
         "mutability" : "readWrite",
@@ -1786,14 +1875,6 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
       {
         "name" : "txErr",
         "type" : "string",
-
-
-
-Hunt, et al.            Expires February 26, 2018              [Page 32]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
-
         "multiValued" : false,
         "description" : "An OPTIONAL JSON String keyword value.  When
         the Event Stream has 'status' set to 'fail', a keyword condition
@@ -1817,6 +1898,14 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
         "multiValued" : false,
         "description" : "An OPTIONAL String value that is usually human
         readable that provides further diagnostic detail by the
+
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 34]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
+
         indicated 'txErr' error code.",
         "required" : false,
         "caseExact" : false,
@@ -1824,7 +1913,19 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
         "returned" : "default",
         "uniqueness" : "none"
       },
-
+      {
+        "name" : "verifyNonce",
+        "type" : "string",
+        "multiValued" : false,
+        "description" : "An OPTIONAL String value that when changed
+        or set by a Control Plane client will cause the Event Transmitter
+        to issue a single Verify Event based on the value provided.",
+        "required" : false,
+        "caseExact" : false,
+        "mutability" : "writeOnly",
+        "returned" : "never",
+        "uniqueness" : "none"
+      },
       {
         "name" : "subscribers",
         "type" : "complex",
@@ -1842,14 +1943,6 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
             of the sub-attribute 'type'.",
             "required" : false,
             "caseExact" : false,
-
-
-
-Hunt, et al.            Expires February 26, 2018              [Page 33]
-
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
-
-
             "mutability" : "immutable",
             "returned" : "default",
             "uniqueness" : "none"
@@ -1861,6 +1954,14 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
             "description" : "A label indicating the type of resource,
             e.g., OIDC Connect Subject, SAML Subject, Email address,
             Telephone Number, SCIM User or SCIM Group, or the URI
+
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 35]
+
+Internet-Draft      draft-hunt-secevent-distribution         August 2017
+
+
             of some other network addressable subject.",
             "required" : false,
             "caseExact" : false,
@@ -1899,37 +2000,23 @@ Appendix B.  Acknowledgments
    The editor would like to thank the participants in the the SECEVENTS
    working group for their support of this specification.
 
+Appendix C.  Change Log
+
+   Draft 00 - PH - First Draft based on control plane portions of draft-
+   hunt-idevent-distribution
+
+Authors' Addresses
 
 
-Hunt, et al.            Expires February 26, 2018              [Page 34]
+
+
+
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 36]
 
 Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
-
-Appendix C.  Change Log
-
-   Draft 00 - PH - First Draft based on reduced version of draft-hunt-
-   idevent-distribution
-
-   Draft 01 - PH -
-
-   o  Reworked terminology to match new WG Transmitter/Receiver terms
-
-   o  Reworked sections into Data Plane vs. Control Plane
-
-   o  Removed method transmission registry in order to simplify the
-      specification
-
-   o  Made Create, Update operations optional for Control Plane (Read is
-      MTI)
-
-   Draft 02 - PH
-
-   o  Added iss metadata for Event Stream
-
-   o  Changed to using JWKS_uri for issuer and receiver.
-
-Authors' Addresses
 
    Phil Hunt (editor)
    Oracle Corporation
@@ -1957,4 +2044,29 @@ Authors' Addresses
 
 
 
-Hunt, et al.            Expires February 26, 2018              [Page 35]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.              Expires March 3, 2018                [Page 37]

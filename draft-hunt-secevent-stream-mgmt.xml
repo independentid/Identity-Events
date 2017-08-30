@@ -47,8 +47,9 @@
 
 		<abstract>
 			<t>
-				This specification defines how an Event Receiver may register to establish,
-        monitor, and manage the provisioning of a Security Event Token
+				This specification defines a "control plane" service which
+        enables a client (e.g. an Event Receiver) to establish,
+        monitor, and manage a Security Event Token
         Stream.
         </t>
 		</abstract>
@@ -66,17 +67,19 @@
       Specification (see <xref target="I-D.ietf-secevent-delivery"/>).
       </t>
       <t> 
-      The specification defines the metadata the Event Transmitter
-      uses to describe the HTTP service endpoints, method, optional
-      signing and encryption modes, and the type and contents of SETs
-      delivered over the Stream. The specification defines how
-      the Event Receiver may review and update the current configuration 
-      and confirm operational delivery status using HTTP over TLS. 
+      The specification defines the common metadata Event Transmitters
+      and Receivers use to describe HTTP service endpoints, methods, optional
+      signing and encryption modes, as well as the type and content of SETs
+      delivered over a Stream. The specification defines how
+      the Event Receiver parties may review and update the current 
+      configuration and confirm operational delivery status using HTTP over TLS. 
       </t>    
       
-      <t>This specification uses a limited profile of SCIM (see 
-      <xref target="RFC7643"/> and <xref target="RFC7644"/>). While the
-      full specification is not required (that is, support for Users and
+      <t>The mandatory part of this specification (see <xref target="monitorStream"/>) 
+      uses a limited profile of SCIM (see <xref target="RFC7643"/> and 
+      <xref target="RFC7644"/>) to implement Stream configuration monitoring
+      and retrieval using HTTP GET <xref target="RFC7231">Section 4.3.1</xref>. 
+      While full SCIM implementation is not required (that is, support for Users and
       Groups), this specification does leverage the
       protocol and schema mechanism to ease adaptability
     to different underlying data systems and SET profile types. In 
@@ -140,6 +143,12 @@
               Event Receiver that allows the Event Transmitter to 
               deliver multiple SETs via HTTP POST as part of an Event
               Stream.</t>
+              
+            <t hangText="Client">A Client is any actor, typically
+            represented by an authorization credential, authorized to 
+            make changes to an Event Stream. Verify often this is
+            an actor belonging to the Event Receiver organization. Actors
+            can be servers, monitoring services, and administrators.</t>
            
 					</list>
 				</t>
@@ -147,7 +156,7 @@
 		</section>
     
 
-    <section title="Stream Monitoring and Configuration Retrieval">
+    <section anchor="monitorStream" title="Stream Monitoring and Configuration Retrieval">
   
     <t>The Control Plane is an HTTP service associated with an Event 
     Transmitter that enables the provisioning, and monitoring of Event 
@@ -157,8 +166,8 @@
     to detect SET delivery problems that may occur when an Event 
     Transmitter fails to deliver SETs.</t>
     <t>This specification also defines optional Control Plane services 
-    to create and update streams in the next section 
-    (see <xref target="streamManagement"/>). </t>
+    to create and update streams in the next sections 
+    (see <xref target="streamManagement"/> and <xref target="manageSubjects"/>). </t>
     
     <section anchor="subscribeMetadata" title="Event Stream Configuration Attributes">
       
@@ -178,11 +187,8 @@
          -->
 
         <t hangText="methodUri"><vspace />A REQUIRED JSON String value
-        which is a URI with a prefix of <spanx style="verb">urn:ietf:params:set:method</spanx>.
-        This specification defines HTTP POST delivery method:
-        <spanx style="verb">urn:ietf:params:set:method:HTTP:webCallback</spanx>
-        <vspace blankLines="0" /> in which the Feed Provider delivers events 
-        using HTTP POST to a specified callback URI.</t>
+        which represents the method used to transfer SETs to the Event
+        Receiver. See <xref target="I-D.ietf-secevent-delivery"/>.</t>
         
         <t hangText="deliveryUri"><vspace />A JSON String value
         containing a URI that describes the location where
@@ -307,6 +313,15 @@
         usually human readable that provides further diagnostic
         detail by the indicated <spanx style="verb">txErr</spanx>
         error code.</t>
+        
+        <t hangText="verifyNonce">A String value that when changed
+        or set by a Control Plane client will cause the Event Transmitter 
+        to issue a single Verify Event based on the nonce value provided (see 
+        <xref target="verifyStream"/>). The intent of the value is to
+        allow the Event Receiver to confirm the Verify Event received
+        matches the value set in the configuration. While this value MAY
+        be updated (see <xref target="verifyStream"/>), its value is
+        usually not returned as part of an Event Stream configuration. </t>
         
         <t hangText="subscribers"><vspace />
         An OPTIONAL complex attribute containing sub objects whose 
@@ -882,7 +897,20 @@ updated to reflect the changes. </postamble>
    <spanx style="verb">subject</spanx> attribute of Event Stream 
    configuration described in <xref target="subscribeMetadata"/></t>
    
-   <section title="Considerations for Managing Subjects">
+   <t>The following sections assume subject membership within streams 
+   is defined by the <spanx style="verb">subjects</spanx> attribute of 
+   the Event Stream configuration. This is one possible way of many that
+   subjects can be associated with an Event Stream. It is important to 
+   note <xref target="RFC7643"/> enables substantial flexibility to 
+   model membership in a number of other ways through extensions to 
+   existing objects (e.g. <spanx style="verb">Users</spanx>) or through 
+   the creation of new resource types (see <xref target="RFC7643"/>).
+   Specifications that are profiling the use of Security Events MAY 
+   represent Stream contents in other ways as per the extension 
+   mechanisms defined in <xref target="RFC7643"/> and <xref target="RFC7644"/>.</t>
+ 
+   
+   <section anchor="subjectConsiderations" title="Considerations for Managing Subjects">
       <t>It is expected, but not required, that most deployments
       will not allow the subjects that are part of an Event Stream
       to be enumerated. In practice, the Event Stream configuration 
@@ -907,7 +935,8 @@ updated to reflect the changes. </postamble>
       
    </section>
    
-   <section title="Checking Subscriber Membership">
+   
+   <section anchor="checkSubject" title="Checking Subscriber Membership">
 
       <section title="Email Based Subjects">
         <t>In this section, values have been added to the 
@@ -1104,72 +1133,83 @@ Authorization: Bearer h480djs93hd8
    <section anchor="verifyStream" title="Event Stream Verification">
   
         <t>In the verify process, the Event Receiver organization initiates
-        a request to the Event Transmitter to verify the Stream. The 
-        Event Receiver provides a <spanx style="verb">confirm</spanx> value and a 
-        <spanx style="verb">nonce</spanx> value that the Event Transmitter is expected
-        to return in the body of a Verify Event so that the Event Receiver
-        can confirm end-to-end configuration of SET delivery including
-        proper signing and encryption depending on the configuration of
-        the Stream.  For example, can the Event Transmitter send a encrypted SET
-        that the Receiver can decode? The method by which this is initiated
-        is out-of-scope of this specification and MAY be provided by a
-        profiling specification, or by administrative interfaces offered
-        by the Event Transmitter.</t>
+        a request to the Event Transmitter to verify the Stream is working
+        correctly. This can be used to both test for configuration errors 
+        (e.g. incorrect keys for signing and/or encryption, endpoints) 
+        and to verify operational state by using a Verify Event as an
+        occasional 'ping' test. </t> 
         
-        <t>To confirm an Event Stream configuration, the Event
-        Transmitter SHALL send a
-        Verify SET to the Event Receiver using the registered 
+        <t>To initiate a Verify Event, the Event Receiver organization
+        using the Control Plane to set a nonce value for the Stream
+        Configuration attribute <spanx style="verb">verifyConfirm</spanx>. 
+        Once set, the Event Transmitter SHALL issue a Verify SET
+        the includes the client specified nonce value. </t>
+        
+       <figure anchor="verifyPatch" title="Requesting a Verify using PATCH">
+        <preamble>In the following non-normative example, the client
+        requests a Verify Event by setting the attribute 
+        <spanx style="verb">verifyNonce</spanx> as part of the Event 
+        Stream configuration.</preamble>
+<artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":
+    ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+  "Operations": [{
+    "op":"replace",
+    "path":"verifyNonce",
+    "value":"VGhpcyBpcyBhbi"
+  }]
+}</artwork>
+            </figure>
+        
+        
+        <t>Upon the changing of the Event Stream configuration attribute
+        <spanx style="verb">verifyNonce</spanx>, the Event Transmitter 
+        sends a Verify Event SET to the Event Receiver using the registered 
         <spanx style="verb">methodUri</spanx> mechanism.</t>
         
         <t>The Verify SET contains the following attributes:<list style="hanging">
-          <t hangText="events"><vspace/>Set with a value of 
-          <spanx style="verb">[[this RFC URL]]#verify</spanx>.</t>
+          <t hangText="events"><vspace/>Set with an event attribute of 
+          <spanx style="verb">urn:ietf:params:secevent:verification</spanx>
+          and
+          contains the sub-attribute <spanx style="verb">nonce</spanx>
+          which contains the value of <spanx style="verb">verifyNonce</spanx>
+          .</t>
 
           <t hangText="iss"><vspace/>Set to the URI defined in the Event Stream
           configuration.</t>
 
           <t hangText="aud"><vspace/>MUST be set to a value that matches the
           EventStream <spanx style="verb">aud</spanx> value agreed to.</t>
-
-          <t hangText="exp"><vspace/>A value that indicates the
-          time the verification request will expire. Once expired, the
-          server will set the Event Stream state to <spanx style="verb">fail</spanx>.</t>
-          
-          <t hangText="confirm"><vspace/>The value given by the Event Receiver to
-          the Event Transmitter to return in the Verify Event.</t>
-          
-          <t hangText="nonce"><vspace/>A value given by the Event Receiver
-          or otherwise agreed up to return which SHOULD be unique to the 
-          Stream and SHOULD change with each test in order to distinguish 
-          tests uniquely.</t>
+                    
         </list>
         </t>
         
-        <t>
-        If the Event Stream is configured to encrypt SETs for the 
-        Event Receiver, then the SET SHOULD be encrypted with 
+        <t>If the Event Stream is configured to encrypt SETs for the 
+        Event Receiver, then the SET MUST be encrypted with 
         the provided key. Successful parsing of the
         message confirms that provides confirmation of correct 
         configuration and possession of keys.</t>
          
-
-        <figure anchor="verifyPostEvent" title="Example Verification SET with Challenge">
-        <preamble>A non-normative JSON representation of an Event to be
-        sent to a Event Receiver as a Event Stream confirmation. Note the
-        Event is not yet encoded as a JWT token:</preamble>
-<artwork>{  
-  "jti": "4d3559ec67504aaba65d40b0363faad8",
-  "events":["[[this RFC URL]]#verify"],
-  "iat": 1458496404,
-  "iss": "https://scim.example.com",  
-  "exp": 1458497000,
-  "aud":[
-   "https://event.example.com/Feeds/98d52461fa5bbc879593b7754"
-  ], 
-  "[[this RFC URL]]#verify":{
-    "confirm":"ca2179f4-8936-479a-a76d-5486e2baacd7",
-    "nonce":"1668c993e95849869e4b3506cccdf9bf"
-  }  
+        <figure anchor="verifyEvent" title="Example Verification SET">
+        <preamble>The following is a non-normative JSON representation 
+        of a Verify Event issued to an Event Receiver. Included in the SET
+        is an example nonce value <spanx style="verb">VGhpcyBpcyBhbi</spanx>.</preamble>
+<artwork>{
+  "jti": "123456",
+  "iss": "https://transmitter.example.com",
+  "aud": "receiver.example.com",
+  "iat": "1493856000",
+  "events": [
+    "urn:ietf:params:secevent:verification" : {
+      "nonce": "VGhpcyBpcyBhbi",
+    },
+  ],
 }</artwork>
         </figure>
         
@@ -1178,24 +1218,93 @@ Authorization: Bearer h480djs93hd8
 
         <t>Upon receiving a verify SET, the Event Receiver SHALL parse
         the SET and verify its claims. In particular, the Event Receiver
-        SHALL confirm that the values for <spanx style="verb">confirm</spanx> 
-        and <spanx style="verb">nonce</spanx> are as expected. If they
-        do not match, an error response of <spanx style="verb">setData</spanx>
-        SHOULD be returned [[TO BE UPDATED]].</t>
-        <t>
-        In many cases, Event Transmitters MAY disable or suspend an Event
-        Stream that fails to successfully verify based on the acknowledgement
-        or lack of acknowledgement by the Event Receiver.
-        </t>         
+        SHALL confirm that the values for <spanx style="verb">nonce</spanx> 
+        match the value assigned to <spanx style="verb">verifyNonce</spanx>
+        in the Event Stream Configuration via the Control Plane. If
+        the values do not match, administrative action should be taken
+        to address the mis-configuration.  Similarly if the SET is not
+        received or is unparseable, the Event Receiver organization
+        can check Event Stream configuration and check for errors by
+        reviewing the Stream configuration attributes <spanx style="verb">status</spanx>
+        and <spanx style="verb">txErr</spanx>. </t>
      </section>
    
+   <section anchor="Privacy" title="Privacy Considerations">
+   
+      <t>See <xref target="RFC7644">Section 7.5</xref> for protocol
+      specific privacy considerations.</t>
+      
+      <t>The Privacy Considerations of SET Token Specification 
+      <xref target="I-D.ietf-secevent-token"/> and the SET Token 
+      Delivery specification <xref target="I-D.ietf-secevent-delivery"/>
+      SHALL apply.</t>
+      
+      <section title="Subject Management">
+        <t>The exact set of subject entities upon which SETs can be 
+        issued SHOULD NOT be made available to any single party. This is
+        because a subject's relationship with an Event Transmitter
+        MAY change over time and may not be known to the Event Receiver.
+        A design consideration is that an Event Receiver MUST already
+        know personal identifiers before asking an Event Transmitter
+        if there is an existing relationship by asking if that 
+        personal identifier is part of a stream. Accordingly the 
+        <spanx style="verb">subjects</spanx> attribute of an Event
+        Stream can not normally be returned. Instead, a Control Plane
+        provider MAY confirm a subject is part of a stream. See
+        <xref target="subjectConsiderations"/> and <xref target="checkSubject"/>.</t>
+        <t>When receiving a request from a Control Plane client to 
+        add a subject, the provider SHOULD consider if the subject is
+        appropriate to the purpose of the Event Stream being managed. For
+        example, for an OpenID Connect Provider, was consent obtained
+        to share security data with the Relying Party. Such authorization
+        may have been previously authorized by a user via the OpenID
+        consent process. Having obtained consent, the Control Plane
+        provider SHOULD consider
+        if the SET Events being requested to be streamed are appropriate. </t>
+      </section>
+   
+   </section>
    
    <section anchor="Security" title="Security Considerations" toc="default">
 
-      <t>[TO BE COMPLETED]</t>
+      <t>This specification depends on the Security Considerations of 
+      <xref target="RFC7644"/>. </t>
+   
+      <section title="Multi-Party Access to Streams">
+        <t>Implementations SHOULD support access roles which enable
+        different types of access to Event Streams via the Control
+        Plane service.  A minimal suggested set of roles includes:
+        <list style="hanging">
+          <t hangText="Monitor">For clients to retrieve Event Stream 
+          configuration and obtain current status. Access is limited
+          to read-only operations.</t>
+          <t hangText="Control">Adds the ability to modify the 
+          <spanx style="verb">status</spanx> attribute to control the
+          operational state of the Event Stream in addition to the rights
+          granted by <spanx style="verb">Monitor</spanx>.</t>
+          <t hangText="Manage">Provides the ability to list, create and manage
+          Event Streams including updating and verifying subjects.</t>
+        </list>
+        Typically these roles are rights or scopes associated with the 
+        security credential presented in the HTTP Authorization header
+        of requests (see <xref target="RFC7644">Section 7</xref>). The 
+        method by which these roles are implemented is out of scope
+        of this specification. </t>
+      </section>   
    </section>
 
     <section anchor="IANA" title="IANA Considerations">
+      
+      <section anchor="verifyUri" title="Registration of Verify Event URI">
+        <t>IANA is requested to add an entry to the 'IETF URN Sub-namespace
+        for Registered Protocol Parameter Identifiers' registry and create a
+        sub-namespace for the Registered Parameter Identifier as per <xref
+        target="RFC3553"/>: <spanx style="verb">urn:ietf:params:secevent:verification</spanx>.</t>
+
+        <t>The identifier is used to indicate a Verify Event as defined
+        in <xref target="verifyStream"/> for use in the <spanx style="verb">events</spanx>
+        attribute defined in <xref target="I-D.ietf-secevent-token"/>.</t>
+      </section>
       
       <section title="SCIM Schema Registration">
         <t>As per the "SCIM Schema URIs for Data Resources" registry established
@@ -1211,6 +1320,9 @@ Authorization: Bearer h480djs93hd8
         
         </texttable>
       
+        <t>Attributes for SET Event Streams are defined in <xref target="subscribeMetadata"/></t>
+      
+        <t>SCIM Schema and ResourceType definitions are defined in <xref target="eventResourceType"/></t>
       </section>
 
   
@@ -1233,6 +1345,8 @@ Authorization: Bearer h480djs93hd8
     </references>
 
     <references title="Informative References">
+    
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3553.xml' ?><!-- Proto Params-->
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3966.xml' ?><!-- JWS -->
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5321.xml' ?><!-- JWS -->
 
@@ -1251,22 +1365,6 @@ Authorization: Bearer h480djs93hd8
           <date day="8" month="Nov" year="2014"/>
         </front>
         <format type="HTML" target="http://openid.net/specs/openid-connect-core-1_0.html"/>
-      </reference>
-      <reference anchor="saml-core-2.0">
-        <front>
-          <title>Assertions and Protocols for the OASIS Security Assertion Markup Language (SAML) V2.0</title>
-          <author fullname="Scott Cantor et al"><organization>Internet2</organization></author>
-          <date day="15" month="March" year="2005"/>
-        </front>
-        <format type="PDF" target="http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf"/>
-      </reference>
-      <reference anchor="idevent-scim">
-        <front>
-          <title>SCIM Event Extensions (work in progress)</title>
-          <author fullname="Phil Hunt"><organization>Oracle Corporation</organization></author>
-          <date/>
-        </front>  
-        <format type="TXT" target="draft-hunt-idevent-scim-00.txt"/>    
       </reference>
 
      <!-- 
@@ -1511,7 +1609,19 @@ endpoint (see <xref target="RFC7644">Section 3.2</xref>).</postamble>
         "returned" : "default",
         "uniqueness" : "none"
       },
-
+      {
+        "name" : "verifyNonce",
+        "type" : "string",
+        "multiValued" : false,
+        "description" : "An OPTIONAL String value that when changed
+        or set by a Control Plane client will cause the Event Transmitter 
+        to issue a single Verify Event based on the value provided.",
+        "required" : false,
+        "caseExact" : false,
+        "mutability" : "writeOnly",
+        "returned" : "never",
+        "uniqueness" : "none"
+      },
       {
         "name" : "subscribers",
         "type" : "complex",
@@ -1581,17 +1691,7 @@ endpoint (see <xref target="RFC7644">Section 3.2</xref>).</postamble>
     </section>
 
     <section title="Change Log">
-      <t>Draft 00 - PH - First Draft based on reduced version of draft-hunt-idevent-distribution</t>
-      <t>Draft 01 - PH - <list style="symbols">
-        <t>Reworked terminology to match new WG Transmitter/Receiver terms</t>
-        <t>Reworked sections into Data Plane vs. Control Plane</t>
-        <t>Removed method transmission registry in order to simplify the specification</t>
-        <t>Made Create, Update operations optional for Control Plane (Read is MTI)</t>
-      </list></t>
-      <t>Draft 02 - PH <list style="symbols">
-        <t>Added iss metadata for Event Stream</t>
-        <t>Changed to using JWKS_uri for issuer and receiver.</t>
-      </list></t>
+      <t>Draft 00 - PH - First Draft based on control plane portions of draft-hunt-idevent-distribution</t>
       
     </section>
   </back>
