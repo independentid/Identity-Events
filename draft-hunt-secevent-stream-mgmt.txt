@@ -5,10 +5,10 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                              A. Nadalin
-Expires: March 3, 2018                                         Microsoft
+Expires: March 26, 2018                                        Microsoft
                                                                M. Ansari
                                                                    Cisco
-                                                         August 30, 2017
+                                                      September 22, 2017
 
 
          SET Security Event Stream Management and Provisioning
@@ -28,14 +28,14 @@ Status of This Memo
    Internet-Drafts are working documents of the Internet Engineering
    Task Force (IETF).  Note that other groups may also distribute
    working documents as Internet-Drafts.  The list of current Internet-
-   Drafts is at http://datatracker.ietf.org/drafts/current/.
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
 
    Internet-Drafts are draft documents valid for a maximum of six months
    and may be updated, replaced, or obsoleted by other documents at any
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on March 3, 2018.
+   This Internet-Draft will expire on March 26, 2018.
 
 Copyright Notice
 
@@ -44,7 +44,7 @@ Copyright Notice
 
    This document is subject to BCP 78 and the IETF Trust's Legal
    Provisions Relating to IETF Documents
-   (http://trustee.ietf.org/license-info) in effect on the date of
+   (https://trustee.ietf.org/license-info) in effect on the date of
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
    to this document.  Code Components extracted from this document must
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Hunt, et al.              Expires March 3, 2018                 [Page 1]
+Hunt, et al.             Expires March 26, 2018                 [Page 1]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    the Trust Legal Provisions and are provided without warranty as
@@ -77,7 +77,7 @@ Table of Contents
        3.2.2.  Update using HTTP PATCH . . . . . . . . . . . . . . .  17
    4.  Managing Stream Subjects  . . . . . . . . . . . . . . . . . .  19
      4.1.  Considerations for Managing Subjects  . . . . . . . . . .  20
-     4.2.  Checking Subscriber Membership  . . . . . . . . . . . . .  20
+     4.2.  Checking Subject Membership . . . . . . . . . . . . . . .  20
        4.2.1.  Email Based Subjects  . . . . . . . . . . . . . . . .  20
        4.2.2.  OIDC Based Subjects . . . . . . . . . . . . . . . . .  22
      4.3.  Adding and Removing Subjects to a Stream  . . . . . . . .  22
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Hunt, et al.              Expires March 3, 2018                 [Page 2]
+Hunt, et al.             Expires March 26, 2018                 [Page 2]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    The specification defines the common metadata Event Transmitters and
@@ -165,9 +165,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                 [Page 3]
+Hunt, et al.             Expires March 26, 2018                 [Page 3]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    The following definitions are defined for Security Event
@@ -221,9 +221,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                 [Page 4]
+Hunt, et al.             Expires March 26, 2018                 [Page 4]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    deliveryUri
@@ -277,9 +277,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                 [Page 5]
+Hunt, et al.             Expires March 26, 2018                 [Page 5]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
          "fail" - indicates that the Event Stream was unable to deliver
@@ -333,9 +333,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                 [Page 6]
+Hunt, et al.             Expires March 26, 2018                 [Page 6]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
       An OPTIONAL String value that is usually human readable that
@@ -351,7 +351,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
       its value is usually not returned as part of an Event Stream
       configuration.
 
-   subscribers
+   subjects
       An OPTIONAL complex attribute containing sub objects whose sub-
       attributes define subjects against which SETs may be issued.  The
       following sub-attributes are defined:
@@ -389,9 +389,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                 [Page 7]
+Hunt, et al.             Expires March 26, 2018                 [Page 7]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
          Group  A SCIM Group where the value is the 'id' of a Group
@@ -445,9 +445,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                 [Page 8]
+Hunt, et al.             Expires March 26, 2018                 [Page 8]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    Below is an example response to Stream retrieval made in Figure 1.
@@ -501,9 +501,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                 [Page 9]
+Hunt, et al.             Expires March 26, 2018                 [Page 9]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    In most cases Event Stream status monitoring can be triggered on a
@@ -557,9 +557,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 10]
+Hunt, et al.             Expires March 26, 2018                [Page 10]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
   HTTP/1.1 200 OK
@@ -613,9 +613,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 11]
+Hunt, et al.             Expires March 26, 2018                [Page 11]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    The following is the state machine representation of a Event Stream
@@ -669,9 +669,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 12]
+Hunt, et al.             Expires March 26, 2018                [Page 12]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    Suspend and Resume
@@ -725,9 +725,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 13]
+Hunt, et al.             Expires March 26, 2018                [Page 13]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    1.  The client initiates an HTTP POST to the Control Plane endpoint
@@ -781,9 +781,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 14]
+Hunt, et al.             Expires March 26, 2018                [Page 14]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    In following non-normative response, the Control Plane provider has
@@ -828,7 +828,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
       An optional HTTP PATCH operation uses a JSON Patch [RFC6902] style
       request format to allow manipulation of specific EventStream
       configuration such as (but not limited to) "status", and
-      "subscribers".
+      "subjects".
 
 
 
@@ -837,9 +837,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 15]
+Hunt, et al.             Expires March 26, 2018                [Page 15]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
 3.2.1.  Update using HTTP PUT
@@ -893,9 +893,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 16]
+Hunt, et al.             Expires March 26, 2018                [Page 16]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    In following non-normative response, the Control Plane provider
@@ -949,9 +949,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 17]
+Hunt, et al.             Expires March 26, 2018                [Page 17]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    The JSON document contains an attribute "Operations" which contains
@@ -963,7 +963,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
    path  A JSON attribute whose value is a document attribute path (see
       Section 3.5.2 [RFC7644]) describing the attribute or sub-attribute
       or value to be updated in the case of multi-valued complex
-      attributes such as "subscribers".
+      attributes such as "subjects".
 
    value  The value to be assigned to the JSON document attribute
       defined in "path".
@@ -1005,9 +1005,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 18]
+Hunt, et al.             Expires March 26, 2018                [Page 18]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    In the following non-normative example, the client is request the
@@ -1024,7 +1024,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
        ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
      "Operations": [{
        "op":"add",
-       "path":"subscribers",
+       "path":"subjects",
        "value":{
          "type":"EMAIL",
          "value":"alice@example.com"
@@ -1032,17 +1032,17 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
      },
      {
        "op":remove",
-       "path":"subscribers[value eq \"bob@example.com\"]
+       "path":"subjects[value eq \"bob@example.com\"]
      }]
    }
 
    In the above request, the remove operation uses a value filter which
    provides a matching expression against one or more sub-attributes of
-   a parent attributes (subscribers).  In this case the composite value
-   of subscribers which contains the sub-attribute "type" and "value"
+   a parent attributes (subjects).  In this case the composite value of
+   subjects which contains the sub-attribute "type" and "value"
    attribute is removed based on matching the "value" sub-attribute.
-   Upon receiving the request, the EventStream subscribers attribute
-   would be updated to reflect the changes.
+   Upon receiving the request, the EventStream subjects attribute would
+   be updated to reflect the changes.
 
           Figure 11: Example Changing the Members of EventStream
 
@@ -1061,9 +1061,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 19]
+Hunt, et al.             Expires March 26, 2018                [Page 19]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    configuration.  This is one possible way of many that subjects can be
@@ -1079,7 +1079,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
    It is expected, but not required, that most deployments will not
    allow the subjects that are part of an Event Stream to be enumerated.
-   In practice, the Event Stream configuration attribute "subscriber" is
+   In practice, the Event Stream configuration attribute "subject" is
    typically not returned when querying Event Stream configurations (see
    Section 2.2).  This is because the number of values may be too large
    (e.g. great than 100k values or even in the billions or more).
@@ -1087,16 +1087,16 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
    Receivers MAY confirm that a subject is part of a stream for privacy
    reasons.
 
-   The ability to return attributes such as "subscribers" is indicated
-   by Control Plane service providers in schema discovery (see Section 4
-   [RFC7644]) as the schema attribute "returned".  For "subscribers"
-   this attribute SHOULD be set to "request" or "never".  In "request"
-   mode, the client must specifically request the attribute
-   "subscribers" to have it enumerated.  If the mode is _never_, the
-   attribute SHALL NOT be returned to clients.  In all cases however, a
-   client MAY execute a query to verify the presence of a subscriber:
+   The ability to return attributes such as "subjects" is indicated by
+   Control Plane service providers in schema discovery (see Section 4
+   [RFC7644]) as the schema attribute "returned".  For "subjects" this
+   attribute SHOULD be set to "request" or "never".  In "request" mode,
+   the client must specifically request the attribute "subjects" to have
+   it enumerated.  If the mode is _never_, the attribute SHALL NOT be
+   returned to clients.  In all cases however, a client MAY execute a
+   query to verify the presence of a subject:
 
-4.2.  Checking Subscriber Membership
+4.2.  Checking Subject Membership
 
 4.2.1.  Email Based Subjects
 
@@ -1117,9 +1117,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 20]
+Hunt, et al.             Expires March 26, 2018                [Page 20]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    In the following non-normative example, a client queries the Control
@@ -1128,7 +1128,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
    as the client does not need to see the rest of the configuration.
    Note, for readability, the URL is not encoded.
 
-GET /EventStreams?filter=(subscribers.value eq "alice@example.com")&attributes=id
+GET /EventStreams?filter=(subjects.value eq "alice@example.com")&attributes=id
 Host: example.com
 Accept: application/scim+json
 Authorization: Bearer h480djs93hd8
@@ -1148,7 +1148,7 @@ Authorization: Bearer h480djs93hd8
      "Resources":[]
    }
 
-           Figure 13: Example Response With No Subscriber Match
+             Figure 13: Example Response With No Subject Match
 
    In the response below, a match for subject "alice@example.com" is
    found and the "id" of the Event Stream configuration that contains
@@ -1173,9 +1173,9 @@ Authorization: Bearer h480djs93hd8
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 21]
+Hunt, et al.             Expires March 26, 2018                [Page 21]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
 4.2.2.  OIDC Based Subjects
@@ -1194,7 +1194,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
    as the client does not need to see the rest of the configuration.
    Note, for readability, the URL is not encoded.
 
-   GET /EventStreams?filter=(subscribers[value eq "123456" and
+   GET /EventStreams?filter=(subjects[value eq "123456" and
      iss eq "op.example.com"])&attributes=id
    Host: example.com
    Accept: application/scim+json
@@ -1206,10 +1206,10 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
    In the above request note that "type" and "value" are enclosed within
    square brackets.  This is done, per [RFC7644] to ensure the matching
    condition within "[" and "]" is matched against the same value
-   record.  If the filter was expressed as "(subscribers.value eq
-   "123456" and subscribers.iss eq "op.example.com")" Then an improper
-   match can occur because a composite value of "subjects" may have
-   "123456" while another has "op.example.com".
+   record.  If the filter was expressed as "(subjects.value eq "123456"
+   and subjects.iss eq "op.example.com")" Then an improper match can
+   occur because a composite value of "subjects" may have "123456" while
+   another has "op.example.com".
 
    For examples of responses to Figure 15, see Figure 13 and Figure 14
 
@@ -1229,15 +1229,15 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 22]
+Hunt, et al.             Expires March 26, 2018                [Page 22]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    In the following non-normative example, the client is request the
    addition of a subject identified by an EMAIL address to an existing
-   EventStream.  The composite value of subscribers has the sub-
-   attributes "type" and "value" which are assigned.
+   EventStream.  The composite value of subjects has the sub-attributes
+   "type" and "value" which are assigned.
 
    PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
    Host: example.com
@@ -1250,7 +1250,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
        ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
      "Operations": [{
        "op":"add",
-       "path":"subscribers",
+       "path":"subjects",
        "value":{
          "type":"EMAIL",
          "value":"alice@example.com"
@@ -1285,14 +1285,14 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 23]
+Hunt, et al.             Expires March 26, 2018                [Page 23]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    In the following non-normative example, the client is request the
    addition of a subject to an existing EventStream.  The composite
-   value of subscribers has the sub-attributes "type", "iss" and "value"
+   value of subjects has the sub-attributes "type", "iss" and "value"
    which are assigned.
 
    PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
@@ -1306,7 +1306,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
        ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
      "Operations": [{
        "op":"add",
-       "path":"subscribers",
+       "path":"subjects",
        "value":{
          "type":"OIDC",
          "value":"123456",
@@ -1332,7 +1332,7 @@ Authorization: Bearer h480djs93hd8
     ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
   "Operations": [{
     "op":"remove",
-    "path":"subscribers[value eq \"123456\" and iss eq \"op.example.com\"]",
+    "path":"subjects[value eq \"123456\" and iss eq \"op.example.com\"]",
   }]
 }
 
@@ -1341,9 +1341,9 @@ Authorization: Bearer h480djs93hd8
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 24]
+Hunt, et al.             Expires March 26, 2018                [Page 24]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
 5.  Event Stream Verification
@@ -1397,9 +1397,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 25]
+Hunt, et al.             Expires March 26, 2018                [Page 25]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
       Set to the URI defined in the Event Stream configuration.
@@ -1453,9 +1453,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 26]
+Hunt, et al.             Expires March 26, 2018                [Page 26]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    The Privacy Considerations of SET Token Specification
@@ -1509,9 +1509,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 27]
+Hunt, et al.             Expires March 26, 2018                [Page 27]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    Typically these roles are rights or scopes associated with the
@@ -1565,9 +1565,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 28]
+Hunt, et al.             Expires March 26, 2018                [Page 28]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    [I-D.ietf-secevent-token]
@@ -1577,8 +1577,8 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
-              DOI 10.17487/RFC2119, March 1997, <https://www.rfc-
-              editor.org/info/rfc2119>.
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
 
    [RFC3986]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
               Resource Identifier (URI): Generic Syntax", STD 66,
@@ -1586,17 +1586,17 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
               <https://www.rfc-editor.org/info/rfc3986>.
 
    [RFC5988]  Nottingham, M., "Web Linking", RFC 5988,
-              DOI 10.17487/RFC5988, October 2010, <https://www.rfc-
-              editor.org/info/rfc5988>.
+              DOI 10.17487/RFC5988, October 2010,
+              <https://www.rfc-editor.org/info/rfc5988>.
 
    [RFC7231]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
               Protocol (HTTP/1.1): Semantics and Content", RFC 7231,
-              DOI 10.17487/RFC7231, June 2014, <https://www.rfc-
-              editor.org/info/rfc7231>.
+              DOI 10.17487/RFC7231, June 2014,
+              <https://www.rfc-editor.org/info/rfc7231>.
 
    [RFC7517]  Jones, M., "JSON Web Key (JWK)", RFC 7517,
-              DOI 10.17487/RFC7517, May 2015, <https://www.rfc-
-              editor.org/info/rfc7517>.
+              DOI 10.17487/RFC7517, May 2015,
+              <https://www.rfc-editor.org/info/rfc7517>.
 
    [RFC7519]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
@@ -1621,14 +1621,14 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 29]
+Hunt, et al.             Expires March 26, 2018                [Page 29]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    [RFC5321]  Klensin, J., "Simple Mail Transfer Protocol", RFC 5321,
-              DOI 10.17487/RFC5321, October 2008, <https://www.rfc-
-              editor.org/info/rfc5321>.
+              DOI 10.17487/RFC5321, October 2008,
+              <https://www.rfc-editor.org/info/rfc5321>.
 
    [RFC6902]  Bryan, P., Ed. and M. Nottingham, Ed., "JavaScript Object
               Notation (JSON) Patch", RFC 6902, DOI 10.17487/RFC6902,
@@ -1677,9 +1677,9 @@ Appendix A.  Event Stream Resource Type Definition
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 30]
+Hunt, et al.             Expires March 26, 2018                [Page 30]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    The attributes for the EventStream resource type are defined in
@@ -1733,9 +1733,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 31]
+Hunt, et al.             Expires March 26, 2018                [Page 31]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
         "name" : "iss",
@@ -1789,9 +1789,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 32]
+Hunt, et al.             Expires March 26, 2018                [Page 32]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
         Event Receiver.",
@@ -1845,9 +1845,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 33]
+Hunt, et al.             Expires March 26, 2018                [Page 33]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
         'failed'.  If undefined, there is no maximum time.",
@@ -1901,9 +1901,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 34]
+Hunt, et al.             Expires March 26, 2018                [Page 34]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
         indicated 'txErr' error code.",
@@ -1927,7 +1927,7 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
         "uniqueness" : "none"
       },
       {
-        "name" : "subscribers",
+        "name" : "subjects",
         "type" : "complex",
         "multiValued" : true,
         "description" : "An optional list of subjects that are part of
@@ -1957,9 +1957,9 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 35]
+Hunt, et al.             Expires March 26, 2018                [Page 35]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
             of some other network addressable subject.",
@@ -2013,9 +2013,9 @@ Authors' Addresses
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 36]
+Hunt, et al.             Expires March 26, 2018                [Page 36]
 
-Internet-Draft      draft-hunt-secevent-distribution         August 2017
+Internet-Draft       draft-hunt-secevent-stream-mgmt      September 2017
 
 
    Phil Hunt (editor)
@@ -2069,4 +2069,4 @@ Internet-Draft      draft-hunt-secevent-distribution         August 2017
 
 
 
-Hunt, et al.              Expires March 3, 2018                [Page 37]
+Hunt, et al.             Expires March 26, 2018                [Page 37]

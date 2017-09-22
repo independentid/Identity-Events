@@ -14,7 +14,7 @@
 <rfc category="std" docName="draft-hunt-secevent-stream-mgmt-00"
 	ipr="trust200902">
 	<front>
-		<title abbrev="draft-hunt-secevent-distribution">
+		<title abbrev="draft-hunt-secevent-stream-mgmt">
 			SET Security Event Stream Management and Provisioning</title>
 
 		<author fullname="Phil Hunt" initials="P." role="editor"
@@ -323,7 +323,7 @@
         be updated (see <xref target="verifyStream"/>), its value is
         usually not returned as part of an Event Stream configuration. </t>
         
-        <t hangText="subscribers"><vspace />
+        <t hangText="subjects"><vspace />
         An OPTIONAL complex attribute containing sub objects whose 
         sub-attributes define subjects against which SETs may be issued.
         The following sub-attributes are defined:<list style="hanging">
@@ -712,7 +712,7 @@ Location:
           <xref target="RFC6902"/> style request format to allow manipulation
           of specific EventStream configuration such as
           (but not limited to) <spanx style="verb">status</spanx>, and 
-          <spanx style="verb">subscribers</spanx>.</t>
+          <spanx style="verb">subjects</spanx>.</t>
         </list>  </t>
 
         <section title="Update using HTTP PUT">
@@ -812,7 +812,7 @@ Location:
           attribute path (see <xref target="RFC7644">Section 3.5.2</xref>) 
           describing the attribute or sub-attribute or
           value to be updated in the case of multi-valued complex attributes
-          such as <spanx style="verb">subscribers</spanx>.</t>
+          such as <spanx style="verb">subjects</spanx>.</t>
           <t hangText="value">The value to be assigned to the JSON 
           document attribute defined in <spanx style="verb">path</spanx>.</t>
         </list></t>
@@ -860,7 +860,7 @@ Authorization: Bearer h480djs93hd8
     ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
   "Operations": [{
     "op":"add",
-    "path":"subscribers",
+    "path":"subjects",
     "value":{
       "type":"EMAIL",
       "value":"alice@example.com"
@@ -868,16 +868,16 @@ Authorization: Bearer h480djs93hd8
   },
   { 
     "op":remove",
-    "path":"subscribers[value eq \"bob@example.com\"]
+    "path":"subjects[value eq \"bob@example.com\"]
   }]
 }</artwork>
 <postamble>In the above request, the remove operation uses a value
 filter which provides a matching expression against one or more
-sub-attributes of a parent attributes (subscribers). In this case the 
-composite value of subscribers which contains the sub-attribute 
+sub-attributes of a parent attributes (subjects). In this case the 
+composite value of subjects which contains the sub-attribute 
 <spanx style="verb">type</spanx> and <spanx style="verb">value</spanx>
 attribute is removed based on matching the "value" sub-attribute.
-Upon receiving the request, the EventStream subscribers attribute would be 
+Upon receiving the request, the EventStream subjects attribute would be 
 updated to reflect the changes. </postamble>
             </figure>
                     
@@ -914,7 +914,7 @@ updated to reflect the changes. </postamble>
       <t>It is expected, but not required, that most deployments
       will not allow the subjects that are part of an Event Stream
       to be enumerated. In practice, the Event Stream configuration 
-      attribute <spanx style="verb">subscriber</spanx> 
+      attribute <spanx style="verb">subject</spanx> 
       is typically not returned when querying Event Stream configurations
       (see <xref target="getStatus"/>). This is because the number of 
       values may be too large (e.g. great than 100k values or even 
@@ -922,21 +922,21 @@ updated to reflect the changes. </postamble>
       Event types being exchanged, Event Receivers MAY confirm that a 
       subject is part of a stream for privacy reasons. </t>
       
-      <t>The ability to return attributes such as <spanx style="verb">subscribers</spanx>
+      <t>The ability to return attributes such as <spanx style="verb">subjects</spanx>
       is indicated by Control Plane service providers in schema discovery 
       (see <xref target="RFC7644">Section 4</xref>) as the schema attribute 
-      <spanx style="verb">returned</spanx>. For <spanx style="verb">subscribers</spanx>
+      <spanx style="verb">returned</spanx>. For <spanx style="verb">subjects</spanx>
       this attribute SHOULD be set to <spanx style="verb">request</spanx> or 
       <spanx style="verb">never</spanx>.  In <spanx style="verb">request</spanx> mode,
-      the client must specifically request the attribute <spanx style="verb">subscribers</spanx>
+      the client must specifically request the attribute <spanx style="verb">subjects</spanx>
       to have it enumerated. If the mode is <spanx style="emph">never</spanx>,
       the attribute SHALL NOT be returned to clients. In all cases however,
-      a client MAY execute a query to verify the presence of a subscriber:</t>
+      a client MAY execute a query to verify the presence of a subject:</t>
       
    </section>
    
    
-   <section anchor="checkSubject" title="Checking Subscriber Membership">
+   <section anchor="checkSubject" title="Checking Subject Membership">
 
       <section title="Email Based Subjects">
         <t>In this section, values have been added to the 
@@ -947,20 +947,20 @@ updated to reflect the changes. </postamble>
         and the sub-attribute <spanx style="verb">value</spanx> contains
         an email address.</t>
 
-        <figure anchor="verifySubscriber" title="Determining if a Subject is in an Event Stream Example">
+        <figure anchor="verifySubject" title="Determining if a Subject is in an Event Stream Example">
         <preamble>In the following non-normative example, a client queries
         the Control Plane to see if Alice@example.com is part of any
         defined stream configuration. In the request, only the attribute 
         <spanx style="verb">id</spanx> is requested as the client
         does not need to see the rest of the configuration. Note, for
         readability, the URL is not encoded.</preamble> 
-  <artwork>GET /EventStreams?filter=(subscribers.value eq "alice@example.com")&amp;attributes=id
+  <artwork>GET /EventStreams?filter=(subjects.value eq "alice@example.com")&amp;attributes=id
 Host: example.com
 Accept: application/scim+json
 Authorization: Bearer h480djs93hd8</artwork>
         </figure>
   
-        <figure anchor="verifyNoMatch" title="Example Response With No Subscriber Match">
+        <figure anchor="verifyNoMatch" title="Example Response With No Subject Match">
         <preamble>In this non-normative response, the subject is confirmed
         as not part of any Event Streams associated with the requestor. In
         this case an empty list is returned with no values and <spanx style="verb">totalResults</spanx> is 
@@ -1011,14 +1011,14 @@ Content-Type: application/scim+json
         <spanx style="verb">op.example.com</spanx> and the 
         <spanx style="verb">sub</spanx> is <spanx style="verb">123456</spanx>.</t>
 
-        <figure anchor="verifyOidcSubscriber" title="Determining if an OIDC Subject is in an Event Stream Example">
+        <figure anchor="verifyOidcSubject" title="Determining if an OIDC Subject is in an Event Stream Example">
         <preamble>In the following non-normative example, a client queries
         the Control Plane to see if the above OIDC user is part of any
         defined stream configuration. In the request, only the attribute 
         <spanx style="verb">id</spanx> is requested as the client
         does not need to see the rest of the configuration. Note, for
         readability, the URL is not encoded.</preamble> 
-  <artwork>GET /EventStreams?filter=(subscribers[value eq "123456" and
+  <artwork>GET /EventStreams?filter=(subjects[value eq "123456" and
   iss eq "op.example.com"])&amp;attributes=id
 Host: example.com
 Accept: application/scim+json
@@ -1030,13 +1030,13 @@ Authorization: Bearer h480djs93hd8</artwork>
         square brackets. This is done, per <xref target="RFC7644"/> to
         ensure the matching condition within "[" and "]" is matched
         against the same value record.  If the filter was expressed as
-<spanx style="verb">(subscribers.value eq "123456" and subscribers.iss eq "op.example.com")</spanx>
+<spanx style="verb">(subjects.value eq "123456" and subjects.iss eq "op.example.com")</spanx>
         Then an improper match can occur because a composite value of 
         <spanx style="verb">subjects</spanx>
         may have <spanx style="verb">123456</spanx> while another has 
         <spanx style="verb">op.example.com</spanx>.</t>
 
-        <t>For examples of responses to <xref target="verifyOidcSubscriber"/>,
+        <t>For examples of responses to <xref target="verifyOidcSubject"/>,
         see <xref target="verifyNoMatch"/> and <xref target="verifyMatch"/></t>
         
       </section>
@@ -1051,7 +1051,7 @@ Authorization: Bearer h480djs93hd8</artwork>
       <figure anchor="addEmailSubject" title="Example Adding an EMAIL Subject to a Stream">
       <preamble>In the following non-normative example, the client
       is request the addition of a subject identified by an EMAIL address
-      to an existing EventStream. The composite value of subscribers
+      to an existing EventStream. The composite value of subjects
       has the sub-attributes <spanx style="verb">type</spanx> and <spanx style="verb">value</spanx>
       which are assigned.</preamble>
 <artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
@@ -1065,7 +1065,7 @@ Authorization: Bearer h480djs93hd8
     ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
   "Operations": [{
     "op":"add",
-    "path":"subscribers",
+    "path":"subjects",
     "value":{
       "type":"EMAIL",
       "value":"alice@example.com"
@@ -1078,7 +1078,7 @@ Authorization: Bearer h480djs93hd8
       <figure anchor="addOidcSubject" title="Example Adding an OIDC Provider Subject to a Stream">
       <preamble>In the following non-normative example, the client
       is request the addition of a subject 
-      to an existing EventStream. The composite value of subscribers
+      to an existing EventStream. The composite value of subjects
       has the sub-attributes <spanx style="verb">type</spanx>, 
       <spanx style="verb">iss</spanx> and <spanx style="verb">value</spanx>
       which are assigned.</preamble>
@@ -1093,7 +1093,7 @@ Authorization: Bearer h480djs93hd8
     ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
   "Operations": [{
     "op":"add",
-    "path":"subscribers",
+    "path":"subjects",
     "value":{
       "type":"OIDC",
       "value":"123456",
@@ -1119,7 +1119,7 @@ Authorization: Bearer h480djs93hd8
     ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
   "Operations": [{
     "op":"remove",
-    "path":"subscribers[value eq \"123456\" and iss eq \"op.example.com\"]",
+    "path":"subjects[value eq \"123456\" and iss eq \"op.example.com\"]",
   }]
 }</artwork>
 <postamble> </postamble>
@@ -1623,7 +1623,7 @@ endpoint (see <xref target="RFC7644">Section 3.2</xref>).</postamble>
         "uniqueness" : "none"
       },
       {
-        "name" : "subscribers",
+        "name" : "subjects",
         "type" : "complex",
         "multiValued" : true,
         "description" : "An optional list of subjects that are part of
