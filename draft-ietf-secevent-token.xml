@@ -13,7 +13,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="std" docName="draft-ietf-secevent-token-02" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-token-03" ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-token">Security Event Token (SET)</title>
 
@@ -128,7 +128,7 @@
       <t>While Event Receivers will often take actions upon receiving 
       SETs, security events MUST NOT be assumed to be commands or requests. 
       The intent of this specification is to define a way of exchanging 
-      statements of fact that subscribers may interpret for their own
+      statements of fact that Event Receivers may interpret for their own
       purposes. As such, SETs have no capability for error signaling 
       other to ensure the validation of a received SET. </t>
 
@@ -170,7 +170,9 @@
           
           <t hangText="Event Receiver"><vspace/>
             An Event Receiver is an entity that receives SETs through 
-            some distribution method.  
+            some distribution method. An Event Receiver is the same
+            entity referred as "recipient" or "receiver" in <xref target="RFC7519"> and
+            related specifications.</xref>
           </t>
             
           <t hangText="Subject"><vspace blankLines="0"/>
@@ -318,8 +320,6 @@
         <artwork>
 { 
   "jti": "fb4e75b5411e4e19b6c0fe87950f7749",
-  
-  "sub": "248289761001",
   "iat": 1458496025,
   "iss": "https://my.examplemed.com",  
   "aud": [
@@ -328,6 +328,7 @@
   "events": {
     "https://openid.net/heart/specs/consent.html":{
       "iss":"https://connect.example.com",
+      "sub": "248289761001",
       "consentUri":[
         "https://terms.examplemed.com/labdisclosure.html#Agree"
       ]
@@ -378,14 +379,8 @@
             </t> 
             
             <t hangText="nbf"><vspace blankLines="0"/>Defined by 
-            <xref target="RFC7519">Section 4.1.5</xref>, a number 
-            whose value is a NumericDate. In the context of the SET token
-            it SHALL be interpreted to mean a date in which
-            the event is believed to have occurred (in the past) or will occur in the 
-            future. Note: there MAY be some cases where "nbf"
-            is still smaller than "iat" such as when it took an extended 
-            time for a SET to be issued (for example after some analysis). 
-            This claim is OPTIONAL.</t> 
+            <xref target="RFC7519">Section 4.1.5</xref>, this claim is
+            not used in SET and SHOULD NOT be used.</t>
             
             <t hangText="sub">As defined by <xref target="RFC7519">Section 4.1.2</xref>,
             a String or URI value representing the principal or the subject of the SET. 
@@ -401,6 +396,13 @@
 	    relative to issuer information that is also conveyed in the event payload,
 	    which may be the case for some identity SET profiles.
 	    </t>   
+      
+            <t hangText="toe">A number whose value is a Numeric Data (
+            see <xref target="RFC7519">Section 2</xref>). The value is
+            the date and time in which the event is believed to have
+            occurred in the past or will occur in the future. This
+            claim is OPTIONAL. When not asserted, the value of "toe" MAY
+            be assumed to be the value of "iat".</t>
             
             <t hangText="exp">As defined by <xref target="RFC7519"/>, this claim
             is time on which the JWT MUST NOT be accepted for processing. In 
@@ -665,7 +667,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	  In any OpenID Connect contexts in which an attacker could attempt to substitute a SET for an ID Token,
 	  the SET would actually already be rejected as an ID Token
 	  because it would not contain the correct <spanx style="verb">nonce</spanx> claim value
-	  for the ID Token to be accepted in that context.
+	  for the ID Token to be accepted in contexts for which substitution is possible.
 	</t>
 	<t>
 	  Note that the use of explicit typing, as described in <xref target="ExplicitTyping"/>,
@@ -691,7 +693,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	    </t>
 	    <t>
 	      Where possible, use a separate <spanx style="verb">aud</spanx>
-	      claim value to distinguish between the SET subscriber and the 
+	      claim value to distinguish between the Event Receiver and the 
 	      protected resource that is the audience of an access token.
 	    </t>
 	    <t>
@@ -762,7 +764,8 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       be used to provide verification of its authenticity.</t>
       
       <t>Event Transmitters SHOULD attempt to specialize feeds so that the content
-      is targeted to the specific business and protocol needs of subscribers.</t>
+      is targeted to the specific business and protocol needs of 
+      an Event Receiver.</t>
       
       <t>When sharing personally identifiable information or information
       that is otherwise considered confidential to affected users, Event 
@@ -772,7 +775,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       <t>The propagation of subject identifiers can be perceived as personally
       identifiable information. Where possible, Event Transmitters and Receivers
       SHOULD devise approaches that prevent propagation -- for example, the
-      passing of a hash value that requires the subscriber to already know
+      passing of a hash value that requires the Event Receiver to know
       the subject.</t>
     </section>
 
@@ -780,7 +783,8 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 
       <section anchor="ClaimsRegistry" title="JSON Web Token Claims Registration">
 	<t>
-	  This specification registers the <spanx style="verb">events</spanx> and
+	  This specification registers the <spanx style="verb">events</spanx>,
+    <spanx style="verb">toe</spanx>, and
 	  <spanx style="verb">txn</spanx> claims in the IANA
 	  "JSON Web Token Claims" registry <xref target="IANA.JWT.Claims"/>
 	  established by <xref target="RFC7519"/>.
@@ -794,26 +798,39 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 		Claim Name: <spanx style="verb">events</spanx>
 	      </t>
 	      <t>
-		Claim Description: Security Event Object
+		Claim Description: SET Security Event URI
 	      </t>
 	      <t>
 		Change Controller: IESG
 	      </t>
 	      <t>
-		Specification Document(s): <xref target="events"/> of [[ this specification ]]
+		Specification Document(s): <xref target="EventContents"/> of [[ this specification ]]
 	      <vspace blankLines="1"/></t>
 	      
-	      <t>
+	       <t>
+    Claim Name: <spanx style="verb">toe</spanx>
+        </t>
+        <t>
+    Claim Description: SET Time Of Event
+        </t>
+        <t>
+    Change Controller: IESG
+        </t>
+        <t>
+    Specification Document(s): <xref target="EventContents"/> of [[ this specification ]]
+        <vspace blankLines="1"/></t>
+        
+        <t>
 		Claim Name: <spanx style="verb">txn</spanx>
 	      </t>
 	      <t>
-		Claim Description: Transaction Identifier
+		Claim Description: SET Transaction Identifier
 	      </t>
 	      <t>
 		Change Controller: IESG
 	      </t>
 	      <t>
-		Specification Document(s): <xref target="events"/> of [[ this specification ]]
+		Specification Document(s): <xref target="EventContents"/> of [[ this specification ]]
 	      </t>
 	    </list>
 	  </t>
@@ -1118,7 +1135,17 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	    Applied grammar corrections.
 	  </t>
 	</list>
-      </t>
+  </t>
+  <t>Draft 03 - Changes As Follows:<list style="symbols">
+    <t>pjh - Corrected old "subscriber" to "Event Receiver". Added clarification
+    in definition that Event Receiver is the same as JWT recipient.</t>
+    <t>pjh - Added definition for "toe" (and IANAN registration).</t>
+    <t>pjh - Clarified nbf is not used.</t>
+    <t>pjh - Figure 3, moved "sub" to the events payload next to "iss".</t>
+    <t>pjh = Clarified use of "nonce" in contexts where susbstitution is possible.</t>
+   
+  </list></t>
+    
     </section>
   </back>
 </rfc>
