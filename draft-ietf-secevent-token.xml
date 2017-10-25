@@ -378,10 +378,18 @@
             to the actual time of the event. This claim is REQUIRED. 
             </t> 
             
+            <t hangText="toe">A number whose value is a Numeric Data (
+            see <xref target="RFC7519">Section 2</xref>). The value is
+            the date and time in which the event is believed to have
+            occurred in the past or will occur in the future. This
+            claim is RECOMMENDED.</t>
+            
+            <!-- Removed after WGLC discussion
             <t hangText="nbf"><vspace blankLines="0"/>Defined by 
             <xref target="RFC7519">Section 4.1.5</xref>, this claim is
             not used in SET and SHOULD NOT be used.</t>
-            
+             -->
+             
             <t hangText="sub">As defined by <xref target="RFC7519">Section 4.1.2</xref>,
             a String or URI value representing the principal or the subject of the SET. 
             This is usually the entity whose "state" was changed. For example,
@@ -397,13 +405,6 @@
 	    which may be the case for some identity SET profiles.
 	    </t>   
       
-            <t hangText="toe">A number whose value is a Numeric Data (
-            see <xref target="RFC7519">Section 2</xref>). The value is
-            the date and time in which the event is believed to have
-            occurred in the past or will occur in the future. This
-            claim is OPTIONAL. When not asserted, the value of "toe" MAY
-            be assumed to be the value of "iat".</t>
-            
             <t hangText="exp">As defined by <xref target="RFC7519"/>, this claim
             is time on which the JWT MUST NOT be accepted for processing. In 
             the context of a SET however, this notion does not apply since
@@ -798,7 +799,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 		Claim Name: <spanx style="verb">events</spanx>
 	      </t>
 	      <t>
-		Claim Description: SET Security Event URI
+		Claim Description: Security Event URI
 	      </t>
 	      <t>
 		Change Controller: IESG
@@ -811,7 +812,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
     Claim Name: <spanx style="verb">toe</spanx>
         </t>
         <t>
-    Claim Description: SET Time Of Event
+    Claim Description: Time Of Event
         </t>
         <t>
     Change Controller: IESG
@@ -824,7 +825,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 		Claim Name: <spanx style="verb">txn</spanx>
 	      </t>
 	      <t>
-		Claim Description: SET Transaction Identifier
+		Claim Description: Transaction Identifier
 	      </t>
 	      <t>
 		Change Controller: IESG
@@ -1140,6 +1141,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
     <t>pjh - Corrected old "subscriber" to "Event Receiver". Added clarification
     in definition that Event Receiver is the same as JWT recipient.</t>
     <t>pjh - Added definition for "toe" (and IANAN registration).</t>
+    <t>pjh - Removed "nbf" claim</t>
     <t>pjh - Clarified nbf is not used.</t>
     <t>pjh - Figure 3, moved "sub" to the events payload next to "iss".</t>
     <t>pjh = Clarified use of "nonce" in contexts where susbstitution is possible.</t>
