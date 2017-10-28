@@ -25,21 +25,6 @@
 				<email>phil.hunt@yahoo.com</email>
 			</address>
 		</author>
-     <author fullname="Anthony Nadalin" initials="A." surname="Nadalin">
-      <organization abbrev="Microsoft">Microsoft</organization>
-
-      <address>
-        <email>tonynad@microsoft.com</email>
-      </address>
-    </author>
-    <author fullname="Morteza Ansari" initials="M." surname="Ansari">
-      <organization abbrev="Cisco">Cisco</organization>
-
-      <address>
-        <email>moransar@cisco.com</email>
-      </address>
-    </author>
-   
 
 		<date year="2017" />
 
@@ -176,8 +161,23 @@
       define an Event Stream's operational configuration:
       <list style="hanging">
       
-        <t hangText="eventUris"><vspace />An array of JSON String values
-        which are the URIs of events issued in this Stream.</t>
+        <t hangText="eventUris"><vspace />A read only array of JSON String values
+        which are the URIs of events issued in this Stream. This attribute
+        is asserted by the Control Plane provider after
+        processing an Event Stream creation request. See 
+        <spanx style="verb">eventUris_req</spanx>.</t>
+        
+        <t hangText="eventUris_req"><vspace/>An array of JSON String values
+        which are the URIs of events requested by the Event Receiver for
+        the Stream. This attribute is modifiable. An Event Stream 
+        provider MAY use this attribute to request requested Event URIs
+        over time that may not be initially offered.</t>
+        
+        <t hangText="eventUris_avail"><vspace/>A read only array of 
+        JSON String values which are the URIs of events that the Event
+        Transmitter is able to support. This attribute MAY be used by
+        Control Plane clients to discover new events that may become
+        available over time.</t>
         
         <!-- Not really needed
         <t hangText="feedUri"><vspace />A JSON String value containing the URI
@@ -402,7 +402,7 @@
       attributes by adding additional schema values as per <xref target="RFC7644" />.
       </t>
       
-      <figure anchor="getRequest" title="Example SCIM EventStream HTTP GET Request">
+      <figure anchor="getRequest" title="Example EventStream HTTP GET Request">
         <preamble>The example below retrieves a specific <spanx style="verb">EventStream</spanx> resource whose 
         <spanx style="verb">id</spanx> is <spanx style="verb">548b7c3f77c8bab33a4fef40</spanx>.</preamble>
         <artwork>GET /EventStreams/767aad7853d240debc8e3c962051c1c0
@@ -422,9 +422,12 @@ Location:
 {
   "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
   "id":"767aad7853d240debc8e3c962051c1c0",
-  "feedName":"OIDCLogoutFeed",
-  "feedUri":
-    "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+  "eventUris_req":[
+    "http://schemas.openid.net/event/backchannel-logout"
+  ],
+  "eventUris":[
+    "http://schemas.openid.net/event/backchannel-logout"
+  ],
   "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
   "deliveryUri":"https://notify.examplerp.com/Events",
   "aud":"https://sets.myexamplerp.com",
@@ -491,8 +494,15 @@ Location:
     "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
     "id":"767aad7853d240debc8e3c962051c1c0",
     "feedName":"OIDCLogoutFeed",
-    "feedUri":
-      "https://example.com/v2/Feeds/88bc00de776d49d5b535ede882d98f74",
+    "eventUris_req":[
+      "http://schemas.openid.net/event/backchannel-logout"
+    ],
+    "eventUris":[
+      "http://schemas.openid.net/event/backchannel-logout"
+    ],
+    "eventUris_avail":[
+      "http://schemas.openid.net/event/backchannel-logout"
+    ],
     "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
     "deliveryUri":"https://notify.examplerp.com/Events",
     "aud":"https://sets.myexamplerp.com",
@@ -545,7 +555,7 @@ Location:
       actions:<list style="hanging">
       
         <t hangText="Create"><vspace />A Event Receiver or an administrator creates
-        a new Event Stream using SCIM as described in <xref target="createSub"></xref>.
+        a new Event Stream as described in <xref target="createSub"></xref>.
         The initial state is <spanx style="verb">verify</spanx>.</t>
         
        
@@ -660,6 +670,9 @@ Authorization: Bearer h480djs93hd8
 {
   "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
   "feedName":"OIDCLogoutFeed",
+  "eventUris_req":[
+    "http://schemas.openid.net/event/backchannel-logout"
+  ],
   "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
   "deliveryUri":"https://notify.examplerp.com/Events",
   "aud":"https://sets.myexamplerp.com",
@@ -685,6 +698,15 @@ Location:
   "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
   "id":"767aad7853d240debc8e3c962051c1c0",
   "feedName":"OIDCLogoutFeed",
+  "eventUris_req":[
+    "http://schemas.openid.net/event/backchannel-logout"
+  ],
+  "eventUris":[
+    "http://schemas.openid.net/event/backchannel-logout"
+  ],
+  "eventUris_avail":[
+    "http://schemas.openid.net/event/backchannel-logout"
+  ],
   "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
   "deliveryUri":"https://notify.examplerp.com/Events",
   "aud":"https://sets.myexamplerp.com",
@@ -731,7 +753,10 @@ Location:
           <preamble>In the following non-normative example, a request to 
           replace the existing EventStream <spanx style="verb">EventStream</spanx> is 
           submitted. In this example, the change shown is the status
-          is now set to <spanx style="verb">off</spanx>.</preamble>
+          is now set to <spanx style="verb">off</spanx>. Note that the client
+          does not have to remove read-only attributes such as <spanx style="verb">eventUris</spanx>
+          and <spanx style="verb">eventUris_avail</spanx> as these values
+          are ignored as per <xref target="RFC7644">Section 3.5.1</xref>.</preamble>
    <artwork>PUT /EventStreams/767aad7853d240debc8e3c962051c1c0
 Host: example.com
 Accept: application/scim+json
@@ -742,6 +767,15 @@ Authorization: Bearer h480djs93hd8
   "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
   "id":"767aad7853d240debc8e3c962051c1c0",
   "feedName":"OIDCLogoutFeed",
+  "eventUris_req":[
+    "http://schemas.openid.net/event/backchannel-logout"
+  ],
+  "eventUris":[
+    "http://schemas.openid.net/event/backchannel-logout"
+  ],
+  "eventUris_avail":[
+    "http://schemas.openid.net/event/backchannel-logout"
+  ],
   "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
   "deliveryUri":"https://notify.examplerp.com/Events",
   "aud":"https://sets.myexamplerp.com",
@@ -770,6 +804,15 @@ Location:
   "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
   "id":"767aad7853d240debc8e3c962051c1c0",
   "feedName":"OIDCLogoutFeed",
+  "eventUris_req":[
+    "http://schemas.openid.net/event/backchannel-logout"
+  ],
+  "eventUris":[
+    "http://schemas.openid.net/event/backchannel-logout"
+  ],
+  "eventUris_avail":[
+    "http://schemas.openid.net/event/backchannel-logout"
+  ],
   "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
   "deliveryUri":"https://notify.examplerp.com/Events",
   "aud":"https://sets.myexamplerp.com",
@@ -837,18 +880,21 @@ Authorization: Bearer h480djs93hd8
     "value":"paused"
   }]
 }</artwork>
-<postamble>Upon receiving the request, the Event Transmitter would stop
-sending Events to the Receiver. Note that while the request MAY seem complex
-it avoids the need for the requestor to have all of the current EventStream
-values in order to make a PUT request. In other words, an HTTP PATCH can
-be typically done in a single request response whereas an HTTP POST usually
-is preceded by an HTTP GET.</postamble>
-            </figure>
+       </figure>
+       <t>In the above figure, upon receiving the request, the Event 
+       Transmitter would stop sending Events to the Receiver. Note that 
+       while the request MAY seem complex it avoids the need for the 
+       requestor to have all of the current EventStream values in order 
+       to make a PUT request. In other words, an HTTP PATCH can be 
+       typically done in a single request response whereas an HTTP POST 
+       usually is preceded by an HTTP GET.</t>
             
+       <t>
        <figure anchor="memberPatch" title="Example Changing the Members of EventStream">
         <preamble>In the following non-normative example, the client
         is request the addition and removal of two subjects
-        from an existing EventStream.</preamble>
+        from an existing EventStream. This operation is discussed 
+        further in <xref target="subjMgmtStream"/>.</preamble>
 <artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
 Host: example.com
 Accept: application/scim+json
@@ -871,52 +917,43 @@ Authorization: Bearer h480djs93hd8
     "path":"subjects[value eq \"bob@example.com\"]
   }]
 }</artwork>
-<postamble>In the above request, the remove operation uses a value
+        </figure>
+        In the above request, the remove operation uses a value
 filter which provides a matching expression against one or more
 sub-attributes of a parent attributes (subjects). In this case the 
 composite value of subjects which contains the sub-attribute 
 <spanx style="verb">type</spanx> and <spanx style="verb">value</spanx>
 attribute is removed based on matching the "value" sub-attribute.
 Upon receiving the request, the EventStream subjects attribute would be 
-updated to reflect the changes. </postamble>
-            </figure>
-                    
+updated to reflect the changes.     
+        </t>
         </section>
         
       </section>      
     </section>
-    
-   <section anchor="manageSubjects" title="Managing Stream Subjects">
    
-   <t>This section describes possible methods based on <xref target="RFC7644"/>
-   that the subjects that are part of a stream can be queried and 
-   managed. This section describes a few possible techniques of many
-   that are possible for drafts that profile the Security Event Token
-   specification <xref target="I-D.ietf-secevent-token"/> to handle 
-   subject management. In this section, examples are given using the 
-   <spanx style="verb">subject</spanx> attribute of Event Stream 
-   configuration described in <xref target="subscribeMetadata"/></t>
+   <section anchor="manageSubjects" title="Models for Managing Stream Subjects">
+     
+     <t>The extensibility of SCIM enables many ways to model
+     subjects that are part of any Event Stream. This section
+     explores a few alternatives that profiling specifications could
+     use to manage the contents of an Event Stream. These examples 
+     include managing subjects:<list style="symbols">
+       <t>As an attribute of an Event Stream configuration (see <xref target="subjMgmtStream"/>);</t>
+       <t>As a member of SCIM Group (see <xref target="subjMgmtGroup"/>); and,</t>
+       <t>As a specific Subject resource (see <xref target="subjMgmtResource"/>).</t>
+     </list>
+     </t>
    
-   <t>The following sections assume subject membership within streams 
-   is defined by the <spanx style="verb">subjects</spanx> attribute of 
-   the Event Stream configuration. This is one possible way of many that
-   subjects can be associated with an Event Stream. It is important to 
-   note <xref target="RFC7643"/> enables substantial flexibility to 
-   model membership in a number of other ways through extensions to 
-   existing objects (e.g. <spanx style="verb">Users</spanx>) or through 
-   the creation of new resource types (see <xref target="RFC7643"/>).
-   Specifications that are profiling the use of Security Events MAY 
-   represent Stream contents in other ways as per the extension 
-   mechanisms defined in <xref target="RFC7643"/> and <xref target="RFC7644"/>.</t>
- 
-   
-   <section anchor="subjectConsiderations" title="Considerations for Managing Subjects">
-      <t>It is expected, but not required, that most deployments
-      will not allow the subjects that are part of an Event Stream
-      to be enumerated. In practice, the Event Stream configuration 
-      attribute <spanx style="verb">subject</spanx> 
+   <section anchor="subjectConsiderations" title="General Considerations for Managing Subjects">
+      
+      <t>As a privacy and scalability consideration, profiling specifications SHOULD
+      consider that most deployments SHOULD not allow the subjects that 
+      are part of an Event Stream to be enumerated in a single request. 
+      For example, in <xref target="subjMgmtStream"/>, 
+      the Event Stream configuration attribute <spanx style="verb">subjects</spanx> 
       is typically not returned when querying Event Stream configurations
-      (see <xref target="getStatus"/>). This is because the number of 
+      (see <xref target="getStatus" />). This is because the number of 
       values may be too large (e.g. great than 100k values or even 
       in the billions or more). Further, depending on the Security
       Event types being exchanged, Event Receivers MAY confirm that a 
@@ -935,21 +972,33 @@ updated to reflect the changes. </postamble>
       
    </section>
    
+   <section anchor="subjMgmtStream" title="Subjects as Part of Stream Configuration">
+   <t>In this section, examples are given using the 
+   <spanx style="verb">subjects</spanx> attribute of Event Stream 
+   configuration described in <xref target="subscribeMetadata"/></t>
    
+   <t>The following sections assume subject membership within streams 
+   is defined by the <spanx style="verb">subjects</spanx> attribute of 
+   the Event Stream configuration. As defined, subjects can support a
+   number of value types including: OIDC Connect Subjects, SCIM Users
+   and Groups, e-mail and telephone number identifiers, and URI referencable
+   entities. </t>
+   
+ 
    <section anchor="checkSubject" title="Checking Subject Membership">
 
       <section title="Email Based Subjects">
         <t>In this section, values have been added to the 
-        <spanx style="verb">subject</spanx> attribute are email addresses
+        <spanx style="verb">subjects</spanx> attribute are email addresses
         which clients to the Control Plane would like to verify are 
-        present. The values <spanx style="verb">subject</spanx> have sub-attribute
+        present. The values <spanx style="verb">subjects</spanx> have sub-attribute
         <spanx style="verb">type</spanx> set to <spanx style="verb">EMAIL</spanx>
         and the sub-attribute <spanx style="verb">value</spanx> contains
         an email address.</t>
 
-        <figure anchor="verifySubject" title="Determining if a Subject is in an Event Stream Example">
+        <figure anchor="verifySubject" title="Determining if an EMail Subject is in an Event Stream">
         <preamble>In the following non-normative example, a client queries
-        the Control Plane to see if Alice@example.com is part of any
+        the Control Plane to see if <spanx style="verb">Alice@example.com</spanx> is part of any
         defined stream configuration. In the request, only the attribute 
         <spanx style="verb">id</spanx> is requested as the client
         does not need to see the rest of the configuration. Note, for
@@ -962,7 +1011,7 @@ Authorization: Bearer h480djs93hd8</artwork>
   
         <figure anchor="verifyNoMatch" title="Example Response With No Subject Match">
         <preamble>In this non-normative response, the subject is confirmed
-        as not part of any Event Streams associated with the requestor. In
+        as not part of any Event Streams associated with the requester. In
         this case an empty list is returned with no values and <spanx style="verb">totalResults</spanx> is 
         <spanx style="verb">0</spanx>.</preamble>
         <artwork>HTTP/1.1 200 OK
@@ -989,6 +1038,7 @@ Content-Type: application/scim+json
   "Resources":[
     {
       "id":"767aad7853d240debc8e3c962051c1c0",
+      ...other meta attributes...
     }
   ]
 }
@@ -999,9 +1049,9 @@ Content-Type: application/scim+json
       
       <section title="OIDC Based Subjects">
         <t>In this section, values have been added to the 
-        <spanx style="verb">subject</spanx> attribute are OIDC users
+        <spanx style="verb">subjects</spanx> attribute are OIDC users
         which clients to the Control Plane would like to verify are 
-        present. The values <spanx style="verb">subject</spanx> have sub-attribute
+        present. The values <spanx style="verb">subjects</spanx> have sub-attribute
         <spanx style="verb">type</spanx> set to <spanx style="verb">OIDC</spanx>
         and the sub-attribute <spanx style="verb">value</spanx> contains
         an OIDC <spanx style="verb">sub</spanx> value and the 
@@ -1011,7 +1061,7 @@ Content-Type: application/scim+json
         <spanx style="verb">op.example.com</spanx> and the 
         <spanx style="verb">sub</spanx> is <spanx style="verb">123456</spanx>.</t>
 
-        <figure anchor="verifyOidcSubject" title="Determining if an OIDC Subject is in an Event Stream Example">
+        <figure anchor="verifyOidcSubject" title="Determining if an OIDC Subject is in an Event Stream">
         <preamble>In the following non-normative example, a client queries
         the Control Plane to see if the above OIDC user is part of any
         defined stream configuration. In the request, only the attribute 
@@ -1027,7 +1077,7 @@ Authorization: Bearer h480djs93hd8</artwork>
   
         <t>In the above request note that <spanx style="verb">type</spanx>
         and <spanx style="verb">value</spanx> are enclosed within
-        square brackets. This is done, per <xref target="RFC7644"/> to
+        square brackets. This is done, per <xref target="RFC7644" /> to
         ensure the matching condition within "[" and "]" is matched
         against the same value record.  If the filter was expressed as
 <spanx style="verb">(subjects.value eq "123456" and subjects.iss eq "op.example.com")</spanx>
@@ -1036,19 +1086,19 @@ Authorization: Bearer h480djs93hd8</artwork>
         may have <spanx style="verb">123456</spanx> while another has 
         <spanx style="verb">op.example.com</spanx>.</t>
 
-        <t>For examples of responses to <xref target="verifyOidcSubject"/>,
-        see <xref target="verifyNoMatch"/> and <xref target="verifyMatch"/></t>
+        <t>For examples of responses to <xref target="verifyOidcSubject" />,
+        see <xref target="verifyNoMatch" /> and <xref target="verifyMatch" /></t>
         
       </section>
   </section>
   
-    <section title="Adding and Removing Subjects to a Stream">
+  <section title="Adding and Removing Subjects to a Stream">
       <t>Adding and removing subjects to an Event Stream is performed
-      using the HTTP PATCH method described in <xref target="updatePatch"/>.
+      using the HTTP PATCH method described in <xref target="updatePatch" />.
       The following provides examples of adding and removing subjects
       based on EMAIL and OIDC subects. </t>    
     
-      <figure anchor="addEmailSubject" title="Example Adding an EMAIL Subject to a Stream">
+      <figure anchor="addEmailSubject" title="Adding an EMAIL Subject to a Stream">
       <preamble>In the following non-normative example, the client
       is request the addition of a subject identified by an EMAIL address
       to an existing EventStream. The composite value of subjects
@@ -1072,10 +1122,9 @@ Authorization: Bearer h480djs93hd8
     }
   }]
 }</artwork>
-<postamble> </postamble>
       </figure>
       
-      <figure anchor="addOidcSubject" title="Example Adding an OIDC Provider Subject to a Stream">
+      <figure anchor="addOidcSubject" title="Adding an OIDC Provider Subject to a Stream">
       <preamble>In the following non-normative example, the client
       is request the addition of a subject 
       to an existing EventStream. The composite value of subjects
@@ -1101,10 +1150,9 @@ Authorization: Bearer h480djs93hd8
     }
   }]
 }</artwork>
-<postamble> </postamble>
       </figure>
     
-      <figure anchor="removeOidcSubjects" title="Example Removing an OIDC Provider Subject from a Stream">
+      <figure anchor="removeOidcSubjects" title="Removing an OIDC Connect Subject from a Stream">
       <preamble>In the following non-normative example, the client
       is request the removal of a subject selected by using a 
       filter from the <spanx style="verb">subjects</spanx> attribute.</preamble>
@@ -1122,10 +1170,356 @@ Authorization: Bearer h480djs93hd8
     "path":"subjects[value eq \"123456\" and iss eq \"op.example.com\"]",
   }]
 }</artwork>
-<postamble> </postamble>
       </figure>
     
-    </section>    
+    </section>
+  </section>
+   
+   <section anchor="subjMgmtGroup" title="Subjects as Members of a Group">
+   <t>SCIM defines a resource type called a 
+   <spanx style="verb">Group</spanx> which can be used as a container
+   to manage one or more objects in a collection (See Section 4.2 of <xref target="RFC7643"/>).
+   Groups work in similar fashion to the operations described in 
+   <xref target="subjMgmtStream"/> except instead of operations against
+   the '<spanx style="verb">subjects</spanx>, the <spanx style="verb">members</spanx>
+   attribute is used. Typically the value of the members attribute is 
+   the <spanx style="verb">id</spanx> of a local User or Group.
+   </t>
+   <t>In order to use this method, the Stream configuration indicates
+   the SCIM Group being used by adding Group as a member of the <spanx style="verb">subjects</spanx>
+   attribute of the Stream configuration and indicating a 
+   <spanx style="verb">type</spanx> of <spanx style="verb">Group</spanx>.</t>
+   
+   <figure anchor="streamGroupConfig" title="Event Stream Configured to Use SCIM Group">
+  <preamble>The following is an example Stream configuration that has
+  a Group as a member of the subjects. In the example below, 
+  <spanx style="verb">e18c2dfb5d588</spanx> is the identifier of a SCIM
+  Group containing a list of member resources.</preamble>
+<artwork>
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:EventStream"],
+  "id":"767aad7853d240debc8e3c962051c1c0",
+  "feedName":"OIDCLogoutFeed",
+  "eventUris":[
+    "http://schemas.openid.net/event/backchannel-logout"
+  ],
+  "methodUri":"urn:ietf:params:set:method:HTTP:webCallback",
+  "deliveryUri":"https://notify.examplerp.com/Events",
+  "aud":"https://sets.myexamplerp.com",
+  "status":"off",
+  "maxDeliveryTime":3600,
+  "minDeliveryInterval":0,
+  "iss":"oidc.example.com"
+  "subjects":[
+    {
+      "type":"Group"
+      "value":"e18c2dfb5d588"
+    }
+  ]
+  "iss_jwksUri":"https://example.com/keys/oidc-example-com.jwks"
+  "description":"Logout events from oidc.example.com",
+  "meta":{
+     ... SCIM meta attributes ...
+  }
+}</artwork>
+        </figure>
+        <t></t>
+   
+   
+   <section anchor="checkMember" title="Checking Membership">
+
+      
+        <t>In this section, values have been added to the 
+        <spanx style="verb">members</spanx> attribute are 
+        <spanx style="verb">id</spanx> values of known SCIM resources. 
+        These values can be queried against the Group to see if the
+        <spanx style="verb">id</spanx> is a member.</t>
+   
+        <t>If the requester does not know the <spanx style="verb">id</spanx>
+        of the resource for which they would like to check membership, 
+        a query can be performed as described in <xref target="RFC7644">Section 3.4</xref>.
+        </t>
+
+        <figure anchor="verifyMember" title="Determining if a SCIM Resource is in a Event Stream Example">
+        <preamble>In the following non-normative example, a client queries
+        the Control Plane to see if a User with <spanx style="verb">id</spanx>
+        value of <spanx style="verb">413861904646</spanx>
+        is a part of any Group. .</preamble> 
+  <artwork>GET /Groups?filter=members.value eq "413861904646"&amp;attributes=id
+Host: scim.example.com
+Accept: application/scim+json
+Authorization: Bearer h480djs93hd8</artwork>
+        </figure>
+  
+        <figure anchor="verifyMmbrNoMatch" title="Example Response With No Match">
+        <preamble>In this non-normative response, the <spanx style="verb">id</spanx> is confirmed
+        as not part of the Group queried by the requester. In
+        this case an empty list is returned with no values and <spanx style="verb">totalResults</spanx> is 
+        <spanx style="verb">0</spanx>.</preamble>
+        <artwork>HTTP/1.1 200 OK
+Content-Type: application/scim+json
+  
+{
+  "schemas":["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+  "totalResults":0,
+  "Resources":[]
+}</artwork>
+        </figure>   
+        
+        <figure anchor="verifyMemberMatch" title="Example Response With Single Match">
+        <preamble>In the response below, a match for resource with an
+        <spanx style="verb">id</spanx> value of <spanx style="verb">413861904646</spanx> 
+        is found and the <spanx style="verb">id</spanx> of any matched 
+        Groups that contain the <spanx style="verb">id</spanx> is returned.
+        In this case a <spanx style="verb">Group</spanx> with an <spanx style="verb">id</spanx>
+        value of <spanx>e18c2dfb5d588</spanx> is returned.</preamble>
+        <artwork>HTTP/1.1 200 OK
+ Content-Type: application/scim+json
+
+ {
+   "schemas":["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+   "totalResults":1,
+     "Resources":[
+       {
+         "id":"e18c2dfb5d588",
+       }
+     ]
+   }</artwork>
+        </figure>
+  </section>
+  
+  <section title="Adding and Removing SCIM Users to a Group">
+      <t>Adding and removing Users to an Event Stream Group is performed
+      using the HTTP PATCH method described in <xref target="updatePatch" />.
+      The following provides examples of adding and removing <spanx style="verb">Users</spanx>
+      to a <spanx style="verb">Group</spanx> </t>    
+    
+      <figure anchor="addMemberResource" title="Example Adding a User to a Group">
+      <preamble>In the following non-normative example, the client
+      requests the addition of a User identified by an <spanx style="verb">id</spanx>
+      to an existing <spanx style="verb">Group</spanx> which is used by
+      an Event Stream to denote member subjects. </preamble>
+<artwork>PATCH /Groups/e18c2dfb5d588
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":
+    ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+  "Operations": [{
+    "op":"add",
+    "path":"members",
+    "value":{
+      "type":"User",
+      "value":"8c16-01f8e146b87a"
+    }
+  }]
+}</artwork>
+      </figure>
+      
+
+    
+      <figure anchor="removeMemberOidcSubjects" title="Example Removing a User from a Group">
+      <preamble>In the following non-normative example, the client
+      requests the removal of a User identified by <spanx style="verb">id</spanx> 
+      with value <spanx style="verb">8c16-01f8e146b87a</spanx>. The item
+      to be removed is selected by using a 
+      filter against the <spanx style="verb">members</spanx> attribute.</preamble>
+<artwork>PATCH /Groups/e18c2dfb5d588
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8
+
+{
+  "schemas":
+    ["urn:ietf:params:scim:api:messages:2.0:PatchOp"],
+  "Operations": [{
+    "op":"remove",
+    "path":"members.value eq \"8c16-01f8e146b87a\"",
+  }]
+}</artwork>
+      </figure>
+    
+    </section>   
+   </section>
+   
+   <section anchor="subjMgmtResource" title="Subjects as a Resource (aka POST Profile)">
+     <t>This section demonstrates how to model subject participation in 
+     an Event Stream by treating subjects as a resource (a <spanx style="verb">Subject</spanx>).
+     In this model, a subject MAY be added and removed from an Event 
+     Stream by through HTTP POST and DELETE methods.
+     </t>
+    
+     <t>In this model, a new SCIM resource type is defined which 
+     describes the <spanx style="verb">Subject</spanx> resource and 
+     its associated schema definition URI (which can be used to 
+     discover the attributes of a <spanx style="verb">Subject</spanx>).</t>
+     <figure anchor="subjectResourceType" title="Example ResourceType Definition for Subject">
+     <preamble>The following is a non-normative example of a 
+     Resource Type definition that would be configured in a SCIM endpoint.
+     It defines the resource endpoint as well as a URI for the schema.
+     This configuration can be discovered by querying a SCIM service 
+     provider's <spanx style="verb">/ResourceTypes</spanx> endpoint (see
+     <xref target="RFC7644">Section 4</xref>).</preamble>
+     <artwork>{
+  "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
+  "id": "Subject",
+  "name": "Subject",
+  "endpoint": "/Subjects",
+  "description": "Endpoint managing SECEVENT Subjects.",
+  "schema": "urn:ietf:params:scim:schemas:event:2.0:Subject",
+  "schemaExtensions": []
+}</artwork>
+     </figure>
+     
+     <figure anchor="subjectSchema" title="Example Schema for Subject Resource">
+     <preamble>The following is an example schema for a Subject. This 
+     configuration can be returned from a SCIM Service Provider using the
+     <spanx style="verb">/Schemas</spanx> endpoint (see
+     <xref target="RFC7644">Section 4</xref>).</preamble>
+     <artwork>{
+  "id" : "urn:ietf:params:scim:schemas:event:2.0:Subject",
+  "name" : "Subject",
+  "description" : "Subject stream configuration",
+  "attributes" : [
+    {
+      "name" : "email",
+      "type" : "string",
+      "multiValued" : false,
+      "description" : "The email of the subject being added to Event
+      Streams. The value SHOULD be specfied according to [RFC5321].",
+      "required" : true,
+      "caseExact" : false,
+      "mutability" : "readWrite",
+      "returned" : "default",
+      "uniqueness" : "none"
+    },
+    {
+      "name" : "displayName",
+      "type" : "string",
+      "multiValued" : false,
+      "description" : "A simple representation of a Subject's name
+      that can be used for display purposes.",
+      "required" : false,
+      "caseExact" : false,
+      "mutability" : "readWrite",
+      "returned" : "default",
+      "uniqueness" : "none"
+    },     
+    {
+      "name" : "streamId",
+      "type" : "string",
+      "multiValued" : fase,
+      "description" : "An Event Stream a Subject is part
+      of as identified by EventStream id",
+      "required" : false,
+      "mutability" : "readWrite",
+      "returned" : "default"
+    }
+  ]
+}</artwork>
+     </figure>
+     
+     <section title="Adding A Subject">
+       <t>To add a Subject to a Stream, an HTTP POST is used to create a new
+       Subject resource.</t>
+       
+       <figure anchor="addSubject" title="Adding a Subject to a Stream Using POST">
+       <preamble>The following non-normative example demonstrates adding
+       a subject identified by <spanx style="verb">example.user@example.com</spanx>
+       to an <spanx style="verb">EventStream</spanx> identified by 
+       <spanx style="verb">id</spanx> with value <spanx style="verb">767aad7853d240debc8e3c962051c1c0</spanx>.</preamble>
+       <artwork>POST /Subjects/ HTTP/1.1
+Host: transmitter.example.com
+Authorization: Bearer eyJ0b2tlbiI6ImV4YW1wbGUifQo=
+{
+ "email": "example.user@example.com"
+ "streamIds": "767aad7853d240debc8e3c962051c1c0",
+ "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subject"]
+}</artwork>
+       </figure>
+       
+       <figure anchor="addSubjectResponse" title="Response to Adding a Subject to a Stream Using POST">
+       <preamble>In response the server indicates the record is created
+       and returns a permanent URI of the entry. This URI can later
+       be used to remove the subject from the identified EventStream.</preamble>
+       <artwork>HTTP/1.1 201 Created
+Content-Type: application/scim+json
+Location:
+    https://example.com/v2/Subjects/e3c962051c1c0</artwork>
+       </figure>
+     </section>
+     
+     <section anchor="querySubjects" title="Querying for Subject in Event Streams">
+       <t>To query Subjects, SCIM filters can be used to return matching
+       resources as per <xref target="RFC7643">Section 3.4.2</xref></t>
+       
+       <figure anchor="querySubjectStream" title="Querying if a Subject is in an EventStream">
+       <preamble>Assuming the <spanx style="verb">id</spanx> of the EventStream is known,
+       a query can be made against that identifier and the subjects
+       identifier - in this case, an email address.</preamble>
+       <artwork>GET /Subjects?filter=(streamId eq "e3c962051c1c0" and 
+   email eq "example.user@example.com")</artwork>
+       </figure>
+       
+       <figure anchor="querySubjectStreamResponse" title="Response to Query">
+       <preamble>Assuming the <spanx style="verb">id</spanx> of the EventStream is known,
+       a query can be made against that identifier and the subjects
+       identifier - in this case, an email address.</preamble>
+       <artwork>HTTP/1.1 200 OK
+ Content-Type: application/scim+json
+
+{
+   "schemas":["urn:ietf:params:scim:api:messages:2.0:ListResponse"],
+   "totalResults":1,
+     "Resources":[
+       {
+         "id":"e3c962051c1c0",
+         "email": "example.user@example.com"
+         "streamIds": "e3c962051c1c0",
+         "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subject"]
+         ...additional meta data...
+       }     
+    ]
+}</artwork>
+       </figure>
+       <t></t>
+       <figure anchor="queryAllStreams" title="Querying All Event Streams for Subject">
+       <preamble>To see if an email address is present in multiple EventStreams,
+       the following query MAY be used.</preamble>
+       <artwork>GET /Subjects?filter=(email eq "example.user@example.com")</artwork>
+       </figure>
+       <t>Assuming only one match is found, than a response similar
+       to <xref target="querySubjectStreamResponse"/> is returned. If
+       not matches occur, a response is returned with <spanx style="verb">totalResults</spanx>
+       equal to 0. If more than one match is returned, the additional
+       matches are returned in the <spanx style="verb">Resources</spanx>
+       array.</t>
+     </section>
+   
+     <section title="Removing a Subject from an Event Stream">
+       <t>Assuming the <spanx style="verb">id</spanx> of the Subject
+       resource is known, HTTP DELETE MAY be used. If it is not known,
+       the <spanx style="verb">id</spanx> MAY be queried as per <xref target="querySubjects"/>.</t>
+       
+       <figure anchor="deleteSubject" title="Removing a Subject from an Event Stream">
+       <preamble>To remove a Subject resource simply perform an HTTP DELETE
+       using the resource's URI (see <xref target="RFC7644">Section 3.6</xref>).</preamble>
+       <artwork>DELETE /Subjects/e3c962051c1c0</artwork></figure>
+     </section>
+   </section>
+   
+ 
+   
+   
+   
+   
+   
+  
+        
   
   
   </section>
@@ -1399,14 +1793,14 @@ Authorization: Bearer h480djs93hd8
   "schema": "urn:ietf:params:scim:schemas:event:2.0:EventStream",
   "schemaExtensions": []
 }</artwork>
-<postamble>The resource type above is discoverable in the 
+        </figure>
+        The resource type above is discoverable in the 
 <spanx style="verb">/ResourceTypes</spanx> endpoint of a SCIM service
 provider and informs SCIM clients about
 the endpoint location of EventStream resources and the SCIM schema used
 to define the resource.  The corresponding schema for the EventStream
 resource MAY be retrieved from the SCIM <spanx style="verb">/Schemas</spanx> 
-endpoint (see <xref target="RFC7644">Section 3.2</xref>).</postamble>
-        </figure>
+endpoint (see <xref target="RFC7644">Section 3.2</xref>).
         </t>
        
         <t>The attributes for the EventStream resource type are defined in
@@ -1419,14 +1813,38 @@ endpoint (see <xref target="RFC7644">Section 3.2</xref>).</postamble>
     "description" : "Event Stream Configuration",
     "attributes" : [
       {
-        "name" : "feedUri",
+        "name" : "eventUris",
         "type" : "string",
-        "multiValued" : false,
-        "description" : "An optional String value containing a logical
-        unique URI for the feed assigned by the provider.",
+        "multiValued" : true,
+        "description" : "An array of String value containing a logical
+        unique URI for Events that may be issued in the Stream",
         "required" : false,
         "caseExact" : false,
-        "mutability" : "immutable",
+        "mutability" : "readOnly",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+      {
+        "name" : "eventUris_req",
+        "type" : "string",
+        "multiValued" : true,
+        "description" : "An array of String value containing a logical
+        unique URI for Events that an Event Receiver is requesting.",
+        "required" : true,
+        "caseExact" : false,
+        "mutability" : "readWrite",
+        "returned" : "default",
+        "uniqueness" : "none"
+      },
+      {
+        "name" : "eventUris_avail",
+        "type" : "string",
+        "multiValued" : true,
+        "description" : "An array of String value containing a logical
+        unique URI for Events that are supported by the Transmitter",
+        "required" : false,
+        "caseExact" : false,
+        "mutability" : "readOnly",
         "returned" : "default",
         "uniqueness" : "none"
       },
@@ -1685,6 +2103,11 @@ endpoint (see <xref target="RFC7644">Section 3.2</xref>).</postamble>
       <section title="Acknowledgments">
       <t>The editors would like to thanks the members of the SCIM WG which 
       began discussions of provisioning events starting with: draft-hunt-scim-notify-00 in 2015.</t>
+      
+      <t>This draft is a re-work of material from Sections 2 and 4 of
+      draft-hunt-secevent-distribution-01. The editor would like to thank
+      Marius Scurtescu, Tony Nadalin, and Morteza Ansari for their 
+      contributions in previous drafts.</t>
       
       <t>The editor would like to thank the participants in the the SECEVENTS
       working group for their support of this specification.</t>
