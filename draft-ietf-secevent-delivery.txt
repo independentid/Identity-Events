@@ -5,20 +5,20 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                            M. Scurtescu
-Expires: January 29, 2018                                         Google
+Expires: May 2, 2018                                              Google
                                                                M. Ansari
                                                                    Cisco
                                                               A. Nadalin
                                                                Microsoft
                                                               A. Backman
                                                                   Amazon
-                                                           July 28, 2017
+                                                        October 29, 2017
 
 
                      SET Token Delivery Using HTTP
                     draft-ietf-secevent-delivery-00
 
-Abstract 
+Abstract
 
    This specification defines how a series of security event tokens
    (SETs) may be delivered to a previously registered receiver using
@@ -34,14 +34,14 @@ Status of This Memo
    Internet-Drafts are working documents of the Internet Engineering
    Task Force (IETF).  Note that other groups may also distribute
    working documents as Internet-Drafts.  The list of current Internet-
-   Drafts is at http://datatracker.ietf.org/drafts/current/.
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
 
    Internet-Drafts are draft documents valid for a maximum of six months
    and may be updated, replaced, or obsoleted by other documents at any
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on January 29, 2018.
+   This Internet-Draft will expire on May 2, 2018.
 
 Copyright Notice
 
@@ -53,12 +53,12 @@ Copyright Notice
 
 
 
-Hunt, et al.            Expires January 29, 2018                [Page 1]
+Hunt, et al.               Expires May 2, 2018                  [Page 1]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
-   (http://trustee.ietf.org/license-info) in effect on the date of
+   (https://trustee.ietf.org/license-info) in effect on the date of
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
    to this document.  Code Components extracted from this document must
@@ -80,24 +80,23 @@ Table of Contents
        2.3.3.  Poll Request  . . . . . . . . . . . . . . . . . . . .  10
        2.3.4.  Poll Response . . . . . . . . . . . . . . . . . . . .  14
      2.4.  Error Response Handling . . . . . . . . . . . . . . . . .  16
-     2.5.  Event Stream Verification . . . . . . . . . . . . . . . .  17
-   3.  Authentication and Authorization  . . . . . . . . . . . . . .  19
-     3.1.  Use of Tokens as Authorizations . . . . . . . . . . . . .  20
-   4.  Security Considerations . . . . . . . . . . . . . . . . . . .  20
-     4.1.  Authentication Using Signed SETs  . . . . . . . . . . . .  20
-     4.2.  HTTP Considerations . . . . . . . . . . . . . . . . . . .  20
-     4.3.  TLS Support Considerations  . . . . . . . . . . . . . . .  21
-     4.4.  Authorization Token Considerations  . . . . . . . . . . .  21
-       4.4.1.  Bearer Token Considerations . . . . . . . . . . . . .  21
-   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  22
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  22
-   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  22
-     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  22
-     7.2.  Informative References  . . . . . . . . . . . . . . . . .  23
-   Appendix A.  Other Streaming Specifications . . . . . . . . . . .  25
-   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  26
-   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  26
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  27
+   3.  Authentication and Authorization  . . . . . . . . . . . . . .  17
+     3.1.  Use of Tokens as Authorizations . . . . . . . . . . . . .  18
+   4.  Security Considerations . . . . . . . . . . . . . . . . . . .  18
+     4.1.  Authentication Using Signed SETs  . . . . . . . . . . . .  18
+     4.2.  HTTP Considerations . . . . . . . . . . . . . . . . . . .  19
+     4.3.  TLS Support Considerations  . . . . . . . . . . . . . . .  19
+     4.4.  Authorization Token Considerations  . . . . . . . . . . .  19
+       4.4.1.  Bearer Token Considerations . . . . . . . . . . . . .  19
+   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  20
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  20
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  20
+     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  20
+     7.2.  Informative References  . . . . . . . . . . . . . . . . .  22
+   Appendix A.  Other Streaming Specifications . . . . . . . . . . .  23
+   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  24
+   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  24
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  25
 
 1.  Introduction and Overview
 
@@ -109,9 +108,10 @@ Table of Contents
 
 
 
-Hunt, et al.            Expires January 29, 2018                [Page 2]
+
+Hunt, et al.               Expires May 2, 2018                  [Page 2]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
    This specification defines to methods of SET delivery in what is
@@ -165,9 +165,9 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-Hunt, et al.            Expires January 29, 2018                [Page 3]
+Hunt, et al.               Expires May 2, 2018                  [Page 3]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
    Relying Party
@@ -221,9 +221,9 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-Hunt, et al.            Expires January 29, 2018                [Page 4]
+Hunt, et al.               Expires May 2, 2018                  [Page 4]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
    Event
@@ -277,9 +277,9 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-Hunt, et al.            Expires January 29, 2018                [Page 5]
+Hunt, et al.               Expires May 2, 2018                  [Page 5]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
       [I-D.ietf-secevent-token].  Upon receipt, the Event Receiver
@@ -333,9 +333,9 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-Hunt, et al.            Expires January 29, 2018                [Page 6]
+Hunt, et al.               Expires May 2, 2018                  [Page 6]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
    The HTTP Content-Type (see Section 3.1.1.5 [RFC7231]) for the HTTP
@@ -389,9 +389,9 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-Hunt, et al.            Expires January 29, 2018                [Page 7]
+Hunt, et al.               Expires May 2, 2018                  [Page 7]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
    The following is a non-normative example of a successful receipt of a
@@ -445,9 +445,9 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-Hunt, et al.            Expires January 29, 2018                [Page 8]
+Hunt, et al.               Expires May 2, 2018                  [Page 8]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
    o  The Event Receiver makes an request for available SETs using an
@@ -501,9 +501,9 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-Hunt, et al.            Expires January 29, 2018                [Page 9]
+Hunt, et al.               Expires May 2, 2018                  [Page 9]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
          results are available (short polling).  The default value is
@@ -557,9 +557,9 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-Hunt, et al.            Expires January 29, 2018               [Page 10]
+Hunt, et al.               Expires May 2, 2018                 [Page 10]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
    that are available.  Because the Event Receiver has no prior SETs to
@@ -613,9 +613,9 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-Hunt, et al.            Expires January 29, 2018               [Page 11]
+Hunt, et al.               Expires May 2, 2018                 [Page 11]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
    The following is a non-normative example poll request to the
@@ -669,9 +669,9 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-Hunt, et al.            Expires January 29, 2018               [Page 12]
+Hunt, et al.               Expires May 2, 2018                 [Page 12]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
    The following is a non-normative example poll with acknowledgement of
@@ -725,9 +725,9 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-Hunt, et al.            Expires January 29, 2018               [Page 13]
+Hunt, et al.               Expires May 2, 2018                 [Page 13]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
    In the above acknowledgement, the Event Receiver has acknowledged
@@ -781,9 +781,9 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-Hunt, et al.            Expires January 29, 2018               [Page 14]
+Hunt, et al.               Expires May 2, 2018                 [Page 14]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
    The following is a non-normative example response to the request
@@ -837,9 +837,9 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-Hunt, et al.            Expires January 29, 2018               [Page 15]
+Hunt, et al.               Expires May 2, 2018                 [Page 15]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
    The following is a non-normative example response to the request
@@ -893,9 +893,9 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-Hunt, et al.            Expires January 29, 2018               [Page 16]
+Hunt, et al.               Expires May 2, 2018                 [Page 16]
 
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
       A value which is a keyword that describes the error (see Table 1).
@@ -908,107 +908,6 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
    is the HTTP response body (see Figure 3).  When included as part of a
    batch of SETs, the above JSON is included as part of the "setErrs"
    attribute as defined in Section 2.3.2 and Section 2.3.3.4
-
-2.5.  Event Stream Verification
-
-   In the verify process, the Event Receiver organization initiates a
-   request to the Event Transmitter to verify the Stream.  The Event
-   Receiver provides a "confirm" value and a "nonce" value that the
-   Event Transmitter is expected to return in the body of a Verify Event
-   so that the Event Receiver can confirm end-to-end configuration of
-   SET delivery including proper signing and encryption depending on the
-   configuration of the Stream.  For example, can the Event Transmitter
-   send a encrypted SET that the Receiver can decode?  The method by
-   which this is initiated is out-of-scope of this specification and MAY
-   be provided by a profiling specification, or by administrative
-   interfaces offered by the Event Transmitter.
-
-   To confirm an Event Stream configuration, the Event Transmitter SHALL
-   send a Verify SET to the Event Receiver using the registered
-   "methodUri" mechanism.
-
-   The Verify SET contains the following attributes:
-
-   events
-      Set with a value of "[[this RFC URL]]#verify".
-
-   iss
-      Set to the URI defined in the Event Stream configuration.
-
-   aud
-      MUST be set to a value that matches the EventStream "aud" value
-      agreed to.
-
-   exp
-      A value that indicates the time the verification request will
-      expire.  Once expired, the server will set the Event Stream state
-      to "fail".
-
-   confirm
-
-
-
-
-Hunt, et al.            Expires January 29, 2018               [Page 17]
-
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
-
-
-      The value given by the Event Receiver to the Event Transmitter to
-      return in the Verify Event.
-
-   nonce
-      A value given by the Event Receiver or otherwise agreed up to
-      return which SHOULD be unique to the Stream and SHOULD change with
-      each test in order to distinguish tests uniquely.
-
-   If the Event Stream is configured to encrypt SETs for the Event
-   Receiver, then the SET SHOULD be encrypted with the provided key.
-   Successful parsing of the message confirms that provides confirmation
-   of correct configuration and possession of keys.
-
-   A non-normative JSON representation of an Event to be sent to a Event
-   Receiver as a Event Stream confirmation.  Note the Event is not yet
-   encoded as a JWT token:
-
-   {
-     "jti": "4d3559ec67504aaba65d40b0363faad8",
-     "events":["[[this RFC URL]]#verify"],
-     "iat": 1458496404,
-     "iss": "https://scim.example.com",
-     "exp": 1458497000,
-     "aud":[
-      "https://event.example.com/Feeds/98d52461fa5bbc879593b7754"
-     ],
-     "[[this RFC URL]]#verify":{
-       "confirm":"ca2179f4-8936-479a-a76d-5486e2baacd7",
-       "nonce":"1668c993e95849869e4b3506cccdf9bf"
-     }
-   }
-
-            Figure 11: Example Verification SET with Challenge
-
-   The above SET is encoded as a JWT and transmitted to the Event
-   Receiver using the configured delivery method.
-
-   Upon receiving a verify SET, the Event Receiver SHALL parse the SET
-   and verify its claims.  In particular, the Event Receiver SHALL
-   confirm that the values for "confirm" and "nonce" are as expected.
-   If they do not match, an error response of "setData" SHOULD be
-   returned (see Section 2.4).
-
-   In many cases, Event Transmitters MAY disable or suspend an Event
-   Stream that fails to successfully verify based on the acknowledgement
-   or lack of acknowledgement by the Event Receiver.
-
-
-
-
-
-Hunt, et al.            Expires January 29, 2018               [Page 18]
-
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
-
 
 3.  Authentication and Authorization
 
@@ -1046,6 +945,15 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
    indicate supported HTTP authentication schemes via the "WWW-
    Authenticate" header.
 
+
+
+
+
+Hunt, et al.               Expires May 2, 2018                 [Page 17]
+
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
+
+
    Because SET Delivery describes a simple function, authorization for
    the ability to pick-up or deliver SETs can be derived by considering
    the identity of the SET issuer, or via an authentication method
@@ -1057,15 +965,6 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
    For illustrative purposes only, SET delivery examples show an OAuth2
    bearer token value [RFC6750] in the authorization header.  This is
    not intended to imply that bearer tokens are preferred.  However, the
-
-
-
-
-Hunt, et al.            Expires January 29, 2018               [Page 19]
-
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
-
-
    use of bearer tokens in the specification does reflect common
    practice.
 
@@ -1103,6 +1002,14 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
    In scenarios where HTTP authorization or TLS mutual authentication
    are not used or are considered weak, JWS signed SETs SHOULD be used
    (see [RFC7515] and Security Considerations
+
+
+
+Hunt, et al.               Expires May 2, 2018                 [Page 18]
+
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
+
+
    [I-D.ietf-secevent-token]).  This enables the Event Receiver to
    validate that the SET issuer is authorized to deliver SETs.
 
@@ -1114,14 +1021,6 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
    As stated in Section 2.7.1 [RFC7230], an HTTP requestor MUST NOT
    generate the "userinfo" (i.e., username and password) component (and
-
-
-
-Hunt, et al.            Expires January 29, 2018               [Page 20]
-
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
-
-
    its "@" delimiter) when an "http" URI reference is generated with a
    message as they are now disallowed in HTTP.
 
@@ -1159,6 +1058,14 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
    Implementations supporting OAuth bearer tokens need to factor in
    security considerations of this authorization method [RFC7521].
+
+
+
+Hunt, et al.               Expires May 2, 2018                 [Page 19]
+
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
+
+
    Since security is only as good as the weakest link, implementers also
    need to consider authentication choices coupled with OAuth bearer
    tokens.  The security considerations of the default authentication
@@ -1168,15 +1075,6 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
    authentication and authorization are out-of-scope for the delivery of
    SET tokens, however this information is provided as a resource to
    implementers.
-
-
-
-
-
-Hunt, et al.            Expires January 29, 2018               [Page 21]
-
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
-
 
 5.  Privacy Considerations
 
@@ -1214,59 +1112,71 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
-              <http://www.rfc-editor.org/info/rfc2119>.
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+
+
+
+Hunt, et al.               Expires May 2, 2018                 [Page 20]
+
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
+
 
    [RFC3986]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
               Resource Identifier (URI): Generic Syntax", STD 66,
               RFC 3986, DOI 10.17487/RFC3986, January 2005,
-              <http://www.rfc-editor.org/info/rfc3986>.
+              <https://www.rfc-editor.org/info/rfc3986>.
 
    [RFC5246]  Dierks, T. and E. Rescorla, "The Transport Layer Security
               (TLS) Protocol Version 1.2", RFC 5246,
               DOI 10.17487/RFC5246, August 2008,
-              <http://www.rfc-editor.org/info/rfc5246>.
-
-
-
-
-Hunt, et al.            Expires January 29, 2018               [Page 22]
-
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
-
+              <https://www.rfc-editor.org/info/rfc5246>.
 
    [RFC5988]  Nottingham, M., "Web Linking", RFC 5988,
               DOI 10.17487/RFC5988, October 2010,
-              <http://www.rfc-editor.org/info/rfc5988>.
+              <https://www.rfc-editor.org/info/rfc5988>.
 
    [RFC6125]  Saint-Andre, P. and J. Hodges, "Representation and
               Verification of Domain-Based Application Service Identity
               within Internet Public Key Infrastructure Using X.509
               (PKIX) Certificates in the Context of Transport Layer
               Security (TLS)", RFC 6125, DOI 10.17487/RFC6125, March
-              2011, <http://www.rfc-editor.org/info/rfc6125>.
+              2011, <https://www.rfc-editor.org/info/rfc6125>.
 
    [RFC7159]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
               Interchange Format", RFC 7159, DOI 10.17487/RFC7159, March
-              2014, <http://www.rfc-editor.org/info/rfc7159>.
+              2014, <https://www.rfc-editor.org/info/rfc7159>.
 
    [RFC7231]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
               Protocol (HTTP/1.1): Semantics and Content", RFC 7231,
               DOI 10.17487/RFC7231, June 2014,
-              <http://www.rfc-editor.org/info/rfc7231>.
+              <https://www.rfc-editor.org/info/rfc7231>.
 
    [RFC7517]  Jones, M., "JSON Web Key (JWK)", RFC 7517,
               DOI 10.17487/RFC7517, May 2015,
-              <http://www.rfc-editor.org/info/rfc7517>.
+              <https://www.rfc-editor.org/info/rfc7517>.
 
    [RFC7519]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
-              <http://www.rfc-editor.org/info/rfc7519>.
+              <https://www.rfc-editor.org/info/rfc7519>.
 
    [RFC7525]  Sheffer, Y., Holz, R., and P. Saint-Andre,
               "Recommendations for Secure Use of Transport Layer
               Security (TLS) and Datagram Transport Layer Security
               (DTLS)", BCP 195, RFC 7525, DOI 10.17487/RFC7525, May
-              2015, <http://www.rfc-editor.org/info/rfc7525>.
+              2015, <https://www.rfc-editor.org/info/rfc7525>.
+
+
+
+
+
+
+
+
+Hunt, et al.               Expires May 2, 2018                 [Page 21]
+
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
+
 
 7.2.  Informative References
 
@@ -1279,72 +1189,64 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
    [RFC3339]  Klyne, G. and C. Newman, "Date and Time on the Internet:
               Timestamps", RFC 3339, DOI 10.17487/RFC3339, July 2002,
-              <http://www.rfc-editor.org/info/rfc3339>.
-
-
-
-
-
-Hunt, et al.            Expires January 29, 2018               [Page 23]
-
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
-
+              <https://www.rfc-editor.org/info/rfc3339>.
 
    [RFC6202]  Loreto, S., Saint-Andre, P., Salsano, S., and G. Wilkins,
               "Known Issues and Best Practices for the Use of Long
               Polling and Streaming in Bidirectional HTTP", RFC 6202,
               DOI 10.17487/RFC6202, April 2011,
-              <http://www.rfc-editor.org/info/rfc6202>.
+              <https://www.rfc-editor.org/info/rfc6202>.
 
    [RFC6749]  Hardt, D., Ed., "The OAuth 2.0 Authorization Framework",
               RFC 6749, DOI 10.17487/RFC6749, October 2012,
-              <http://www.rfc-editor.org/info/rfc6749>.
+              <https://www.rfc-editor.org/info/rfc6749>.
 
    [RFC6750]  Jones, M. and D. Hardt, "The OAuth 2.0 Authorization
               Framework: Bearer Token Usage", RFC 6750,
               DOI 10.17487/RFC6750, October 2012,
-              <http://www.rfc-editor.org/info/rfc6750>.
+              <https://www.rfc-editor.org/info/rfc6750>.
 
    [RFC7230]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
               Protocol (HTTP/1.1): Message Syntax and Routing",
               RFC 7230, DOI 10.17487/RFC7230, June 2014,
-              <http://www.rfc-editor.org/info/rfc7230>.
+              <https://www.rfc-editor.org/info/rfc7230>.
 
    [RFC7235]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
               Protocol (HTTP/1.1): Authentication", RFC 7235,
               DOI 10.17487/RFC7235, June 2014,
-              <http://www.rfc-editor.org/info/rfc7235>.
+              <https://www.rfc-editor.org/info/rfc7235>.
 
    [RFC7515]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
               Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May
-              2015, <http://www.rfc-editor.org/info/rfc7515>.
+              2015, <https://www.rfc-editor.org/info/rfc7515>.
 
    [RFC7516]  Jones, M. and J. Hildebrand, "JSON Web Encryption (JWE)",
               RFC 7516, DOI 10.17487/RFC7516, May 2015,
-              <http://www.rfc-editor.org/info/rfc7516>.
+              <https://www.rfc-editor.org/info/rfc7516>.
+
+
+
+
+
+
+Hunt, et al.               Expires May 2, 2018                 [Page 22]
+
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
+
 
    [RFC7521]  Campbell, B., Mortimore, C., Jones, M., and Y. Goland,
               "Assertion Framework for OAuth 2.0 Client Authentication
               and Authorization Grants", RFC 7521, DOI 10.17487/RFC7521,
-              May 2015, <http://www.rfc-editor.org/info/rfc7521>.
+              May 2015, <https://www.rfc-editor.org/info/rfc7521>.
 
    [RFC7617]  Reschke, J., "The 'Basic' HTTP Authentication Scheme",
               RFC 7617, DOI 10.17487/RFC7617, September 2015,
-              <http://www.rfc-editor.org/info/rfc7617>.
+              <https://www.rfc-editor.org/info/rfc7617>.
 
    [saml-core-2.0]
               Internet2, "Assertions and Protocols for the OASIS
               Security Assertion Markup Language (SAML) V2.0", March
               2005.
-
-
-
-
-
-Hunt, et al.            Expires January 29, 2018               [Page 24]
-
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
-
 
 Appendix A.  Other Streaming Specifications
 
@@ -1380,6 +1282,14 @@ Appendix A.  Other Streaming Specifications
    not suggesting that we need all of these things in the spec, but they
    give an idea of what features people have found useful.
 
+
+
+
+Hunt, et al.               Expires May 2, 2018                 [Page 23]
+
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
+
+
    Other information:
 
    o  API Reference:
@@ -1394,14 +1304,6 @@ Appendix A.  Other Streaming Specifications
 
    Apache Kafka is an Apache open source project based upon TCP for
    distributed streaming.  It prescribes some interesting general
-
-
-
-Hunt, et al.            Expires January 29, 2018               [Page 25]
-
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
-
-
    purpose features that seem to extend far beyond the simpler streaming
    model SECEVENTs is after.  A comment from MS has been that Kafka does
    an acknowledge with poll combination event which seems to be a
@@ -1436,6 +1338,14 @@ Appendix C.  Change Log
    Draft 00 - PH - Based on draft-hunt-secevent.distribution with the
    following additions:
 
+
+
+
+Hunt, et al.               Expires May 2, 2018                 [Page 24]
+
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
+
+
    o  Removed Control Plane from specification
 
    o  Added new HTTP Polling delivery method
@@ -1450,13 +1360,6 @@ Appendix C.  Change Log
 
    o  Draft 00 - PH - First Draft based on reduced version of draft-
       hunt-idevent-distribution
-
-
-
-Hunt, et al.            Expires January 29, 2018               [Page 26]
-
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
-
 
    o  Draft 01 - PH -
 
@@ -1489,6 +1392,16 @@ Authors' Addresses
    Email: phil.hunt@yahoo.com
 
 
+
+
+
+
+
+Hunt, et al.               Expires May 2, 2018                 [Page 25]
+
+Internet-Draft        draft-ietf-secevent-delivery          October 2017
+
+
    Marius Scurtescu
    Google
 
@@ -1505,13 +1418,6 @@ Authors' Addresses
    Microsoft
 
    Email: tonynad@microsoft.com
-
-
-
-
-Hunt, et al.            Expires January 29, 2018               [Page 27]
-
-Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
    Annabelle Richard Backman
@@ -1547,22 +1453,4 @@ Internet-Draft        draft-ietf-secevent-delivery             July 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.            Expires January 29, 2018               [Page 28]
+Hunt, et al.               Expires May 2, 2018                 [Page 26]

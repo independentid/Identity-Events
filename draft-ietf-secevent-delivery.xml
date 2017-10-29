@@ -231,6 +231,7 @@
   <section title="SET Event Stream Protocol">
     <t>An Event Stream represents the communication channel over which a 
     series of SETs are delivered to a configured Event Receiver. </t>
+    
     <section anchor="process" title="Event Delivery Process">
 			<t>When an Event occurs, the Feed Provider constructs a SET
       token <xref target="I-D.ietf-secevent-token" /> that describes the	
@@ -898,93 +899,6 @@ Location: https://notify.exampleidp/Events
          
         </section>  
        
-     <section anchor="verifyStream" title="Event Stream Verification">
-  
-        <t>In the verify process, the Event Receiver organization initiates
-        a request to the Event Transmitter to verify the Stream. The 
-        Event Receiver provides a <spanx style="verb">confirm</spanx> value and a 
-        <spanx style="verb">nonce</spanx> value that the Event Transmitter is expected
-        to return in the body of a Verify Event so that the Event Receiver
-        can confirm end-to-end configuration of SET delivery including
-        proper signing and encryption depending on the configuration of
-        the Stream.  For example, can the Event Transmitter send a encrypted SET
-        that the Receiver can decode? The method by which this is initiated
-        is out-of-scope of this specification and MAY be provided by a
-        profiling specification, or by administrative interfaces offered
-        by the Event Transmitter.</t>
-        
-        <t>To confirm an Event Stream configuration, the Event
-        Transmitter SHALL send a
-        Verify SET to the Event Receiver using the registered 
-        <spanx style="verb">methodUri</spanx> mechanism.</t>
-        
-        <t>The Verify SET contains the following attributes:<list style="hanging">
-          <t hangText="events"><vspace/>Set with a value of 
-          <spanx style="verb">[[this RFC URL]]#verify</spanx>.</t>
-
-          <t hangText="iss"><vspace/>Set to the URI defined in the Event Stream
-          configuration.</t>
-
-          <t hangText="aud"><vspace/>MUST be set to a value that matches the
-          EventStream <spanx style="verb">aud</spanx> value agreed to.</t>
-
-          <t hangText="exp"><vspace/>A value that indicates the
-          time the verification request will expire. Once expired, the
-          server will set the Event Stream state to <spanx style="verb">fail</spanx>.</t>
-          
-          <t hangText="confirm"><vspace/>The value given by the Event Receiver to
-          the Event Transmitter to return in the Verify Event.</t>
-          
-          <t hangText="nonce"><vspace/>A value given by the Event Receiver
-          or otherwise agreed up to return which SHOULD be unique to the 
-          Stream and SHOULD change with each test in order to distinguish 
-          tests uniquely.</t>
-        </list>
-        </t>
-        
-        <t>
-        If the Event Stream is configured to encrypt SETs for the 
-        Event Receiver, then the SET SHOULD be encrypted with 
-        the provided key. Successful parsing of the
-        message confirms that provides confirmation of correct 
-        configuration and possession of keys.</t>
-         
-
-        <figure anchor="verifyPostEvent" title="Example Verification SET with Challenge">
-        <preamble>A non-normative JSON representation of an Event to be
-        sent to a Event Receiver as a Event Stream confirmation. Note the
-        Event is not yet encoded as a JWT token:</preamble>
-<artwork>{  
-  "jti": "4d3559ec67504aaba65d40b0363faad8",
-  "events":["[[this RFC URL]]#verify"],
-  "iat": 1458496404,
-  "iss": "https://scim.example.com",  
-  "exp": 1458497000,
-  "aud":[
-   "https://event.example.com/Feeds/98d52461fa5bbc879593b7754"
-  ], 
-  "[[this RFC URL]]#verify":{
-    "confirm":"ca2179f4-8936-479a-a76d-5486e2baacd7",
-    "nonce":"1668c993e95849869e4b3506cccdf9bf"
-  }  
-}</artwork>
-        </figure>
-        
-        <t>The above SET is encoded as a JWT and transmitted to the 
-        Event Receiver using the configured delivery method.</t>
-
-        <t>Upon receiving a verify SET, the Event Receiver SHALL parse
-        the SET and verify its claims. In particular, the Event Receiver
-        SHALL confirm that the values for <spanx style="verb">confirm</spanx> 
-        and <spanx style="verb">nonce</spanx> are as expected. If they
-        do not match, an error response of <spanx style="verb">setData</spanx>
-        SHOULD be returned (see <xref target="errorResponse"/>).</t>
-        <t>
-        In many cases, Event Transmitters MAY disable or suspend an Event
-        Stream that fails to successfully verify based on the acknowledgement
-        or lack of acknowledgement by the Event Receiver.
-        </t>         
-     </section>
    </section>
    
    <section anchor="aa" title="Authentication and Authorization" toc="default">
@@ -1060,7 +974,8 @@ Location: https://notify.exampleidp/Events
         the relevant specifications.</t>
       </section>
   
-  </section><section anchor="Security" title="Security Considerations" toc="default">
+  </section>
+  <section anchor="Security" title="Security Considerations" toc="default">
       
       <section anchor="payloadAuthentication" title="Authentication Using Signed SETs">
       <t>In scenarios where HTTP authorization or TLS mutual authentication
