@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-delivery-00"
+<rfc category="std" docName="draft-ietf-secevent-delivery-01"
 	ipr="trust200902">
 	<front> 
 		<title abbrev="draft-ietf-secevent-delivery">
@@ -1221,7 +1221,9 @@ Location: https://notify.exampleidp/Events
  
       </list></t>
       
-      <t>draft-hunt-secevent.distribution revision history:<list style="symbols">
+      <t>Draft 01 - PH - Removed Verification section per feedback from IETF99.</t>
+      
+      <t>This draft was based on draft-hunt-secevent.distribution revision history:<list style="symbols">
       <t>Draft 00 - PH - First Draft based on reduced version of draft-hunt-idevent-distribution</t>
       <t>Draft 01 - PH - <list style="symbols">
         <t>Reworked terminology to match new WG Transmitter/Receiver terms</t>

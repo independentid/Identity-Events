@@ -16,7 +16,7 @@ Expires: May 2, 2018                                              Google
 
 
                      SET Token Delivery Using HTTP
-                    draft-ietf-secevent-delivery-00
+                    draft-ietf-secevent-delivery-01
 
 Abstract
 
@@ -1356,7 +1356,11 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
    o  Revised Verify Event to work with both types of delivery
 
-   draft-hunt-secevent.distribution revision history:
+   Draft 01 - PH - Removed Verification section per feedback from
+   IETF99.
+
+   This draft was based on draft-hunt-secevent.distribution revision
+   history:
 
    o  Draft 00 - PH - First Draft based on reduced version of draft-
       hunt-idevent-distribution
@@ -1390,10 +1394,6 @@ Authors' Addresses
    Oracle Corporation
 
    Email: phil.hunt@yahoo.com
-
-
-
-
 
 
 
