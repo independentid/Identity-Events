@@ -171,8 +171,8 @@
           <t hangText="Event Receiver"><vspace/>
             An Event Receiver is an entity that receives SETs through 
             some distribution method. An Event Receiver is the same
-            entity referred as "recipient" or "receiver" in <xref target="RFC7519"> and
-            related specifications.</xref>
+            entity referred as "recipient" or "receiver" in <xref target="RFC7519"/> and
+            related specifications.
           </t>
             
           <t hangText="Subject"><vspace blankLines="0"/>
@@ -378,7 +378,7 @@
             to the actual time of the event. This claim is REQUIRED. 
             </t> 
             
-            <t hangText="toe">A number whose value is a Numeric Data (
+            <t hangText="toe">A number whose value is a Numeric Date (
             see <xref target="RFC7519">Section 2</xref>). The value is
             the date and time in which the event is believed to have
             occurred in the past or will occur in the future. This
