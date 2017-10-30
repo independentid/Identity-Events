@@ -46,7 +46,7 @@
       <t>
       This specification defines a "Control Plane" service that defines 
       how an Event Receiver or its agent may provision, monitor, and manage 
-      the configuration of a Stream that delivers Security Event Tokens 
+      the configuration of an Event Stream that delivers Security Event Tokens 
       (see <xref target="I-D.ietf-secevent-token"/>) using delivery 
       methods such as specified in the SET Delivery Using HTTP 
       Specification (see <xref target="I-D.ietf-secevent-delivery"/>).
@@ -61,21 +61,26 @@
       </t>    
       
       <t>The mandatory part of this specification (see <xref target="monitorStream"/>) 
-      uses a limited profile of SCIM (see <xref target="RFC7643"/> and 
-      <xref target="RFC7644"/>) to implement Stream configuration monitoring
+      uses a profile of SCIM (see <xref target="RFC7643"/> and 
+      <xref target="RFC7644"/>) to implement Event Stream configuration, monitoring
       and retrieval using HTTP GET <xref target="RFC7231">Section 4.3.1</xref>. 
-      While full SCIM implementation is not required (that is, support for Users and
-      Groups), this specification does leverage the
-      protocol and schema mechanism to ease adaptability
-    to different underlying data systems and SET profile types. In 
-    particular, <xref target="RFC7643">Section 2</xref>
-    SHALL provide the processing rules that enable Control Plane 
-    providers and clients negotiate specific attributes (metadata) and
-    resource types. This includes differing provider definitions of 
-    attribute types, mutability, cardinality, or returnability that MAY
-    differ between deployments and SET Event type profiles. 
-    For HTTP method handling and error signaling, the 
-    processing rules in <xref target="RFC7644"/> SHALL be applied. </t>  
+      Additionally, SCIM MAY be used to manage and update Event Stream
+      configuration and operational state.</t>
+      
+      <t>The choice os SCIM has been recommended as it is intended as
+      a general purpose layer that can be applied to many underlying systems.
+      SCIM's extensibility mechanisms to define data types (resource types)
+      enable it to be flexibly used by specifications intenting to profile
+      SET Tokens and Delivery for use in many ways.</t>
+      
+      <t>For the purposes of the Control Plane, SCIM <xref target="RFC7643">Section 2</xref>
+      provides the JSON data definitions that enable the Control Plane to allow
+      service providers and clients to negotiate attributes and
+      resource types used in different SET Profiles. This includes 
+      declarations and discovery of attribute types, mutability, 
+      cardinality, and returnability that MAY differ between deployments 
+      and SET Event type profiles. For HTTP protocol handling and error 
+      signaling, the processing rules in <xref target="RFC7644"/> SHALL be applied. </t>  
 
 			<section anchor="notat" title="Notational Conventions" toc="default">
 				<t>
@@ -95,15 +100,15 @@
 				<t>
 					For purposes of readability examples are not URL encoded.
 					Implementers MUST percent encode URLs as described in
-					<xref target="RFC3986">Section 2.1 of</xref>
-					.
+					<xref target="RFC3986">Section 2.1 of</xref>. Many examples
+          show only partial response and may use <spanx style="verb">...</spanx>
+          to indicate omitted data.
 				</t>
 
 				<t>Throughout this documents all figures MAY contain spaces and
-					extra
-					line-wrapping for readability and space limitations. Similarly, some
-					URI's contained within examples, have been shortened for space and
-					readability reasons.
+					extra	line-wrapping for readability and space limitations. 
+          Similarly, some URI's contained within examples, have been 
+          shortened for space and readability reasons.
 				</t>
 			</section>
 
@@ -111,9 +116,10 @@
         <t>This specification assumes terminology defined in the Security
         Event Token specification <xref target="I-D.ietf-secevent-token"/>
         and SET Token Delivery specification <xref target="I-D.ietf-secevent-delivery"/>.</t>
+        
 				<t>
-					The following definitions are defined for Security Event distribution:
-					<list style="hanging">
+			  The following definitions are defined for Security Event distribution:
+				<list style="hanging">
                         
             <t hangText="Control Plane"><vspace/>
               A Control Plane represents an service offered by an Event
@@ -135,8 +141,7 @@
             an actor belonging to the Event Receiver organization. Actors
             can be servers, monitoring services, and administrators.</t>
            
-					</list>
-				</t>
+				</list></t>
 			</section>
 		</section>
     
@@ -144,15 +149,16 @@
     <section anchor="monitorStream" title="Stream Monitoring and Configuration Retrieval">
   
     <t>The Control Plane is an HTTP service associated with an Event 
-    Transmitter that enables the provisioning, and monitoring of Event 
+    Transmitter that enables the provisioning and monitoring of Event 
     Streams by entities such Event Receivers, administrators, and 
     monitoring services. This section describes required functionality 
     to enable Event Receivers to retrieve configuration attributes and
     to detect SET delivery problems that may occur when an Event 
     Transmitter fails to deliver SETs.</t>
+    
     <t>This specification also defines optional Control Plane services 
-    to create and update streams in the next sections 
-    (see <xref target="streamManagement"/> and <xref target="manageSubjects"/>). </t>
+    to create and update streams in sections <xref target="streamManagement"/> 
+    and <xref target="manageSubjects"/>.</t>
     
     <section anchor="subscribeMetadata" title="Event Stream Configuration Attributes">
       
@@ -161,11 +167,11 @@
       define an Event Stream's operational configuration:
       <list style="hanging">
       
-        <t hangText="eventUris"><vspace />A read only array of JSON String values
-        which are the URIs of events issued in this Stream. This attribute
-        is asserted by the Control Plane provider after
-        processing an Event Stream creation request. See 
-        <spanx style="verb">eventUris_req</spanx>.</t>
+        <t hangText="eventUris"><vspace />A read only array of JSON 
+        String values which are the URIs of events configured for the 
+        Event Stream. This attribute is assigned by the Control Plane 
+        provider in response to receiving an Event Stream creation or
+        update request. See <spanx style="verb">eventUris_req</spanx>.</t>
         
         <t hangText="eventUris_req"><vspace/>An array of JSON String values
         which are the URIs of events requested by the Event Receiver for
@@ -222,45 +228,46 @@
         JSON String keyword that indicates the current state of an Event Stream.
         More information on the Event Stream state can be found in 
         <xref target="subState" />. Valid keywords are:<list>
-            <t><spanx style="verb">on</spanx> - indicates the Event Stream
-            has been verified and that the Feed Provider MAY pass 
-            SETs to the Event Receiver.</t>
+        
+          <t><spanx style="verb">on</spanx> - indicates the Event Stream
+          has been verified and that the Feed Provider MAY pass 
+          SETs to the Event Receiver.</t>
 
-            <!-- No longer used with client initiated verify
-            <t><spanx style="verb">verify</spanx> - indicates the 
-            Event Stream is pending verification. While in "verify", 
-            SETs, except for the verify SET (see 
-            <xref target="verifyStream"/>) are not delivered to the 
-            Event Receiver. Once verified, the status returns to 
-            <spanx style="verb">on</spanx>.</t>
-             -->
+          <!-- No longer used with client initiated verify
+          <t><spanx style="verb">verify</spanx> - indicates the 
+          Event Stream is pending verification. While in "verify", 
+          SETs, except for the verify SET (see 
+          <xref target="verifyStream"/>) are not delivered to the 
+          Event Receiver. Once verified, the status returns to 
+          <spanx style="verb">on</spanx>.</t>
+           -->
 
-            <t><spanx style="verb">paused</spanx> - indicates the
-            Event Stream is temporarily suspended. While 
-            <spanx style="verb">paused</spanx>, SETs SHOULD be 
-            retained and delivered when state returns to 
-            <spanx style="verb">on</spanx>. If delivery is paused
-            for an extended period defined by the Event Transmitter,
-            the Event Transmitter MAY change the state to 
-            <spanx style="verb">off</spanx> indicating SETs are
-            no longer retained.</t>
+          <t><spanx style="verb">paused</spanx> - indicates the
+          Event Stream is temporarily suspended. While 
+          <spanx style="verb">paused</spanx>, SETs SHOULD be 
+          retained and delivered when state returns to 
+          <spanx style="verb">on</spanx>. If delivery is paused
+          for an extended period defined by the Event Transmitter,
+          the Event Transmitter MAY change the state to 
+          <spanx style="verb">off</spanx> indicating SETs are
+          no longer retained.</t>
 
-            <t><spanx style="verb">off</spanx> - indicates that the
-            Event Stream is no longer passing SETs. While in off mode,
-            the Event Stream configuration is maintained, but new events 
-            are ignored, not delivered or retained. Before returning
-            to <spanx style="verb">on</spanx>, a verification MUST
-            be performed.</t>
+          <t><spanx style="verb">off</spanx> - indicates that the
+          Event Stream is no longer passing SETs. While in off mode,
+          the Event Stream configuration is maintained, but new events 
+          are ignored, not delivered or retained. Before returning
+          to <spanx style="verb">on</spanx>, a verification MUST
+          be performed.</t>
 
-            <t><spanx style="verb">fail</spanx> - indicates that the
-            Event Stream was unable to deliver SETs to the
-            Event Receiver due an unrecoverable error or for an 
-            extended period of time. Unlike paused
-            status, a failed Event Stream does not retain existing
-            or new SETs that are issued. Before returning
-            to <spanx style="verb">on</spanx>, a verification MUST
-            be performed.</t>
-          </list></t>
+          <t><spanx style="verb">fail</spanx> - indicates that the
+          Event Stream was unable to deliver SETs to the
+          Event Receiver due an unrecoverable error or for an 
+          extended period of time. Unlike paused
+          status, a failed Event Stream does not retain existing
+          or new SETs that are issued. Before returning
+          to <spanx style="verb">on</spanx>, a verification MUST
+          be performed.</t>
+        </list></t>
           
         <t hangText="maxRetries"><vspace blankLines="0" />An OPTIONAL 
         JSON number indicating the 
@@ -370,36 +377,38 @@
       <t>Additional Event Stream configuration (attributes) MAY be defined
       as extensions. The method for adding new attributes is defined in 
       <xref target="RFC7643">Section 3.3</xref>.</t>
-  </section>
+    </section>
    
     <section anchor="getStatus" title="Checking Stream Configuration and Stream State">
       <t>An Event Receiver MAY check the current status of a Stream
-      with the Event Transmitter, by performing an HTTP GET using the
-      provided URI from the Transmitter either through an administrative
-      process or via the optional Stream creation response defined in 
-      <xref target="createSub"/>.</t>
+      the Event Transmitter's Control Plane service by performing an 
+      HTTP GET using the provided URI from the Event Transmitter either 
+      through an administrative process or via the optional Stream 
+      creation response defined in <xref target="createSub"/>.</t>
       <t>The format of the Stream GET request and response is defined 
       by <xref target="RFC7644">Section 3.4</xref>.
       </t>
       
       <t>In addition to the basic attributes defined in 
       <xref target="RFC7643">Section 2</xref> common to all resource 
-      types, Streams use the attributes defined in
-      <xref target="subscribeMetadata" />.  In particular, the Stream
-      configuration includes JSON attributes <spanx style="verb">schemas</spanx>
-      and <spanx style="verb">id</spanx>. <list style="hanging">
+      types, an <spanx style="verb">EventStream</spanx> resource types
+      uses the attributes defined in <xref target="subscribeMetadata" />.  
+      As with any SCIM resource, an <spanx style="verb">EventStream</spanx> 
+      resource MUST include the JSON attributes <spanx style="verb">schemas</spanx>
+      and <spanx style="verb">id</spanx> as defined in <xref target="RFC7643"/>:
+      <list style="hanging">
         <t hangText="schemas"><vspace/>Is an array of Strings with at 
         least a single value of 
-        <spanx style="verb">urn:ietf:params:scim:schemas:event:2.0:EventStream</spanx>.</t>
+        <spanx style="verb">urn:ietf:params:scim:schemas:event:2.0:EventStream</spanx>.
+        Configuration MAY be extented through the addition of other schema
+        URI values such as in the case where a new delivery method or 
+        SET profile needs to define additional attributes.</t>
+        
         <t hangText="id"><vspace/>Is a String which is a permanent unique 
-        identifier for the Stream. The value which is also used to define
-        the Stream Resource URI is permanent and provides referential
-        integrity over time as it SHALL NOT change.</t>
+        identifier for <spanx style="verb">EventStream</spanx> resources. 
+        The value which is also used to define a permanent Event Stream 
+        Resource URI.</t>
       </list>
-      These attributes are provided to enable SCIM client
-      compatibility and informs the client of the type of JSON 
-      object being returned. Service providers may offer additional 
-      attributes by adding additional schema values as per <xref target="RFC7644" />.
       </t>
       
       <figure anchor="getRequest" title="Example EventStream HTTP GET Request">
@@ -411,10 +420,11 @@ Accept: application/json
 Authorization: Bearer h480djs93hd8</artwork>
 </figure>
          
-<figure anchor="streamResponse" title="Example Stream GET Response">
-<preamble>Below is an example response to Stream retrieval
-made in <xref target="getRequest"/>.</preamble>
-<artwork>HTTP/1.1 200 OK
+      <figure anchor="streamResponse" title="Example Stream GET Response">
+      <preamble>Below is an example response to the 
+      <spanx style="verb">EventStream</spanx> retrieval
+      made in <xref target="getRequest"/>.</preamble>
+      <artwork>HTTP/1.1 200 OK
 Content-Type: application/scim+json
 Location: 
  https://example.com/EventStreams/767aad7853d240debc8e3c962051c1c0
@@ -441,32 +451,38 @@ Location:
      ... SCIM meta attributes ...
   }
 }</artwork>
-</figure>  
-      <t>In the above figure, the Event Stream is showing a failed
-      status due to a TCP connection error. The Event Receiver is
+      </figure>  
+      
+      <t>In the above figure, the <spanx style="verb">EventStream</spanx>
+      shows a <spanx style="verb">status</spanx> of <spanx style="verb">fail</spanx> 
+      due to a TCP connection error. In this case, the Event Receiver is
       able to discover that its endpoint was unavailable and has been
-      marked failed by the Event Transmitter. Typically, with this 
+      marked failed by the Event Transmitter (possibly explaining a lack 
+      of received SETs). Typically, with this 
       type of error, appropriate operations staff would be alerted and some 
       corrective action would be taken to check for a configuration
-      error or service outage..</t>
+      error or service failure.</t>
       
       <t>The frequency with which Event Receivers poll the
-      Event Stream status depends on the following factors: <list style="symbols">
-      <t>The level of technical fault tolerance and availability of the 
-      receiving endpoint.</t>
-      <t>A frequency appropriate to the amount of risk that can be tolerated for lost
-      events. For example, if Security Events are considered informational,
-      then infrequent (hourly or daily) may be sufficient.</t>
+      Event Stream status depends on factors such as: 
+      <list style="symbols">
+        <t>The level of technical fault tolerance and availability of the 
+        receiving endpoint.</t>
+        <t>The amount of risk that can be tolerated for lost
+        events. For example, if Security Events are considered informational,
+        then infrequent (hourly or daily) may be sufficient.</t>
+        <t>The amount of buffer recovery offered by an Event Transmitter
+        which MAY be minutes depending on SET frequency and buffer size.</t>
       </list>
-      In most cases Event Stream status monitoring can be triggered on a 
+      In many cases Event Stream status monitoring may be triggered on a 
       timeout basis. Event Receivers would typically poll if they have not
       received a SET for some period during which SETs would be expected
       based on past experience.
       </t>
   
-      <t>Receivers MAY use the resource type endpoint 
-      <spanx style="verb">EventStreams</spanx> to retrieve available
-      Streams based on the provided <spanx style="verb">Authorization</spanx> 
+      <t>Receivers MAY use the endpoint 
+      <spanx style="verb">/EventStreams</spanx> to query and retrieve available
+      Event Streams based on the provided <spanx style="verb">Authorization</spanx> 
       header. 
       </t>
       <figure anchor="getCommonRequest" title="Example Stream HTTP GET Request From Common Endpoint">
@@ -522,9 +538,9 @@ Location:
         
     <section anchor="subState" title="Event Stream State Model">
       <t>The Event Stream configuration attribute <spanx style="verb">status</spanx>
-      reports the state of an Event Stream with regards to
+      reports the current state of an Event Stream with regards to
       whether the stream is operational or is in a suspended or failed state.
-      Additionally, the <spanx style="verb">stream</spanx> attribute 
+      Additionally, the <spanx style="verb">status</spanx> attribute 
       can be used to pause or stop streams using the stream configuration
       update functions described in <xref target="streamManagement"/>.</t>
       
@@ -533,7 +549,7 @@ Location:
       Event Stream on a Event Transmitter. Note that a Event Stream cannot
       be made active until a verification process has been completed. As 
       such, a newly created Event Stream begins with state 
-      <spanx style="verb">verify</spanx>.</preamble>
+      <spanx style="verb">on</spanx>.</preamble>
       <artwork align="center">                          +
                        Create
                           |
@@ -556,7 +572,7 @@ Location:
       
         <t hangText="Create"><vspace />A Event Receiver or an administrator creates
         a new Event Stream as described in <xref target="createSub"></xref>.
-        The initial state is <spanx style="verb">verify</spanx>.</t>
+        The initial state is <spanx style="verb">on</spanx>.</t>
         
        
         <!-- No used now that receiver verifies success
@@ -600,8 +616,7 @@ Location:
         is disabled, all SETs that occur at the Event Transmitter are lost.</t>
       </list></t>
     
-     </section>
-  
+     </section> 
    </section>
 			
    <section anchor="streamManagement" title="Stream Management and Provisioning">
@@ -612,15 +627,15 @@ Location:
       management.</t>
       
       <t>The operations specified in this section are based on <xref target="RFC7644"/>.
-      As such, extension declarations for Event Streams are defined in 
-      <xref target="eventResourceType"/>. Basic processing rules are
-      provided by <xref target="RFC7644"/> along with additional
-      profiling specific to the needs for Stream management.</t>          
+      SCIM schema declarations for the <spanx style="verb">EventStream</spanx>
+      resources are defined in 
+      <xref target="eventResourceType"/>. HTTP Protocol usage and 
+      processing rules are provided by <xref target="RFC7644"/>.</t>          
       
       
       <section anchor="createSub" title="Creating An Event Stream">
         <t>To define an Event Stream, the Event Receiver or its administrator
-        (known as the 'client') first obtains an authorization credential 
+        (known as the client) first obtains an authorization credential 
         allowing the ability to define a new Stream. Note: the process 
         for registering to obtain credentials and permission to register 
         is out-of-scope of this specification.</t>
@@ -635,9 +650,9 @@ Location:
         being used.</t>
          
         <t>The client MAY discover the Event Transmitter's 
-        Control Plane service for the schema requirement for an 
-        <spanx style="verb">EventStream</spanx> resource type using 
-        service configuration and schema discovery of 
+        Control Plane service for the schema requirements for  
+        <spanx style="verb">EventStream</spanx> resource type and any
+        other extensions using SCIM schema discovery in  
         <xref target="RFC7644">Section 4</xref>.
         </t>
         
@@ -735,19 +750,22 @@ Location:
           of specific EventStream configuration such as
           (but not limited to) <spanx style="verb">status</spanx>, and 
           <spanx style="verb">subjects</spanx>.</t>
-        </list>  </t>
+        </list></t>
 
         <section title="Update using HTTP PUT">
           <t>The HTTP PUT method allows a client having previously 
           received the EventStream JSON document to modify the document
           and replace the Control Plane provider's copy. In using this
           method, the client is not required to remove data normally
-          asserted or defined by the Event Stream Control Plane provider.
-          The robust processing rules of <xref target="RFC7644"/> enable the
+          asserted or defined by the Event Stream Control Plane provider
+          (e.g. attributes that are read only).
+          The processing rules of <xref target="RFC7644"/> enable the
           client to "put back" what was previously received allowing
-          the Control Plane to figure out what needs to be updated and
-          ignored.  For example, while "id" is immutable, the Control
-          Plane provider will simply ignore attempts to replace its value.</t>
+          the Control Plane provider to figure out what attributes
+          need updating and which attributes are ignored.  For example, 
+          while "id" is immutable, the Control Plane provider will simply 
+          ignore attempts to replace its value. When processing is complete
+          the final accepted state is represented in the HTTP Response.</t>
           
           <figure anchor="putSubscription" title="Example Replace Event Stream Request">
           <preamble>In the following non-normative example, a request to 
@@ -793,7 +811,7 @@ Authorization: Bearer h480djs93hd8
 
         <figure anchor="putSubscriptionResponse" title="Example Response to PUT EventStream Request">
         <preamble>In following non-normative response, the Control
-        Plane provider responds with the accepted and revised state
+        Plane provider responds with the processed final state
         of the submitted EventStream.</preamble>
 <artwork>HTTP/1.1 200 OK
 Content-Type: application/scim+json
@@ -832,39 +850,40 @@ Location:
 
             
         <section anchor="updatePatch" title="Update using HTTP PATCH">
-        <t>Periodically, Event Receivers MAY have need to update an
+        <t>Periodically, Event Receiver parties MAY have need to update an
         EventStream configuration for the purpose of:<list style="symbols">
-        <t>Rotating access credentials or keys</t>
-        <t>Updating endpoint configuration</t>
-        <t>Making operational changes such as pausing, resetting, or 
-        disabling an Event Stream.</t>
-        <t>Other operations (e.g. such as adding or removing subjects)
-        as defined by profiling Event specifications.</t></list></t>
+          <t>Rotating access credentials or keys</t>
+          <t>Updating endpoint configuration</t>
+          <t>Making operational changes such as pausing, resetting, or 
+          disabling an Event Stream.</t>
+          <t>Other operations (e.g. such as adding or removing subjects)
+          as defined by profiling Event specifications.</t>
+        </list></t>
 
         <t>As documented in <xref target="RFC7644">Section 3.5.2</xref>,
-        one or more JSON Patch style (see <xref target="RFC6902"/>) 
-        operations can be made against a single EventStream resource. 
-        The update is expressed as a JSON document. The JSON document
-        contains an attribute <spanx style="verb">Operations</spanx>
-        which contains an array of JSON objects which each have the 
+        one or more PATCH operations (which are based on 
+        <xref target="RFC6902"/>) can be made against a single 
+        EventStream resource. The update is expressed as a JSON document. 
+        The JSON document contains an attribute <spanx style="verb">Operations</spanx>
+        which contains an array of JSON objects each of which each have the 
         following attributes:<list style="hanging">
-          <t hangText="op">A JSON attribute whose value is one of
+          <t hangText="op"><vspace/>A JSON attribute whose value is one of
           <spanx style="verb">add</spanx>, <spanx style="verb">remove</spanx>,
           or <spanx style="verb">replace</spanx>.</t>
-          <t hangText="path">A JSON attribute whose value is a document
+          <t hangText="path"><vspace/>A JSON attribute whose value is a document
           attribute path (see <xref target="RFC7644">Section 3.5.2</xref>) 
           describing the attribute or sub-attribute or
           value to be updated in the case of multi-valued complex attributes
           such as <spanx style="verb">subjects</spanx>.</t>
-          <t hangText="value">The value to be assigned to the JSON 
+          <t hangText="value"><vspace/>The value to be assigned to the JSON 
           document attribute defined in <spanx style="verb">path</spanx>.</t>
         </list></t>
 
         <figure anchor="subscriptionPatch" title="Example EventStream PATCH Request">
         <preamble>In the following non-normative example, the client
-        is requesting that <spanx style="verb">status</spanx> be 
-        changed to <spanx style="verb">paused</spanx> for the EventStream
-        whose path is identified by the request URI path.</preamble>
+        requests that the <spanx style="verb">status</spanx> configuration
+        attribute be changed to <spanx style="verb">paused</spanx> for 
+        the EventStream whose path is identified by the request URI path.</preamble>
 <artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
 Host: example.com
 Accept: application/scim+json
@@ -882,17 +901,14 @@ Authorization: Bearer h480djs93hd8
 }</artwork>
        </figure>
        <t>In the above figure, upon receiving the request, the Event 
-       Transmitter would stop sending Events to the Receiver. Note that 
-       while the request MAY seem complex it avoids the need for the 
-       requestor to have all of the current EventStream values in order 
-       to make a PUT request. In other words, an HTTP PATCH can be 
-       typically done in a single request response whereas an HTTP POST 
-       usually is preceded by an HTTP GET.</t>
+       Transmitter would stop sending Events to the Receiver based on 
+       the requested value of <spanx style="verb">status</spanx> being
+       set to <spanx style="verb">paused</spanx>.</t>
             
        <t>
        <figure anchor="memberPatch" title="Example Changing the Members of EventStream">
         <preamble>In the following non-normative example, the client
-        is request the addition and removal of two subjects
+        requests the addition and removal of two subjects
         from an existing EventStream. This operation is discussed 
         further in <xref target="subjMgmtStream"/>.</preamble>
 <artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
@@ -918,12 +934,15 @@ Authorization: Bearer h480djs93hd8
   }]
 }</artwork>
         </figure>
-        In the above request, the remove operation uses a value
-filter which provides a matching expression against one or more
-sub-attributes of a parent attributes (subjects). In this case the 
-composite value of subjects which contains the sub-attribute 
+        In the above request, the second operation, the remove operation, 
+        uses a <spanx style="verb">path</spanx> attribute to specify a
+        matching filter the correct array element of <spanx style="verb">subjects</spanx>
+        by matching the appropriate sub-attributes which are denoted by 
+        square brackets (see <xref target="RFC7644">Figure 1 and 2</xref>
+        for other examples and ABNF for filters). 
+        In this case the composite filter of the <spanx style="verb">subjects</spanx> sub-attributes 
 <spanx style="verb">type</spanx> and <spanx style="verb">value</spanx>
-attribute is removed based on matching the "value" sub-attribute.
+are used to remove the correct JSON array element.
 Upon receiving the request, the EventStream subjects attribute would be 
 updated to reflect the changes.     
         </t>
@@ -935,7 +954,7 @@ updated to reflect the changes.
    <section anchor="manageSubjects" title="Models for Managing Stream Subjects">
      
      <t>The extensibility of SCIM enables many ways to model
-     subjects that are part of any Event Stream. This section
+     subjects that are part of an Event Stream. This section
      explores a few alternatives that profiling specifications could
      use to manage the contents of an Event Stream. These examples 
      include managing subjects:<list style="symbols">
@@ -987,32 +1006,38 @@ updated to reflect the changes.
  
    <section anchor="checkSubject" title="Checking Subject Membership">
 
+      <t>Checking subject membership is a matter of performing a query
+      using a filter to achieve a match based on a value of the 
+      <spanx style="verb">subjects</spanx> attribute.</t>
+      
       <section title="Email Based Subjects">
         <t>In this section, values have been added to the 
-        <spanx style="verb">subjects</spanx> attribute are email addresses
-        which clients to the Control Plane would like to verify are 
-        present. The values <spanx style="verb">subjects</spanx> have sub-attribute
-        <spanx style="verb">type</spanx> set to <spanx style="verb">EMAIL</spanx>
-        and the sub-attribute <spanx style="verb">value</spanx> contains
-        an email address.</t>
+        <spanx style="verb">subjects</spanx> attribute that are email 
+        addresses which clients to the Control Plane would like to verify are 
+        present or not. The <spanx style="verb">subjects</spanx> attribute 
+        has sub-attribute <spanx style="verb">type</spanx> set to 
+        <spanx style="verb">EMAIL</spanx> and the sub-attribute 
+        <spanx style="verb">value</spanx> contains an email address.</t>
 
         <figure anchor="verifySubject" title="Determining if an EMail Subject is in an Event Stream">
         <preamble>In the following non-normative example, a client queries
-        the Control Plane to see if <spanx style="verb">Alice@example.com</spanx> is part of any
+        the Control Plane to see if <spanx style="verb">alice@example.com</spanx> is part of any
         defined stream configuration. In the request, only the attribute 
-        <spanx style="verb">id</spanx> is requested as the client
-        does not need to see the rest of the configuration. Note, for
-        readability, the URL is not encoded.</preamble> 
-  <artwork>GET /EventStreams?filter=(subjects.value eq "alice@example.com")&amp;attributes=id
+        <spanx style="verb">id</spanx> of the Event Stream is requested 
+        as the client does not need to see the rest of the Event Stream
+        attributes. Note, for readability, the URL is not encoded.</preamble> 
+  <artwork>GET /EventStreams?filter=(subjects.value eq "alice@example.com")
+  &amp;attributes=id
 Host: example.com
 Accept: application/scim+json
 Authorization: Bearer h480djs93hd8</artwork>
         </figure>
   
         <figure anchor="verifyNoMatch" title="Example Response With No Subject Match">
-        <preamble>In this non-normative response, the subject is confirmed
+        <preamble>In this non-normative example response, the subject is confirmed
         as not part of any Event Streams associated with the requester. In
-        this case an empty list is returned with no values and <spanx style="verb">totalResults</spanx> is 
+        this case an empty list is returned with no values and 
+        <spanx style="verb">totalResults</spanx> is 
         <spanx style="verb">0</spanx>.</preamble>
         <artwork>HTTP/1.1 200 OK
 Content-Type: application/scim+json
@@ -1048,10 +1073,10 @@ Content-Type: application/scim+json
       </section>
       
       <section title="OIDC Based Subjects">
-        <t>In this section, values have been added to the 
+        <t>In this section, values in the 
         <spanx style="verb">subjects</spanx> attribute are OIDC users
-        which clients to the Control Plane would like to verify are 
-        present. The values <spanx style="verb">subjects</spanx> have sub-attribute
+        which clients would like to verify are present. The attribute 
+        <spanx style="verb">subjects</spanx> has the sub-attribute
         <spanx style="verb">type</spanx> set to <spanx style="verb">OIDC</spanx>
         and the sub-attribute <spanx style="verb">value</spanx> contains
         an OIDC <spanx style="verb">sub</spanx> value and the 
@@ -1065,8 +1090,7 @@ Content-Type: application/scim+json
         <preamble>In the following non-normative example, a client queries
         the Control Plane to see if the above OIDC user is part of any
         defined stream configuration. In the request, only the attribute 
-        <spanx style="verb">id</spanx> is requested as the client
-        does not need to see the rest of the configuration. Note, for
+        <spanx style="verb">id</spanx> is requested. Note, for
         readability, the URL is not encoded.</preamble> 
   <artwork>GET /EventStreams?filter=(subjects[value eq "123456" and
   iss eq "op.example.com"])&amp;attributes=id
@@ -1075,13 +1099,13 @@ Accept: application/scim+json
 Authorization: Bearer h480djs93hd8</artwork>
         </figure>
   
-        <t>In the above request note that <spanx style="verb">type</spanx>
+        <t>In the above request note that <spanx style="verb">iss</spanx>
         and <spanx style="verb">value</spanx> are enclosed within
-        square brackets. This is done, per <xref target="RFC7644" /> to
+        square brackets. This is done, per <xref target="RFC7644">Figure 1</xref> to
         ensure the matching condition within "[" and "]" is matched
-        against the same value record.  If the filter was expressed as
+        against the same JSON array record.  If the filter was expressed as
 <spanx style="verb">(subjects.value eq "123456" and subjects.iss eq "op.example.com")</spanx>
-        Then an improper match can occur because a composite value of 
+        Then an improper match may occur because a composite value of 
         <spanx style="verb">subjects</spanx>
         may have <spanx style="verb">123456</spanx> while another has 
         <spanx style="verb">op.example.com</spanx>.</t>
@@ -1100,7 +1124,7 @@ Authorization: Bearer h480djs93hd8</artwork>
     
       <figure anchor="addEmailSubject" title="Adding an EMAIL Subject to a Stream">
       <preamble>In the following non-normative example, the client
-      is request the addition of a subject identified by an EMAIL address
+      requests the addition of a subject identified by an EMAIL address
       to an existing EventStream. The composite value of subjects
       has the sub-attributes <spanx style="verb">type</spanx> and <spanx style="verb">value</spanx>
       which are assigned.</preamble>
@@ -1126,10 +1150,10 @@ Authorization: Bearer h480djs93hd8
       
       <figure anchor="addOidcSubject" title="Adding an OIDC Provider Subject to a Stream">
       <preamble>In the following non-normative example, the client
-      is request the addition of a subject 
-      to an existing EventStream. The composite value of subjects
+      requests the addition of an OIDC subject 
+      to an existing EventStream. The composite value of <spanx style="verb">subjects</spanx>
       has the sub-attributes <spanx style="verb">type</spanx>, 
-      <spanx style="verb">iss</spanx> and <spanx style="verb">value</spanx>
+      <spanx style="verb">iss</spanx>, and <spanx style="verb">value</spanx>
       which are assigned.</preamble>
 <artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
 Host: example.com
@@ -1154,8 +1178,8 @@ Authorization: Bearer h480djs93hd8
     
       <figure anchor="removeOidcSubjects" title="Removing an OIDC Connect Subject from a Stream">
       <preamble>In the following non-normative example, the client
-      is request the removal of a subject selected by using a 
-      filter from the <spanx style="verb">subjects</spanx> attribute.</preamble>
+      requests the removal of a subject selected by using a 
+      filter against the <spanx style="verb">subjects</spanx> attribute.</preamble>
 <artwork>PATCH /EventStreams/767aad7853d240debc8e3c962051c1c0
 Host: example.com
 Accept: application/scim+json
@@ -1175,7 +1199,7 @@ Authorization: Bearer h480djs93hd8
     </section>
   </section>
    
-   <section anchor="subjMgmtGroup" title="Subjects as Members of a Group">
+  <section anchor="subjMgmtGroup" title="Subjects as Members of a Group">
    <t>SCIM defines a resource type called a 
    <spanx style="verb">Group</spanx> which can be used as a container
    to manage one or more objects in a collection (See Section 4.2 of <xref target="RFC7643"/>).
@@ -1245,7 +1269,8 @@ Authorization: Bearer h480djs93hd8
         the Control Plane to see if a User with <spanx style="verb">id</spanx>
         value of <spanx style="verb">413861904646</spanx>
         is a part of any Group. .</preamble> 
-  <artwork>GET /Groups?filter=members.value eq "413861904646"&amp;attributes=id
+  <artwork>GET /Groups?filter=members.value eq "413861904646"
+  &amp;attributes=id
 Host: scim.example.com
 Accept: application/scim+json
 Authorization: Bearer h480djs93hd8</artwork>
@@ -1349,20 +1374,20 @@ Authorization: Bearer h480djs93hd8
    <section anchor="subjMgmtResource" title="Subjects as a Resource (aka POST Profile)">
      <t>This section demonstrates how to model subject participation in 
      an Event Stream by treating subjects as a resource (a <spanx style="verb">Subject</spanx>).
-     In this model, a subject MAY be added and removed from an Event 
-     Stream by through HTTP POST and DELETE methods.
+     In this model, a subject is added, removed, and queried from an Event 
+     Stream by through HTTP POST, DELETE, and GET methods.
      </t>
     
-     <t>In this model, a new SCIM resource type is defined which 
+     <t>In this model, a new SCIM resource type is defined that 
      describes the <spanx style="verb">Subject</spanx> resource and 
-     its associated schema definition URI (which can be used to 
-     discover the attributes of a <spanx style="verb">Subject</spanx>).</t>
-     <figure anchor="subjectResourceType" title="Example ResourceType Definition for Subject">
+     its associated schema.</t>
+     <figure anchor="subjectResourceType" title="Example Resource Type Definition for Subjects">
      <preamble>The following is a non-normative example of a 
-     Resource Type definition that would be configured in a SCIM endpoint.
-     It defines the resource endpoint as well as a URI for the schema.
-     This configuration can be discovered by querying a SCIM service 
-     provider's <spanx style="verb">/ResourceTypes</spanx> endpoint (see
+     Resource Type definition that is configured in a SCIM service
+     provider. The Resource Type defines the <spanx style="verb">Subjects</spanx> 
+     endpoint as well as a URI for the schema definition.
+     The Resource Type configuration can be discovered by querying the 
+     SCIM service  provider's <spanx style="verb">/ResourceTypes</spanx> endpoint (see
      <xref target="RFC7644">Section 4</xref>).</preamble>
      <artwork>{
   "schemas": ["urn:ietf:params:scim:schemas:core:2.0:ResourceType"],
@@ -1375,10 +1400,10 @@ Authorization: Bearer h480djs93hd8
 }</artwork>
      </figure>
      
-     <figure anchor="subjectSchema" title="Example Schema for Subject Resource">
-     <preamble>The following is an example schema for a Subject. This 
-     configuration can be returned from a SCIM Service Provider using the
-     <spanx style="verb">/Schemas</spanx> endpoint (see
+     <figure anchor="subjectSchema" title="Example Schema for Subject Resources">
+     <preamble>The following is an example schema definition for a Subject
+     resource. This configuration can be retrieved from the SCIM Service 
+     Provider using the <spanx style="verb">/Schemas</spanx> endpoint (see
      <xref target="RFC7644">Section 4</xref>).</preamble>
      <artwork>{
   "id" : "urn:ietf:params:scim:schemas:event:2.0:Subject",
@@ -1423,9 +1448,10 @@ Authorization: Bearer h480djs93hd8
 }</artwork>
      </figure>
      
-     <section title="Adding A Subject">
+     <section title="Adding A Subject to a Stream">
        <t>To add a Subject to a Stream, an HTTP POST is used to create a new
-       Subject resource.</t>
+       Subject resource which contains attributes identifying the subject
+       and the associated Event Stream <spanx style="verb">id</spanx>.</t>
        
        <figure anchor="addSubject" title="Adding a Subject to a Stream Using POST">
        <preamble>The following non-normative example demonstrates adding
@@ -1436,7 +1462,8 @@ Authorization: Bearer h480djs93hd8
 Host: transmitter.example.com
 Authorization: Bearer eyJ0b2tlbiI6ImV4YW1wbGUifQo=
 {
- "email": "example.user@example.com"
+ "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subject"],
+ "email": "example.user@example.com",
  "streamIds": "767aad7853d240debc8e3c962051c1c0",
  "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subject"]
 }</artwork>
@@ -1449,8 +1476,20 @@ Authorization: Bearer eyJ0b2tlbiI6ImV4YW1wbGUifQo=
        <artwork>HTTP/1.1 201 Created
 Content-Type: application/scim+json
 Location:
-    https://example.com/v2/Subjects/e3c962051c1c0</artwork>
+    https://example.com/v2/Subjects/e3c962051c1c0
+{
+  "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subject"],
+  "id": "e3c962051c1c0",
+  "email": "example.user@example.com",
+  "streamIds": "767aad7853d240debc8e3c962051c1c0",
+  "meta":{
+     ...SCIM meta data...
+  }
+}</artwork>
        </figure>
+       <t>Should the record be a duplicate Subject, the Control Plane
+       implementation MAY choose to return the original resource registration
+       and location with HTTP Status 200 (OK).</t>
      </section>
      
      <section anchor="querySubjects" title="Querying for Subject in Event Streams">
@@ -1466,9 +1505,9 @@ Location:
        </figure>
        
        <figure anchor="querySubjectStreamResponse" title="Response to Query">
-       <preamble>Assuming the <spanx style="verb">id</spanx> of the EventStream is known,
-       a query can be made against that identifier and the subjects
-       identifier - in this case, an email address.</preamble>
+       <preamble>If a match to the request in <xref target="querySubjectStream"/>
+       is made, the following is a non-normative example response showing
+       the matched Subject resource.</preamble>
        <artwork>HTTP/1.1 200 OK
  Content-Type: application/scim+json
 
@@ -1480,7 +1519,7 @@ Location:
          "id":"e3c962051c1c0",
          "email": "example.user@example.com"
          "streamIds": "e3c962051c1c0",
-         "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subject"]
+         "schemas":["urn:ietf:params:scim:schemas:event:2.0:Subject"],
          ...additional meta data...
        }     
     ]
@@ -1506,22 +1545,12 @@ Location:
        the <spanx style="verb">id</spanx> MAY be queried as per <xref target="querySubjects"/>.</t>
        
        <figure anchor="deleteSubject" title="Removing a Subject from an Event Stream">
-       <preamble>To remove a Subject resource simply perform an HTTP DELETE
+       <preamble>To remove a Subject resource perform an HTTP DELETE
        using the resource's URI (see <xref target="RFC7644">Section 3.6</xref>).</preamble>
        <artwork>DELETE /Subjects/e3c962051c1c0</artwork></figure>
      </section>
    </section>
-   
- 
-   
-   
-   
-   
-   
-  
-        
-  
-  
+    
   </section>
 
    <section anchor="verifyStream" title="Event Stream Verification">
@@ -1779,7 +1808,7 @@ Authorization: Bearer h480djs93hd8
        -->
     </references>
 
-    <section anchor="eventResourceType" title="Event Stream Resource Type Definition">
+    <section anchor="eventResourceType" title="Event Stream Resource Type and Schema Definitions">
              
         <t>The <spanx style="verb">EventStream</spanx> resource type definition 
         is defined as follows:
