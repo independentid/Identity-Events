@@ -46,7 +46,7 @@
       </address>
     </author>
 
-    <date year="2018" month="January" day="5" />
+    <date year="2018" month="January" day="8" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
@@ -386,6 +386,44 @@
       distinct from the top level value of <spanx style="verb">iss</spanx>,
       which always refers to the issuer of the event - a medical consent
       service that is a relying party to the OpenID Provider.
+          </t>
+
+	</section>
+
+	<section anchor="RISCExample" title="RISC Example">
+
+          <t>
+	    <figure anchor="exampleRISC" title="Example RISC Event">
+	      <preamble>
+		The following example JWT Claims Set is for an account disabled event.
+		This example was taken from a working draft of the RISC events specification,
+		where RISC is the OpenID RISC (Risk and Incident Sharing and Coordination)
+		working group <xref target="RISC"/>.
+		The example is subject to change.
+	      </preamble>
+	      <artwork>
+{
+  "iss": "https://idp.example.com/",
+  "sub": "7375626A656374",
+  "jti": "756E69717565206964656E746966696572",
+  "iat": 1508184845,
+  "aud": "636C69656E745F6964",
+  "events": {
+    "http://schemas.openid.net/secevent/risc/event-type/\
+    account-disabled": {
+      "reason": "hijacking",
+      "cause-time": 1508012752,
+    }
+  }
+}
+</artwork>
+	    </figure>
+
+	    Notice that parameters to the event are included in the event payload, in this case,
+	    the <spanx style="verb">reason</spanx> and <spanx style="verb">cause-time</spanx> values.
+	    The account that is the subject of the event is identified using the
+	    <spanx style="verb">iss</spanx> and <spanx style="verb">sub</spanx> values
+	    in the same manner as OpenID Connect <xref target="OpenID.Core"/> ID Tokens.
           </t>
 
 	</section>
@@ -1114,6 +1152,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
           <date day="8" month="November" year="2014"/>
         </front>
       </reference>
+
       <reference anchor="saml-core-2.0">
         <front>
           <title>Assertions and Protocols for the OASIS Security Assertion Markup Language (SAML) V2.0</title>
@@ -1123,14 +1162,15 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
         <format type="PDF" target="http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf"/>
       </reference>
      
- <!-- 
-      <reference anchor="RISC">
+      <reference anchor="RISC" target="http://openid.net/wg/risc/">
         <front>
           <title>OpenID Risk and Incident Sharing and Coordination (RISC) Working Group</title>
           <author> <organization>OpenID Foundation</organization></author>
           <date/>
         </front>
       </reference>
+
+ <!-- 
 
       <reference anchor="HEART" target="http://openid.net/wg/heart/">
         <front>
@@ -1140,7 +1180,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
         </front>
       </reference>
       
-       -->
+ -->
 
     </references>
 
@@ -1280,6 +1320,9 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	    standardized on using the term "issuer" to align with JWT terminology and the "iss" claim.
 	    Previously the term "transmitter" was sometimes used and "issuer" was sometimes used.
 	    Likewise, standardized on using the term "recipient" instead of "receiver" for the same reasons.
+	  </t>
+	  <t>
+	    Added a RISC event example.
 	  </t>
 	  <t>
 	    Applied numerous grammar, syntax, and formatting corrections.
