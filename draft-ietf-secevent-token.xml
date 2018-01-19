@@ -46,7 +46,7 @@
       </address>
     </author>
 
-    <date year="2018" month="January" day="8" />
+    <date year="2018" month="January" day="18" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
@@ -235,13 +235,17 @@
 	    These claims are defined by the Profiling Specification that defines the event.
 	    An event with no payload claims SHALL be represented as the empty JSON object 
 	    (<spanx style="verb">{}</spanx>).
-
+	  </t>
+	  <t>
 	    When multiple event identifiers are contained in a SET,
 	    they represent multiple aspects of the same state transition
 	    that occurred to the Security Subject.
 	    They are not intended to be used to aggregate distinct events about the same subject.
-
-	    Possible uses of multiple values include:
+	    Beyond this, the interpretation of SETs containing multiple event identifiers
+	    is out of scope for this specification;
+	    Profiling Specifications MAY define their own rules regarding their use of
+	    SETs containing multiple event identifiers, as described in <xref target="Profiles"/>.
+	    Possible uses of multiple values include, but are not limited to:
 	    <list style="symbols">
 	      <t>
 		Values to provide classification information (e.g., threat type or level).
@@ -422,7 +426,7 @@
 	    Notice that parameters to the event are included in the event payload, in this case,
 	    the <spanx style="verb">reason</spanx> and <spanx style="verb">cause-time</spanx> values.
 	    The account that is the subject of the event is identified using the
-	    <spanx style="verb">iss</spanx> and <spanx style="verb">sub</spanx> values
+	    <spanx style="verb">iss</spanx> and <spanx style="verb">sub</spanx> values,
 	    in the same manner as OpenID Connect <xref target="OpenID.Core"/> ID Tokens.
           </t>
 
@@ -447,12 +451,12 @@
             <t hangText="iss">
 	      <vspace/>
 	      A string identifying the service provider publishing
-            the SET (the issuer). This claim is REQUIRED. Note that when
-            a SET is expressing information about a Security Subject for
-            which the SET issuer is not the issuer of the Security Subject,
-            the conflict can be resolved by including the Security Subject
-            issuer value within the event payload
-            (see the <spanx style="verb">events</spanx> claim). </t>
+	      the SET (the issuer).
+	      In some cases, the SET issuer is not the issuer of the Security Subject.
+	      Therefore, implementers cannot assume that the issuers are the same
+	      unless the Profiling Specification specifies that they are for that kind of SET.
+	      This claim is REQUIRED.
+	    </t>
  
             <t hangText="aud">
 	      <vspace/>
@@ -766,7 +770,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 
         <t>Profiling Specifications and implementers SHOULD take caution when
         using timestamps such as <spanx style="verb">iat</spanx> to define order. Distributed systems will have 
-        some amount of clock skew. and thus time by itself will not guarantee order.</t>
+        some amount of clock skew. Thus, time by itself will not guarantee order.</t>
         
         <t>Specifications profiling SET SHOULD define a mechanism for detecting
         order or sequence of events when the order matters.
@@ -1322,7 +1326,10 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	    Likewise, standardized on using the term "recipient" instead of "receiver" for the same reasons.
 	  </t>
 	  <t>
-	    Added a RISC event example.
+	    Added a RISC event example, courtesy of Marius Scurtescu.
+	  </t>
+	  <t>
+	    Applied wording clarifications suggested by Annabelle Bachman and Yaron Sheffer.
 	  </t>
 	  <t>
 	    Applied numerous grammar, syntax, and formatting corrections.
