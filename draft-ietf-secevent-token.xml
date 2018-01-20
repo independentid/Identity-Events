@@ -46,7 +46,7 @@
       </address>
     </author>
 
-    <date year="2018" month="January" day="18" />
+    <date year="2018" month="January" day="20" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
@@ -454,7 +454,8 @@
 	      the SET (the issuer).
 	      In some cases, the SET issuer is not the issuer of the Security Subject.
 	      Therefore, implementers cannot assume that the issuers are the same
-	      unless the Profiling Specification specifies that they are for that kind of SET.
+	      unless the Profiling Specification specifies that they are
+	      for SETs conforming to that profile.
 	      This claim is REQUIRED.
 	    </t>
  
@@ -468,7 +469,7 @@
             <t hangText="iat">
 	      <vspace/>
 	      As defined by Section 4.1.6 of <xref target="RFC7519"/>,
-            a value containing a NumericDate, which represents when the 
+	      a value representing when the
             event was issued. Unless otherwise specified,
             the value SHOULD be interpreted as equivalent 
             to the actual time of the event. This claim is REQUIRED. 
@@ -1300,7 +1301,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
     <t>pjh - Figure 3, moved "sub" to the events payload next to "iss".</t>
     <t>pjh - Clarified the use of "nonce" in contexts where substitution is possible.</t>
     <t>mbj - Addressed WGLC comments by Nat Sakimura.</t>
-    <t>mbj - Addressed WGLC comments by Annabelle Bachman.</t>
+    <t>mbj - Addressed WGLC comments by Annabelle Backman.</t>
     <t>mbj - Addressed WGLC comments by Marius Scurtescu.</t>
   </list></t>
 
@@ -1329,7 +1330,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	    Added a RISC event example, courtesy of Marius Scurtescu.
 	  </t>
 	  <t>
-	    Applied wording clarifications suggested by Annabelle Bachman and Yaron Sheffer.
+	    Applied wording clarifications suggested by Annabelle Backman and Yaron Sheffer.
 	  </t>
 	  <t>
 	    Applied numerous grammar, syntax, and formatting corrections.
