@@ -13,7 +13,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="std" docName="draft-ietf-secevent-token-04" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-token-05" ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-token">Security Event Token (SET)</title>
 
@@ -46,7 +46,7 @@
       </address>
     </author>
 
-    <date year="2018" month="January" day="20" />
+    <date year="2018" month="February" day="2" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
@@ -137,14 +137,13 @@
       to ensure the validation of a received SET.</t>
 
       <section anchor="notat" title="Notational Conventions" toc="default">
-        <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-        "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this
-        document are to be interpreted as described in <xref target="RFC2119"/>.
-	These keywords are capitalized when used to
-        unambiguously specify requirements of the protocol or application
-        features and behavior that affect the inter-operability and security of
-        implementations. When these words are not capitalized, they are meant
-        in their natural-language sense.</t>
+	<t>
+	  The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+	  "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
+	  "MAY", and "OPTIONAL" in this document are to be interpreted as
+	  described in BCP 14 <xref target="RFC2119"/> <xref target="RFC8174"/>
+	  when, and only when, they appear in all capitals, as shown here.
+	</t>
 
         <t>For purposes of readability, examples are not URL encoded.
         Implementers MUST percent encode URLs as described in
@@ -278,9 +277,9 @@
         case, the current count of reset attempts:</preamble>
         <artwork>
 { 
-  "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
-  "iat": 1458496025,
   "iss": "https://scim.example.com",  
+  "iat": 1458496025,
+  "jti": "3d0c3cf797584bd193bd0fb1bd4e7d30",
   "aud": [
     "https://jhub.example.com/Feeds/98d52461fa5bbc879593b7754",
     "https://jhub.example.com/Feeds/5d7604516b1d08641d7676ee7"
@@ -347,7 +346,10 @@
    }
 }
 </artwork>
-          </figure>Note that the above SET has an empty JSON object and
+          </figure>
+	  </t>
+	  <t>
+	    Note that the above SET has an empty JSON object and
           uses the JWT registered claims <spanx style="verb">sub</spanx> 
           and <spanx style="verb">sid</spanx> to identify the subject
           that was logged out.</t>
@@ -365,9 +367,9 @@
           application rather than the OpenID provider:</preamble>
         <artwork>
 { 
-  "jti": "fb4e75b5411e4e19b6c0fe87950f7749",
+  "iss": "https://my.med.example.org",  
   "iat": 1458496025,
-  "iss": "https://my.examplemed.com",  
+  "jti": "fb4e75b5411e4e19b6c0fe87950f7749",
   "aud": [
     "https://rp.example.com"
   ],  
@@ -376,19 +378,21 @@
       "iss": "https://connect.example.com",
       "sub": "248289761001",
       "consentUri": [
-        "https://terms.examplemed.com/labdisclosure.html#Agree"
+        "https://terms.med.example.org/labdisclosure.html#Agree"
       ]
     }
   }
 }
 </artwork>
-      </figure>  
+      </figure>
+	  </t>
+	  <t>
       In the above example, the attribute <spanx style="verb">iss</spanx> contained within the
       payload for the event <spanx style="verb">https://openid.net/heart/specs/consent.html</spanx> refers
       to the issuer of the Security Subject (<spanx style="verb">sub</spanx>) rather than the event
-      issuer <spanx style="verb">https://my.examplemed.com</spanx>. They are
-      distinct from the top level value of <spanx style="verb">iss</spanx>,
-      which always refers to the issuer of the event - a medical consent
+      issuer <spanx style="verb">https://my.med.example.org</spanx>. They are
+      distinct from the top-level value of <spanx style="verb">iss</spanx>,
+      which always refers to the issuer of the event -- a medical consent
       service that is a relying party to the OpenID Provider.
           </t>
 
@@ -408,26 +412,30 @@
 	      <artwork>
 {
   "iss": "https://idp.example.com/",
-  "sub": "7375626A656374",
   "jti": "756E69717565206964656E746966696572",
   "iat": 1508184845,
   "aud": "636C69656E745F6964",
   "events": {
     "http://schemas.openid.net/secevent/risc/event-type/\
     account-disabled": {
+      "subject": {
+        "subject_type": "iss-sub",
+        "iss": "https://idp.example.com/",
+        "sub": "7375626A656374"
+      },
       "reason": "hijacking",
-      "cause-time": 1508012752,
+      "cause-time": 1508012752
     }
   }
 }
 </artwork>
 	    </figure>
-
+	  </t>
+	  <t>
 	    Notice that parameters to the event are included in the event payload, in this case,
 	    the <spanx style="verb">reason</spanx> and <spanx style="verb">cause-time</spanx> values.
-	    The account that is the subject of the event is identified using the
-	    <spanx style="verb">iss</spanx> and <spanx style="verb">sub</spanx> values,
-	    in the same manner as OpenID Connect <xref target="OpenID.Core"/> ID Tokens.
+	    The subject of the event is identified using the <spanx style="verb">subject</spanx>
+	    payload value, which itself is a JSON object.
           </t>
 
 	</section>
@@ -439,15 +447,6 @@
 	  The following claims from <xref target="RFC7519"/> are profiled for use in SETs:
 	  <list style="hanging">
 
-            <t hangText="jti">
-	      <vspace/>
-	      As defined by 
-            Section 4.1.7 of <xref target="RFC7519"/> contains a unique
-            identifier for an event. The identifier SHOULD be unique within
-            a particular event feed and MAY be used by clients to track
-            whether a particular event has already been received. This 
-            claim is REQUIRED.</t>
-
             <t hangText="iss">
 	      <vspace/>
 	      A string identifying the service provider publishing
@@ -458,22 +457,29 @@
 	      for SETs conforming to that profile.
 	      This claim is REQUIRED.
 	    </t>
- 
+
+            <t hangText="iat">
+	      <vspace/>
+	      As defined by Section 4.1.6 of <xref target="RFC7519"/>,
+	      a value representing when the event was issued.
+	      This claim is REQUIRED.
+            </t> 
+
+            <t hangText="jti">
+	      <vspace/>
+	      As defined by 
+            Section 4.1.7 of <xref target="RFC7519"/> contains a unique
+            identifier for an event. The identifier SHOULD be unique within
+            a particular event feed and MAY be used by clients to track
+            whether a particular event has already been received. This 
+            claim is REQUIRED.</t>
+
             <t hangText="aud">
 	      <vspace/>
 	      The syntax of the 
             claim is as defined in Section 4.1.3 of <xref target="RFC7519"/>.
             This claim contains one or more audience identifiers 
             for the SET. This claim is RECOMMENDED.</t>
-            
-            <t hangText="iat">
-	      <vspace/>
-	      As defined by Section 4.1.6 of <xref target="RFC7519"/>,
-	      a value representing when the
-            event was issued. Unless otherwise specified,
-            the value SHOULD be interpreted as equivalent 
-            to the actual time of the event. This claim is REQUIRED. 
-            </t> 
 
             <!-- Removed after WGLC discussion
             <t hangText="nbf">
@@ -551,9 +557,10 @@
 	      <vspace/>
 	      A value that represents the date and time at which the event occurred.
 	      This value is a NumericDate (see Section 2 of <xref target="RFC7519"/>).
-	      This claim is RECOMMENDED.
-	      Note that some profiles may choose to omit <spanx style="verb">toe</spanx>
-	      and convey event time information with the <spanx style="verb">iat</spanx> claim or another claim.
+	      By omitting this claim, the issuer indicates that
+	      they are not sharing an event time with the recipient.
+	      (Note that in some use cases, the represented time might be approximate.)
+	      This claim is OPTIONAL.
 	    </t>
 
 	  </list>
@@ -591,9 +598,9 @@
 
             <artwork>
 {  
-  "jti": "4d3559ec67504aaba65d40b0363faad8",
-  "iat": 1458496404,
   "iss": "https://scim.example.com",  
+  "iat": 1458496404,
+  "jti": "4d3559ec67504aaba65d40b0363faad8",
   "aud": [
    "https://scim.example.com/Feeds/98d52461fa5bbc879593b7754",
    "https://scim.example.com/Feeds/5d7604516b1d08641d7676ee7"
@@ -623,14 +630,16 @@
 
             <artwork>{"typ":"secevent+jwt","alg":"none"}</artwork>
           </figure>
-
+	</t>
+	<t>
 	  <figure>
             <preamble>Base64url encoding of the octets of the UTF-8
             representation of the JOSE Header yields:</preamble>
 
             <artwork>eyJ0eXAiOiJzZWNldmVudCtqd3QiLCJhbGciOiJub25lIn0</artwork>
           </figure>
-
+	</t>
+	<t>
 	  <figure>
             <preamble>The above example JWT Claims Set is encoded as
             follows:</preamble>
@@ -645,7 +654,8 @@ OmNyZWF0ZSI6eyJyZWYiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRm
 NjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIsImF0dHJpYnV0ZXMiOlsiaWQiLCJuYW1lIiwi
 dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19</artwork>
           </figure>
-
+	</t>
+	<t>
           <figure anchor="eventToken"
             title="Example Unsecured Security Event Token">
             <preamble>The encoded JWS signature is the empty string.
@@ -765,7 +775,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	order may or may not matter. For example, in provisioning, 
         event order is critical -- an object cannot be modified before it
         is created. In other SET types, such as a token revocation, the order
-        of SETs for revoked tokens does not matter. If however, the event conveys
+        of SETs for revoked tokens does not matter. If, however, the event conveys
         a logged in or logged out status for a user subject, then
         order becomes important.</t>
 
@@ -927,6 +937,20 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       SHOULD devise approaches that prevent propagation -- for example, the
       passing of a hash value that requires the Event Recipient to know
       the subject.</t>
+
+      <t>
+	In some cases, it may be possible for an Event Recipient to correlate different events
+	and thereby gain information about a subject that the Event Issuer did not intend to share.
+	For example, an Event Recipient might be able to use <spanx style="verb">iat</spanx> values
+	or highly precise <spanx style="verb">toe</spanx> values to determine that
+	two otherwise un-relatable events actually relate to the same real-world event.
+	The union of information from both events could allow an Event Recipient to de-anonymize data
+	or recognize that unrelated identifiers relate to the same individual.
+	Event Issuers SHOULD take steps to minimize the chance of event correlation,
+	when such correlation would constitute a privacy violation.
+	For instance, they could use approximate values for the <spanx style="verb">toe</spanx> claim
+	or arbitrarily delay SET issuance, where such delay can be tolerated.
+      </t>
     </section>
 
     <section anchor="IANA" title="IANA Considerations">
@@ -1093,6 +1117,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml'?><!-- JWT -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7525.xml'?><!-- TLS BCP -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7617.xml'?><!-- Basic Auth -->
+      <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174"?>
 
       <reference anchor="IANA.JWT.Claims" target="http://www.iana.org/assignments/jwt">
         <front>
@@ -1293,7 +1318,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	  </t>
 	</list>
       </t>
-  <t>Draft 03 - Changes As Follows:<list style="symbols">
+  <t>Draft 03 - Changes are as follows:<list style="symbols">
     <t>pjh - Corrected old "subscriber" to "Event Receiver". Added clarification
     in definition that Event Receiver is the same as JWT recipient.</t>
     <t>pjh - Added definition for "toe" (and IANA registration).</t>
@@ -1334,6 +1359,27 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	  </t>
 	  <t>
 	    Applied numerous grammar, syntax, and formatting corrections.
+	  </t>
+	</list>
+      </t>
+
+      <t>
+	Draft 05 - mbj - Changes were as follows:
+	<list style="symbols">
+	  <t>
+	    Simplified the definitions of the "iat" and "toe" claims in ways suggested by Annabelle Backman.
+	  </t>
+	  <t>
+	    Added privacy considerations text suggested by Annabelle Backman.
+	  </t>
+	  <t>
+	    Updated the RISC event example, courtesy of Marius Scurtescu.
+	  </t>
+	  <t>
+	    Reordered the claim definitions to place the required claims first.
+	  </t>
+	  <t>
+	    Changed to using the RFC 8174 boilerplate instead of the RFC 2119 boilerplate.
 	  </t>
 	</list>
       </t>
