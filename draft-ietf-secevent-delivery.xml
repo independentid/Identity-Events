@@ -58,7 +58,7 @@
       </address>
     </author>
 
-		<date year="2017" />
+		<date year="2018" />
 
 		<keyword>Internet-Draft</keyword>
 
@@ -81,13 +81,11 @@
         can be transmitted to a previously registered 
         Event Receiver using HTTP <xref target="RFC7231"/>
         over TLS. The specification defines a method to push SETs via 
-        HTTP POST and to poll for SETs using HTTP POST. 
+        HTTP POST and another method to poll for SETs using HTTP POST. 
       			</t>
 
-      <t>This specification defines to methods of SET delivery in what
-      is known as Event Streams. The specification includes a 
-      verification process which tests and validates Event Stream 
-      configuration.</t>
+      <t>This specification defines two methods of SET delivery in what
+      is known as Event Streams.</t>
         
       <t>This specification does not define the method by which Event 
       Streams are defined, provisioned, managed, monitored,
@@ -178,7 +176,7 @@
             <t hangText="Event Receiver"><vspace/>
               A service provider that registers to receive SETs from 
               an Event Transmitter and provides an endpoint to receive
-              SETs via HTTP POST (known as the "Data Plane"). 
+              SETs via HTTP POST. 
               Some examples of Event Receivers are 
               Identity Providers and Relying Parties. Event Receivers
               can check current Event Stream configuration and status by
@@ -194,11 +192,6 @@
               Event Families.
             </t>
                           
-						<t hangText="Event Family"><vspace/>An Event Family is a 
-              URI that describes the set of Events types be issued in 
-              an Event Stream.
-						</t>
-            
             <t hangText="Subject"><vspace/>
               The security subject around which a security event has 
               occurred. For example, a security subject might per a user, 
@@ -233,17 +226,17 @@
     series of SETs are delivered to a configured Event Receiver. </t>
     
     <section anchor="process" title="Event Delivery Process">
-			<t>When an Event occurs, the Feed Provider constructs a SET
+			<t>When an Event occurs, the Event Transmitter constructs a SET
       token <xref target="I-D.ietf-secevent-token" /> that describes the	
-      Event. The SET issuer determines the Event Streams over which the
+      Event. The Event Transmitter determines the Event Streams over which the
       SET should be distributed to.</t>
       <t> 
-      How SET Events are defined and the process by which Events are identified for 
+      How SETs are defined and the process by which Events are identified for 
       Event Receivers is out-of-scope of this	specification.
 			</t>
 
 			<t>
-			When a SET is available for a Event Receiver, the Feed Transmitter
+			When a SET is available for an Event Receiver, the Event Transmitter
 			attempts to deliver the SET based on the Event Receiver's registered
 			delivery mechanism:
 			<list style="symbols">
@@ -253,7 +246,7 @@
         <t>The Event Transmitter queues up the SET in a buffer so that
         an Event Receiver MAY poll for SETs using HTTP/1.1 POST.</t>
 
-			  <t>Or, the Feed Transmitter delivers the Event through a different
+			  <t>Or, the Event Transmitter delivers the Event through a different
         method not defined by this specification.
 			  </t>
 			</list>
@@ -298,13 +291,13 @@
 
 			<t>
 			Upon receiving a SET, the Event Receiver reads the SET and validates 
-      it. The receiver MUST acknowledge receipt to the Event transmitter, using the 
+      it. The Event Receiver MUST acknowledge receipt to the Event Transmitter, using the 
       defined acknowledgement or error method depending on the method of 
       transfer.</t>
       
       <t>The Event Receiver SHALL NOT use the Event acknowledgement mechanism
       to report Event errors other than relating to the parsing and validation
-      of the SET token.</t>
+      of the SET.</t>
   </section>
   
     
@@ -320,14 +313,14 @@
      <t>The SET to be delivered MAY be signed 
      and/or encrypted as defined in <xref target="I-D.ietf-secevent-token" />.</t>
            
-     <t>The Event Stream configuration defines a URI the of an Event 
+     <t>The Event Stream configuration defines a URI of an Event 
      Receiver provided endpoint which accepts HTTP POST requests (e.g. 
-     <spanx style="verb">https://notify.examplerp.com/Events</spanx>).</t>
+     <spanx style="verb">https://rp.example.com/Events</spanx>).</t>
 
      <t>The HTTP Content-Type (see 
      <xref target="RFC7231">Section 3.1.1.5</xref>) for the HTTP POST is 
-     <spanx style="verb">application/jwt</spanx> and SHALL consist of 
-     a single SET token (see <xref target="I-D.ietf-secevent-token" />).
+     <spanx style="verb">application/secevent+jwt</spanx> and SHALL consist of 
+     a single SET (see <xref target="I-D.ietf-secevent-token" />).
      As per <xref target="RFC7231">Section 5.3.2</xref>, the expected 
      media type (<spanx style="verb">Accept</spanx> header) response is 
      <spanx style="verb">application/json</spanx>.</t>
@@ -374,7 +367,7 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
      Event Receiver SHOULD NOT include an HTTP response body representation
      of the submitted SET or what the SET's pending status is when 
      acknowledging success. In the case of an error (e.g. HTTP Status 400),
-     purpose of the HTTP response body is to indicate any SET parsing, 
+     the purpose of the HTTP response body is to indicate any SET parsing, 
      validation, or cryptographic errors.</t>
      
      <figure anchor="goodPostResponse" title="Example Successful Delivery Response">
@@ -389,7 +382,7 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
        Before acknowledgement, Event Receivers SHOULD ensure they have 
        validated received SETs and retained them in a manner appropriate 
        to information retention requirements appropriate to the SET 
-       event types signaled. The level of retention and method of SETs
+       event types signaled. The level and method of retention of SETs
        by Event Receivers is out-of-scope of this specification.</t>
           
      <t>In the Event of a general HTTP error condition, the Event Receiver
@@ -426,7 +419,7 @@ Content-Type: application/json
                    
        <t>The delivery of SETs in this method is facilitated by HTTP
        POST requests initiated by the Event Receiver in which:<list style="symbols">
-        <t>The Event Receiver makes an request for available SETs 
+        <t>The Event Receiver makes a request for available SETs 
         using an HTTP POST to a pre-arranged endpoint provided by the Event 
         Transmitter. Or,</t>
         <t>After validating previously received SETs, the Event Receiver 
