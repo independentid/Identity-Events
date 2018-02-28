@@ -46,7 +46,7 @@
       </address>
     </author>
 
-    <date year="2018" month="February" day="27" />
+    <date year="2018" month="February" day="28" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
@@ -188,7 +188,21 @@
             Section 4.1.2 of <xref target="RFC7519"/>), a web resource,
             an entity such as an IP address, or the issuer of the SET.
           </t>
-            
+
+          <t hangText="Event Identifier">
+	    <vspace/>
+	    A member name for an element of the JSON object that is
+	    the value of the <spanx style="verb">events</spanx> claim in a SET.
+	    This member name MUST be a URI.
+          </t>
+
+          <t hangText="Event Payload">
+	    <vspace/>
+	    A member value for an element of the JSON object that is
+	    the value of the <spanx style="verb">events</spanx> claim in a SET.
+	    This member value MUST be JSON object.
+          </t>
+
           <t hangText="Profiling Specification">
 	    <vspace/>
 	    A specification that profiles the SET data structure to define
@@ -231,7 +245,7 @@
 	    corresponding value is a JSON object known as the event "payload".
 	    The payload JSON object contains claims that pertain to
 	    that event identifier and need not be registered as JWT claims.
-	    These claims are defined by the Profiling Specification that defines the event.
+	    These claims are defined by the profiling specification that defines the event.
 	    An event with no payload claims SHALL be represented as the empty JSON object 
 	    (<spanx style="verb">{}</spanx>).
 	  </t>
@@ -242,7 +256,7 @@
 	    They are not intended to be used to aggregate distinct events about the same subject.
 	    Beyond this, the interpretation of SETs containing multiple event identifiers
 	    is out of scope for this specification;
-	    Profiling Specifications MAY define their own rules regarding their use of
+	    profiling specifications MAY define their own rules regarding their use of
 	    SETs containing multiple event identifiers, as described in <xref target="Profiles"/>.
 	    Possible uses of multiple values include, but are not limited to:
 	    <list style="symbols">
@@ -454,7 +468,7 @@
 	      the SET (the issuer).
 	      In some cases, the SET issuer is not the issuer of the security subject.
 	      Therefore, implementers cannot assume that the issuers are the same
-	      unless the Profiling Specification specifies that they are
+	      unless the profiling specification specifies that they are
 	      for SETs conforming to that profile.
 	      This claim is REQUIRED.
 	    </t>
@@ -499,7 +513,7 @@
             This is usually the entity whose "state" was changed. For example,
             an IP Address was added to a black list. A URI representing a
             user resource that was modified. A token identifier for a revoked 
-            token. If used, the Profiling Specification SHOULD
+            token. If used, the profiling specification SHOULD
             define the content and format semantics for the value. This claim
             is OPTIONAL, as the principal for any given profile may already be
             identified without the inclusion of a subject claim.
@@ -546,7 +560,7 @@
 	      the corresponding value 
 	      MUST be a JSON object. The JSON object MAY be an empty 
 	      object (<spanx style="verb">{}</spanx>), or it MAY be a JSON 
-	      object containing data described by the Profiling Specification.
+	      object containing data described by the profiling specification.
 	    </t>
 
             <t hangText="txn" anchor="txnDef">
@@ -692,7 +706,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 
     <section anchor="Profiles" title="Requirements for SET Profiles">
       <t>
-	Profiling Specifications for SETs define the syntax and semantics
+	Profiling specifications for SETs define the syntax and semantics
 	of SETs conforming to that SET profile and rules for validating those SETs.
 	The syntax defined by profiling specifications includes what claims
 	and event payload values are used by SETs utilizing the profile.
@@ -709,13 +723,13 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	the means by which the integrity of the JWT is ensured MUST be specified.
       </t>
       <t>
-	Profiling Specifications MUST define how the event subject is identified in the SET,
+	Profiling specifications MUST define how the event subject is identified in the SET,
 	as well as how to differentiate between the event subject's issuer and the SET issuer, if applicable.
-	It is NOT RECOMMENDED for Profiling Specifications to use the <spanx style="verb">sub</spanx> claim
+	It is NOT RECOMMENDED for profiling specifications to use the <spanx style="verb">sub</spanx> claim
 	in cases in which the subject is not globally unique and has a different issuer from the SET itself.
       </t>
       <t>
-	Among the syntax and semantics of SETs that Profiling Specifications define is
+	Among the syntax and semantics of SETs that profiling specifications define is
 	whether and how multiple <spanx style="verb">events</spanx> values are used
 	for SETs conforming to those profiles.  Many valid choices are possible.
 	For instance, some profiles might allow multiple event identifiers to be present
@@ -724,10 +738,10 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	Other profiles might allow multiple event identifiers to be present
 	but require that all be understood if the SET is to be accepted.
 	Some profiles might require that only a single value be present.
-	All such choices are within the scope of Profiling Specifications to define.
+	All such choices are within the scope of profiling specifications to define.
       </t>
       <t>
-	Profiling Specifications MUST clearly specify the steps that a recipient of a SET
+	Profiling specifications MUST clearly specify the steps that a recipient of a SET
 	utilizing that profile MUST perform to validate that the SET is
 	both syntactically and semantically valid.
       </t>
@@ -763,7 +777,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 
       <t>This specification does not define a delivery mechanism for SETs.
       In addition to confidentiality and integrity (discussed above), implementers
-      and Profiling Specifications MUST consider the consequences of delivery 
+      and profiling specifications MUST consider the consequences of delivery 
       mechanisms that are not secure and/or not assured. For example, while
       a SET may be end-to-end secured using JWE encrypted SETs, without TLS,
       there is no assurance that the correct endpoint received the SET and 
@@ -782,7 +796,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
         a logged in or logged out status for a user subject, then
         order becomes important.</t>
 
-        <t>Profiling Specifications and implementers SHOULD take caution when
+        <t>Profiling specifications and implementers SHOULD take caution when
         using timestamps such as <spanx style="verb">iat</spanx> to define order. Distributed systems will have 
         some amount of clock skew. Thus, time by itself will not guarantee order.</t>
         
@@ -802,7 +816,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
         cause a logout SET to be issued that may arrive at the same time 
         as the user agent accesses a web site having just logged in. If
         timing is not handled properly, the effect would be to erroneously
-        treat the new user session as logged out. Profiling Specifications 
+        treat the new user session as logged out. Profiling specifications 
         SHOULD be careful to anticipate timing and subject selection information. 
         For example, it might be more appropriate to cancel a "session" 
         rather than a "user". Alternatively, the specification could use timestamps
