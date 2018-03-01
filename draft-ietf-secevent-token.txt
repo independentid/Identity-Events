@@ -634,7 +634,8 @@ Internet-Draft          draft-ietf-secevent-token          February 2018
       An OPTIONAL string value that represents a unique transaction
       identifier.  In cases in which multiple related JWTs are issued,
       the transaction identifier claim can be used to correlate these
-      related JWTs.
+      related JWTs.  Note that this claim can be used in JWTs that are
+      SETs and also in JWTs using non-SET profiles.
 
    "toe" (Time of Event) Claim
       A value that represents the date and time at which the event
@@ -660,7 +661,6 @@ Internet-Draft          draft-ietf-secevent-token          February 2018
 2.4.  Security Event Token Construction
 
    This section describes how to construct a SET.
-
 
 
 

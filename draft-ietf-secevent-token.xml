@@ -573,6 +573,8 @@
 	      An OPTIONAL string value that represents a unique transaction identifier.
 	      In cases in which multiple related JWTs are issued, the transaction
 	      identifier claim can be used to correlate these related JWTs.
+	      Note that this claim can be used in JWTs that are SETs
+	      and also in JWTs using non-SET profiles.
 	    </t>
 
             <t hangText='"toe" (Time of Event) Claim'>
