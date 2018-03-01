@@ -64,8 +64,12 @@
     <abstract>
       <t>
 	This specification defines the Security Event Token (SET) data structure.
-	A SET describes a statement of fact from the perspective of an issuer,
+	A SET describes a statement of fact from the perspective of an issuer
+	about the state of a security subject,
 	which is intended to be shared with one or more recipients.
+	This statement of fact represents an event that occurred to the security subject.
+	In some use cases, the security subject may be a digitial identity,
+	but SETs are also applicable to non-identity use cases.
 	A SET is a JSON Web Token (JWT),
 	which can be optionally signed and/or encrypted.
 	SETs can be distributed via protocols such as HTTP.
@@ -99,7 +103,7 @@
       issuer about the state of a security subject (e.g., a web 
       resource, token, IP address, the issuer itself) that the issuer controls or is aware 
       of, that has changed in some way (explicitly or implicitly). A 
-      security subject MAY be permanent (e.g., a user account) or 
+      security subject may be permanent (e.g., a user account) or 
       temporary (e.g., an HTTP session) in nature. A state change could 
       describe a direct change of entity state, an implicit change of state, 
       or other higher-level security statements such as:
@@ -133,8 +137,7 @@
       SETs, security events cannot be assumed to be commands or requests. 
       The intent of this specification is to define a syntax for
       statements of fact that SET recipients may interpret for their own
-      purposes. As such, SETs have no capability for error signaling 
-      to ensure the validation of a received SET.</t>
+      purposes.</t>
 
       <section anchor="notat" title="Notational Conventions" toc="default">
 	<t>
@@ -184,7 +187,7 @@
           <t hangText="Subject">
 	    <vspace/>
             A SET describes an event or state change that has occurred 
-            about a subject. A subject might, for instance, be a principal (e.g., 
+            to a subject. A subject might, for instance, be a principal (e.g., 
             Section 4.1.2 of <xref target="RFC7519"/>), a web resource,
             an entity such as an IP address, or the issuer of the SET.
           </t>
@@ -217,7 +220,7 @@
     <section anchor="events" title="The Security Event Token (SET)">
       <t>
 	A SET is a JWT <xref target="RFC7519"/> data structure that represents
-	one or more related aspects of a security event about a subject.
+	one or more related aspects of a security event that occurred to a subject.
 	The JWT Claims Set in a SET has the following structure:
 	<list style="symbols">
 	  <t>
@@ -461,7 +464,7 @@
 	  The following claims from <xref target="RFC7519"/> are profiled for use in SETs:
 	  <list style="hanging">
 
-            <t hangText="iss">
+            <t hangText='"iss" (Issuer) Claim'>
 	      <vspace/>
 	      As defined by Section 4.1.1 of <xref target="RFC7519"/>,
 	      this claim contains a string identifying the service provider publishing
@@ -473,14 +476,14 @@
 	      This claim is REQUIRED.
 	    </t>
 
-            <t hangText="iat">
+            <t hangText='"iat" (Issued At) Claim'>
 	      <vspace/>
 	      As defined by Section 4.1.6 of <xref target="RFC7519"/>,
 	      this claim contains a value representing when the SET was issued.
 	      This claim is REQUIRED.
             </t> 
 
-            <t hangText="jti">
+            <t hangText='"jti" (JWT ID) Claim'>
 	      <vspace/>
 	      As defined by Section 4.1.7 of <xref target="RFC7519"/>,
 	      this claim contains a unique identifier for the SET.
@@ -490,7 +493,7 @@
 	      This claim is REQUIRED.
 	    </t>
 
-            <t hangText="aud">
+            <t hangText='"aud" (Audience) Claim'>
 	      <vspace/>
 	      As defined by Section 4.1.3 of <xref target="RFC7519"/>,
 	      this claim contains one or more audience identifiers for the SET.
@@ -498,14 +501,14 @@
 	    </t>
 
             <!-- Removed after WGLC discussion
-            <t hangText="nbf">
+            <t hangText='"nbf" (Not Before) Claim'>
 	    <vspace/>
 	    Defined by 
             Section 4.1.5 of <xref target="RFC7519"/>, this claim is
             not used in SET and SHOULD NOT be used.</t>
              -->
              
-            <t hangText="sub">
+            <t hangText='"sub" (Subject) Claim'>
 	      <vspace/>
 	      As defined by Section 4.1.2 of <xref target="RFC7519"/>,
 	      this claim contains a StringOrURI value representing
@@ -525,13 +528,15 @@
 	    which may be the case for some identity SET profiles.
 	    </t>   
       
-            <t hangText="exp">
+            <t hangText='"exp" (Expiration Time) Claim'>
 	      <vspace/>
 	      As defined by Section 4.1.4 of <xref target="RFC7519"/>, this claim
 	      is the time after which the JWT MUST NOT be accepted for processing.
-	      In the context of a SET however, this notion does not apply,
+	      In the context of a SET however, this notion does not typically apply,
 	      since a SET represents something that has already occurred and is historical in nature.
-	      While some profiles MAY choose to use this claim, its use is NOT RECOMMENDED.
+	      Therefore, its use is NOT RECOMMENDED.
+	      (Also, see <xref target="SETsAndIDTokens"/> for additional reasons
+	      not to use the <spanx style="verb">exp</spanx> claim in some SET use cases.)
 	    </t>
 
           </list>
@@ -541,7 +546,7 @@
 	  The following new claims are defined by this specification:
 	  <list style="hanging">
 
-            <t hangText="events" anchor="eventDef">
+            <t hangText='"events" (Security Events) Claim' anchor="eventDef">
 	      <vspace/>
 	      This claim contains a set of event statements
 	      that each provide information describing a single
@@ -563,14 +568,14 @@
 	      object containing data described by the profiling specification.
 	    </t>
 
-            <t hangText="txn" anchor="txnDef">
+            <t hangText='"txn" (Transaction Identifier) Claim' anchor="txnDef">
 	      <vspace/>
 	      An OPTIONAL string value that represents a unique transaction identifier.
 	      In cases in which multiple related JWTs are issued, the transaction
 	      identifier claim can be used to correlate these related JWTs.
 	    </t>
 
-            <t hangText="toe">
+            <t hangText='"toe" (Time of Event) Claim'>
 	      <vspace/>
 	      A value that represents the date and time at which the event occurred.
 	      This value is a NumericDate (see Section 2 of <xref target="RFC7519"/>).
@@ -695,7 +700,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
         an unsecured token is shown. When SETs are not signed or
         encrypted, other mechanisms such as TLS MUST be employed
 	to provide integrity, confidentiality,
-	and issuer validation, as needed by the application.
+	and issuer authenticity, as needed by the application.
         </t>
         <t>When validation (i.e., auditing), or additional transmission
         security is required, JWS signing and/or JWE encryption MAY be used. 
@@ -730,7 +735,8 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       </t>
       <t>
 	Among the syntax and semantics of SETs that profiling specifications define is
-	whether and how multiple <spanx style="verb">events</spanx> values are used
+	whether and how multiple members of the JSON object
+	that is the value of the <spanx style="verb">events</spanx> claim are used
 	for SETs conforming to those profiles.  Many valid choices are possible.
 	For instance, some profiles might allow multiple event identifiers to be present
 	and specify that any that are not understood by recipients be ignored,
@@ -754,7 +760,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       <t>SETs may contain sensitive information. Therefore,
       methods for distribution of events SHOULD require the use of a 
       transport-layer security mechanism when distributing events. 
-      Parties MUST support TLS 1.2 <xref target="RFC5246"/> and MAY support
+      Parties MUST support TLS 1.2 <xref target="RFC5246"/> or a higher version and MAY support
       additional transport-layer mechanisms meeting its security
       requirements. When using TLS, the client MUST perform a TLS/SSL server
       certificate check, per <xref target="RFC6125"/>. Implementation
@@ -829,7 +835,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	  Because <xref target="RFC7519"/> states that "all claims that are not understood
 	  by implementations MUST be ignored", there is a consideration that 
 	  a SET might be confused with ID Token <xref target="OpenID.Core"/>
-	  if a SET is mistakenly or intentionally used in a context requiring an ID Token.
+	  if a SET is mistakenly or maliciously used in a context requiring an ID Token.
 	  If a SET could otherwise be interpreted as a valid ID Token
 	  (because it includes the required claims for an ID Token
 	  and valid issuer and audience claim values for an ID Token)
@@ -989,7 +995,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 		Claim Name: <spanx style="verb">events</spanx>
 	      </t>
 	      <t>
-		Claim Description: Security Event URI
+		Claim Description: Security Events
 	      </t>
 	      <t>
 		Change Controller: IESG
@@ -1133,7 +1139,6 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6749.xml'?><!-- OAuth 2.0 -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml'?><!-- JWT -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7525.xml'?><!-- TLS BCP -->
-      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7617.xml'?><!-- Basic Auth -->
       <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174"?>
 
       <reference anchor="IANA.JWT.Claims" target="http://www.iana.org/assignments/jwt">
@@ -1200,15 +1205,6 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
         </front>
       </reference>
 
-      <reference anchor="saml-core-2.0">
-        <front>
-          <title>Assertions and Protocols for the OASIS Security Assertion Markup Language (SAML) V2.0</title>
-          <author fullname="Scott Cantor et al"><organization>Internet2</organization></author>
-          <date day="15" month="March" year="2005"/>
-        </front>
-        <format type="PDF" target="http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf"/>
-      </reference>
-     
       <reference anchor="RISC" target="http://openid.net/wg/risc/">
         <front>
           <title>OpenID Risk and Incident Sharing and Coordination (RISC) Working Group</title>
@@ -1410,7 +1406,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	  </t>
 	  <t>
 	    Applied editorial improvements that improve the consistency of the specification
-	    that were suggested by Annabelle Backman and Marius Scurtescu.
+	    that were suggested by Annabelle Backman, Marius Scurtescu, and Yaron Sheffer.
 	  </t>
 	</list>
       </t>
