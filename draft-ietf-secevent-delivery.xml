@@ -95,19 +95,12 @@
       
 
 			<section anchor="notat" title="Notational Conventions" toc="default">
-				<t>
-					The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-					"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in
-					this
-					document are to be interpreted as described in
-					<xref target="RFC2119" />
-					. These keywords are capitalized when used to
-					unambiguously specify requirements of the protocol or application
-					features and behavior that affect the inter-operability and security of
-					implementations. When these words are not capitalized, they are
-					meant
-					in their natural-language sense.
-				</t>
+				<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+                                  NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
+                                  "MAY", and "OPTIONAL" in this document are to be interpreted as
+                                  described in BCP 14 <xref target="RFC2119"/> <xref target="RFC8174"/>
+				  when, and only when, they appear in all capitals, as shown here.
+			        </t>
 
 				<t>
 					For purposes of readability examples are not URL encoded.
@@ -1086,6 +1079,8 @@ Location: https://notify.exampleidp/Events
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7517.xml' ?><!-- JWK -->
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7525.xml' ?><!-- TLS Recos -->
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml' ?>
    
       <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-token-00.xml'?>
 
