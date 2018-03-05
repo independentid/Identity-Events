@@ -220,10 +220,8 @@
         header of <spanx style="verb">application/secevent+jwt</spanx> 
         as defined in Section 2.2 and 6.2 of 
         <xref target="I-D.ietf-secevent-token"/>. Upon receipt, the 
-        Event Receiver acknowledges receipt with an HTTP response which 
-        is a JSON document with a <spanx style="verb">Content-Type</spanx> header of 
-        <spanx style="verb">application/json</spanx> (see Section 11 of
-        <xref target="RFC7159"/>) as described below in <xref target="httpPost"/>.</t>
+        Event Receiver acknowledges receipt with a response with HTTP 
+        Status 202, as described below in <xref target="httpPost"/>.</t>
         
         <t hangText="POLLING">Where 
         multiple SETs are delivered in a JSON document <xref target="RFC7159"/>
