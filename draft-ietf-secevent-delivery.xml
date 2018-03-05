@@ -125,42 +125,9 @@
 					The following definitions are defined for Security Event distribution:
 					<list style="hanging">
           
-            <t hangText="Identity Provider"><vspace/>
-              An Identity Provider is a service provider that issues authentication
-              assertions that may be used by Relying Party service providers
-              to establish login sessions with users. Examples of Identity 
-              Providers are defined in: OpenID Connect 
-              <xref target="openid-connect-core"/> and SAML2 
-              <xref target="saml-core-2.0"/>. For the purpose of this 
-              specification an Identity Provider also includes any provider
-              of services where the compromise of an account may open up 
-              relying parties to attack. For example for the purposes of
-              security events, an email service provider could be 
-              considered an "implicit" Identity Provider.
-            </t>
-              
-            <t hangText="Relying Party"><vspace/>
-              Relying Parties come in multiple forms generally classified 
-              as "Explicit" or "Implicit". An Explicit Relying Party is a 
-              service provider that accepts a standard security 
-              assertion (e.g. a JWT access tokens <xref target="RFC7519"/>)
-              from an Identity Provider to establish a session or 
-              authorization. An Implicit Relying Party (implicit) uses 
-              a personal identifier such as an email address or telephone 
-              number from another provider to establish a Subject's 
-              identity. Examples of Explicit Relying Parties are defined 
-              in: OpenID Connect <xref target="openid-connect-core"/> and 
-              SAML2 <xref target="saml-core-2.0"/>. Implicit relying 
-              parties are verified by a common channel associated with 
-              the identifier. For example, an email or a text message is
-              sent with a unique link to establish ownership of the
-              identifier by the Subject.
-            </t>          
-            
             <t hangText="Event Transmitter"><vspace/>
               A service provider that delivers SETs to other providers known
-              as Event Receivers. Some examples of Event Transmitters are 
-              Identity Providers and Relying Parties. An Event Transmitter
+              as Event Receivers. An Event Transmitter
               is responsible for offering a service that allows the Event
               Receiver to check the Event Stream configuration and status
               known as the "Control Plane". 
@@ -170,8 +137,7 @@
               A service provider that registers to receive SETs from 
               an Event Transmitter and provides an endpoint to receive
               SETs via HTTP POST. 
-              Some examples of Event Receivers are 
-              Identity Providers and Relying Parties. Event Receivers
+              Event Receivers
               can check current Event Stream configuration and status by
               accessing the Event Transmitters "Control Plane".
             </t>
@@ -254,10 +220,8 @@
         header of <spanx style="verb">application/secevent+jwt</spanx> 
         as defined in Section 2.2 and 6.2 of 
         <xref target="I-D.ietf-secevent-token"/>. Upon receipt, the 
-        Event Receiver acknowledges receipt with an HTTP response which 
-        is a JSON document with a <spanx style="verb">Content-Type</spanx> header of 
-        <spanx style="verb">application/json</spanx> (see Section 11 of
-        <xref target="RFC7159"/>) as described below in <xref target="httpPost"/>.</t>
+        Event Receiver acknowledges receipt with a response with HTTP 
+        Status 202, as described below in <xref target="httpPost"/>.</t>
         
         <t hangText="POLLING">Where 
         multiple SETs are delivered in a JSON document <xref target="RFC7159"/>
