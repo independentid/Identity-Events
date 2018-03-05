@@ -1175,7 +1175,11 @@ Location: https://notify.exampleidp/Events
       
       <t>Draft 01 - PH - Removed Verification section per feedback from IETF99.</t>
 	    
-      <t>Draft 02 - MS - Minor editorial clarifications and update for RFC8174.</t>
+      <t>Draft 02 - MS - <list style="symbols">
+        <t>Minor editorial improvements</t>
+        <t>Removed Identity Provider / Relying Party Terminology</t>
+        <t>Changed boilerplate language according to RFC8174</t>     
+      </list> </t>
       
       <t>This draft was based on draft-hunt-secevent.distribution revision history:<list style="symbols">
       <t>Draft 00 - PH - First Draft based on reduced version of draft-hunt-idevent-distribution</t>

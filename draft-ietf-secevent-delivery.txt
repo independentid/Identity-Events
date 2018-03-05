@@ -5,18 +5,18 @@
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                            M. Scurtescu
-Expires: May 2, 2018                                              Google
+Expires: September 5, 2018                                        Google
                                                                M. Ansari
                                                                    Cisco
                                                               A. Nadalin
                                                                Microsoft
                                                               A. Backman
                                                                   Amazon
-                                                        October 29, 2017
+                                                           March 4, 2018
 
 
                      SET Token Delivery Using HTTP
-                    draft-ietf-secevent-delivery-01
+                    draft-ietf-secevent-delivery-02
 
 Abstract
 
@@ -41,11 +41,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on May 2, 2018.
+   This Internet-Draft will expire on September 5, 2018.
 
 Copyright Notice
 
-   Copyright (c) 2017 IETF Trust and the persons identified as the
+   Copyright (c) 2018 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Hunt, et al.               Expires May 2, 2018                  [Page 1]
+Hunt, et al.            Expires September 5, 2018               [Page 1]
 
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
 
 
    (https://trustee.ietf.org/license-info) in effect on the date of
@@ -71,11 +71,11 @@ Table of Contents
    1.  Introduction and Overview . . . . . . . . . . . . . . . . . .   2
      1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   3
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   3
-   2.  SET Event Stream Protocol . . . . . . . . . . . . . . . . . .   5
-     2.1.  Event Delivery Process  . . . . . . . . . . . . . . . . .   5
+   2.  SET Event Stream Protocol . . . . . . . . . . . . . . . . . .   4
+     2.1.  Event Delivery Process  . . . . . . . . . . . . . . . . .   4
      2.2.  Push Delivery using HTTP  . . . . . . . . . . . . . . . .   6
      2.3.  Polling Delivery using HTTP . . . . . . . . . . . . . . .   8
-       2.3.1.  Polling HTTP Request Attributes . . . . . . . . . . .   9
+       2.3.1.  Polling HTTP Request Attributes . . . . . . . . . . .   8
        2.3.2.  Polling HTTP Response Attributes  . . . . . . . . . .  10
        2.3.3.  Poll Request  . . . . . . . . . . . . . . . . . . . .  10
        2.3.4.  Poll Response . . . . . . . . . . . . . . . . . . . .  14
@@ -96,27 +96,26 @@ Table of Contents
    Appendix A.  Other Streaming Specifications . . . . . . . . . . .  23
    Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  24
    Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  24
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  25
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  26
 
 1.  Introduction and Overview
 
    This specification defines how a stream of SETs (see
    [I-D.ietf-secevent-token]) can be transmitted to a previously
    registered Event Receiver using HTTP [RFC7231] over TLS.  The
-   specification defines a method to push SETs via HTTP POST and to poll
-   for SETs using HTTP POST.
+   specification defines a method to push SETs via HTTP POST and another
+   method to poll for SETs using HTTP POST.
 
 
 
 
-Hunt, et al.               Expires May 2, 2018                  [Page 2]
+Hunt, et al.            Expires September 5, 2018               [Page 2]
 
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
 
 
-   This specification defines to methods of SET delivery in what is
-   known as Event Streams.  The specification includes a verification
-   process which tests and validates Event Stream configuration.
+   This specification defines two methods of SET delivery in what is
+   known as Event Streams.
 
    This specification does not define the method by which Event Streams
    are defined, provisioned, managed, monitored, and configured and is
@@ -126,13 +125,10 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 1.1.  Notational Conventions
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-   "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-   document are to be interpreted as described in [RFC2119] . These
-   keywords are capitalized when used to unambiguously specify
-   requirements of the protocol or application features and behavior
-   that affect the inter-operability and security of implementations.
-   When these words are not capitalized, they are meant in their
-   natural-language sense.
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP
+   14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
 
    For purposes of readability examples are not URL encoded.
    Implementers MUST percent encode URLs as described in Section 2.1 of
@@ -151,66 +147,34 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
    The following definitions are defined for Security Event
    distribution:
 
-   Identity Provider
-      An Identity Provider is a service provider that issues
-      authentication assertions that may be used by Relying Party
-      service providers to establish login sessions with users.
-      Examples of Identity Providers are defined in: OpenID Connect
-      [openid-connect-core] and SAML2 [saml-core-2.0].  For the purpose
-      of this specification an Identity Provider also includes any
-      provider of services where the compromise of an account may open
-      up relying parties to attack.  For example for the purposes of
-      security events, an email service provider could be considered an
-      "implicit" Identity Provider.
-
-
-
-Hunt, et al.               Expires May 2, 2018                  [Page 3]
-
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
-
-
-   Relying Party
-      Relying Parties come in multiple forms generally classified as
-      "Explicit" or "Implicit".  An Explicit Relying Party is a service
-      provider that accepts a standard security assertion (e.g. a JWT
-      access tokens [RFC7519]) from an Identity Provider to establish a
-      session or authorization.  An Implicit Relying Party (implicit)
-      uses a personal identifier such as an email address or telephone
-      number from another provider to establish a Subject's identity.
-      Examples of Explicit Relying Parties are defined in: OpenID
-      Connect [openid-connect-core] and SAML2 [saml-core-2.0].  Implicit
-      relying parties are verified by a common channel associated with
-      the identifier.  For example, an email or a text message is sent
-      with a unique link to establish ownership of the identifier by the
-      Subject.
-
    Event Transmitter
       A service provider that delivers SETs to other providers known as
-      Event Receivers.  Some examples of Event Transmitters are Identity
-      Providers and Relying Parties.  An Event Transmitter is
-      responsible for offering a service that allows the Event Receiver
-      to check the Event Stream configuration and status known as the
-      "Control Plane".
+      Event Receivers.  An Event Transmitter is responsible for offering
+      a service that allows the Event Receiver to check the Event Stream
+      configuration and status known as the "Control Plane".
 
    Event Receiver
       A service provider that registers to receive SETs from an Event
-      Transmitter and provides an endpoint to receive SETs via HTTP POST
-      (known as the "Data Plane").  Some examples of Event Receivers are
-      Identity Providers and Relying Parties.  Event Receivers can check
-      current Event Stream configuration and status by accessing the
-      Event Transmitters "Control Plane".
+      Transmitter and provides an endpoint to receive SETs via HTTP
+      POST.  Event Receivers can check current Event Stream
+      configuration and status by accessing the Event Transmitters
+      "Control Plane".
 
    Event Stream
+
+
+
+
+Hunt, et al.            Expires September 5, 2018               [Page 3]
+
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
+
+
       An Event Stream is a defined location, distribution method and
       whereby an Event Transmitter and Event Receiver exchange a pre-
       defined family of SETs.  A Stream is assumed to have configuration
       data such as HTTP endpoints, timeouts, public key sets for signing
       and encryption, and Event Families.
-
-   Event Family
-      An Event Family is a URI that describes the set of Events types be
-      issued in an Event Stream.
 
    Subject
       The security subject around which a security event has occurred.
@@ -218,13 +182,6 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
       email address, a service provider entity, an IP address, an OAuth
       Client, a mobile device, or any identifiable thing referenced in
       security and authorization systems.
-
-
-
-Hunt, et al.               Expires May 2, 2018                  [Page 4]
-
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
-
 
    Event
       An Event is defined to be an event as represented by a security
@@ -246,25 +203,33 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 2.1.  Event Delivery Process
 
-   When an Event occurs, the Feed Provider constructs a SET token
-   [I-D.ietf-secevent-token] that describes the Event.  The SET issuer
-   determines the Event Streams over which the SET should be distributed
-   to.
+   When an Event occurs, the Event Transmitter constructs a SET token
+   [I-D.ietf-secevent-token] that describes the Event.  The Event
+   Transmitter determines the Event Streams over which the SET should be
+   distributed to.
 
-   How SET Events are defined and the process by which Events are
-   identified for Event Receivers is out-of-scope of this specification.
+   How SETs are defined and the process by which Events are identified
+   for Event Receivers is out-of-scope of this specification.
 
-   When a SET is available for a Event Receiver, the Feed Transmitter
+   When a SET is available for an Event Receiver, the Event Transmitter
    attempts to deliver the SET based on the Event Receiver's registered
    delivery mechanism:
 
    o  The Event Transmitter uses an HTTP/1.1 POST to the Event Receiver
       endpoint to deliver the SET;
 
+
+
+
+Hunt, et al.            Expires September 5, 2018               [Page 4]
+
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
+
+
    o  The Event Transmitter queues up the SET in a buffer so that an
       Event Receiver MAY poll for SETs using HTTP/1.1 POST.
 
-   o  Or, the Feed Transmitter delivers the Event through a different
+   o  Or, the Event Transmitter delivers the Event through a different
       method not defined by this specification.
 
    Delivery of SETs MAY be delivered using one of two modes:
@@ -274,18 +239,9 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
       by an Event Transmitter to an Event Receiver.  The HTTP request
       body is a JSON Web Token [RFC7519] with a "Content-Type" header of
       "application/secevent+jwt" as defined in Section 2.2 and 6.2 of
-
-
-
-Hunt, et al.               Expires May 2, 2018                  [Page 5]
-
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
-
-
       [I-D.ietf-secevent-token].  Upon receipt, the Event Receiver
-      acknowledges receipt with an HTTP response which is a JSON
-      document with a "Content-Type" header of "application/json" (see
-      Section 11 of [RFC7159]) as described below in Section 2.2.
+      acknowledges receipt with a response with HTTP Status 202, as
+      described below in Section 2.2.
 
    POLLING  Where multiple SETs are delivered in a JSON document
       [RFC7159] to an Event Receiver in response to an HTTP POST request
@@ -307,13 +263,24 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
    authentication.
 
    Upon receiving a SET, the Event Receiver reads the SET and validates
-   it.  The receiver MUST acknowledge receipt to the Event transmitter,
-   using the defined acknowledgement or error method depending on the
-   method of transfer.
+   it.  The Event Receiver MUST acknowledge receipt to the Event
+   Transmitter, using the defined acknowledgement or error method
+   depending on the method of transfer.
 
    The Event Receiver SHALL NOT use the Event acknowledgement mechanism
    to report Event errors other than relating to the parsing and
-   validation of the SET token.
+   validation of the SET.
+
+
+
+
+
+
+
+Hunt, et al.            Expires September 5, 2018               [Page 5]
+
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
+
 
 2.2.  Push Delivery using HTTP
 
@@ -325,21 +292,12 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
    The SET to be delivered MAY be signed and/or encrypted as defined in
    [I-D.ietf-secevent-token].
 
-   The Event Stream configuration defines a URI the of an Event Receiver
+   The Event Stream configuration defines a URI of an Event Receiver
    provided endpoint which accepts HTTP POST requests (e.g.
-   "https://notify.examplerp.com/Events").
-
-
-
-
-
-Hunt, et al.               Expires May 2, 2018                  [Page 6]
-
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
-
+   "https://rp.example.com/Events").
 
    The HTTP Content-Type (see Section 3.1.1.5 [RFC7231]) for the HTTP
-   POST is "application/jwt" and SHALL consist of a single SET token
+   POST is "application/secevent+jwt" and SHALL consist of a single SET
    (see [I-D.ietf-secevent-token]).  As per Section 5.3.2 [RFC7231], the
    expected media type ("Accept" header) response is "application/json".
 
@@ -372,6 +330,14 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
    Upon receipt of the request, the Event Receiver SHALL validate the
    JWT structure of the SET as defined in Section 7.2 [RFC7519].  The
+
+
+
+Hunt, et al.            Expires September 5, 2018               [Page 6]
+
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
+
+
    Event Receiver SHALL also validate the SET information as described
    in Section 2 [I-D.ietf-secevent-token].
 
@@ -383,16 +349,8 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
    transmission, the Event Receiver SHOULD NOT include an HTTP response
    body representation of the submitted SET or what the SET's pending
    status is when acknowledging success.  In the case of an error (e.g.
-   HTTP Status 400), purpose of the HTTP response body is to indicate
-   any SET parsing, validation, or cryptographic errors.
-
-
-
-
-Hunt, et al.               Expires May 2, 2018                  [Page 7]
-
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
-
+   HTTP Status 400), the purpose of the HTTP response body is to
+   indicate any SET parsing, validation, or cryptographic errors.
 
    The following is a non-normative example of a successful receipt of a
    SET.
@@ -407,7 +365,7 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
    Before acknowledgement, Event Receivers SHOULD ensure they have
    validated received SETs and retained them in a manner appropriate to
    information retention requirements appropriate to the SET event types
-   signaled.  The level of retention and method of SETs by Event
+   signaled.  The level and method of retention of SETs by Event
    Receivers is out-of-scope of this specification.
 
    In the Event of a general HTTP error condition, the Event Receiver
@@ -418,6 +376,23 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
    received SET (as defined by [I-D.ietf-secevent-token]), the Event
    Receiver SHALL indicate an HTTP Status 400 error with an error code
    as described in Section 2.4.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.            Expires September 5, 2018               [Page 7]
+
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
+
 
    The following is an example non-normative error response.
 
@@ -443,14 +418,7 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
    The delivery of SETs in this method is facilitated by HTTP POST
    requests initiated by the Event Receiver in which:
 
-
-
-Hunt, et al.               Expires May 2, 2018                  [Page 8]
-
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
-
-
-   o  The Event Receiver makes an request for available SETs using an
+   o  The Event Receiver makes a request for available SETs using an
       HTTP POST to a pre-arranged endpoint provided by the Event
       Transmitter.  Or,
 
@@ -472,6 +440,15 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
    When initiating a poll request, the Event Receiver constructs a JSON
    document that consists of polling request parameters and SET
    acknowledgement parameters in the form of JSON attributes.
+
+
+
+
+
+Hunt, et al.            Expires September 5, 2018               [Page 8]
+
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
+
 
    The request payloads are delivered in one of two forms as described
    in Section 2.3.3 and Section 2.3.4
@@ -498,14 +475,6 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
       returnImmediately
          An OPTIONAL JSON boolean value that indicates the Event
          Transmitter SHOULD return an immediate response even if no
-
-
-
-Hunt, et al.               Expires May 2, 2018                  [Page 9]
-
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
-
-
          results are available (short polling).  The default value is
          "false" indicates the request is to be treated as an HTTP Long
          Poll (see Section 2 [RFC6202]).  The time out for the request
@@ -528,6 +497,14 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
          value of each is a JSON object whose contents is an "err"
          attribute and "description" attribute whose value correspond to
          the errors described in Section 2.4.
+
+
+
+
+Hunt, et al.            Expires September 5, 2018               [Page 9]
+
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
+
 
 2.3.2.  Polling HTTP Response Attributes
 
@@ -553,15 +530,6 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
    The Event Receiver performs an HTTP POST (see Section 4.3.4
    [RFC7231]) to a pre-arranged polling endpoint URI to check for SETs
-
-
-
-
-Hunt, et al.               Expires May 2, 2018                 [Page 10]
-
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
-
-
    that are available.  Because the Event Receiver has no prior SETs to
    acknowledge, the "ack" and "errs" request parameters are omitted.
 
@@ -586,6 +554,14 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
    Poll requests have three variations:
 
    Poll Only
+
+
+
+Hunt, et al.            Expires September 5, 2018              [Page 10]
+
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
+
+
       In which an Event Receiver asks for the next set of Events where
       no previous SET deliveries are acknowledged (such as in the
       initial poll request).
@@ -611,13 +587,6 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
    has no outstanding SETs to acknowledge and is polling for available
    SETs.
 
-
-
-Hunt, et al.               Expires May 2, 2018                 [Page 11]
-
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
-
-
    The following is a non-normative example poll request to the
    endpoint: "https://nofity.exampleidp.com/Events".
 
@@ -635,6 +604,19 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
    An Event Receiver MAY poll with no parameters at all by passing an
    empty JSON object.
+
+
+
+
+
+
+
+
+
+Hunt, et al.            Expires September 5, 2018              [Page 11]
+
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
+
 
    The following is a non-normative example default poll request to the
    endpoint: "https://nofity.exampleidp.com/Events".
@@ -658,21 +640,6 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
    This variation is typically used when an Event Receiver needs to
    acknowledge received SETs independently (e.g. on separate threads)
    from the process of receiving SETs.
-
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.               Expires May 2, 2018                 [Page 12]
-
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
-
 
    The following is a non-normative example poll with acknowledgement of
    SETs received (for example as shown in Figure 9).
@@ -700,6 +667,13 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
    previously received SETs and wait for the next group of SETs in a
    single request.
 
+
+
+Hunt, et al.            Expires September 5, 2018              [Page 12]
+
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
+
+
    The following is a non-normative example poll with acknowledgement of
    SETs received in Figure 9.
 
@@ -720,16 +694,6 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
          Figure 7: Example Poll With Acknowledgement and No Errors
 
-
-
-
-
-
-Hunt, et al.               Expires May 2, 2018                 [Page 13]
-
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
-
-
    In the above acknowledgement, the Event Receiver has acknowledged
    receipt of two SETs and has indicated it wants to wait until the next
    SET is available.
@@ -739,6 +703,32 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
    In the case where errors were detected in previously delivered SETs,
    the Event Receiver MAY use the "setErrs" attribute to indicate errors
    in the following poll request.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.            Expires September 5, 2018              [Page 13]
+
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
+
 
    The following is a non-normative example of a response acknowledging
    1 error and 1 receipt of two SETs received in Figure 9.
@@ -781,9 +771,19 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
 
-Hunt, et al.               Expires May 2, 2018                 [Page 14]
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.            Expires September 5, 2018              [Page 14]
 
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
 
 
    The following is a non-normative example response to the request
@@ -837,9 +837,9 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
 
-Hunt, et al.               Expires May 2, 2018                 [Page 15]
+Hunt, et al.            Expires September 5, 2018              [Page 15]
 
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
 
 
    The following is a non-normative example response to the request
@@ -893,9 +893,9 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
 
-Hunt, et al.               Expires May 2, 2018                 [Page 16]
+Hunt, et al.            Expires September 5, 2018              [Page 16]
 
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
 
 
       A value which is a keyword that describes the error (see Table 1).
@@ -949,9 +949,9 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
 
-Hunt, et al.               Expires May 2, 2018                 [Page 17]
+Hunt, et al.            Expires September 5, 2018              [Page 17]
 
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
 
 
    Because SET Delivery describes a simple function, authorization for
@@ -1005,9 +1005,9 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
 
-Hunt, et al.               Expires May 2, 2018                 [Page 18]
+Hunt, et al.            Expires September 5, 2018              [Page 18]
 
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
 
 
    [I-D.ietf-secevent-token]).  This enables the Event Receiver to
@@ -1061,9 +1061,9 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
 
-Hunt, et al.               Expires May 2, 2018                 [Page 19]
+Hunt, et al.            Expires September 5, 2018              [Page 19]
 
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
 
 
    Since security is only as good as the weakest link, implementers also
@@ -1117,9 +1117,9 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
 
-Hunt, et al.               Expires May 2, 2018                 [Page 20]
+Hunt, et al.            Expires September 5, 2018              [Page 20]
 
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
 
 
    [RFC3986]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
@@ -1166,16 +1166,16 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
               (DTLS)", BCP 195, RFC 7525, DOI 10.17487/RFC7525, May
               2015, <https://www.rfc-editor.org/info/rfc7525>.
 
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
 
 
 
-
-
-
-Hunt, et al.               Expires May 2, 2018                 [Page 21]
+Hunt, et al.            Expires September 5, 2018              [Page 21]
 
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
 
 
 7.2.  Informative References
@@ -1229,9 +1229,9 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
 
-Hunt, et al.               Expires May 2, 2018                 [Page 22]
+Hunt, et al.            Expires September 5, 2018              [Page 22]
 
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
 
 
    [RFC7521]  Campbell, B., Mortimore, C., Jones, M., and Y. Goland,
@@ -1285,9 +1285,9 @@ Appendix A.  Other Streaming Specifications
 
 
 
-Hunt, et al.               Expires May 2, 2018                 [Page 23]
+Hunt, et al.            Expires September 5, 2018              [Page 23]
 
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
 
 
    Other information:
@@ -1341,9 +1341,9 @@ Appendix C.  Change Log
 
 
 
-Hunt, et al.               Expires May 2, 2018                 [Page 24]
+Hunt, et al.            Expires September 5, 2018              [Page 24]
 
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
 
 
    o  Removed Control Plane from specification
@@ -1358,6 +1358,14 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
    Draft 01 - PH - Removed Verification section per feedback from
    IETF99.
+
+   Draft 02 - MS -
+
+   o  Minor editorial improvements
+
+   o  Removed Identity Provider / Relying Party Terminology
+
+   o  Changed boilerplate language according to RFC8174
 
    This draft was based on draft-hunt-secevent.distribution revision
    history:
@@ -1385,6 +1393,15 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
       *  Control Plane sections moved to draft-hunt-secevent-stream-mgmt
 
+
+
+
+
+Hunt, et al.            Expires September 5, 2018              [Page 25]
+
+Internet-Draft        draft-ietf-secevent-delivery            March 2018
+
+
       *  Added support for delivering multiple events using HTTP POST
          polling
 
@@ -1394,12 +1411,6 @@ Authors' Addresses
    Oracle Corporation
 
    Email: phil.hunt@yahoo.com
-
-
-
-Hunt, et al.               Expires May 2, 2018                 [Page 25]
-
-Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
    Marius Scurtescu
@@ -1442,15 +1453,4 @@ Internet-Draft        draft-ietf-secevent-delivery          October 2017
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.               Expires May 2, 2018                 [Page 26]
+Hunt, et al.            Expires September 5, 2018              [Page 26]
