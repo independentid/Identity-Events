@@ -22,6 +22,7 @@
       <address>
         <email>phil.hunt@yahoo.com</email>
       </address>
+      
     </author>
 
     <author fullname="Michael B. Jones" initials="M.B." surname="Jones">
@@ -46,7 +47,7 @@
       </address>
     </author>
 
-    <date year="2018" month="February" day="28" />
+    <date year="2018" month="March" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
