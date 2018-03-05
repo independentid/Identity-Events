@@ -13,7 +13,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="std" docName="draft-ietf-secevent-token-06" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-token-07" ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-token">Security Event Token (SET)</title>
 
@@ -736,10 +736,12 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	in cases in which the subject is not globally unique and has a different issuer from the SET itself.
       </t>
       <t>
-	Among the syntax and semantics of SETs that profiling specifications define is
-	whether and how multiple members of the JSON object
-	that is the value of the <spanx style="verb">events</spanx> claim are used
-	for SETs conforming to those profiles.  Many valid choices are possible.
+      
+  Among the syntax and semantics of SETs that a profiling specification 
+  may define is whether the value of the <spanx style="verb">events</spanx>  
+  claim may contain multiple members, and what processing instructions 
+  are employed in the single- and multiple-valued cases for SETs 
+  conforming to that profile.  Many valid choices are possible.
 	For instance, some profiles might allow multiple event identifiers to be present
 	and specify that any that are not understood by recipients be ignored,
 	thus enabling extensibility.
@@ -1412,6 +1414,8 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	  </t>
 	</list>
       </t>
+       
+      <t>Draft 07 - PH - Text refinement to Section 3 proposed by Annabelle Backman post WGLC</t>
 
     </section>
   </back>

@@ -14,7 +14,7 @@ Expires: September 1, 2018                                     Microsoft
 
 
                        Security Event Token (SET)
-                      draft-ietf-secevent-token-06
+                      draft-ietf-secevent-token-07
 
 Abstract
 
@@ -789,10 +789,11 @@ Internet-Draft          draft-ietf-secevent-token          February 2018
    cases in which the subject is not globally unique and has a different
    issuer from the SET itself.
 
-   Among the syntax and semantics of SETs that profiling specifications
-   define is whether and how multiple members of the JSON object that is
-   the value of the "events" claim are used for SETs conforming to those
-   profiles.  Many valid choices are possible.  For instance, some
+   Among the syntax and semantics of SETs that a profiling specification
+   may define is whether the value of the "events" claim may contain
+   multiple members, and what processing instructions are employed in
+   the single- and multiple-valued cases for SETs conforming to that
+   profile.  Many valid choices are possible.  For instance, some
    profiles might allow multiple event identifiers to be present and
    specify that any that are not understood by recipients be ignored,
    thus enabling extensibility.  Other profiles might allow multiple
@@ -833,7 +834,6 @@ Internet-Draft          draft-ietf-secevent-token          February 2018
    addition to confidentiality and integrity (discussed above),
    implementers and profiling specifications MUST consider the
    consequences of delivery mechanisms that are not secure and/or not
-   assured.  For example, while a SET may be end-to-end secured using
 
 
 
@@ -842,6 +842,7 @@ Hunt, et al.            Expires September 1, 2018              [Page 15]
 Internet-Draft          draft-ietf-secevent-token          February 2018
 
 
+   assured.  For example, while a SET may be end-to-end secured using
    JWE encrypted SETs, without TLS, there is no assurance that the
    correct endpoint received the SET and that it could be successfully
    processed.
@@ -889,7 +890,6 @@ Internet-Draft          draft-ietf-secevent-token          February 2018
    Because [RFC7519] states that "all claims that are not understood by
    implementations MUST be ignored", there is a consideration that a SET
    might be confused with ID Token [OpenID.Core] if a SET is mistakenly
-   or maliciously used in a context requiring an ID Token.  If a SET
 
 
 
@@ -898,6 +898,7 @@ Hunt, et al.            Expires September 1, 2018              [Page 16]
 Internet-Draft          draft-ietf-secevent-token          February 2018
 
 
+   or maliciously used in a context requiring an ID Token.  If a SET
    could otherwise be interpreted as a valid ID Token (because it
    includes the required claims for an ID Token and valid issuer and
    audience claim values for an ID Token) then that SET profile MUST
@@ -944,7 +945,6 @@ Internet-Draft          draft-ietf-secevent-token          February 2018
    o  Employ explicit typing, as described in Section 2.3, and modify
       access token validation systems to use the "typ" header parameter
       value.
-
 
 
 
@@ -1467,6 +1467,9 @@ Internet-Draft          draft-ietf-secevent-token          February 2018
       specification that were suggested by Annabelle Backman, Marius
       Scurtescu, and Yaron Sheffer.
 
+   Draft 07 - PH - Text refinement to Section 3 proposed by Annabelle
+   Backman post WGLC
+
 Authors' Addresses
 
    Phil Hunt (editor)
@@ -1492,9 +1495,6 @@ Authors' Addresses
    Cisco
 
    Email: morteza.ansari@cisco.com
-
-
-
 
 
 
