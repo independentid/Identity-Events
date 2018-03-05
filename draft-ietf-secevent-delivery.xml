@@ -130,7 +130,7 @@
               as Event Receivers. An Event Transmitter
               is responsible for offering a service that allows the Event
               Receiver to check the Event Stream configuration and status
-              known as the "Management API". 
+              known as the "Control Plane". 
             </t>
             
             <t hangText="Event Receiver"><vspace/>
@@ -139,7 +139,7 @@
               SETs via HTTP POST. 
               Event Receivers
               can check current Event Stream configuration and status by
-              accessing the Event Transmitters "Management API".
+              accessing the Event Transmitters "Control Plane".
             </t>
   
             <t hangText="Event Stream"><vspace/>
