@@ -26,6 +26,14 @@
 			</address>
 		</author>
     
+    <author fullname="Anthony Nadalin" initials="A." surname="Nadalin">
+      <organization abbrev="Microsoft">Microsoft</organization>
+
+      <address>
+        <email>tonynad@microsoft.com</email>
+      </address>
+    </author>
+    
 		<date year="2018" />
 
 		<keyword>Internet-Draft</keyword>
@@ -961,7 +969,8 @@ Location: https://notify.exampleidp/Events
       <t>The editor would like to thank the participants in the the SECEVENTS
       working group for their support of this specification.</t>
       
-      <t>This specification is based on and optionally replaces draft-ietf-secevent-delivery.</t>
+      <t>This specification is based on and ideally replaces draft-ietf-secevent-delivery,
+      and we thank its contributors Annabelle Backman, Marius Scurtescu, and Morteza Ansari.</t>
     </section>
 
     <section title="Change Log">

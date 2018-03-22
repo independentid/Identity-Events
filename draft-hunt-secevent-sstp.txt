@@ -4,8 +4,9 @@
 
 Network Working Group                                       P. Hunt, Ed.
 Internet-Draft                                                    Oracle
-Intended status: Standards Track                           March 9, 2018
-Expires: September 10, 2018
+Intended status: Standards Track                              A. Nadalin
+Expires: September 23, 2018                                    Microsoft
+                                                          March 22, 2018
 
 
                     Symmetric SET Transfer Protocol
@@ -35,7 +36,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on September 10, 2018.
+   This Internet-Draft will expire on September 23, 2018.
 
 Copyright Notice
 
@@ -52,8 +53,7 @@ Copyright Notice
 
 
 
-
-Hunt                   Expires September 10, 2018               [Page 1]
+Hunt & Nadalin         Expires September 23, 2018               [Page 1]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -88,7 +88,7 @@ Table of Contents
      7.2.  Informative References  . . . . . . . . . . . . . . . . .  21
    Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  22
    Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  23
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  23
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  23
 
 1.  Introduction
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Hunt                   Expires September 10, 2018               [Page 2]
+Hunt & Nadalin         Expires September 23, 2018               [Page 2]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -165,7 +165,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018               [Page 3]
+Hunt & Nadalin         Expires September 23, 2018               [Page 3]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -221,7 +221,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018               [Page 4]
+Hunt & Nadalin         Expires September 23, 2018               [Page 4]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -277,7 +277,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018               [Page 5]
+Hunt & Nadalin         Expires September 23, 2018               [Page 5]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -333,7 +333,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018               [Page 6]
+Hunt & Nadalin         Expires September 23, 2018               [Page 6]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -389,7 +389,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018               [Page 7]
+Hunt & Nadalin         Expires September 23, 2018               [Page 7]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -445,7 +445,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018               [Page 8]
+Hunt & Nadalin         Expires September 23, 2018               [Page 8]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -501,7 +501,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018               [Page 9]
+Hunt & Nadalin         Expires September 23, 2018               [Page 9]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -557,7 +557,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018              [Page 10]
+Hunt & Nadalin         Expires September 23, 2018              [Page 10]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -613,7 +613,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018              [Page 11]
+Hunt & Nadalin         Expires September 23, 2018              [Page 11]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -669,7 +669,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018              [Page 12]
+Hunt & Nadalin         Expires September 23, 2018              [Page 12]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -725,7 +725,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018              [Page 13]
+Hunt & Nadalin         Expires September 23, 2018              [Page 13]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -781,7 +781,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018              [Page 14]
+Hunt & Nadalin         Expires September 23, 2018              [Page 14]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -837,7 +837,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018              [Page 15]
+Hunt & Nadalin         Expires September 23, 2018              [Page 15]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -893,7 +893,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018              [Page 16]
+Hunt & Nadalin         Expires September 23, 2018              [Page 16]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -949,7 +949,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018              [Page 17]
+Hunt & Nadalin         Expires September 23, 2018              [Page 17]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -1005,7 +1005,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018              [Page 18]
+Hunt & Nadalin         Expires September 23, 2018              [Page 18]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -1061,7 +1061,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018              [Page 19]
+Hunt & Nadalin         Expires September 23, 2018              [Page 19]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -1117,7 +1117,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018              [Page 20]
+Hunt & Nadalin         Expires September 23, 2018              [Page 20]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -1173,7 +1173,7 @@ Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
 
 
-Hunt                   Expires September 10, 2018              [Page 21]
+Hunt & Nadalin         Expires September 23, 2018              [Page 21]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -1220,16 +1220,16 @@ Appendix A.  Acknowledgments
    The editor would like to thank the participants in the the SECEVENTS
    working group for their support of this specification.
 
-   This specification is based on and optionally replaces draft-ietf-
-   secevent-delivery.
+   This specification is based on and ideally replaces draft-ietf-
+   secevent-delivery, and we thank its contributors Annabelle Backman,
+   Marius Scurtescu, and Morteza Ansari.
 
 
 
 
 
 
-
-Hunt                   Expires September 10, 2018              [Page 22]
+Hunt & Nadalin         Expires September 23, 2018              [Page 22]
 
 Internet-Draft          draft-hunt-secevent-sstp              March 2018
 
@@ -1238,7 +1238,7 @@ Appendix B.  Change Log
 
    Draft 00 - PH - Original
 
-Author's Address
+Authors' Addresses
 
    Phil Hunt (editor)
    Oracle Corporation
@@ -1246,6 +1246,10 @@ Author's Address
    Email: phil.hunt@yahoo.com
 
 
+   Anthony Nadalin
+   Microsoft
+
+   Email: tonynad@microsoft.com
 
 
 
@@ -1281,8 +1285,4 @@ Author's Address
 
 
 
-
-
-
-
-Hunt                   Expires September 10, 2018              [Page 23]
+Hunt & Nadalin         Expires September 23, 2018              [Page 23]
