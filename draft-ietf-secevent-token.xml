@@ -13,7 +13,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="std" docName="draft-ietf-secevent-token-07" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-token-08" ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-token">Security Event Token (SET)</title>
 
@@ -47,7 +47,7 @@
       </address>
     </author>
 
-    <date year="2018" month="March" />
+    <date year="2018" month="April" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
@@ -69,8 +69,7 @@
 	about the state of a security subject,
 	which is intended to be shared with one or more recipients.
 	This statement of fact represents an event that occurred to the security subject.
-	In some use cases, the security subject may be a digitial identity,
-	but SETs are also applicable to non-identity use cases.
+	This specification is intended to enable representing security- and identity-related events.
 	A SET is a JSON Web Token (JWT),
 	which can be optionally signed and/or encrypted.
 	SETs can be distributed via protocols such as HTTP.
@@ -94,7 +93,7 @@
       This specification uses non-normative example events to 
       demonstrate how events can be constructed.</t>
       
-      <t>This specification is scoped to security and identity related events.
+      <t>This specification is scoped to security- and identity-related events.
       While Security Event Tokens may be used for other purposes, the specification
       only considers security and privacy concerns relevant to identity 
       and personal information.</t>
@@ -240,6 +239,8 @@
 	    The claim <spanx style="verb">events</spanx> contains the event identifiers
 	    and event-specific data expressed about the security subject.
 	    The envelope MAY include event-specific or profile-specific data.
+	    The <spanx style="verb">events</spanx> claim value MUST be a JSON object
+	    that contains at least one member.
 	  </t> 
 	  
 	  <t>
@@ -284,10 +285,15 @@
 
       <section anchor="IllustrativeExamples"  title="Illustrative Examples">
 
+	<t>
+	  This section illustrates several possible uses of SETs
+	  through non-normative examples.
+	</t>
+
 	<section anchor="SCIMExample" title="SCIM Example">
 
       <figure anchor="examplePassword" title="Example SCIM Password Reset Event">
-        <preamble>The following is a non-normative example showing the JWT Claims Set for a hypothetical 
+        <preamble>The following example shows the JWT Claims Set for a hypothetical 
         SCIM <xref target="RFC7644"/> password reset SET.
 	This example uses a second <spanx style="verb">events</spanx>
         value (<spanx style="verb">https://example.com/scim/event/passwordResetExt</spanx>)
@@ -714,7 +720,8 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 
     <section anchor="Profiles" title="Requirements for SET Profiles">
       <t>
-	Profiling specifications for SETs define the syntax and semantics
+	Profiling specifications of this specification define actual SETs to be used in particular use cases.
+	These profiling specifications define the syntax and semantics
 	of SETs conforming to that SET profile and rules for validating those SETs.
 	The syntax defined by profiling specifications includes what claims
 	and event payload values are used by SETs utilizing the profile.
@@ -1236,10 +1243,23 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 
     <section anchor="Acknowledgments" title="Acknowledgments">
       <t>The editors would like to thank the members of the IETF SCIM working group, which 
-      began discussions of provisioning events starting with draft-hunt-scim-notify-00 in 2015.</t>
-      <t>The editors would like to thank the participants in the IETF id-event
+      began discussions of provisioning events starting with draft-hunt-scim-notify-00 in 2015.
+      The editors would like to thank the participants in the IETF id-event
       mailing list, the Security Events working group,
       and related working groups for their contributions to this specification.
+      The specification incorporates suggestions made by many people, including
+      Annabelle Backman,
+      John Bradley,
+      Dick Hardt,
+      Russ Housley,
+      Benjamin Kaduk,
+      Mark Lizar,
+      Andrew Nash,
+      Justin Richer,
+      Nat Sakimura,
+      Marius Scurtescu,
+      and
+      Yaron Sheffer.
       </t>
     </section>
 
@@ -1417,6 +1437,18 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       </t>
        
       <t>Draft 07 - PH - Text refinement to Section 3 proposed by Annabelle Backman post WGLC</t>
+
+      <t>
+	Draft 08 - mbj - Changes were as follows:
+	<list style="symbols">
+	  <t>
+	    Incorporated wording improvements resulting from Russ Housley's SecDir comments.
+	  </t>
+	  <t>
+	    Acknowledged individuals who made significant contributions.
+	  </t>
+	</list>
+      </t>
 
     </section>
   </back>
