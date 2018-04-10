@@ -2,29 +2,31 @@
 
 
 
-Network Working Group                                       P. Hunt, Ed.
-Internet-Draft                                                    Oracle
-Intended status: Standards Track                            M. Scurtescu
-Expires: October 11, 2018                                         Google
+Network Working Group                                    A. Backman, Ed.
+Internet-Draft                                                    Amazon
+Intended status: Standards Track                           M. Jones, Ed.
+Expires: October 11, 2018                                      Microsoft
+                                                            P. Hunt, Ed.
+                                                                  Oracle
+                                                            M. Scurtescu
+                                                                  Google
                                                                M. Ansari
                                                                    Cisco
                                                               A. Nadalin
                                                                Microsoft
-                                                              A. Backman
-                                                                  Amazon
                                                            April 9, 2018
 
 
-                     SET Token Delivery Using HTTP
-                    draft-ietf-secevent-delivery-02
+                Poll-Based SET Token Delivery Using HTTP
+                    draft-ietf-secevent-http-poll-00
 
 Abstract
 
    This specification defines how a series of security event tokens
    (SETs) may be delivered to a previously registered receiver using
-   HTTP POST over TLS initiated as a push to the receiver, or as a poll
-   by the receiver.  The specification also defines how delivery can be
-   assured subject to the SET Token Receiver's need for assurance.
+   HTTP POST over TLS initiated as a poll by the receiver.  The
+   specification also defines how delivery can be assured subject to the
+   SET Token Receiver's need for assurance.
 
 Status of This Memo
 
@@ -48,16 +50,16 @@ Copyright Notice
    Copyright (c) 2018 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
+
+
+
+Backman, et al.         Expires October 11, 2018                [Page 1]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
+
    This document is subject to BCP 78 and the IETF Trust's Legal
    Provisions Relating to IETF Documents
-
-
-
-Hunt, et al.            Expires October 11, 2018                [Page 1]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
    (http://trustee.ietf.org/license-info) in effect on the date of
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
@@ -73,49 +75,47 @@ Table of Contents
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   3
    2.  SET Event Stream Protocol . . . . . . . . . . . . . . . . . .   4
      2.1.  Event Delivery Process  . . . . . . . . . . . . . . . . .   4
-     2.2.  Push Delivery using HTTP  . . . . . . . . . . . . . . . .   6
-     2.3.  Polling Delivery using HTTP . . . . . . . . . . . . . . .   8
-       2.3.1.  Polling HTTP Request Attributes . . . . . . . . . . .   8
-       2.3.2.  Polling HTTP Response Attributes  . . . . . . . . . .  10
-       2.3.3.  Poll Request  . . . . . . . . . . . . . . . . . . . .  10
-       2.3.4.  Poll Response . . . . . . . . . . . . . . . . . . . .  14
-     2.4.  Error Response Handling . . . . . . . . . . . . . . . . .  16
-   3.  Authentication and Authorization  . . . . . . . . . . . . . .  17
-     3.1.  Use of Tokens as Authorizations . . . . . . . . . . . . .  18
-   4.  Security Considerations . . . . . . . . . . . . . . . . . . .  18
-     4.1.  Authentication Using Signed SETs  . . . . . . . . . . . .  18
-     4.2.  HTTP Considerations . . . . . . . . . . . . . . . . . . .  19
-     4.3.  TLS Support Considerations  . . . . . . . . . . . . . . .  19
-     4.4.  Authorization Token Considerations  . . . . . . . . . . .  19
-       4.4.1.  Bearer Token Considerations . . . . . . . . . . . . .  19
-   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  20
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  20
-   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  20
-     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  20
-     7.2.  Informative References  . . . . . . . . . . . . . . . . .  22
-   Appendix A.  Other Streaming Specifications . . . . . . . . . . .  23
-   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  24
-   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  24
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  26
+     2.2.  Polling Delivery using HTTP . . . . . . . . . . . . . . .   5
+       2.2.1.  Polling HTTP Request Attributes . . . . . . . . . . .   6
+       2.2.2.  Polling HTTP Response Attributes  . . . . . . . . . .   7
+       2.2.3.  Poll Request  . . . . . . . . . . . . . . . . . . . .   7
+       2.2.4.  Poll Response . . . . . . . . . . . . . . . . . . . .  11
+     2.3.  Error Response Handling . . . . . . . . . . . . . . . . .  13
+   3.  Authentication and Authorization  . . . . . . . . . . . . . .  14
+     3.1.  Use of Tokens as Authorizations . . . . . . . . . . . . .  15
+   4.  Security Considerations . . . . . . . . . . . . . . . . . . .  15
+     4.1.  Authentication Using Signed SETs  . . . . . . . . . . . .  15
+     4.2.  HTTP Considerations . . . . . . . . . . . . . . . . . . .  15
+     4.3.  TLS Support Considerations  . . . . . . . . . . . . . . .  16
+     4.4.  Authorization Token Considerations  . . . . . . . . . . .  16
+       4.4.1.  Bearer Token Considerations . . . . . . . . . . . . .  16
+   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  17
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  17
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  17
+     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  17
+     7.2.  Informative References  . . . . . . . . . . . . . . . . .  18
+   Appendix A.  Other Streaming Specifications . . . . . . . . . . .  20
+   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  21
+   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  21
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  22
 
 1.  Introduction and Overview
 
    This specification defines how a stream of SETs (see
    [I-D.ietf-secevent-token]) can be transmitted to a previously
    registered Event Receiver using HTTP [RFC7231] over TLS.  The
-   specification defines a method to push SETs via HTTP POST and another
-   method to poll for SETs using HTTP POST.
+   specification defines a method to poll for SETs using HTTP POST.
 
 
 
 
-Hunt, et al.            Expires October 11, 2018                [Page 2]
+Backman, et al.         Expires October 11, 2018                [Page 2]
 
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
 
 
-   This specification defines two methods of SET delivery in what is
-   known as Event Streams.
+   This specification defines a method of SET delivery in what is known
+   as Event Streams.
 
    This specification does not define the method by which Event Streams
    are defined, provisioned, managed, monitored, and configured and is
@@ -165,9 +165,9 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
 
 
 
-Hunt, et al.            Expires October 11, 2018                [Page 3]
+Backman, et al.         Expires October 11, 2018                [Page 3]
 
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
 
 
       An Event Stream is a defined location, distribution method and
@@ -215,41 +215,27 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    attempts to deliver the SET based on the Event Receiver's registered
    delivery mechanism:
 
-   o  The Event Transmitter uses an HTTP/1.1 POST to the Event Receiver
-      endpoint to deliver the SET;
-
-
-
-
-Hunt, et al.            Expires October 11, 2018                [Page 4]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
    o  The Event Transmitter queues up the SET in a buffer so that an
       Event Receiver MAY poll for SETs using HTTP/1.1 POST.
+
+
+
+
+Backman, et al.         Expires October 11, 2018                [Page 4]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
 
    o  Or, the Event Transmitter delivers the Event through a different
       method not defined by this specification.
 
-   Delivery of SETs MAY be delivered using one of two modes:
-
-   PUSH
-      In which SETs are delivered one at a time using HTTP POST requests
-      by an Event Transmitter to an Event Receiver.  The HTTP request
-      body is a JSON Web Token [RFC7519] with a "Content-Type" header of
-      "application/secevent+jwt" as defined in Section 2.2 and 6.2 of
-      [I-D.ietf-secevent-token].  Upon receipt, the Event Receiver
-      acknowledges receipt with a response with HTTP Status 202, as
-      described below in Section 2.2.
-
-   POLLING  Where multiple SETs are delivered in a JSON document
-      [RFC7159] to an Event Receiver in response to an HTTP POST request
-      to the Event Transmitter.  Then in a following request, the Event
-      Receiver acknowledges received SETs and MAY poll for more.  In
-      POLLING mode, all requests and responses are JSON documents and
-      use a "Content-Type" of "application/json" as described in
-      Section 2.3.
+   In Poll-Based SET Token Delivery Using HTTP, multiple SETs are
+   delivered in a JSON document [RFC7159] to an Event Receiver in
+   response to an HTTP POST request to the Event Transmitter.  Then in a
+   following request, the Event Receiver acknowledges received SETs and
+   MAY poll for more.  All requests and responses are JSON documents and
+   use a "Content-Type" of "application/json" as described in
+   Section 2.2.
 
    After successful (acknowledged) SET delivery, Event Transmitters
    SHOULD NOT be required to maintain or record SETs for recovery.  Once
@@ -271,143 +257,7 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    to report Event errors other than relating to the parsing and
    validation of the SET.
 
-
-
-
-
-
-
-Hunt, et al.            Expires October 11, 2018                [Page 5]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
-2.2.  Push Delivery using HTTP
-
-   This method allows an Event Transmitter to use HTTP POST
-   (Section 4.3.3 [RFC7231]) to deliver SETs to a previously registered
-   web callback URI supplied by the Event Receiver as part of an Event
-   Stream configuration process (not defined by this document).
-
-   The SET to be delivered MAY be signed and/or encrypted as defined in
-   [I-D.ietf-secevent-token].
-
-   The Event Stream configuration defines a URI of an Event Receiver
-   provided endpoint which accepts HTTP POST requests (e.g.
-   "https://rp.example.com/Events").
-
-   The HTTP Content-Type (see Section 3.1.1.5 [RFC7231]) for the HTTP
-   POST is "application/secevent+jwt" and SHALL consist of a single SET
-   (see [I-D.ietf-secevent-token]).  As per Section 5.3.2 [RFC7231], the
-   expected media type ("Accept" header) response is "application/json".
-
-   To deliver an Event, the Event Transmitter generates an event
-   delivery message and uses HTTP POST to the configured endpoint with
-   the appropriate "Accept" and "Content-Type" headers.
-
-   POST /Events  HTTP/1.1
-
-   Host: notify.examplerp.com
-   Accept: application/json
-   Authorization: Bearer h480djs93hd8
-   Content-Type: application/secevent+jwt
-   eyJhbGciOiJub25lIn0
-   .
-   eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
-   kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
-   FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
-   WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
-   WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
-   hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
-   VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
-   SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
-   b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
-   tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
-   1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
-   .
-
-                    Figure 1: Example HTTP POST Request
-
-   Upon receipt of the request, the Event Receiver SHALL validate the
-   JWT structure of the SET as defined in Section 7.2 [RFC7519].  The
-
-
-
-Hunt, et al.            Expires October 11, 2018                [Page 6]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
-   Event Receiver SHALL also validate the SET information as described
-   in Section 2 [I-D.ietf-secevent-token].
-
-   If the SET is determined to be valid, the Event Receiver SHALL
-   "acknowledge" successful submission by responding with HTTP Status
-   202 as "Accepted" (see Section 6.3.3 [RFC7231]).
-
-   In order to maintain compatibility with other methods of
-   transmission, the Event Receiver SHOULD NOT include an HTTP response
-   body representation of the submitted SET or what the SET's pending
-   status is when acknowledging success.  In the case of an error (e.g.
-   HTTP Status 400), the purpose of the HTTP response body is to
-   indicate any SET parsing, validation, or cryptographic errors.
-
-   The following is a non-normative example of a successful receipt of a
-   SET.
-
-   HTTP/1.1 202 Accepted
-
-              Figure 2: Example Successful Delivery Response
-
-   Note that the purpose of the "acknowledgement" response is to let the
-   Event Transmitter know that a SET has been delivered and the
-   information no longer needs to be retained by the Event Transmitter.
-   Before acknowledgement, Event Receivers SHOULD ensure they have
-   validated received SETs and retained them in a manner appropriate to
-   information retention requirements appropriate to the SET event types
-   signaled.  The level and method of retention of SETs by Event
-   Receivers is out-of-scope of this specification.
-
-   In the Event of a general HTTP error condition, the Event Receiver
-   MAY respond with an appropriate HTTP Status code as defined in
-   Section 6 [RFC7231].
-
-   When the Event Receiver detects an error parsing or validating a
-   received SET (as defined by [I-D.ietf-secevent-token]), the Event
-   Receiver SHALL indicate an HTTP Status 400 error with an error code
-   as described in Section 2.4.
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.            Expires October 11, 2018                [Page 7]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
-   The following is an example non-normative error response.
-
-   HTTP/1.1 400 Bad Request
-   Content-Type: application/json
-
-   {
-     "err":"dup",
-     "description":"SET already received. Ignored."
-
-   }
-
-                Figure 3: Example HTTP Status 400 Response
-
-2.3.  Polling Delivery using HTTP
+2.2.  Polling Delivery using HTTP
 
    This method allows an Event Receiver to use HTTP POST (Section 4.3.3
    [RFC7231]) to acknowledge SETs and to check for and receive zero or
@@ -424,6 +274,14 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
 
    o  After validating previously received SETs, the Event Receiver
       initiates another poll request using HTTP POST that includes
+
+
+
+Backman, et al.         Expires October 11, 2018                [Page 5]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
+
       acknowledgement of previous SETs, and waits for the next batch of
       SETs.
 
@@ -435,23 +293,14 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    requirements.  The level and method of retention of SETs by Event
    Receivers is out-of-scope of this specification.
 
-2.3.1.  Polling HTTP Request Attributes
+2.2.1.  Polling HTTP Request Attributes
 
    When initiating a poll request, the Event Receiver constructs a JSON
    document that consists of polling request parameters and SET
    acknowledgement parameters in the form of JSON attributes.
 
-
-
-
-
-Hunt, et al.            Expires October 11, 2018                [Page 8]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
    The request payloads are delivered in one of two forms as described
-   in Section 2.3.3 and Section 2.3.4
+   in Section 2.2.3 and Section 2.2.4
 
    When making a request, the HTTP header "Content-Type" is set to
    "application/json".
@@ -481,6 +330,14 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
          is part of the Stream configuration which is out of scope of
          this specification.
 
+
+
+
+Backman, et al.         Expires October 11, 2018                [Page 6]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
+
    SET Acknowledgment Parameters
 
       ack
@@ -496,17 +353,9 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
          that correspond to the "jti" of each invalid SET received.  The
          value of each is a JSON object whose contents is an "err"
          attribute and "description" attribute whose value correspond to
-         the errors described in Section 2.4.
+         the errors described in Section 2.3.
 
-
-
-
-Hunt, et al.            Expires October 11, 2018                [Page 9]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
-2.3.2.  Polling HTTP Response Attributes
+2.2.2.  Polling HTTP Response Attributes
 
    In response to a poll request, the Event Transmitter checks for
    available SET events and responds with a JSON document containing the
@@ -526,7 +375,7 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    When making a response, the HTTP header "Content-Type" is set to
    "application/json".
 
-2.3.3.  Poll Request
+2.2.3.  Poll Request
 
    The Event Receiver performs an HTTP POST (see Section 4.3.4
    [RFC7231]) to a pre-arranged polling endpoint URI to check for SETs
@@ -537,6 +386,14 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    and Receiver, an Event Transmitter MAY re-issue SETs it has
    previously delivered.  The Event Receiver SHOULD accept repeat SETs
    and acknowledge the SETs regardless of whether the Receiver believes
+
+
+
+Backman, et al.         Expires October 11, 2018                [Page 7]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
+
    it has already acknowledged the SETs previously.  An Event
    Transmitter MAY limit the number of times it attempts to deliver a
    SET.  Upon abandoning delivery of a SET, the Event Transmitter SHOULD
@@ -554,14 +411,6 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    Poll requests have three variations:
 
    Poll Only
-
-
-
-Hunt, et al.            Expires October 11, 2018               [Page 10]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
       In which an Event Receiver asks for the next set of Events where
       no previous SET deliveries are acknowledged (such as in the
       initial poll request).
@@ -577,15 +426,29 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
       received SETs using the "ack" and "err" attributes and will wait
       for the next group of SETs in the Event Transmitters response.
 
-2.3.3.1.  Poll Only Request
+2.2.3.1.  Poll Only Request
 
    In the case where no SETs were received in a previous poll (see
-   Figure 10), the Event Receiver simply polls without acknowledgement
+   Figure 7), the Event Receiver simply polls without acknowledgement
    parameters ("sets" and "setErrs").
 
    The following is an example request made by an Event Receiver that
    has no outstanding SETs to acknowledge and is polling for available
    SETs.
+
+
+
+
+
+
+
+
+
+
+Backman, et al.         Expires October 11, 2018                [Page 8]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
 
    The following is a non-normative example poll request to the
    endpoint: "https://nofity.exampleidp.com/Events".
@@ -600,23 +463,10 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
     "returnImmediately":true
    }
 
-                  Figure 4: Example Initial Poll Request
+                  Figure 1: Example Initial Poll Request
 
    An Event Receiver MAY poll with no parameters at all by passing an
    empty JSON object.
-
-
-
-
-
-
-
-
-
-Hunt, et al.            Expires October 11, 2018               [Page 11]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
 
    The following is a non-normative example default poll request to the
    endpoint: "https://nofity.exampleidp.com/Events".
@@ -629,9 +479,9 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
 
    {}
 
-                  Figure 5: Example Default Poll Request
+                  Figure 2: Example Default Poll Request
 
-2.3.3.2.  Acknowledge Only Request
+2.2.3.2.  Acknowledge Only Request
 
    In this variation, the Event Receiver acknowledges previously
    received SETs and indicates it does not want to receive SETs in
@@ -641,8 +491,23 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    acknowledge received SETs independently (e.g. on separate threads)
    from the process of receiving SETs.
 
+
+
+
+
+
+
+
+
+
+
+Backman, et al.         Expires October 11, 2018                [Page 9]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
+
    The following is a non-normative example poll with acknowledgement of
-   SETs received (for example as shown in Figure 9).
+   SETs received (for example as shown in Figure 6).
 
    POST /Events  HTTP/1.1
 
@@ -659,23 +524,16 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
      "maxEvents":0
    }
 
-                 Figure 6: Example Acknowledge Only equest
+                 Figure 3: Example Acknowledge Only equest
 
-2.3.3.3.  Poll with Acknowledgement
+2.2.3.3.  Poll with Acknowledgement
 
    This variation allows a receiver thread to simultaneously acknowledge
    previously received SETs and wait for the next group of SETs in a
    single request.
 
-
-
-Hunt, et al.            Expires October 11, 2018               [Page 12]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
    The following is a non-normative example poll with acknowledgement of
-   SETs received in Figure 9.
+   SETs received in Figure 6.
 
    POST /Events  HTTP/1.1
 
@@ -692,46 +550,30 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
      "returnImmediately":false
    }
 
-         Figure 7: Example Poll With Acknowledgement and No Errors
+         Figure 4: Example Poll With Acknowledgement and No Errors
+
+
+
+
+
+
+Backman, et al.         Expires October 11, 2018               [Page 10]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
 
    In the above acknowledgement, the Event Receiver has acknowledged
    receipt of two SETs and has indicated it wants to wait until the next
    SET is available.
 
-2.3.3.4.  Poll with Acknowledgement and Errors
+2.2.3.4.  Poll with Acknowledgement and Errors
 
    In the case where errors were detected in previously delivered SETs,
    the Event Receiver MAY use the "setErrs" attribute to indicate errors
    in the following poll request.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.            Expires October 11, 2018               [Page 13]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
    The following is a non-normative example of a response acknowledging
-   1 error and 1 receipt of two SETs received in Figure 9.
+   1 error and 1 receipt of two SETs received in Figure 6.
 
    POST /Events  HTTP/1.1
 
@@ -751,9 +593,9 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
      "returnImmediately":true
    }
 
-             Figure 8: Example Poll Acknowledgement With Error
+             Figure 5: Example Poll Acknowledgement With Error
 
-2.3.4.  Poll Response
+2.2.4.  Poll Response
 
    In response to a poll request, the service provider MAY respond
    immediately if SETs are available to be delivered.  If no SETs are
@@ -761,7 +603,7 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    delay responding until a SET is available unless the poll request
    parameter "returnImmediately" is "true".
 
-   As described in Section 2.3.2 a JSON document is returned containing
+   As described in Section 2.2.2 a JSON document is returned containing
    a number of attributes including "sets" which SHALL contain zero or
    more SETs.
 
@@ -771,23 +613,13 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
 
 
 
-
-
-
-
-
-
-
-
-
-
-Hunt, et al.            Expires October 11, 2018               [Page 14]
+Backman, et al.         Expires October 11, 2018               [Page 11]
 
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
 
 
    The following is a non-normative example response to the request
-   shown Section 2.3.3.  This example shows two SETs are returned.
+   shown Section 2.2.3.  This example shows two SETs are returned.
 
   HTTP/1.1 200 OK
   Content-Type: application/json
@@ -819,7 +651,7 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    }
   }
 
-                      Figure 9: Example Poll Response
+                      Figure 6: Example Poll Response
 
    In the above example, a two SETs whose "jti" are
    "4d3559ec67504aaba65d40b0363faad8" and
@@ -837,13 +669,13 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
 
 
 
-Hunt, et al.            Expires October 11, 2018               [Page 15]
+Backman, et al.         Expires October 11, 2018               [Page 12]
 
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
 
 
    The following is a non-normative example response to the request
-   shown Section 2.3.3 showing no new SETs or unacknowledged SETs are
+   shown Section 2.2.3 showing no new SETs or unacknowledged SETs are
    available.
 
    HTTP/1.1 200 OK
@@ -854,14 +686,14 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
     "sets":{ }
    }
 
-                 Figure 10: Example No SETs Poll Response
+                  Figure 7: Example No SETs Poll Response
 
-   Upon receiving the JSON document (e.g. as shown in Figure 9), the
+   Upon receiving the JSON document (e.g. as shown in Figure 6), the
    Event Receiver parses and verifies the received SETs and notifies the
    Event Transmitter via the next poll request to the Event Transmitter
-   as described in Section 2.3.3.3 or Section 2.3.3.4.
+   as described in Section 2.2.3.3 or Section 2.2.3.4.
 
-2.4.  Error Response Handling
+2.3.  Error Response Handling
 
    If a SET is invalid, the following error codes are defined:
 
@@ -893,9 +725,9 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
 
 
 
-Hunt, et al.            Expires October 11, 2018               [Page 16]
+Backman, et al.         Expires October 11, 2018               [Page 13]
 
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
 
 
       A value which is a keyword that describes the error (see Table 1).
@@ -904,15 +736,14 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
       A human-readable text that provides additional diagnostic
       information.
 
-   When included as part of an HTTP Status 400 response, the above JSON
-   is the HTTP response body (see Figure 3).  When included as part of a
-   batch of SETs, the above JSON is included as part of the "setErrs"
-   attribute as defined in Section 2.3.2 and Section 2.3.3.4
+   When included as part of a batch of SETs, the above JSON is included
+   as part of the "setErrs" attribute as defined in Section 2.2.2 and
+   Section 2.2.3.4
 
 3.  Authentication and Authorization
 
-   The SET delivery methods described in this specification are based
-   upon HTTP and depend on the use of TLS and/or standard HTTP
+   The SET delivery method described in this specification is based upon
+   HTTP and depends on the use of TLS and/or standard HTTP
    authentication and authorization schemes as per [RFC7235].  For
    example, the following methodologies could be used among others:
 
@@ -935,24 +766,9 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
       considered along with using signed SETs (see SET Payload
       Authentication below).
 
-   SET Payload Authentication
-      In scenarios where SETs are signed and the delivery method is HTTP
-      POST (see Section 2.2), Event Receivers MAY elect to use Basic
-      Authentication or not to use HTTP or TLS based authentication at
-      all.  See Section 4.1 for considerations.
-
    As per Section 4.1 of [RFC7235], a SET delivery endpoint SHALL
    indicate supported HTTP authentication schemes via the "WWW-
    Authenticate" header.
-
-
-
-
-
-Hunt, et al.            Expires October 11, 2018               [Page 17]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
 
    Because SET Delivery describes a simple function, authorization for
    the ability to pick-up or deliver SETs can be derived by considering
@@ -961,6 +777,14 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    prevent denial-of-service attacks.  Because SETs are not commands
    (see ), Event Receivers are free to ignore SETs that are not of
    interest.
+
+
+
+
+Backman, et al.         Expires October 11, 2018               [Page 14]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
 
    For illustrative purposes only, SET delivery examples show an OAuth2
    bearer token value [RFC6750] in the authorization header.  This is
@@ -1002,14 +826,6 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    In scenarios where HTTP authorization or TLS mutual authentication
    are not used or are considered weak, JWS signed SETs SHOULD be used
    (see [RFC7515] and Security Considerations
-
-
-
-Hunt, et al.            Expires October 11, 2018               [Page 18]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
    [I-D.ietf-secevent-token]).  This enables the Event Receiver to
    validate that the SET issuer is authorized to deliver SETs.
 
@@ -1018,6 +834,13 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    SET delivery depends on the use of Hypertext Transfer Protocol and
    thus subject to the security considerations of HTTP Section 9
    [RFC7230] and its related specifications.
+
+
+
+Backman, et al.         Expires October 11, 2018               [Page 15]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
 
    As stated in Section 2.7.1 [RFC7230], an HTTP requestor MUST NOT
    generate the "userinfo" (i.e., username and password) component (and
@@ -1058,14 +881,6 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
 
    Implementations supporting OAuth bearer tokens need to factor in
    security considerations of this authorization method [RFC7521].
-
-
-
-Hunt, et al.            Expires October 11, 2018               [Page 19]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
    Since security is only as good as the weakest link, implementers also
    need to consider authentication choices coupled with OAuth bearer
    tokens.  The security considerations of the default authentication
@@ -1075,6 +890,13 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    authentication and authorization are out-of-scope for the delivery of
    SET tokens, however this information is provided as a resource to
    implementers.
+
+
+
+Backman, et al.         Expires October 11, 2018               [Page 16]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
 
 5.  Privacy Considerations
 
@@ -1114,14 +936,6 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
               DOI 10.17487/RFC2119, March 1997, <https://www.rfc-
               editor.org/info/rfc2119>.
 
-
-
-
-Hunt, et al.            Expires October 11, 2018               [Page 20]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
    [RFC3986]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
               Resource Identifier (URI): Generic Syntax", STD 66,
               RFC 3986, DOI 10.17487/RFC3986, January 2005,
@@ -1131,6 +945,14 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
               (TLS) Protocol Version 1.2", RFC 5246,
               DOI 10.17487/RFC5246, August 2008, <https://www.rfc-
               editor.org/info/rfc5246>.
+
+
+
+
+Backman, et al.         Expires October 11, 2018               [Page 17]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
 
    [RFC5988]  Nottingham, M., "Web Linking", RFC 5988,
               DOI 10.17487/RFC5988, October 2010, <https://www.rfc-
@@ -1170,14 +992,6 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
-
-
-
-Hunt, et al.            Expires October 11, 2018               [Page 21]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
 7.2.  Informative References
 
    [openid-connect-core]
@@ -1186,6 +1000,15 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    [POSIX.1]  Institute of Electrical and Electronics Engineers, "The
               Open Group Base Specifications Issue 7", IEEE Std 1003.1,
               2013 Edition, 2013.
+
+
+
+
+
+Backman, et al.         Expires October 11, 2018               [Page 18]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
 
    [RFC3339]  Klyne, G. and C. Newman, "Date and Time on the Internet:
               Timestamps", RFC 3339, DOI 10.17487/RFC3339, July 2002,
@@ -1224,16 +1047,6 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
               RFC 7516, DOI 10.17487/RFC7516, May 2015,
               <https://www.rfc-editor.org/info/rfc7516>.
 
-
-
-
-
-
-Hunt, et al.            Expires October 11, 2018               [Page 22]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
    [RFC7521]  Campbell, B., Mortimore, C., Jones, M., and Y. Goland,
               "Assertion Framework for OAuth 2.0 Client Authentication
               and Authorization Grants", RFC 7521, DOI 10.17487/RFC7521,
@@ -1242,6 +1055,16 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    [RFC7617]  Reschke, J., "The 'Basic' HTTP Authentication Scheme",
               RFC 7617, DOI 10.17487/RFC7617, September 2015,
               <https://www.rfc-editor.org/info/rfc7617>.
+
+
+
+
+
+
+Backman, et al.         Expires October 11, 2018               [Page 19]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
 
    [saml-core-2.0]
               Internet2, "Assertions and Protocols for the OASIS
@@ -1282,14 +1105,6 @@ Appendix A.  Other Streaming Specifications
    not suggesting that we need all of these things in the spec, but they
    give an idea of what features people have found useful.
 
-
-
-
-Hunt, et al.            Expires October 11, 2018               [Page 23]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
    Other information:
 
    o  API Reference:
@@ -1299,6 +1114,13 @@ Internet-Draft        draft-ietf-secevent-delivery            April 2018
    o  Visibility Timeouts:
       http://docs.aws.amazon.com/AWSSimpleQueueService/latest/
       SQSDeveloperGuide/sqs-visibility-timeout.html
+
+
+
+Backman, et al.         Expires October 11, 2018               [Page 20]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
+
 
    Apache Kafka
 
@@ -1330,82 +1152,46 @@ Appendix B.  Acknowledgments
    began discussions of provisioning events starting with: draft-hunt-
    scim-notify-00 in 2015.
 
-   The editor would like to thank the participants in the the SECEVENTS
+   The editors would like to thank the authors of draft-ietf-secevent-
+   delivery-02, on which this draft is based.
+
+   The editors would like to thank the participants in the the SECEVENTS
    working group for their support of this specification.
 
 Appendix C.  Change Log
 
-   Draft 00 - PH - Based on draft-hunt-secevent.distribution with the
+   Draft 00 - AB - Based on draft-ietf-secevent-delivery-02 with the
    following additions:
 
+   o  Renamed to "Poll-Based SET Token Delivery Using HTTP"
+
+   o  Removed references to the HTTP Push delivery method.
 
 
 
-Hunt, et al.            Expires October 11, 2018               [Page 24]
+
+
+
+
+Backman, et al.         Expires October 11, 2018               [Page 21]
 
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
+Internet-Draft        draft-ietf-secevent-http-poll           April 2018
 
-
-   o  Removed Control Plane from specification
-
-   o  Added new HTTP Polling delivery method
-
-   o  Added general HTTP security considerations
-
-   o  Added authentication and authorization
-
-   o  Revised Verify Event to work with both types of delivery
-
-   Draft 01 - PH - Removed Verification section per feedback from
-   IETF99.
-
-   Draft 02 - MS -
-
-   o  Minor editorial improvements
-
-   o  Removed Identity Provider / Relying Party Terminology
-
-   o  Changed boilerplate language according to RFC8174
-
-   This draft was based on draft-hunt-secevent.distribution revision
-   history:
-
-   o  Draft 00 - PH - First Draft based on reduced version of draft-
-      hunt-idevent-distribution
-
-   o  Draft 01 - PH -
-
-      *  Reworked terminology to match new WG Transmitter/Receiver terms
-
-      *  Reworked sections into Data Plane vs. Control Plane
-
-      *  Removed method transmission registry in order to simplify the
-         specification
-
-      *  Made Create, Update operations optional for Control Plane (Read
-         is MTI)
-
-   o  Draft 02 - PH
-
-      *  Added iss metadata for Event Stream
-
-      *  Changed to using JWKS_uri for issuer and receiver.
-
-      *  Control Plane sections moved to draft-hunt-secevent-stream-mgmt
-
-
-
-
-
-Hunt, et al.            Expires October 11, 2018               [Page 25]
-
-Internet-Draft        draft-ietf-secevent-delivery            April 2018
-
-
-      *  Added support for delivering multiple events using HTTP POST
-         polling
 
 Authors' Addresses
+
+   Annabelle Backman (editor)
+   Amazon
+
+   Email: richanna@amazon.com
+
+
+   Michael B. Jones (editor)
+   Microsoft
+
+   Email: mbj@microsoft.com
+   URI:   http://self-issued.info/
+
 
    Phil Hunt (editor)
    Oracle Corporation
@@ -1431,10 +1217,6 @@ Authors' Addresses
    Email: tonynad@microsoft.com
 
 
-   Annabelle Richard Backman
-   Amazon
-
-   Email: richanna@amazon.com
 
 
 
@@ -1447,10 +1229,4 @@ Authors' Addresses
 
 
 
-
-
-
-
-
-
-Hunt, et al.            Expires October 11, 2018               [Page 26]
+Backman, et al.         Expires October 11, 2018               [Page 22]
