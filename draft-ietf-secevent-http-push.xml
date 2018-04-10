@@ -1,0 +1,1201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type='text/xsl' href='http://xml.resource.org/authoring/rfc2629.xslt' ?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
+<?rfc toc="yes"?>
+<?rfc tocompact="yes"?>
+<?rfc tocdepth="3"?>
+<?rfc tocindent="yes"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes"?>
+<?rfc comments="yes"?>
+<?rfc inline="yes"?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+<rfc category="std" docName="draft-ietf-secevent-delivery-02"
+	ipr="trust200902">
+	<front> 
+		<title abbrev="draft-ietf-secevent-delivery">
+			SET Token Delivery Using HTTP</title>
+
+		<author fullname="Phil Hunt" initials="P." role="editor"
+			surname="Hunt">
+			<organization abbrev="Oracle">Oracle Corporation</organization>
+
+			<address>
+				<email>phil.hunt@yahoo.com</email>
+			</address>
+		</author>
+    
+    <author fullname="Marius Scurtescu" initials="M.S." surname="Scurtescu">
+      <organization abbrev="Google">Google</organization>
+
+      <address>
+        <email>mscurtescu@google.com</email>
+      </address>
+    </author>
+
+    <author fullname="Morteza Ansari" initials="M." surname="Ansari">
+      <organization abbrev="Cisco">Cisco</organization>
+
+      <address>
+        <email>morteza.ansari@cisco.com</email>
+      </address>
+    </author>
+    
+    <author fullname="Anthony Nadalin" initials="A." surname="Nadalin">
+      <organization abbrev="Microsoft">Microsoft</organization>
+
+      <address>
+        <email>tonynad@microsoft.com</email>
+      </address>
+    </author>
+    
+    <author fullname="Annabelle Richard Backman" initials="A.R." surname="Backman">
+      <organization abbrev="Amazon">Amazon</organization>
+
+      <address>
+        <email>richanna@amazon.com</email>
+      </address>
+    </author>
+
+		<date year="2018" />
+
+		<keyword>Internet-Draft</keyword>
+
+		<abstract>
+			<t>
+				This specification defines how a series of security event tokens 
+        (SETs) may be delivered to a previously registered receiver 
+        using HTTP POST over TLS initiated as a push to the receiver, or
+        as a poll by the receiver. The specification also defines how delivery 
+        can be assured subject to the SET Token Receiver's need for assurance.
+        </t>
+		</abstract>
+	</front>
+
+	<middle>
+		<section anchor="intro" title="Introduction and Overview" toc="default">
+			
+      <t>
+        This specification defines how a stream of SETs (see <xref target="I-D.ietf-secevent-token"/>)
+        can be transmitted to a previously registered 
+        Event Receiver using HTTP <xref target="RFC7231"/>
+        over TLS. The specification defines a method to push SETs via 
+        HTTP POST and another method to poll for SETs using HTTP POST. 
+      			</t>
+
+      <t>This specification defines two methods of SET delivery in what
+      is known as Event Streams.</t>
+        
+      <t>This specification does not define the method by which Event 
+      Streams are defined, provisioned, managed, monitored,
+      and configured and is out of scope of this specification.
+      <vspace/>[[This work is TBD by the SECEVENTS WG]]</t>
+      
+      
+
+			<section anchor="notat" title="Notational Conventions" toc="default">
+				<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+                                  NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
+                                  "MAY", and "OPTIONAL" in this document are to be interpreted as
+                                  described in BCP 14 <xref target="RFC2119"/> <xref target="RFC8174"/>
+				  when, and only when, they appear in all capitals, as shown here.
+			        </t>
+
+				<t>
+					For purposes of readability examples are not URL encoded.
+					Implementers MUST percent encode URLs as described in
+					<xref target="RFC3986">Section 2.1 of</xref>
+					.
+				</t>
+
+				<t>Throughout this documents all figures MAY contain spaces and
+					extra
+					line-wrapping for readability and space limitations. Similarly, some
+					URI's contained within examples, have been shortened for space and
+					readability reasons.
+				</t>
+			</section>
+
+			<section anchor="defs" title="Definitions" toc="default">
+        <t>This specification assumes terminology defined in the Security
+        Event Token specification<xref target="I-D.ietf-secevent-token"/>
+        .</t>
+				<t>
+					The following definitions are defined for Security Event distribution:
+					<list style="hanging">
+          
+            <t hangText="Event Transmitter"><vspace/>
+              A service provider that delivers SETs to other providers known
+              as Event Receivers. An Event Transmitter
+              is responsible for offering a service that allows the Event
+              Receiver to check the Event Stream configuration and status
+              known as the "Control Plane". 
+            </t>
+            
+            <t hangText="Event Receiver"><vspace/>
+              A service provider that registers to receive SETs from 
+              an Event Transmitter and provides an endpoint to receive
+              SETs via HTTP POST. 
+              Event Receivers
+              can check current Event Stream configuration and status by
+              accessing the Event Transmitters "Control Plane".
+            </t>
+  
+            <t hangText="Event Stream"><vspace/>
+              An Event Stream is a defined location, distribution method
+              and whereby an Event Transmitter and Event Receiver 
+              exchange a pre-defined family of SETs. A Stream is assumed
+              to have configuration data such as HTTP endpoints, timeouts,
+              public key sets for signing and encryption, and 
+              Event Families.
+            </t>
+                          
+            <t hangText="Subject"><vspace/>
+              The security subject around which a security event has 
+              occurred. For example, a security subject might per a user, 
+              a person, an email address, a service provider entity, an
+              IP address, an OAuth Client, a mobile device, or any identifiable
+              thing referenced in security and authorization systems.
+            </t>
+            
+            <t hangText="Event"><vspace/>An Event is defined to be an 
+            event as represented by a security event token (SET).
+            See <xref target="I-D.ietf-secevent-token"/>.</t>
+
+            <t hangText="NumericDate"><vspace/>
+            A JSON numeric value representing the number of seconds from
+            1970-01-01T00:00:00Z UTC until the specified UTC date/time,
+            ignoring leap seconds.  This is equivalent to the 
+            IEEE Std 1003.1, 2013 Edition <xref target="POSIX.1"/> 
+            definition "Seconds Since the Epoch", in which each day is 
+            accounted for by exactly 86400 seconds, other than that 
+            non-integer values can be represented.  See 
+            <xref target="RFC3339"/> for details regarding date/times 
+            in general and UTC in particular.</t>
+
+      
+					</list>
+				</t>
+			</section>
+		</section>
+   
+  <section title="SET Event Stream Protocol">
+    <t>An Event Stream represents the communication channel over which a 
+    series of SETs are delivered to a configured Event Receiver. </t>
+    
+    <section anchor="process" title="Event Delivery Process">
+			<t>When an Event occurs, the Event Transmitter constructs a SET
+      token <xref target="I-D.ietf-secevent-token" /> that describes the	
+      Event. The Event Transmitter determines the Event Streams over which the
+      SET should be distributed to.</t>
+      <t> 
+      How SETs are defined and the process by which Events are identified for 
+      Event Receivers is out-of-scope of this	specification.
+			</t>
+
+			<t>
+			When a SET is available for an Event Receiver, the Event Transmitter
+			attempts to deliver the SET based on the Event Receiver's registered
+			delivery mechanism:
+			<list style="symbols">
+				<t>The Event Transmitter uses an HTTP/1.1 POST to the Event 
+        Receiver endpoint to deliver the SET;
+			  </t>
+        <t>The Event Transmitter queues up the SET in a buffer so that
+        an Event Receiver MAY poll for SETs using HTTP/1.1 POST.</t>
+
+			  <t>Or, the Event Transmitter delivers the Event through a different
+        method not defined by this specification.
+			  </t>
+			</list>
+			</t>
+      
+      <t>Delivery of SETs MAY be delivered using one of two modes:
+      <list style="hanging">
+        <t hangText="PUSH"><vspace/>In which SETs are delivered
+        one at a time using HTTP POST requests by an Event Transmitter 
+        to an Event Receiver. The HTTP request body is a JSON Web Token 
+        <xref target="RFC7519"/> with a <spanx style="verb">Content-Type</spanx> 
+        header of <spanx style="verb">application/secevent+jwt</spanx> 
+        as defined in Section 2.2 and 6.2 of 
+        <xref target="I-D.ietf-secevent-token"/>. Upon receipt, the 
+        Event Receiver acknowledges receipt with a response with HTTP 
+        Status 202, as described below in <xref target="httpPost"/>.</t>
+        
+        <t hangText="POLLING">Where 
+        multiple SETs are delivered in a JSON document <xref target="RFC7159"/>
+        to an Event Receiver in response to an HTTP POST request to the 
+        Event Transmitter. Then in a following request, the Event Receiver
+        acknowledges received SETs and MAY poll for more. In POLLING mode, 
+        all requests and responses are JSON documents and use a 
+        <spanx style="verb">Content-Type</spanx> of 
+        <spanx style="verb">application/json</spanx> as described in
+        <xref target="httpPoll"/>.</t>
+      </list></t>
+
+			<t>After successful (acknowledged) SET delivery, Event 
+      Transmitters SHOULD NOT be required to maintain or record SETs for 
+      recovery. Once a SET is acknowledged, the Event Receiver SHALL be 
+      responsible for retention and recovery.</t>
+      
+      <t>Transmitted SETs SHOULD be self-validating (e.g. signed)
+      if there is a requirement to verify they were issued by the Event 
+      Transmitter at a later date when de-coupled from the original 
+      delivery where authenticity could be checked via the HTTP or 
+      TLS mutual authentication.
+			</t>
+
+			<t>
+			Upon receiving a SET, the Event Receiver reads the SET and validates 
+      it. The Event Receiver MUST acknowledge receipt to the Event Transmitter, using the 
+      defined acknowledgement or error method depending on the method of 
+      transfer.</t>
+      
+      <t>The Event Receiver SHALL NOT use the Event acknowledgement mechanism
+      to report Event errors other than relating to the parsing and validation
+      of the SET.</t>
+  </section>
+  
+    
+  
+  <section anchor="httpPost" title="Push Delivery using HTTP">
+        
+     <t>This method allows an Event Transmitter to use HTTP POST 
+     (<xref target="RFC7231">Section 4.3.3</xref>) to deliver
+     SETs to a previously registered web callback URI supplied by the
+     Event Receiver as part of an Event Stream configuration process 
+     (not defined by this document).</t>
+          
+     <t>The SET to be delivered MAY be signed 
+     and/or encrypted as defined in <xref target="I-D.ietf-secevent-token" />.</t>
+           
+     <t>The Event Stream configuration defines a URI of an Event 
+     Receiver provided endpoint which accepts HTTP POST requests (e.g. 
+     <spanx style="verb">https://rp.example.com/Events</spanx>).</t>
+
+     <t>The HTTP Content-Type (see 
+     <xref target="RFC7231">Section 3.1.1.5</xref>) for the HTTP POST is 
+     <spanx style="verb">application/secevent+jwt</spanx> and SHALL consist of 
+     a single SET (see <xref target="I-D.ietf-secevent-token" />).
+     As per <xref target="RFC7231">Section 5.3.2</xref>, the expected 
+     media type (<spanx style="verb">Accept</spanx> header) response is 
+     <spanx style="verb">application/json</spanx>.</t>
+     
+     <figure align="left" anchor="postSet" title="Example HTTP POST Request">
+     <preamble>To deliver an Event, the Event Transmitter generates an event 
+     delivery message and uses HTTP POST to the configured endpoint with
+     the appropriate <spanx style="verb">Accept</spanx> and 
+     <spanx style="verb">Content-Type</spanx> headers.</preamble>
+<artwork align="left">POST /Events  HTTP/1.1
+
+Host: notify.examplerp.com
+Accept: application/json
+Authorization: Bearer h480djs93hd8
+Content-Type: application/secevent+jwt
+eyJhbGciOiJub25lIn0
+.
+eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
+kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
+FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
+WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
+WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
+hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
+VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
+SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
+b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
+tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
+1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
+.</artwork>
+     </figure>
+            
+     <t>Upon receipt of the request, the Event Receiver SHALL 
+     validate the JWT structure of the SET as defined in 
+     <xref target="RFC7519">Section 7.2</xref>. The Event Receiver 
+     SHALL also validate the SET information as described
+     in <xref target="I-D.ietf-secevent-token">Section 2</xref>.</t>
+     <t>If the SET is determined to be valid, the Event Receiver SHALL
+     "acknowledge" successful submission by responding with HTTP Status
+     202 as <spanx style="verb">Accepted</spanx> 
+     (see <xref target="RFC7231">Section 6.3.3</xref>).</t>
+     
+     <t>In order
+     to maintain compatibility with other methods of transmission, the 
+     Event Receiver SHOULD NOT include an HTTP response body representation
+     of the submitted SET or what the SET's pending status is when 
+     acknowledging success. In the case of an error (e.g. HTTP Status 400),
+     the purpose of the HTTP response body is to indicate any SET parsing, 
+     validation, or cryptographic errors.</t>
+     
+     <figure anchor="goodPostResponse" title="Example Successful Delivery Response">
+        <preamble>The following is a non-normative example of a successful
+        receipt of a SET.</preamble>
+        <artwork>HTTP/1.1 202 Accepted</artwork>
+     </figure> 
+     
+     <t>Note that the purpose of the "acknowledgement" response is to let the 
+       Event Transmitter know that a SET has been delivered and the 
+       information no longer needs to be retained by the Event Transmitter. 
+       Before acknowledgement, Event Receivers SHOULD ensure they have 
+       validated received SETs and retained them in a manner appropriate 
+       to information retention requirements appropriate to the SET 
+       event types signaled. The level and method of retention of SETs
+       by Event Receivers is out-of-scope of this specification.</t>
+          
+     <t>In the Event of a general HTTP error condition, the Event Receiver
+     MAY respond with an appropriate HTTP Status code as defined in 
+     <xref target="RFC7231">Section 6</xref>.</t>
+     <t>When the Event Receiver detects an error parsing or 
+     validating a received SET (as defined by <xref target="I-D.ietf-secevent-token"/>), 
+     the Event Receiver SHALL indicate an HTTP Status 400 error with an 
+     error code as described in <xref target="errorResponse"/>.
+     </t>
+     
+     <figure anchor="badPostResponse" title="Example HTTP Status 400 Response">
+        <preamble>The following is an example non-normative error 
+        response.</preamble>
+        <artwork>HTTP/1.1 400 Bad Request
+Content-Type: application/json
+
+{
+  "err":"dup",
+  "description":"SET already received. Ignored."
+
+}</artwork>
+     </figure>    
+     </section>
+     
+     <section anchor="httpPoll" title="Polling Delivery using HTTP">
+ 
+       <t>This method allows an Event Receiver to use HTTP POST 
+       (<xref target="RFC7231">Section 4.3.3</xref>) to acknowledge
+       SETs and to check for and receive zero or more SETs. Requests
+       MAY be made at a periodic interval (short polling) or requests
+       MAY wait pending availability of new SETs using long polling 
+       (see <xref target="RFC6202">Section 2</xref>).</t>
+                   
+       <t>The delivery of SETs in this method is facilitated by HTTP
+       POST requests initiated by the Event Receiver in which:<list style="symbols">
+        <t>The Event Receiver makes a request for available SETs 
+        using an HTTP POST to a pre-arranged endpoint provided by the Event 
+        Transmitter. Or,</t>
+        <t>After validating previously received SETs, the Event Receiver 
+        initiates another poll request using HTTP POST that includes
+        acknowledgement of previous SETs, and waits for the next batch
+        of SETs.</t>
+       </list></t>
+       
+       <t>The purpose of the "acknowledgement" is to inform the 
+       Event Transmitter that has successfully been delivered and attempts
+       to re-deliver are no longer required. Before acknowledgement, Event 
+       Receivers SHOULD ensure received SETs have been validated and 
+       retained in a manner appropriate to the receiver's  
+       retention requirements. The level and method of retention of SETs
+       by Event Receivers is out-of-scope of this specification.</t>
+ 
+       <section anchor="pollReqAttrs" title="Polling HTTP Request Attributes">
+       
+       <t>When initiating a poll request, the Event Receiver constructs
+       a JSON document that consists of polling request parameters
+       and SET acknowledgement parameters in the form of JSON attributes.</t>
+       
+       <t>The request payloads are delivered in one of two forms as described
+       in <xref target="pollRequest"/> and <xref target="pollGetAck"></xref></t>
+       
+       <t>When making a request, the HTTP header <spanx style="verb">Content-Type</spanx>
+       is set to <spanx style="verb">application/json</spanx>.</t>
+       
+       <t>The following JSON Attributes are used in a polling request:
+       <list style="hanging">
+       
+         <!-- Request parameters -->
+         <t hangText="Request Processing Parameters"><list style="hanging">
+         
+          <t hangText="maxEvents"><vspace/>an OPTIONAL JSON integer value 
+         indicating the maximum number of unacknowledged SETs that 
+         SHOULD be returned. If more than the maximum number of SETs 
+         are available, the oldest SETs available SHOULD be returned 
+         first. A value of <spanx style="verb">0</spanx> MAY be used by 
+         Event Receivers that would like to perform an acknowledge only
+         request. This enables the Receiver to use separate HTTP requests
+         for acknowledgement and reception of SETs. When zero returned
+         events is requested, the value of the attribute 
+         <spanx style="verb">returnImmediately</spanx> SHALL be ignored 
+         as an immediate response is expected.
+         </t>
+         
+         <t hangText="returnImmediately"><vspace/>An OPTIONAL JSON 
+         boolean value that indicates the Event Transmitter SHOULD return
+         an immediate response even if no results are available 
+         (short polling). The default value is <spanx style="verb">false</spanx> 
+         indicates the request is to be treated as an HTTP Long Poll (see 
+         <xref target="RFC6202">Section 2</xref>). The time out for the 
+         request is part of the Stream configuration which is out of 
+         scope of this specification.</t> 
+
+<!-- Removed in favoour of maxEvents=0
+         <t hangText="ackOnly"><vspace/>An OPTIONAL JSON boolean value
+         where a value of <spanx style="verb">true</spanx> indicates 
+         that the Event Receiver is acknowledging
+         received SETs and does not wish to receive new SETs in the 
+         current request. The default value is <spanx style="verb">false</spanx>.
+         This option MAY be used by Event Receivers that would like
+         to use a separate or distinct request for acknowledgement (e.g.
+         to separate receiver threads from acknowledgement threads).
+         When specified the value of the attribute 
+         <spanx style="verb">returnImmediately</spanx> SHALL be ignored 
+         as an immediate response is expected.</t>             
+  -->
+         </list></t>
+         
+         <t hangText="SET Acknowledgment Parameters"><list style="hanging">
+ 
+         <!-- Acknowledgement parameters -->     
+ 
+         <t hangText="ack"><vspace/>Which is an array of Strings that each
+         correspond to the <spanx style="verb">jti</spanx> of a 
+         successfully received SET. If there are no 
+         outstanding SETs to acknowledge, the attribute MAY be omitted. 
+         When acknowledging a SET, the Event Transmitter is released from
+         any obligation to retain the SET (e.g. for a future re-try to
+         receive).</t>
+          
+         <t hangText="setErrs"><vspace/>A JSON Object that contains 
+         one or more nested JSON attributes that correspond to the 
+         <spanx style="verb">jti</spanx> of each invalid SET received.
+         The value of each is a JSON object whose contents is an
+         <spanx style="verb">err</spanx> attribute and 
+         <spanx style="verb">description</spanx> attribute whose value 
+         correspond to the errors described in <xref target="errorResponse"/>.</t> 
+         
+         <!-- Removed will try to avoid using docId
+         <t hangText="docErrs"><vspace/>A JSON Object that contains 
+         one or more nested JSON attributes that correspond to the 
+         <spanx style="verb">docId</spanx> of a previous polling response.
+         The value of each is a JSON object whose contents is an
+         <spanx style="verb">err</spanx> attribute and 
+         <spanx style="verb">description</spanx> attribute whose value 
+         correspond to the errors described in <xref target="errorResponse"/>.</t> 
+          -->
+         
+         </list></t>
+                
+        </list>
+        </t>
+       </section>
+       
+       <section anchor="pollRespAttrs" title="Polling HTTP Response Attributes">
+       
+       <t>In response to a poll request, the Event Transmitter checks for 
+       available SET events and responds with a JSON document containing
+       the following JSON attributes:
+       <list style="hanging">
+       
+         <!-- If we use docId, it should probably be in a header
+         
+         <t hangText="docId"><vspace/>A REQUIRED JSON String that contains
+         a value which can be used to identify the current response
+         document. This value is used primarily to acknowledge document
+         level errors by the Event Receiver.</t>
+         
+          -->
+          
+         <t hangText="sets"><vspace/>A JSON object that contains zero 
+         or more nested JSON attributes. Each nested attribute 
+         corresponds to the <spanx style="verb">jti</spanx> of a SET to 
+         be delivered and whose value is a JSON String containing the 
+         value of the encoded corresponding SET. If there are no 
+         outstanding SETs to be transmitted, the JSON object SHALL be 
+         empty.</t>
+         
+<!--  drop before and since         
+         <t hangText="since"><vspace/>A JSON integer value that
+         is a NumericDate and indicates the time of the oldest SET that 
+         was returned. 
+         </t>
+         
+         <t hangText="before"><vspace/>A JSON integer value that is a 
+         NumericDate and indicates the time of the youngest SET that was 
+         returned.</t>
+    -->
+    
+         <t hangText="moreAvailable"><vspace/>A JSON boolean value that 
+         indicates if more unacknowledged SETs are available to be returned. 
+         </t>     
+       </list>
+       </t>
+       
+       <t>When making a response, the HTTP header <spanx style="verb">Content-Type</spanx>
+       is set to <spanx style="verb">application/json</spanx>.</t>
+       </section>
+       
+       <section anchor="pollRequest" title="Poll Request">
+       
+       <t>The Event Receiver performs an HTTP POST (see
+       <xref target="RFC7231">Section 4.3.4</xref>) to a pre-arranged 
+       polling endpoint URI to check for SETs that are available. 
+       Because the Event Receiver has no prior SETs to 
+       acknowledge, the <spanx style="verb">ack</spanx> and 
+       <spanx style="verb">errs</spanx> request parameters are omitted.</t>
+
+       <t>If after a period of time, negotiated between the Event 
+       Transmitter and Receiver, an Event Transmitter MAY re-issue SETs
+       it has previously delivered. The Event Receiver SHOULD accept
+       repeat SETs and acknowledge the SETs regardless of whether the
+       Receiver believes it has already acknowledged the SETs previously.
+       An Event Transmitter MAY limit the number of times it attempts to
+       deliver a SET. Upon abandoning delivery of a SET, the Event Transmitter
+       SHOULD have a method to notify the Event Receiver of the loss
+       such as through a status service (not defined by this specification).
+       </t>
+       
+        <t>If the Event Receiver has received SETs from the 
+        Event Transmitter, the Event Receiver SHOULD parse and validate 
+        received SETs to meet its own requirements and SHOULD acknowledge 
+        receipt in a timely (e.g. minutes) fashion so that the Event 
+        Transmitter may mark the SETs as received. Event Receivers SHOULD
+        acknowledge receipt before taking any local actions based on
+        the SETs to avoid unnecessary delay in acknowledgement where 
+        possible.</t>
+        
+        <t>Poll requests have three variations:
+        <list style="hanging">
+          <t hangText="Poll Only"><vspace/>In which an Event Receiver 
+          asks for the next set of Events where no previous SET deliveries 
+          are acknowledged (such as in the initial poll request).</t>
+          <t hangText="Acknowledge Only"><vspace/>In which an Event 
+          Receiver sets the <spanx style="verb">maxEvents</spanx> 
+          attribute to <spanx style="verb">0</spanx> along with 
+          <spanx style="verb">ack</spanx> and
+          <spanx style="verb">err</spanx> attributes indicating the 
+          Event Receiver is acknowledging previously received SETs and 
+          does not want to receive any new SETs in response to the 
+          request. </t>
+          <t hangText="Combined Acknowledge and Poll"><vspace/>In 
+          which an Event Receiver is both acknowledging previously
+          received SETs using the <spanx style="verb">ack</spanx> and
+          <spanx style="verb">err</spanx> attributes
+          and will wait for the next group of SETs in the Event Transmitters
+          response.</t>
+        </list></t>
+       
+       <section title="Poll Only Request">
+       <t>In the case where no SETs were received in a previous poll (see 
+        <xref target="emptyPollResponse"/>), the Event Receiver simply
+        polls without acknowledgement parameters (<spanx style="verb">sets</spanx>
+        and <spanx style="verb">setErrs</spanx>).</t>  
+        
+       <t>The following is an example request made by an Event Receiver
+       that has no outstanding SETs to acknowledge and is polling 
+       for available SETs.</t>
+       
+       <figure anchor="pollInitRequest" title="Example Initial Poll Request">
+       <preamble>The following is a non-normative example poll request to the
+       endpoint: <spanx style="verb">https://nofity.exampleidp.com/Events</spanx>.</preamble>
+       <artwork align="left">POST /Events  HTTP/1.1
+
+Host: notify.exampleidp.com
+Authorization: Bearer h480djs93hd8
+Accept: application/json
+
+{
+ "returnImmediately":true
+}</artwork>
+       </figure>
+       
+       <t>An Event Receiver MAY poll with no parameters at all by passing
+       an empty JSON object.</t>
+       
+       <figure anchor="pollDefaultRequest" title="Example Default Poll Request">
+       <preamble>The following is a non-normative example default poll request to the
+       endpoint: <spanx style="verb">https://nofity.exampleidp.com/Events</spanx>.</preamble>
+       <artwork align="left">POST /Events  HTTP/1.1
+
+Host: notify.exampleidp.com
+Authorization: Bearer h480djs93hd8
+Accept: application/json
+
+{}</artwork>
+       </figure>
+       
+       </section>
+       
+       <section title="Acknowledge Only Request">
+       <t>In this variation, the Event Receiver acknowledges previously 
+       received SETs and indicates it does not want to receive SETs in 
+       response by setting the <spanx style="verb">maxEvents</spanx> 
+       attribute to <spanx style="verb">0</spanx>.</t>
+       
+       <t>This variation is typically used when an Event Receiver needs to 
+       acknowledge received SETs independently (e.g. on separate threads)
+       from the process of receiving SETs.</t>
+       
+       <figure anchor="pollAckOnly" title="Example Acknowledge Only equest">
+        <preamble>The following is a non-normative example poll with acknowledgement 
+        of SETs received (for example as shown in 
+        <xref target="pollResponse"/>).</preamble>
+        <artwork>POST /Events  HTTP/1.1
+
+Host: notify.exampleidp.com
+Authorization: Bearer h480djs93hd8
+Content-Type: application/json
+Authorization: Bearer h480djs93hd8
+
+{
+  "ack":[
+    "4d3559ec67504aaba65d40b0363faad8",
+    "3d0c3cf797584bd193bd0fb1bd4e7d30"
+  ],
+  "maxEvents":0
+}</artwork>
+        </figure>
+       
+       </section>
+       
+       <section anchor="pollAck" title="Poll with Acknowledgement">
+       
+       <t>This variation allows a receiver thread to simultaneously 
+       acknowledge previously received SETs and wait for the next
+       group of SETs in a single request.</t>
+     
+        <figure anchor="pollGoodResponse" title="Example Poll With Acknowledgement and No Errors">
+        <preamble>The following is a non-normative example poll with acknowledgement 
+        of SETs received in <xref target="pollResponse"/>.</preamble>
+        <artwork>POST /Events  HTTP/1.1
+
+Host: notify.exampleidp.com
+Authorization: Bearer h480djs93hd8
+Content-Type: application/json
+Authorization: Bearer h480djs93hd8
+
+{
+  "ack":[
+    "4d3559ec67504aaba65d40b0363faad8",
+    "3d0c3cf797584bd193bd0fb1bd4e7d30"
+  ],
+  "returnImmediately":false
+}</artwork>
+        </figure>
+        
+        <t>In the above acknowledgement, the Event Receiver has acknowledged
+        receipt of two SETs and has indicated it wants to wait until
+        the next SET is available.</t>       
+       </section>
+       
+       <section anchor="pollAckErr" title="Poll with Acknowledgement and Errors">
+        <t>In the case where errors were detected in previously 
+        delivered SETs, the Event Receiver MAY use the 
+        <spanx style="verb">setErrs</spanx> attribute to indicate errors
+        in the following poll request.
+        </t>
+        
+        <figure anchor="pollErrorResponse" 
+        title="Example Poll Acknowledgement With Error">
+        <preamble>The following is a non-normative example of a response
+        acknowledging 1 error and 1 receipt of two SETs received 
+        in <xref target="pollResponse"/>.</preamble>
+        <artwork>POST /Events  HTTP/1.1
+
+Host: notify.exampleidp.com
+Authorization: Bearer h480djs93hd8
+Content-Type: application/json
+Authorization: Bearer h480djs93hd8
+
+{
+  "ack":["3d0c3cf797584bd193bd0fb1bd4e7d30"],
+  "setErrs":{
+    "4d3559ec67504aaba65d40b0363faad8":{
+      "err":"jwtAud",
+      "description":"The audience value was incorrect."
+    }
+  },
+  "returnImmediately":true
+}</artwork>
+        </figure>     
+        
+        <!-- DocId errors removed from current version
+        <figure anchor="pollDocErrorAck" 
+        title="Example Poll Acknowledgement With Document Error">
+        <preamble>The following is a non-normative example of a response
+        acknowledging a document parsing error from a previous poll.</preamble>
+        <artwork>POST /Events  HTTP/1.1
+
+Host: notify.exampleidp.com
+Authorization: Bearer h480djs93hd8
+Content-Type: application/json
+Authorization: Bearer h480djs93hd8
+
+{
+  "docErrs":{
+    "1c7cb28146f24b08aba8ac1aaf27fece":{
+      "err":"json",
+      "description":"Received document was not a valid JSON document."
+    }
+  }
+}</artwork>
+        </figure>               
+         -->
+         
+       </section>
+       </section>
+ 
+       <section anchor="pollGetAck" 
+       title="Poll Response">
+        
+       <t>In response to a poll request, the service provider MAY
+       respond immediately if SETs are available to be delivered. 
+       If no SETs are available at the time of the request, the 
+       Event Transmitter SHALL delay responding until a SET is 
+       available unless the poll request parameter 
+       <spanx style="verb">returnImmediately</spanx> is <spanx style="verb">true</spanx>.</t>
+       
+       <t>As described in <xref target="pollRespAttrs"/> a JSON document
+       is returned containing a number of attributes including
+       <spanx style="verb">sets</spanx> which SHALL contain zero or more 
+       SETs.</t>
+       <figure anchor="pollResponse" title="Example Poll Response">
+       <preamble>The following is a non-normative example response to
+       the request shown <xref target="pollRequest"/>. This example
+       shows two SETs are returned.</preamble>
+       <artwork align="left">HTTP/1.1 200 OK
+Content-Type: application/json
+Location: https://notify.exampleidp/Events
+
+{
+"sets":{
+  "4d3559ec67504aaba65d40b0363faad8":
+   "eyJhbGciOiJub25lIn0.
+   eyJqdGkiOiI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIsImlhdCI6MTQ
+   1ODQ5NjQwNCwiaXNzIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwiYXVkIjpbIm
+   h0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M
+   2I3NzU0IiwiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIx
+   ZDA4NjQxZDc2NzZlZTciXSwiZXZlbnRzIjp7InVybjppZXRmOnBhcmFtczpzY2ltOmV
+   2ZW50OmNyZWF0ZSI6eyJyZWYiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcn
+   MvNDRmNjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIsImF0dHJpYnV0ZXMiOlsiaWQiLCJuY
+   W1lIiwidXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.",
+  "3d0c3cf797584bd193bd0fb1bd4e7d30":
+   "eyJhbGciOiJub25lIn0.
+   eyJqdGkiOiIzZDBjM2NmNzk3NTg0YmQxOTNiZDBmYjFiZDRlN2QzMCIsImlhdCI6MTQ
+   1ODQ5NjAyNSwiaXNzIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwiYXVkIjpbIm
+   h0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M
+   2I3NzU0IiwiaHR0cHM6Ly9qaHViLmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIx
+   ZDA4NjQxZDc2NzZlZTciXSwic3ViIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL1V
+   zZXJzLzQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJldmVudHMiOnsidXJuOmlldG
+   Y6cGFyYW1zOnNjaW06ZXZlbnQ6cGFzc3dvcmRSZXNldCI6eyJpZCI6IjQ0ZjYxNDJkZ
+   jk2YmQ2YWI2MWU3NTIxZDkifSwiaHR0cHM6Ly9leGFtcGxlLmNvbS9zY2ltL2V2ZW50
+   L3Bhc3N3b3JkUmVzZXRFeHQiOnsicmVzZXRBdHRlbXB0cyI6NX19fQ."
+ }
+}</artwork></figure>
+       <t>In the above example, a two SETs whose <spanx style="verb">jti</spanx>
+       are <spanx style="verb">4d3559ec67504aaba65d40b0363faad8</spanx> 
+       and <spanx style="verb">3d0c3cf797584bd193bd0fb1bd4e7d30</spanx> 
+       are delivered.</t>
+       
+       <figure anchor="emptyPollResponse" title="Example No SETs Poll Response">
+       <preamble>The following is a non-normative example response to
+       the request shown <xref target="pollRequest"/> showing no new
+       SETs or unacknowledged SETs are available.</preamble>
+       <artwork align="left">HTTP/1.1 200 OK
+Content-Type: application/json
+Location: https://notify.exampleidp/Events
+
+{
+ "sets":{ }
+}</artwork></figure>
+       
+       <t>Upon receiving the JSON document (e.g. as shown in 
+       <xref target="pollResponse"/>), the Event Receiver parses
+       and verifies the received SETs and notifies the Event Transmitter 
+       via the next poll request to the Event Transmitter as described in 
+       <xref target="pollAck"/> or <xref target="pollAckErr"/>.</t>      
+    
+     </section>
+     
+     </section>
+     
+     <section anchor="errorResponse" title="Error Response Handling">
+        <t></t>
+        <t>If a SET is invalid, the following error codes are defined:</t>
+        <texttable anchor="reqErrors" title="SET Errors">
+          <ttcol>Err Value</ttcol><ttcol>Description</ttcol>
+          <c>json</c><c>Invalid JSON object.</c>
+          <c>jwtParse</c><c>Invalid or unparsable JWT or JSON structure.</c>
+          <c>jwtHdr</c><c>In invalid JWT header was detected.</c>
+          <c>jwtCrypto</c><c>Unable to parse due to unsupported algorithm.</c>
+          <c>jws</c><c>Signature was not validated.</c>
+          <c>jwe</c><c>Unable to decrypt JWE encoded data.</c>
+          <c>jwtAud</c><c>Invalid audience value.</c>
+          <c>jwtIss</c><c>Issuer not recognized.</c>
+          <c>setType</c><c>An unexpected Event type was received.</c>
+          <c>setParse</c><c>Invalid structure was encountered such as an 
+          inability to parse or an incomplete set of Event claims.</c>
+          <c>setData</c><c>SET event claims incomplete or invalid.</c>
+          <c>dup</c><c>A duplicate SET was received and has been ignored.</c>
+        </texttable>
+            
+        <t>An error response SHALL include a JSON
+        object which provides details about the error. The JSON object
+        includes the JSON attributes: <list style="hanging">
+          <t hangText="err"><vspace />A value which is a keyword that 
+          describes the error (see <xref target="reqErrors" />).</t>
+          <t hangText="description"><vspace />A human-readable text that provides
+          additional diagnostic information.</t>
+        </list>
+        When included as part of an HTTP Status 400 response, the above
+        JSON is the HTTP response body (see <xref target="badPostResponse"/>). 
+        When included as part of a batch of SETs, the above JSON is included
+        as part of the <spanx style="verb">setErrs</spanx> attribute as
+        defined in <xref target="pollRespAttrs"/> and <xref target="pollAckErr"/></t>
+         
+        </section>  
+       
+   </section>
+   
+   <section anchor="aa" title="Authentication and Authorization" toc="default">
+      <t>The SET delivery methods described in this specification are
+      based upon HTTP and depend on the use of TLS and/or standard 
+      HTTP authentication and authorization schemes as per 
+      <xref target="RFC7235" />. For example, the following
+      methodologies could be used among others: <list style="hanging">
+          <t hangText="TLS Client Authentication"><vspace />Event delivery
+          endpoints MAY request TLS mutual client authentication. 
+          See <xref target="RFC5246">Section 7.3</xref>. </t>
+
+          <t hangText="Bearer Tokens"><vspace />Bearer tokens 
+          <xref target="RFC6750" /> MAY be used when combined with TLS and a token
+          framework such as OAuth 2.0 <xref target="RFC6749" />. 
+          For security considerations regarding the use of bearer tokens in
+          SET delivery see <xref target="bearerConsiderations" />.</t>
+
+          <t hangText="Basic Authentication"><vspace />Usage of basic
+          authentication should be avoided due to its use of a single factor
+          that is based upon a relatively static, symmetric secret.
+          Implementers SHOULD combine the use of basic authentication with
+          other factors. The security considerations of HTTP BASIC, are well
+          documented in <xref target="RFC7617" /> and SHOULD be considered
+          along with using signed SETs (see SET Payload Authentication below).</t>
+          
+          <t hangText="SET Payload Authentication"><vspace/>In scenarios 
+          where SETs are signed and
+          the delivery method is HTTP POST (see <xref target="httpPost" />),
+          Event Receivers MAY elect to use Basic Authentication or not 
+          to use HTTP or TLS based authentication at all. See 
+          <xref target="payloadAuthentication" /> for considerations.</t>
+        </list></t>
+
+      <t>As per <xref target="RFC7235">Section 4.1 of</xref>, a SET
+      delivery endpoint SHALL indicate supported HTTP authentication 
+      schemes via the <spanx style="verb">WWW-Authenticate</spanx> header.</t>
+
+      <t>Because SET Delivery describes a simple function, authorization
+      for the ability to pick-up or deliver SETs can be derived by
+      considering the identity of the SET issuer, or via an authentication
+      method above. This specification considers authentication as a
+      feature to prevent denial-of-service attacks. Because SETs are
+      not commands (see ), Event Receivers are free to ignore SETs that 
+      are not of interest.</t>
+
+      <t>For illustrative purposes only, SET delivery examples show an OAuth2
+      bearer token value <xref target="RFC6750" /> in the authorization header.
+      This is not intended to imply that bearer tokens are
+      preferred. However, the use of bearer tokens in the specification does
+      reflect common practice. </t>
+
+      <section anchor="authzTokens" title="Use of Tokens as Authorizations">
+        <t>When using bearer tokens or proof-of-possession tokens that
+        represent an authorization grant such as issued by OAuth (see <xref target="RFC6749" />), implementers SHOULD consider the type of
+        authorization granted, any authorized scopes (see Section 3.3 of <xref target="RFC6749" />), and the security subject(s) that SHOULD be mapped
+        from the authorization when considering local access control rules.
+        Section 6 of the OAuth Assertions draft <xref target="RFC7521" />, documents common scenarios for
+        authorization including:<list style="symbols">
+            <t>Clients using an assertion to authenticate and/or act on behalf
+            of itself;</t>
+
+            <t>Clients acting on behalf of a user; and,</t>
+
+            <t>A Client acting on behalf of an anonymous user (e.g., see next
+            section).</t>
+          </list>When using OAuth authorization tokens, implementers MUST take
+        into account the threats and countermeasures documented in the
+        security considerations for the use of client authorizations (see
+        Section 8 of <xref target="RFC7521" />). When using
+        other token formats or frameworks, implementers MUST take into account
+        similar threats and countermeasures, especially those documented by
+        the relevant specifications.</t>
+      </section>
+  
+  </section>
+  <section anchor="Security" title="Security Considerations" toc="default">
+      
+      <section anchor="payloadAuthentication" title="Authentication Using Signed SETs">
+      <t>In scenarios where HTTP authorization or TLS mutual authentication
+      are not used or are considered weak, JWS signed SETs SHOULD be 
+      used (see <xref target="RFC7515"/> and <xref target="I-D.ietf-secevent-token">
+      Security Considerations</xref>). This enables the Event Receiver
+      to validate that the SET issuer is authorized to deliver SETs.
+      </t>
+      </section>
+      <section title="HTTP Considerations">
+        <t>SET delivery depends on the use of Hypertext Transfer Protocol and thus
+        subject to the security considerations of HTTP <xref
+        target="RFC7230">Section 9</xref> and its related specifications.</t>
+
+        <t>As stated in <xref target="RFC7230">Section 2.7.1</xref>, an 
+        HTTP requestor MUST NOT generate the <spanx style="verb">userinfo</spanx>
+        (i.e., username and password) component (and its "@" delimiter) when
+        an "http" URI reference is generated with a message as they are now
+        disallowed in HTTP.</t>
+      </section>
+
+      <section title="TLS Support Considerations">
+        <t>SETs contain sensitive information that is considered PII
+        (e.g. subject claims). Therefore, Event Transmitters and
+        Event Receivers MUST require the use of a transport-layer 
+        security mechanism. Event delivery endpoints MUST support TLS 
+        1.2 <xref target="RFC5246"/> and MAY support additional 
+        transport-layer mechanisms meeting its security requirements. 
+        When using TLS, the client MUST perform a TLS/SSL server
+        certificate check, per <xref target="RFC6125"/>. Implementation
+        security considerations for TLS can be found in "Recommendations for
+        Secure Use of TLS and DTLS" <xref target="RFC7525"/>.</t>
+      </section>
+
+      <section title="Authorization Token Considerations">
+        <t>When using authorization tokens such as those issued by OAuth 2.0
+        <xref target="RFC6749"/>, implementers MUST take into account threats
+        and countermeasures documented in Section 8 of <xref
+        target="RFC7521"/>.</t>
+        
+        <section anchor="bearerConsiderations"
+               title="Bearer Token Considerations">
+        <t>Due to the possibility of interception, Bearer tokens MUST be 
+        exchanged using TLS.</t>
+
+        <t>Bearer tokens MUST have a limited lifetime that can be determined
+        directly or indirectly (e.g., by checking with a validation service)
+        by the service provider. By expiring tokens, clients are forced to
+        obtain a new token (which usually involves re-authentication) for
+        continued authorized access. For example, in OAuth2, a client MAY use
+        OAuth token refresh to obtain a new bearer token after authenticating
+        to an authorization server. See Section 6 of <xref
+        target="RFC6749"/>.</t>
+
+        <t>Implementations supporting OAuth bearer tokens need to factor in
+        security considerations of this authorization method <xref
+        target="RFC7521"/>. Since security is only as good
+        as the weakest link, implementers also need to consider authentication
+        choices coupled with OAuth bearer tokens. The security considerations
+        of the default authentication method for OAuth bearer tokens, HTTP
+        BASIC, are well documented in <xref
+        target="RFC7617"/>, therefore implementers
+        are encouraged to prefer stronger authentication methods. Designating
+        the specific methods of authentication and authorization are
+        out-of-scope for the delivery of SET tokens, however this 
+        information is provided as a resource to implementers.</t>
+      </section>
+      </section>
+
+      
+   </section>
+   
+   <section title="Privacy Considerations">
+   
+      <t>If a SET needs to be retained for audit purposes, JWS MAY 
+      be used to provide verification of its authenticity.</t>
+      
+      <t>Event Transmitters SHOULD attempt to specialize Event Streams 
+      so that the content is targeted to the specific business and 
+      protocol needs of subscribers.</t>
+      
+      <t>When sharing personally identifiable information or information
+      that is otherwise considered confidential to affected users, Event 
+      Transmitters and Receivers MUST have the appropriate legal agreements
+      and user consent or terms of service in place.</t>
+      
+      <t>The propagation of subject identifiers can be perceived as personally
+      identifiable information. Where possible, Event Transmitters and Receivers
+      SHOULD devise approaches that prevent propagation -- for example, the
+      passing of a hash value that requires the subscriber to already know
+      the subject.</t>
+
+   </section>
+
+    <section anchor="IANA" title="IANA Considerations">
+      
+      <t>There are no IANA considerations.</t>
+  
+    </section>
+  </middle>
+
+  <back>
+    <references title="Normative References">
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml' ?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5246.xml' ?><!-- TLS 1.2 -->
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5988.xml' ?>
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6125.xml' ?><!-- TLS Certs -->
+      
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7159.xml' ?><!-- JSON -->
+      
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7517.xml' ?><!-- JWK -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7525.xml' ?><!-- TLS Recos -->
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml' ?>
+   
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-token-00.xml'?>
+
+    </references>
+
+    <references title="Informative References">
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml' ?>
+    
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6202.xml' ?><!-- HTTP Long Polling -->
+    
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6749.xml' ?><!-- OAuth -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6750.xml' ?><!-- OAuth Bearer-->
+      
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7521.xml' ?><!-- Client Auth Assertions -->
+      
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7230.xml' ?><!-- HTTP Msg -->
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7235.xml' ?><!-- HTTP Auth -->
+
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7617.xml' ?><!-- Basic Auth Update -->
+      
+     <reference anchor="POSIX.1">
+  <front>
+    <title>The Open Group Base Specifications Issue 7</title>
+    <author>
+      <organization>Institute of Electrical and Electronics Engineers</organization>
+    </author>
+    <date year="2013"/>
+  </front>
+  <seriesInfo value="Std 1003.1, 2013 Edition" name="IEEE"/>
+  <format target="http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap04.html#tag_04_15"
+    type="HTML" />
+      </reference>
+
+      <reference anchor="openid-connect-core">
+        <front>
+          <title>OpenID Connect Core 1.0</title>
+          <author fullname="Nat Sakimura et al"><organization>NRI</organization></author>
+          <date day="8" month="Nov" year="2014"/>
+        </front>
+        <format type="HTML" target="http://openid.net/specs/openid-connect-core-1_0.html"/>
+      </reference>
+      <reference anchor="saml-core-2.0">
+        <front>
+          <title>Assertions and Protocols for the OASIS Security Assertion Markup Language (SAML) V2.0</title>
+          <author fullname="Scott Cantor et al"><organization>Internet2</organization></author>
+          <date day="15" month="March" year="2005"/>
+        </front>
+        <format type="PDF" target="http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf"/>
+      </reference>
+
+    </references>
+
+    <section title="Other Streaming Specifications">
+    <t>[[EDITORS NOTE: This section to be removed prior to publication]]</t>
+    
+    <t>The following pub/sub, queuing, streaming systems were reviewed 
+    as possible solutions or as input to the current draft:</t>
+    
+    <t>XMPP Events</t>
+    <t>The WG considered the XMPP events ands its ability to provide a single
+    messaging solution without the need for both polling and push modes.
+    The feeling was the size and methodology of XMPP was to far apart from
+    the current capabilities of the SECEVENTs community which focuses in
+    on HTTP based service delivery and authorization.</t>
+    
+    <t>Amazon Simple Notification Service</t>
+    <t>Simple Notification Service, is a pub/sub messaging product from 
+    AWS. SNS supports a variety of subscriber types: HTTP/HTTPS endpoints, 
+    AWS Lambda functions, email addresses (as JSON or plain text), phone 
+    numbers (via SMS), and AWS SQS standard queues. It doesn’t directly 
+    support pull, but subscribers can get the pull model by creating an 
+    SQS queue and subscribing it to the topic. Note that this puts the 
+    cost of pull support back onto the subscriber, just as it is in the 
+    push model. It is not clear that one way is strictly better than the 
+    other; larger, sophisticated developers may be happy to own message 
+    persistence so they can have their own internal delivery guarantees. 
+    The long tail of OIDC clients may not care about that, or may fail 
+    to get it right. Regardless, I think we can learn something from the 
+    Delivery Policies supported by SNS, as well as the delivery controls 
+    that SQS offers (e.g. Visibility Timeout, Dead-Letter Queues). I’m 
+    not suggesting that we need all of these things in the spec, but 
+    they give an idea of what features people have found useful.</t>
+    <t>Other information:<list style="symbols">
+     <t>API Reference: http://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/Welcome.html</t>
+     <t>Visibility Timeouts: http://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html</t>
+    </list></t>
+    
+    <t>Apache Kafka</t>
+    <t>Apache Kafka is an Apache open source project based upon TCP for 
+    distributed streaming. It prescribes some interesting general 
+    purpose features that seem to extend far beyond the simpler 
+    streaming model SECEVENTs is after. A comment from MS has been that 
+    Kafka does an acknowledge with poll combination event which seems 
+    to be a performance advantage. See: https://kafka.apache.org/intro</t>
+    
+    <t>Google Pub/Sub</t>
+    <t>Google Pub Sub system favours a model whereby polling and acknowledgement
+    of events is done as separate endpoints as separate functions.</t>
+    <t>Information:<list style="symbols">
+      <t>Cloud Overview - https://cloud.google.com/pubsub/</t>
+      <t>Subscriber Overview - https://cloud.google.com/pubsub/docs/subscriber</t>
+      <t>Subscriber Pull(poll) - https://cloud.google.com/pubsub/docs/pull</t>
+    </list></t>
+    
+    
+    </section>
+
+    <section title="Acknowledgments">
+      <t>The editors would like to thanks the members of the SCIM WG which 
+      began discussions of provisioning events starting with: draft-hunt-scim-notify-00 in 2015.</t>
+      
+      <t>The editor would like to thank the participants in the the SECEVENTS
+      working group for their support of this specification.</t>
+    </section>
+
+    <section title="Change Log">
+      <t>Draft 00 - PH - Based on draft-hunt-secevent.distribution with the 
+      following additions:<list style="symbols">
+        <t>Removed Control Plane from specification</t>
+        <t>Added new HTTP Polling delivery method</t>
+        <t>Added general HTTP security considerations</t>
+        <t>Added authentication and authorization</t>
+        <t>Revised Verify Event to work with both types of delivery</t>
+ 
+      </list></t>
+      
+      <t>Draft 01 - PH - Removed Verification section per feedback from IETF99.</t>
+	    
+      <t>Draft 02 - MS - <list style="symbols">
+        <t>Minor editorial improvements</t>
+        <t>Removed Identity Provider / Relying Party Terminology</t>
+        <t>Changed boilerplate language according to RFC8174</t>     
+      </list> </t>
+      
+      <t>This draft was based on draft-hunt-secevent.distribution revision history:<list style="symbols">
+      <t>Draft 00 - PH - First Draft based on reduced version of draft-hunt-idevent-distribution</t>
+      <t>Draft 01 - PH - <list style="symbols">
+        <t>Reworked terminology to match new WG Transmitter/Receiver terms</t>
+        <t>Reworked sections into Data Plane vs. Control Plane</t>
+        <t>Removed method transmission registry in order to simplify the specification</t>
+        <t>Made Create, Update operations optional for Control Plane (Read is MTI)</t>
+      </list></t>
+      <t>Draft 02 - PH <list style="symbols">
+        <t>Added iss metadata for Event Stream</t>
+        <t>Changed to using JWKS_uri for issuer and receiver.</t>
+        <t>Control Plane sections moved to draft-hunt-secevent-stream-mgmt</t>
+        <t>Added support for delivering multiple events using HTTP POST polling</t>
+      </list></t>
+      </list></t>
+    </section>
+  </back>
+</rfc>
