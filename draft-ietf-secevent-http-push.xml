@@ -11,21 +11,32 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-delivery-02"
-	ipr="trust200902">
-	<front> 
-		<title abbrev="draft-ietf-secevent-delivery">
-			SET Token Delivery Using HTTP</title>
+<rfc category="std" docName="draft-ietf-secevent-http-push-00" ipr="trust200902">
+    <front>
+        <title abbrev="draft-ietf-secevent-http-push">Push-Based SET Token Delivery Using HTTP</title>
 
-		<author fullname="Phil Hunt" initials="P." role="editor"
-			surname="Hunt">
-			<organization abbrev="Oracle">Oracle Corporation</organization>
+    <author fullname="Annabelle Backman" initials="A." surname="Backman" role="editor">
+        <organization abbrev="Amazon">Amazon</organization>
+        <address>
+            <email>richanna@amazon.com</email>
+        </address>
+    </author>
 
-			<address>
-				<email>phil.hunt@yahoo.com</email>
-			</address>
-		</author>
-    
+    <author fullname="Michael B. Jones" initials="M." surname="Jones" role="editor">
+        <organization abbrev="Microsoft">Microsoft</organization>
+        <address>
+            <email>mbj@microsoft.com</email>
+            <uri>http://self-issued.info/</uri>
+        </address>
+    </author>
+
+    <author fullname="Phil Hunt" initials="P." role="editor" surname="Hunt">
+        <organization abbrev="Oracle">Oracle Corporation</organization>
+        <address>
+            <email>phil.hunt@yahoo.com</email>
+        </address>
+    </author>
+
     <author fullname="Marius Scurtescu" initials="M.S." surname="Scurtescu">
       <organization abbrev="Google">Google</organization>
 
@@ -50,14 +61,6 @@
       </address>
     </author>
     
-    <author fullname="Annabelle Richard Backman" initials="A.R." surname="Backman">
-      <organization abbrev="Amazon">Amazon</organization>
-
-      <address>
-        <email>richanna@amazon.com</email>
-      </address>
-    </author>
-
 		<date year="2018" />
 
 		<keyword>Internet-Draft</keyword>
@@ -66,9 +69,7 @@
 			<t>
 				This specification defines how a series of security event tokens 
         (SETs) may be delivered to a previously registered receiver 
-        using HTTP POST over TLS initiated as a push to the receiver, or
-        as a poll by the receiver. The specification also defines how delivery 
-        can be assured subject to the SET Token Receiver's need for assurance.
+        using HTTP POST over TLS initiated as a push to the receiver.
         </t>
 		</abstract>
 	</front>
@@ -81,10 +82,10 @@
         can be transmitted to a previously registered 
         Event Receiver using HTTP <xref target="RFC7231"/>
         over TLS. The specification defines a method to push SETs via 
-        HTTP POST and another method to poll for SETs using HTTP POST. 
+        HTTP POST. 
       			</t>
 
-      <t>This specification defines two methods of SET delivery in what
+      <t>This specification defines a method for SET delivery in what
       is known as Event Streams.</t>
         
       <t>This specification does not define the method by which Event 
@@ -202,18 +203,13 @@
 				<t>The Event Transmitter uses an HTTP/1.1 POST to the Event 
         Receiver endpoint to deliver the SET;
 			  </t>
-        <t>The Event Transmitter queues up the SET in a buffer so that
-        an Event Receiver MAY poll for SETs using HTTP/1.1 POST.</t>
-
 			  <t>Or, the Event Transmitter delivers the Event through a different
         method not defined by this specification.
 			  </t>
 			</list>
 			</t>
       
-      <t>Delivery of SETs MAY be delivered using one of two modes:
-      <list style="hanging">
-        <t hangText="PUSH"><vspace/>In which SETs are delivered
+      <t>In Push-Based SET Delivery Using HTTP, SETs are delivered
         one at a time using HTTP POST requests by an Event Transmitter 
         to an Event Receiver. The HTTP request body is a JSON Web Token 
         <xref target="RFC7519"/> with a <spanx style="verb">Content-Type</spanx> 
@@ -222,17 +218,6 @@
         <xref target="I-D.ietf-secevent-token"/>. Upon receipt, the 
         Event Receiver acknowledges receipt with a response with HTTP 
         Status 202, as described below in <xref target="httpPost"/>.</t>
-        
-        <t hangText="POLLING">Where 
-        multiple SETs are delivered in a JSON document <xref target="RFC7159"/>
-        to an Event Receiver in response to an HTTP POST request to the 
-        Event Transmitter. Then in a following request, the Event Receiver
-        acknowledges received SETs and MAY poll for more. In POLLING mode, 
-        all requests and responses are JSON documents and use a 
-        <spanx style="verb">Content-Type</spanx> of 
-        <spanx style="verb">application/json</spanx> as described in
-        <xref target="httpPoll"/>.</t>
-      </list></t>
 
 			<t>After successful (acknowledged) SET delivery, Event 
       Transmitters SHOULD NOT be required to maintain or record SETs for 
@@ -249,8 +234,7 @@
 			<t>
 			Upon receiving a SET, the Event Receiver reads the SET and validates 
       it. The Event Receiver MUST acknowledge receipt to the Event Transmitter, using the 
-      defined acknowledgement or error method depending on the method of 
-      transfer.</t>
+      defined acknowledgement or error method.</t>
       
       <t>The Event Receiver SHALL NOT use the Event acknowledgement mechanism
       to report Event errors other than relating to the parsing and validation
@@ -365,454 +349,6 @@ Content-Type: application/json
      </figure>    
      </section>
      
-     <section anchor="httpPoll" title="Polling Delivery using HTTP">
- 
-       <t>This method allows an Event Receiver to use HTTP POST 
-       (<xref target="RFC7231">Section 4.3.3</xref>) to acknowledge
-       SETs and to check for and receive zero or more SETs. Requests
-       MAY be made at a periodic interval (short polling) or requests
-       MAY wait pending availability of new SETs using long polling 
-       (see <xref target="RFC6202">Section 2</xref>).</t>
-                   
-       <t>The delivery of SETs in this method is facilitated by HTTP
-       POST requests initiated by the Event Receiver in which:<list style="symbols">
-        <t>The Event Receiver makes a request for available SETs 
-        using an HTTP POST to a pre-arranged endpoint provided by the Event 
-        Transmitter. Or,</t>
-        <t>After validating previously received SETs, the Event Receiver 
-        initiates another poll request using HTTP POST that includes
-        acknowledgement of previous SETs, and waits for the next batch
-        of SETs.</t>
-       </list></t>
-       
-       <t>The purpose of the "acknowledgement" is to inform the 
-       Event Transmitter that has successfully been delivered and attempts
-       to re-deliver are no longer required. Before acknowledgement, Event 
-       Receivers SHOULD ensure received SETs have been validated and 
-       retained in a manner appropriate to the receiver's  
-       retention requirements. The level and method of retention of SETs
-       by Event Receivers is out-of-scope of this specification.</t>
- 
-       <section anchor="pollReqAttrs" title="Polling HTTP Request Attributes">
-       
-       <t>When initiating a poll request, the Event Receiver constructs
-       a JSON document that consists of polling request parameters
-       and SET acknowledgement parameters in the form of JSON attributes.</t>
-       
-       <t>The request payloads are delivered in one of two forms as described
-       in <xref target="pollRequest"/> and <xref target="pollGetAck"></xref></t>
-       
-       <t>When making a request, the HTTP header <spanx style="verb">Content-Type</spanx>
-       is set to <spanx style="verb">application/json</spanx>.</t>
-       
-       <t>The following JSON Attributes are used in a polling request:
-       <list style="hanging">
-       
-         <!-- Request parameters -->
-         <t hangText="Request Processing Parameters"><list style="hanging">
-         
-          <t hangText="maxEvents"><vspace/>an OPTIONAL JSON integer value 
-         indicating the maximum number of unacknowledged SETs that 
-         SHOULD be returned. If more than the maximum number of SETs 
-         are available, the oldest SETs available SHOULD be returned 
-         first. A value of <spanx style="verb">0</spanx> MAY be used by 
-         Event Receivers that would like to perform an acknowledge only
-         request. This enables the Receiver to use separate HTTP requests
-         for acknowledgement and reception of SETs. When zero returned
-         events is requested, the value of the attribute 
-         <spanx style="verb">returnImmediately</spanx> SHALL be ignored 
-         as an immediate response is expected.
-         </t>
-         
-         <t hangText="returnImmediately"><vspace/>An OPTIONAL JSON 
-         boolean value that indicates the Event Transmitter SHOULD return
-         an immediate response even if no results are available 
-         (short polling). The default value is <spanx style="verb">false</spanx> 
-         indicates the request is to be treated as an HTTP Long Poll (see 
-         <xref target="RFC6202">Section 2</xref>). The time out for the 
-         request is part of the Stream configuration which is out of 
-         scope of this specification.</t> 
-
-<!-- Removed in favoour of maxEvents=0
-         <t hangText="ackOnly"><vspace/>An OPTIONAL JSON boolean value
-         where a value of <spanx style="verb">true</spanx> indicates 
-         that the Event Receiver is acknowledging
-         received SETs and does not wish to receive new SETs in the 
-         current request. The default value is <spanx style="verb">false</spanx>.
-         This option MAY be used by Event Receivers that would like
-         to use a separate or distinct request for acknowledgement (e.g.
-         to separate receiver threads from acknowledgement threads).
-         When specified the value of the attribute 
-         <spanx style="verb">returnImmediately</spanx> SHALL be ignored 
-         as an immediate response is expected.</t>             
-  -->
-         </list></t>
-         
-         <t hangText="SET Acknowledgment Parameters"><list style="hanging">
- 
-         <!-- Acknowledgement parameters -->     
- 
-         <t hangText="ack"><vspace/>Which is an array of Strings that each
-         correspond to the <spanx style="verb">jti</spanx> of a 
-         successfully received SET. If there are no 
-         outstanding SETs to acknowledge, the attribute MAY be omitted. 
-         When acknowledging a SET, the Event Transmitter is released from
-         any obligation to retain the SET (e.g. for a future re-try to
-         receive).</t>
-          
-         <t hangText="setErrs"><vspace/>A JSON Object that contains 
-         one or more nested JSON attributes that correspond to the 
-         <spanx style="verb">jti</spanx> of each invalid SET received.
-         The value of each is a JSON object whose contents is an
-         <spanx style="verb">err</spanx> attribute and 
-         <spanx style="verb">description</spanx> attribute whose value 
-         correspond to the errors described in <xref target="errorResponse"/>.</t> 
-         
-         <!-- Removed will try to avoid using docId
-         <t hangText="docErrs"><vspace/>A JSON Object that contains 
-         one or more nested JSON attributes that correspond to the 
-         <spanx style="verb">docId</spanx> of a previous polling response.
-         The value of each is a JSON object whose contents is an
-         <spanx style="verb">err</spanx> attribute and 
-         <spanx style="verb">description</spanx> attribute whose value 
-         correspond to the errors described in <xref target="errorResponse"/>.</t> 
-          -->
-         
-         </list></t>
-                
-        </list>
-        </t>
-       </section>
-       
-       <section anchor="pollRespAttrs" title="Polling HTTP Response Attributes">
-       
-       <t>In response to a poll request, the Event Transmitter checks for 
-       available SET events and responds with a JSON document containing
-       the following JSON attributes:
-       <list style="hanging">
-       
-         <!-- If we use docId, it should probably be in a header
-         
-         <t hangText="docId"><vspace/>A REQUIRED JSON String that contains
-         a value which can be used to identify the current response
-         document. This value is used primarily to acknowledge document
-         level errors by the Event Receiver.</t>
-         
-          -->
-          
-         <t hangText="sets"><vspace/>A JSON object that contains zero 
-         or more nested JSON attributes. Each nested attribute 
-         corresponds to the <spanx style="verb">jti</spanx> of a SET to 
-         be delivered and whose value is a JSON String containing the 
-         value of the encoded corresponding SET. If there are no 
-         outstanding SETs to be transmitted, the JSON object SHALL be 
-         empty.</t>
-         
-<!--  drop before and since         
-         <t hangText="since"><vspace/>A JSON integer value that
-         is a NumericDate and indicates the time of the oldest SET that 
-         was returned. 
-         </t>
-         
-         <t hangText="before"><vspace/>A JSON integer value that is a 
-         NumericDate and indicates the time of the youngest SET that was 
-         returned.</t>
-    -->
-    
-         <t hangText="moreAvailable"><vspace/>A JSON boolean value that 
-         indicates if more unacknowledged SETs are available to be returned. 
-         </t>     
-       </list>
-       </t>
-       
-       <t>When making a response, the HTTP header <spanx style="verb">Content-Type</spanx>
-       is set to <spanx style="verb">application/json</spanx>.</t>
-       </section>
-       
-       <section anchor="pollRequest" title="Poll Request">
-       
-       <t>The Event Receiver performs an HTTP POST (see
-       <xref target="RFC7231">Section 4.3.4</xref>) to a pre-arranged 
-       polling endpoint URI to check for SETs that are available. 
-       Because the Event Receiver has no prior SETs to 
-       acknowledge, the <spanx style="verb">ack</spanx> and 
-       <spanx style="verb">errs</spanx> request parameters are omitted.</t>
-
-       <t>If after a period of time, negotiated between the Event 
-       Transmitter and Receiver, an Event Transmitter MAY re-issue SETs
-       it has previously delivered. The Event Receiver SHOULD accept
-       repeat SETs and acknowledge the SETs regardless of whether the
-       Receiver believes it has already acknowledged the SETs previously.
-       An Event Transmitter MAY limit the number of times it attempts to
-       deliver a SET. Upon abandoning delivery of a SET, the Event Transmitter
-       SHOULD have a method to notify the Event Receiver of the loss
-       such as through a status service (not defined by this specification).
-       </t>
-       
-        <t>If the Event Receiver has received SETs from the 
-        Event Transmitter, the Event Receiver SHOULD parse and validate 
-        received SETs to meet its own requirements and SHOULD acknowledge 
-        receipt in a timely (e.g. minutes) fashion so that the Event 
-        Transmitter may mark the SETs as received. Event Receivers SHOULD
-        acknowledge receipt before taking any local actions based on
-        the SETs to avoid unnecessary delay in acknowledgement where 
-        possible.</t>
-        
-        <t>Poll requests have three variations:
-        <list style="hanging">
-          <t hangText="Poll Only"><vspace/>In which an Event Receiver 
-          asks for the next set of Events where no previous SET deliveries 
-          are acknowledged (such as in the initial poll request).</t>
-          <t hangText="Acknowledge Only"><vspace/>In which an Event 
-          Receiver sets the <spanx style="verb">maxEvents</spanx> 
-          attribute to <spanx style="verb">0</spanx> along with 
-          <spanx style="verb">ack</spanx> and
-          <spanx style="verb">err</spanx> attributes indicating the 
-          Event Receiver is acknowledging previously received SETs and 
-          does not want to receive any new SETs in response to the 
-          request. </t>
-          <t hangText="Combined Acknowledge and Poll"><vspace/>In 
-          which an Event Receiver is both acknowledging previously
-          received SETs using the <spanx style="verb">ack</spanx> and
-          <spanx style="verb">err</spanx> attributes
-          and will wait for the next group of SETs in the Event Transmitters
-          response.</t>
-        </list></t>
-       
-       <section title="Poll Only Request">
-       <t>In the case where no SETs were received in a previous poll (see 
-        <xref target="emptyPollResponse"/>), the Event Receiver simply
-        polls without acknowledgement parameters (<spanx style="verb">sets</spanx>
-        and <spanx style="verb">setErrs</spanx>).</t>  
-        
-       <t>The following is an example request made by an Event Receiver
-       that has no outstanding SETs to acknowledge and is polling 
-       for available SETs.</t>
-       
-       <figure anchor="pollInitRequest" title="Example Initial Poll Request">
-       <preamble>The following is a non-normative example poll request to the
-       endpoint: <spanx style="verb">https://nofity.exampleidp.com/Events</spanx>.</preamble>
-       <artwork align="left">POST /Events  HTTP/1.1
-
-Host: notify.exampleidp.com
-Authorization: Bearer h480djs93hd8
-Accept: application/json
-
-{
- "returnImmediately":true
-}</artwork>
-       </figure>
-       
-       <t>An Event Receiver MAY poll with no parameters at all by passing
-       an empty JSON object.</t>
-       
-       <figure anchor="pollDefaultRequest" title="Example Default Poll Request">
-       <preamble>The following is a non-normative example default poll request to the
-       endpoint: <spanx style="verb">https://nofity.exampleidp.com/Events</spanx>.</preamble>
-       <artwork align="left">POST /Events  HTTP/1.1
-
-Host: notify.exampleidp.com
-Authorization: Bearer h480djs93hd8
-Accept: application/json
-
-{}</artwork>
-       </figure>
-       
-       </section>
-       
-       <section title="Acknowledge Only Request">
-       <t>In this variation, the Event Receiver acknowledges previously 
-       received SETs and indicates it does not want to receive SETs in 
-       response by setting the <spanx style="verb">maxEvents</spanx> 
-       attribute to <spanx style="verb">0</spanx>.</t>
-       
-       <t>This variation is typically used when an Event Receiver needs to 
-       acknowledge received SETs independently (e.g. on separate threads)
-       from the process of receiving SETs.</t>
-       
-       <figure anchor="pollAckOnly" title="Example Acknowledge Only equest">
-        <preamble>The following is a non-normative example poll with acknowledgement 
-        of SETs received (for example as shown in 
-        <xref target="pollResponse"/>).</preamble>
-        <artwork>POST /Events  HTTP/1.1
-
-Host: notify.exampleidp.com
-Authorization: Bearer h480djs93hd8
-Content-Type: application/json
-Authorization: Bearer h480djs93hd8
-
-{
-  "ack":[
-    "4d3559ec67504aaba65d40b0363faad8",
-    "3d0c3cf797584bd193bd0fb1bd4e7d30"
-  ],
-  "maxEvents":0
-}</artwork>
-        </figure>
-       
-       </section>
-       
-       <section anchor="pollAck" title="Poll with Acknowledgement">
-       
-       <t>This variation allows a receiver thread to simultaneously 
-       acknowledge previously received SETs and wait for the next
-       group of SETs in a single request.</t>
-     
-        <figure anchor="pollGoodResponse" title="Example Poll With Acknowledgement and No Errors">
-        <preamble>The following is a non-normative example poll with acknowledgement 
-        of SETs received in <xref target="pollResponse"/>.</preamble>
-        <artwork>POST /Events  HTTP/1.1
-
-Host: notify.exampleidp.com
-Authorization: Bearer h480djs93hd8
-Content-Type: application/json
-Authorization: Bearer h480djs93hd8
-
-{
-  "ack":[
-    "4d3559ec67504aaba65d40b0363faad8",
-    "3d0c3cf797584bd193bd0fb1bd4e7d30"
-  ],
-  "returnImmediately":false
-}</artwork>
-        </figure>
-        
-        <t>In the above acknowledgement, the Event Receiver has acknowledged
-        receipt of two SETs and has indicated it wants to wait until
-        the next SET is available.</t>       
-       </section>
-       
-       <section anchor="pollAckErr" title="Poll with Acknowledgement and Errors">
-        <t>In the case where errors were detected in previously 
-        delivered SETs, the Event Receiver MAY use the 
-        <spanx style="verb">setErrs</spanx> attribute to indicate errors
-        in the following poll request.
-        </t>
-        
-        <figure anchor="pollErrorResponse" 
-        title="Example Poll Acknowledgement With Error">
-        <preamble>The following is a non-normative example of a response
-        acknowledging 1 error and 1 receipt of two SETs received 
-        in <xref target="pollResponse"/>.</preamble>
-        <artwork>POST /Events  HTTP/1.1
-
-Host: notify.exampleidp.com
-Authorization: Bearer h480djs93hd8
-Content-Type: application/json
-Authorization: Bearer h480djs93hd8
-
-{
-  "ack":["3d0c3cf797584bd193bd0fb1bd4e7d30"],
-  "setErrs":{
-    "4d3559ec67504aaba65d40b0363faad8":{
-      "err":"jwtAud",
-      "description":"The audience value was incorrect."
-    }
-  },
-  "returnImmediately":true
-}</artwork>
-        </figure>     
-        
-        <!-- DocId errors removed from current version
-        <figure anchor="pollDocErrorAck" 
-        title="Example Poll Acknowledgement With Document Error">
-        <preamble>The following is a non-normative example of a response
-        acknowledging a document parsing error from a previous poll.</preamble>
-        <artwork>POST /Events  HTTP/1.1
-
-Host: notify.exampleidp.com
-Authorization: Bearer h480djs93hd8
-Content-Type: application/json
-Authorization: Bearer h480djs93hd8
-
-{
-  "docErrs":{
-    "1c7cb28146f24b08aba8ac1aaf27fece":{
-      "err":"json",
-      "description":"Received document was not a valid JSON document."
-    }
-  }
-}</artwork>
-        </figure>               
-         -->
-         
-       </section>
-       </section>
- 
-       <section anchor="pollGetAck" 
-       title="Poll Response">
-        
-       <t>In response to a poll request, the service provider MAY
-       respond immediately if SETs are available to be delivered. 
-       If no SETs are available at the time of the request, the 
-       Event Transmitter SHALL delay responding until a SET is 
-       available unless the poll request parameter 
-       <spanx style="verb">returnImmediately</spanx> is <spanx style="verb">true</spanx>.</t>
-       
-       <t>As described in <xref target="pollRespAttrs"/> a JSON document
-       is returned containing a number of attributes including
-       <spanx style="verb">sets</spanx> which SHALL contain zero or more 
-       SETs.</t>
-       <figure anchor="pollResponse" title="Example Poll Response">
-       <preamble>The following is a non-normative example response to
-       the request shown <xref target="pollRequest"/>. This example
-       shows two SETs are returned.</preamble>
-       <artwork align="left">HTTP/1.1 200 OK
-Content-Type: application/json
-Location: https://notify.exampleidp/Events
-
-{
-"sets":{
-  "4d3559ec67504aaba65d40b0363faad8":
-   "eyJhbGciOiJub25lIn0.
-   eyJqdGkiOiI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIsImlhdCI6MTQ
-   1ODQ5NjQwNCwiaXNzIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwiYXVkIjpbIm
-   h0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M
-   2I3NzU0IiwiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIx
-   ZDA4NjQxZDc2NzZlZTciXSwiZXZlbnRzIjp7InVybjppZXRmOnBhcmFtczpzY2ltOmV
-   2ZW50OmNyZWF0ZSI6eyJyZWYiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcn
-   MvNDRmNjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIsImF0dHJpYnV0ZXMiOlsiaWQiLCJuY
-   W1lIiwidXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.",
-  "3d0c3cf797584bd193bd0fb1bd4e7d30":
-   "eyJhbGciOiJub25lIn0.
-   eyJqdGkiOiIzZDBjM2NmNzk3NTg0YmQxOTNiZDBmYjFiZDRlN2QzMCIsImlhdCI6MTQ
-   1ODQ5NjAyNSwiaXNzIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwiYXVkIjpbIm
-   h0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M
-   2I3NzU0IiwiaHR0cHM6Ly9qaHViLmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIx
-   ZDA4NjQxZDc2NzZlZTciXSwic3ViIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL1V
-   zZXJzLzQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJldmVudHMiOnsidXJuOmlldG
-   Y6cGFyYW1zOnNjaW06ZXZlbnQ6cGFzc3dvcmRSZXNldCI6eyJpZCI6IjQ0ZjYxNDJkZ
-   jk2YmQ2YWI2MWU3NTIxZDkifSwiaHR0cHM6Ly9leGFtcGxlLmNvbS9zY2ltL2V2ZW50
-   L3Bhc3N3b3JkUmVzZXRFeHQiOnsicmVzZXRBdHRlbXB0cyI6NX19fQ."
- }
-}</artwork></figure>
-       <t>In the above example, a two SETs whose <spanx style="verb">jti</spanx>
-       are <spanx style="verb">4d3559ec67504aaba65d40b0363faad8</spanx> 
-       and <spanx style="verb">3d0c3cf797584bd193bd0fb1bd4e7d30</spanx> 
-       are delivered.</t>
-       
-       <figure anchor="emptyPollResponse" title="Example No SETs Poll Response">
-       <preamble>The following is a non-normative example response to
-       the request shown <xref target="pollRequest"/> showing no new
-       SETs or unacknowledged SETs are available.</preamble>
-       <artwork align="left">HTTP/1.1 200 OK
-Content-Type: application/json
-Location: https://notify.exampleidp/Events
-
-{
- "sets":{ }
-}</artwork></figure>
-       
-       <t>Upon receiving the JSON document (e.g. as shown in 
-       <xref target="pollResponse"/>), the Event Receiver parses
-       and verifies the received SETs and notifies the Event Transmitter 
-       via the next poll request to the Event Transmitter as described in 
-       <xref target="pollAck"/> or <xref target="pollAckErr"/>.</t>      
-    
-     </section>
-     
-     </section>
-     
      <section anchor="errorResponse" title="Error Response Handling">
         <t></t>
         <t>If a SET is invalid, the following error codes are defined:</t>
@@ -842,18 +378,15 @@ Location: https://notify.exampleidp/Events
           additional diagnostic information.</t>
         </list>
         When included as part of an HTTP Status 400 response, the above
-        JSON is the HTTP response body (see <xref target="badPostResponse"/>). 
-        When included as part of a batch of SETs, the above JSON is included
-        as part of the <spanx style="verb">setErrs</spanx> attribute as
-        defined in <xref target="pollRespAttrs"/> and <xref target="pollAckErr"/></t>
+        JSON is the HTTP response body (see <xref target="badPostResponse"/>).</t>
          
         </section>  
        
    </section>
    
    <section anchor="aa" title="Authentication and Authorization" toc="default">
-      <t>The SET delivery methods described in this specification are
-      based upon HTTP and depend on the use of TLS and/or standard 
+      <t>The SET delivery method described in this specification is
+      based upon HTTP and depends on the use of TLS and/or standard 
       HTTP authentication and authorization schemes as per 
       <xref target="RFC7235" />. For example, the following
       methodologies could be used among others: <list style="hanging">
@@ -1053,8 +586,6 @@ Location: https://notify.exampleidp/Events
     <references title="Informative References">
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml' ?>
     
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6202.xml' ?><!-- HTTP Long Polling -->
-    
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6749.xml' ?><!-- OAuth -->
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6750.xml' ?><!-- OAuth Bearer-->
       
@@ -1157,44 +688,20 @@ Location: https://notify.exampleidp/Events
     <section title="Acknowledgments">
       <t>The editors would like to thanks the members of the SCIM WG which 
       began discussions of provisioning events starting with: draft-hunt-scim-notify-00 in 2015.</t>
+
+      <t>The editors would like to thank the authors of draft-ietf-secevent-delivery-02,
+          on which this draft is based.</t>
       
       <t>The editor would like to thank the participants in the the SECEVENTS
       working group for their support of this specification.</t>
     </section>
 
     <section title="Change Log">
-      <t>Draft 00 - PH - Based on draft-hunt-secevent.distribution with the 
-      following additions:<list style="symbols">
-        <t>Removed Control Plane from specification</t>
-        <t>Added new HTTP Polling delivery method</t>
-        <t>Added general HTTP security considerations</t>
-        <t>Added authentication and authorization</t>
-        <t>Revised Verify Event to work with both types of delivery</t>
- 
-      </list></t>
-      
-      <t>Draft 01 - PH - Removed Verification section per feedback from IETF99.</t>
-	    
-      <t>Draft 02 - MS - <list style="symbols">
-        <t>Minor editorial improvements</t>
-        <t>Removed Identity Provider / Relying Party Terminology</t>
-        <t>Changed boilerplate language according to RFC8174</t>     
-      </list> </t>
-      
-      <t>This draft was based on draft-hunt-secevent.distribution revision history:<list style="symbols">
-      <t>Draft 00 - PH - First Draft based on reduced version of draft-hunt-idevent-distribution</t>
-      <t>Draft 01 - PH - <list style="symbols">
-        <t>Reworked terminology to match new WG Transmitter/Receiver terms</t>
-        <t>Reworked sections into Data Plane vs. Control Plane</t>
-        <t>Removed method transmission registry in order to simplify the specification</t>
-        <t>Made Create, Update operations optional for Control Plane (Read is MTI)</t>
-      </list></t>
-      <t>Draft 02 - PH <list style="symbols">
-        <t>Added iss metadata for Event Stream</t>
-        <t>Changed to using JWKS_uri for issuer and receiver.</t>
-        <t>Control Plane sections moved to draft-hunt-secevent-stream-mgmt</t>
-        <t>Added support for delivering multiple events using HTTP POST polling</t>
-      </list></t>
+      <t>Draft 00 - AB - Based on draft-ietf-secevent-delivery-02 with the 
+      following changes:<list style="symbols">
+        <t>Renamed to "Push-Based SET Token Delivery Using HTTP"</t>
+        <t>Removed references to the HTTP Polling delivery method.</t>
+        <t>Removed informative reference to RFC6202.</t>
       </list></t>
     </section>
   </back>
