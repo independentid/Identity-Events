@@ -5,28 +5,28 @@
 Security Events Working Group                               P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                                M. Jones
-Expires: September 5, 2018                                     Microsoft
+Expires: October 17, 2018                                      Microsoft
                                                               W. Denniss
                                                                   Google
                                                                M. Ansari
                                                                    Cisco
-                                                           March 4, 2018
+                                                          April 15, 2018
 
 
                        Security Event Token (SET)
-                      draft-ietf-secevent-token-07
+                      draft-ietf-secevent-token-09
 
 Abstract
 
    This specification defines the Security Event Token (SET) data
-   structure.  A SET describes a statement of fact from the perspective
-   of an issuer about the state of a security subject, which is intended
-   to be shared with one or more recipients.  This statement of fact
-   represents an event that occurred to the security subject.  In some
-   use cases, the security subject may be a digitial identity, but SETs
-   are also applicable to non-identity use cases.  A SET is a JSON Web
-   Token (JWT), which can be optionally signed and/or encrypted.  SETs
-   can be distributed via protocols such as HTTP.
+   structure.  A SET describes statements of fact from the perspective
+   of an issuer about a subject.  These statements of fact represent an
+   event that occurred directly to or about a security subject.  For
+   example a statement about the issuance or revocation of a token on
+   behalf of a subject.  This specification is intended to enable
+   representing security- and identity-related events.  A SET is a JSON
+   Web Token (JWT), which can be optionally signed and/or encrypted.
+   SETs can be distributed via protocols such as HTTP.
 
 Status of This Memo
 
@@ -43,7 +43,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on September 5, 2018.
+   This Internet-Draft will expire on October 17, 2018.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Hunt, et al.            Expires September 5, 2018               [Page 1]
+Hunt, et al.            Expires October 17, 2018                [Page 1]
 
-Internet-Draft          draft-ietf-secevent-token             March 2018
+Internet-Draft          draft-ietf-secevent-token             April 2018
 
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -81,25 +81,25 @@ Table of Contents
        2.1.4.  RISC Example  . . . . . . . . . . . . . . . . . . . .   9
      2.2.  Core SET Claims . . . . . . . . . . . . . . . . . . . . .  10
      2.3.  Explicit Typing of SETs . . . . . . . . . . . . . . . . .  12
-     2.4.  Security Event Token Construction . . . . . . . . . . . .  12
+     2.4.  Security Event Token Construction . . . . . . . . . . . .  13
    3.  Requirements for SET Profiles . . . . . . . . . . . . . . . .  14
    4.  Security Considerations . . . . . . . . . . . . . . . . . . .  15
      4.1.  Confidentiality and Integrity . . . . . . . . . . . . . .  15
-     4.2.  Delivery  . . . . . . . . . . . . . . . . . . . . . . . .  15
+     4.2.  Delivery  . . . . . . . . . . . . . . . . . . . . . . . .  16
      4.3.  Sequencing  . . . . . . . . . . . . . . . . . . . . . . .  16
      4.4.  Timing Issues . . . . . . . . . . . . . . . . . . . . . .  16
-     4.5.  Distinguishing SETs from ID Tokens  . . . . . . . . . . .  16
+     4.5.  Distinguishing SETs from ID Tokens  . . . . . . . . . . .  17
      4.6.  Distinguishing SETs from Access Tokens  . . . . . . . . .  17
      4.7.  Distinguishing SETs from other kinds of JWTs  . . . . . .  18
-   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  18
+   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  19
    6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  19
      6.1.  JSON Web Token Claims Registration  . . . . . . . . . . .  19
-       6.1.1.  Registry Contents . . . . . . . . . . . . . . . . . .  19
+       6.1.1.  Registry Contents . . . . . . . . . . . . . . . . . .  20
      6.2.  Media Type Registration . . . . . . . . . . . . . . . . .  20
        6.2.1.  Registry Contents . . . . . . . . . . . . . . . . . .  20
-   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  20
-     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  20
-     7.2.  Informative References  . . . . . . . . . . . . . . . . .  21
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  21
+     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  21
+     7.2.  Informative References  . . . . . . . . . . . . . . . . .  22
    Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  23
    Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  23
    Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  27
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Hunt, et al.            Expires September 5, 2018               [Page 2]
+Hunt, et al.            Expires October 17, 2018                [Page 2]
 
-Internet-Draft          draft-ietf-secevent-token             March 2018
+Internet-Draft          draft-ietf-secevent-token             April 2018
 
 
 1.  Introduction and Overview
@@ -129,20 +129,21 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    their meanings.  This specification uses non-normative example events
    to demonstrate how events can be constructed.
 
-   This specification is scoped to security and identity related events.
-   While Security Event Tokens may be used for other purposes, the
-   specification only considers security and privacy concerns relevant
-   to identity and personal information.
+   This specification is scoped to security- and identity-related
+   events.  While Security Event Tokens may be used for other purposes,
+   the specification only considers security and privacy concerns
+   relevant to identity and personal information.
 
-   Security events are not commands issued between parties.  A security
-   event is a statement of fact from the perspective of an issuer about
-   the state of a security subject (e.g., a web resource, token, IP
-   address, the issuer itself) that the issuer controls or is aware of,
-   that has changed in some way (explicitly or implicitly).  A security
-   subject may be permanent (e.g., a user account) or temporary (e.g.,
-   an HTTP session) in nature.  A state change could describe a direct
-   change of entity state, an implicit change of state, or other higher-
-   level security statements such as:
+   Security events are not commands issued between parties.  A SET
+   describes statements of fact from the perspective of an issuer about
+   a subject (e.g., a web resource, token, IP address, the issuer
+   itself).  These statements of fact represent a logical event that
+   occurred directly to or about a security subject.  For example a
+   statement about the issuance or revocation of a token on behalf of a
+   subject.  A security subject may be permanent (e.g., a user account)
+   or temporary (e.g., an HTTP session) in nature.  A state change could
+   describe a direct change of entity state, an implicit change of
+   state, or other higher-level security statements such as:
 
    o  The creation, modification, removal of a resource.
 
@@ -161,15 +162,15 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    the change that generated the security event.  Subsequently, a SET
    recipient, having received a SET, validates and interprets the
    received SET and takes its own independent actions, if any.  For
-   example, having been informed of a personal identifier being
 
 
 
-Hunt, et al.            Expires September 5, 2018               [Page 3]
+Hunt, et al.            Expires October 17, 2018                [Page 3]
 
-Internet-Draft          draft-ietf-secevent-token             March 2018
+Internet-Draft          draft-ietf-secevent-token             April 2018
 
 
+   example, having been informed of a personal identifier being
    associated with a different security subject (e.g., an email address
    is being used by someone else), the SET recipient may choose to
    ensure that the new user is not granted access to resources
@@ -203,8 +204,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    The following definitions are used with SETs:
 
    Security Event Token (SET)
-      A SET is a JWT [RFC7519] conforming to this specification that is
-      distributed to one or more SET recipients.
+      A SET is a JWT [RFC7519] conforming to this specification.
 
    SET Issuer
       A service provider that creates SETs to be sent to other service
@@ -221,9 +221,9 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
 
 
-Hunt, et al.            Expires September 5, 2018               [Page 4]
+Hunt, et al.            Expires October 17, 2018                [Page 4]
 
-Internet-Draft          draft-ietf-secevent-token             March 2018
+Internet-Draft          draft-ietf-secevent-token             April 2018
 
 
       A SET describes an event or state change that has occurred to a
@@ -237,7 +237,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
    Event Payload
       A member value for an element of the JSON object that is the value
-      of the "events" claim in a SET.  This member value MUST be JSON
+      of the "events" claim in a SET.  This member value MUST be a JSON
       object.
 
    Profiling Specification
@@ -263,7 +263,8 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
       about the event data included in the SET.  The claim "events"
       contains the event identifiers and event-specific data expressed
       about the security subject.  The envelope MAY include event-
-      specific or profile-specific data.
+      specific or profile-specific data.  The "events" claim value MUST
+      be a JSON object that contains at least one member.
 
    o  Each member of the "events" JSON object is a name/value pair.  The
       JSON member name is a URI string value, which is the event
@@ -276,10 +277,9 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
 
 
-
-Hunt, et al.            Expires September 5, 2018               [Page 5]
+Hunt, et al.            Expires October 17, 2018                [Page 5]
 
-Internet-Draft          draft-ietf-secevent-token             March 2018
+Internet-Draft          draft-ietf-secevent-token             April 2018
 
 
    o  When multiple event identifiers are contained in a SET, they
@@ -305,8 +305,15 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
 2.1.  Illustrative Examples
 
+   This section illustrates several possible uses of SETs through non-
+   normative examples.
+
 2.1.1.  SCIM Example
 
+   The following example shows the JWT Claims Set for a hypothetical
+   SCIM [RFC7644] password reset SET.  Such a SET might be used by a
+   receiver as a trigger to reset active user-agent sessions related to
+   the identified user.
 
 
 
@@ -326,23 +333,10 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
 
 
-
-
-
-
-
-
-
-Hunt, et al.            Expires September 5, 2018               [Page 6]
+Hunt, et al.            Expires October 17, 2018                [Page 6]
 
-Internet-Draft          draft-ietf-secevent-token             March 2018
+Internet-Draft          draft-ietf-secevent-token             April 2018
 
-
-   The following is a non-normative example showing the JWT Claims Set
-   for a hypothetical SCIM [RFC7644] password reset SET.  This example
-   uses a second "events" value ("https://example.com/scim/event/
-   passwordResetExt") to convey additional information about the state
-   change -- in this case, the current count of reset attempts:
 
    {
      "iss": "https://scim.example.com",
@@ -363,7 +357,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
                 Figure 1: Example SCIM Password Reset Event
 
-   The JWT Claims Set consists of:
+   The JWT Claims Set usage consists of:
 
    o  The "events" claim specifying the hypothetical SCIM URN
       ("urn:ietf:params:scim:event:passwordReset") for a password reset,
@@ -380,19 +374,30 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
       (The syntax of the "aud" claim is defined in Section 4.1.3 of
       [RFC7519].)
 
+   The SET contains two event payloads:
+
+   o  The "id" claim represents SCIM's unique identifier for a subject.
+
+   o  The second payload identified by "https://example.com/scim/event/
+      passwordResetExt") and the payload claim "resetAttempts" conveys
+      the current count of reset attempts.  In this example, while the
+      count is a simple factual statement for the issuer, the meaning of
+      the value (a count) is up to the receiver.  As an example, such a
+      value might be used by the receiver to infer increasing risk.
+
+
+
+
+
+Hunt, et al.            Expires October 17, 2018                [Page 7]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
    In this example, the SCIM event indicates that a password has been
    updated and the current password reset count is 5.  Notice that the
    value for "resetAttempts" is in the event payload of an event used to
    convey this information.
-
-
-
-
-
-Hunt, et al.            Expires September 5, 2018               [Page 7]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
 
 2.1.2.  Logout Example
 
@@ -440,14 +445,9 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
 
 
-
-
-
-
-
-Hunt, et al.            Expires September 5, 2018               [Page 8]
+Hunt, et al.            Expires October 17, 2018                [Page 8]
 
-Internet-Draft          draft-ietf-secevent-token             March 2018
+Internet-Draft          draft-ietf-secevent-token             April 2018
 
 
    In the following example JWT Claims Set, a fictional medical service
@@ -501,9 +501,9 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
 
 
-Hunt, et al.            Expires September 5, 2018               [Page 9]
+Hunt, et al.            Expires October 17, 2018                [Page 9]
 
-Internet-Draft          draft-ietf-secevent-token             March 2018
+Internet-Draft          draft-ietf-secevent-token             April 2018
 
 
    The following example JWT Claims Set is for an account disabled
@@ -557,9 +557,9 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
 
 
-Hunt, et al.            Expires September 5, 2018              [Page 10]
+Hunt, et al.            Expires October 17, 2018               [Page 10]
 
-Internet-Draft          draft-ietf-secevent-token             March 2018
+Internet-Draft          draft-ietf-secevent-token             April 2018
 
 
       As defined by Section 4.1.6 of [RFC7519], this claim contains a
@@ -568,7 +568,7 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
    "jti" (JWT ID) Claim
       As defined by Section 4.1.7 of [RFC7519], this claim contains a
-      unique identifier for the SET.  The identifier SHOULD be unique
+      unique identifier for the SET.  The identifier MUST be unique
       within a particular event feed and MAY be used by clients to track
       whether a particular SET has already been received.  This claim is
       REQUIRED.
@@ -582,18 +582,23 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
       As defined by Section 4.1.2 of [RFC7519], this claim contains a
       StringOrURI value representing the principal that is the subject
       of the SET.  This is usually the entity whose "state" was changed.
-      For example, an IP Address was added to a black list.  A URI
-      representing a user resource that was modified.  A token
-      identifier for a revoked token.  If used, the profiling
-      specification SHOULD define the content and format semantics for
-      the value.  This claim is OPTIONAL, as the principal for any given
-      profile may already be identified without the inclusion of a
-      subject claim.  Note that some SET profiles MAY choose to convey
-      event subject information in the event payload (either using the
-      "sub" member name or another name), particularly if the subject
-      information is relative to issuer information that is also
-      conveyed in the event payload, which may be the case for some
-      identity SET profiles.
+      For example:
+
+      *  an IP Address was added to a black list;
+
+      *  a URI representing a user resource that was modified; or,
+
+      *  a token identifier (e.g. "jti") for a revoked token.
+
+      If used, the profiling specification SHOULD define the content and
+      format semantics for the value.  This claim is OPTIONAL, as the
+      principal for any given profile may already be identified without
+      the inclusion of a subject claim.  Note that some SET profiles MAY
+      choose to convey event subject information in the event payload
+      (either using the "sub" member name or another name), particularly
+      if the subject information is relative to issuer information that
+      is also conveyed in the event payload, which may be the case for
+      some identity SET profiles.
 
    "exp" (Expiration Time) Claim
       As defined by Section 4.1.4 of [RFC7519], this claim is the time
@@ -606,20 +611,19 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
    The following new claims are defined by this specification:
 
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 11]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
    "events" (Security Events) Claim
       This claim contains a set of event statements that each provide
       information describing a single logical event that has occurred
       about a security subject (e.g., a state change to the subject).
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 11]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
-
       Multiple event identifiers with the same value MUST NOT be used.
-      The "events" claim SHOULD NOT be used to express multiple
+      The "events" claim MUST NOT be used to express multiple
       independent logical events.
 
       The value of the "events" claim is a JSON object whose members are
@@ -658,21 +662,21 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    RECOMMENDED that the "application/" prefix be omitted.  Therefore,
    the "typ" value used SHOULD be "secevent+jwt".
 
+
+
+
+
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 12]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
 2.4.  Security Event Token Construction
 
    This section describes how to construct a SET.
-
-
-
-
-
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 12]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
 
    The following is an example JWT Claims Set for a hypothetical SCIM
    SET (which has been formatted for readability):
@@ -709,6 +713,23 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
    eyJ0eXAiOiJzZWNldmVudCtqd3QiLCJhbGciOiJub25lIn0
 
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 13]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
    The above example JWT Claims Set is encoded as follows:
 
    eyJqdGkiOiI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIsImlhdCI6MTQ1
@@ -719,16 +740,6 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    OmNyZWF0ZSI6eyJyZWYiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRm
    NjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIsImF0dHJpYnV0ZXMiOlsiaWQiLCJuYW1lIiwi
    dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19
-
-
-
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 13]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
 
    The encoded JWS signature is the empty string.  Concatenating the
    parts yields this complete SET:
@@ -747,9 +758,9 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
    For the purpose of having a simpler example in Figure 6, an unsecured
    token is shown.  When SETs are not signed or encrypted, other
-   mechanisms such as TLS MUST be employed to provide integrity,
-   confidentiality, and issuer authenticity, as needed by the
-   application.
+   mechanisms such as TLS MUST be employed to provide integrity
+   protection, confidentiality, and issuer authenticity, as needed by
+   the application.
 
    When validation (i.e., auditing), or additional transmission security
    is required, JWS signing and/or JWE encryption MAY be used.  To
@@ -758,14 +769,23 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
 3.  Requirements for SET Profiles
 
-   Profiling specifications for SETs define the syntax and semantics of
-   SETs conforming to that SET profile and rules for validating those
-   SETs.  The syntax defined by profiling specifications includes what
-   claims and event payload values are used by SETs utilizing the
-   profile.
+   Profiling specifications of this specification define actual SETs to
+   be used in particular use cases.  These profiling specifications
+   define the syntax and semantics of SETs conforming to that SET
+   profile and rules for validating those SETs.  The syntax defined by
+   profiling specifications includes what claims and event payload
+   values are used by SETs utilizing the profile.
 
    Defining the semantics of the SET contents for SETs utilizing the
    profile is equally important.  Possibly most important is defining
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 14]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
    the procedures used to validate the SET issuer and to obtain the keys
    controlled by the issuer that were used for cryptographic operations
    used in the JWT representing the SET.  For instance, some profiles
@@ -778,14 +798,6 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    identified in the SET, as well as how to differentiate between the
    event subject's issuer and the SET issuer, if applicable.  It is NOT
    RECOMMENDED for profiling specifications to use the "sub" claim in
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 14]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
-
    cases in which the subject is not globally unique and has a different
    issuer from the SET itself.
 
@@ -815,14 +827,20 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    security mechanism when distributing events.  Parties MUST support
    TLS 1.2 [RFC5246] or a higher version and MAY support additional
    transport-layer mechanisms meeting its security requirements.  When
-   using TLS, the client MUST perform a TLS/SSL server certificate
-   check, per [RFC6125].  Implementation security considerations for TLS
-   can be found in "Recommendations for Secure Use of TLS and DTLS"
-   [RFC7525].
+   using TLS, the client MUST perform a TLS server certificate check,
+   per [RFC6125].  Implementation security considerations for TLS can be
+   found in "Recommendations for Secure Use of TLS and DTLS" [RFC7525].
 
    Security events distributed through third parties or that carry
    personally identifiable information SHOULD be encrypted using JWE
    [RFC7516] or secured for confidentiality by other means.
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 15]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
 
    Unless integrity of the JWT is ensured by other means, it MUST be
    signed using JWS [RFC7515] so that the SET can be authenticated and
@@ -834,18 +852,10 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    addition to confidentiality and integrity (discussed above),
    implementers and profiling specifications MUST consider the
    consequences of delivery mechanisms that are not secure and/or not
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 15]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
-
    assured.  For example, while a SET may be end-to-end secured using
-   JWE encrypted SETs, without TLS, there is no assurance that the
-   correct endpoint received the SET and that it could be successfully
-   processed.
+   JWE encrypted SETs, without (mutual) TLS, there is no assurance that
+   the correct endpoint received the SET and that it could be
+   successfully processed.
 
 4.3.  Sequencing
 
@@ -875,29 +885,31 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    is important to consider that a SET might be delivered to a SET
    recipient in advance of or behind the process that caused the event.
    For example, a user having been required to log out and then log back
-   in again, may cause a logout SET to be issued that may arrive at the
-   same time as the user agent accesses a web site having just logged
-   in.  If timing is not handled properly, the effect would be to
-   erroneously treat the new user session as logged out.  Profiling
-   specifications SHOULD be careful to anticipate timing and subject
-   selection information.  For example, it might be more appropriate to
-   cancel a "session" rather than a "user".  Alternatively, the
-   specification could use timestamps that allow new sessions to be
-   started immediately after a stated logout event time.
+   in again, may cause a token revoked SET to be issued, typically
+   causing the receiver to reset all active sessions at the receiver
+   that are related to that user.  If revocation SET arrives at the same
+   time as the user agent re-logs in, timing could cause problems by
+   erroneously treating the new user session as logged out.  Profiling
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 16]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
+   specifications SHOULD be careful to consider both SET expression and
+   timing issues.  For example, it might be more appropriate to revoke a
+   specific session or identity token rather than a general logout
+   statement about a "user".  Alternatively, profiling specifications
+   could use timestamps that allow new sessions to be started
+   immediately after a stated logout event time.
 
 4.5.  Distinguishing SETs from ID Tokens
 
    Because [RFC7519] states that "all claims that are not understood by
    implementations MUST be ignored", there is a consideration that a SET
    might be confused with ID Token [OpenID.Core] if a SET is mistakenly
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 16]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
-
    or maliciously used in a context requiring an ID Token.  If a SET
    could otherwise be interpreted as a valid ID Token (because it
    includes the required claims for an ID Token and valid issuer and
@@ -933,6 +945,15 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    o  Prohibit use of the "exp" claim, as is done to prevent ID Token
       confusion.
 
+
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 17]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
    o  Where possible, use a separate "aud" claim value to distinguish
       between the SET recipient and the protected resource that is the
       audience of an access token.
@@ -945,14 +966,6 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    o  Employ explicit typing, as described in Section 2.3, and modify
       access token validation systems to use the "typ" header parameter
       value.
-
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 17]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
 
 4.7.  Distinguishing SETs from other kinds of JWTs
 
@@ -989,6 +1002,14 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    task, should confusion otherwise even be possible.  Note that this
    topic is being explored in a more general fashion in JSON Web Token
    Best Current Practices [I-D.ietf-oauth-jwt-bcp].  The proposed best
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 18]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
    practices in that draft may also be applicable for particular SET
    profiles and use cases.
 
@@ -1001,25 +1022,16 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    is targeted to the specific business and protocol needs of the
    intended SET recipients.
 
-
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 18]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
-
    When sharing personally identifiable information or information that
    is otherwise considered confidential to affected users, SET issuers
-   and recipients MUST have the appropriate legal agreements and user
+   and recipients should have the appropriate legal agreements and user
    consent and/or terms of service in place.
 
    The propagation of subject identifiers can be perceived as personally
    identifiable information.  Where possible, SET issuers and recipients
    SHOULD devise approaches that prevent propagation -- for example, the
-   passing of a hash value that requires the SET recipient to know the
-   subject.
+   passing of a salted hash value that requires the SET recipient to
+   know the subject.
 
    In some cases, it may be possible for a SET recipient to correlate
    different events and thereby gain information about a subject that
@@ -1042,6 +1054,18 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    the IANA "JSON Web Token Claims" registry [IANA.JWT.Claims]
    established by [RFC7519].
 
+
+
+
+
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 19]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
 6.1.1.  Registry Contents
 
    o  Claim Name: "events"
@@ -1058,13 +1082,6 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    o  Claim Description: Transaction Identifier
    o  Change Controller: IESG
    o  Specification Document(s): Section 2.2 of [[ this specification ]]
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 19]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
 
 6.2.  Media Type Registration
 
@@ -1097,6 +1114,14 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    o  Person & email address to contact for further information:
       Michael B. Jones, mbj@microsoft.com
    o  Intended usage: COMMON
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 20]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
    o  Restrictions on usage: none
    o  Author: Michael B. Jones, mbj@microsoft.com
    o  Change controller: IESG
@@ -1113,14 +1138,6 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    [IANA.MediaTypes]
               IANA, "Media Types",
               <http://www.iana.org/assignments/media-types>.
-
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 20]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -1152,6 +1169,15 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
               <https://www.rfc-editor.org/info/rfc7519>.
 
+
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 21]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
    [RFC7525]  Sheffer, Y., Holz, R., and P. Saint-Andre,
               "Recommendations for Secure Use of Transport Layer
               Security (TLS) and Datagram Transport Layer Security
@@ -1168,15 +1194,6 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
               Sheffer, Y., Hardt, D., and M. Jones, "JSON Web Token Best
               Current Practices", draft-ietf-oauth-jwt-bcp-00 (work in
               progress), July 2017.
-
-
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 21]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
 
    [I-D.ietf-stir-passport]
               Wendt, C. and J. Peterson, "Personal Assertion Token
@@ -1210,6 +1227,13 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
               RFC 7516, DOI 10.17487/RFC7516, May 2015,
               <https://www.rfc-editor.org/info/rfc7516>.
 
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 22]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
    [RFC7517]  Jones, M., "JSON Web Key (JWK)", RFC 7517,
               DOI 10.17487/RFC7517, May 2015,
               <https://www.rfc-editor.org/info/rfc7517>.
@@ -1224,16 +1248,6 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
               Realm", RFC 8055, DOI 10.17487/RFC8055, January 2017,
               <https://www.rfc-editor.org/info/rfc8055>.
 
-
-
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 22]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
-
    [RISC]     OpenID Foundation, "OpenID Risk and Incident Sharing and
               Coordination (RISC) Working Group",
               <http://openid.net/wg/risc/>.
@@ -1242,11 +1256,14 @@ Appendix A.  Acknowledgments
 
    The editors would like to thank the members of the IETF SCIM working
    group, which began discussions of provisioning events starting with
-   draft-hunt-scim-notify-00 in 2015.
-
-   The editors would like to thank the participants in the IETF id-event
-   mailing list, the Security Events working group, and related working
-   groups for their contributions to this specification.
+   draft-hunt-scim-notify-00 in 2015.  The editors would like to thank
+   the participants in the IETF id-event mailing list, the Security
+   Events working group, and related working groups for their
+   contributions to this specification.  The specification incorporates
+   suggestions made by many people, including Annabelle Backman, John
+   Bradley, Dick Hardt, Russ Housley, Benjamin Kaduk, Mark Lizar, Andrew
+   Nash, Justin Richer, Nat Sakimura, Marius Scurtescu, and Yaron
+   Sheffer.
 
 Appendix B.  Change Log
 
@@ -1265,6 +1282,14 @@ Appendix B.  Change Log
    clarified examples and intro text, and added security and privacy
    section.
 
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 23]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
    Draft 03 - PH
 
       General edit corrections from Sarah Squire
@@ -1282,13 +1307,6 @@ Appendix B.  Change Log
    - mbj - Registered "events" claim, and proof-reading corrections.
 
    Draft 04 - PH -
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 23]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
 
    o  Re-added the "sub" claim with clarifications that any SET type may
       use it.
@@ -1320,6 +1338,14 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
    Draft 07 -
 
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 24]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
    o  PH - Moved payload objects to be values of event URI attributes,
       per discussion.
 
@@ -1338,13 +1364,6 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    From draft-ietf-secevent-token:
 
    Draft 00 - PH - First WG Draft based on draft-hunt-idevent-token
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 24]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
 
    Draft 01 - PH - Changes as follows:
 
@@ -1375,6 +1394,14 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
       may choose to convey event subject information in the event
       payload.
 
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 25]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
    o  PH - Corrected encoded claim example on page 10.
 
    o  mbj - Applied grammar corrections.
@@ -1393,14 +1420,6 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
    o  pjh - Clarified the use of "nonce" in contexts where substitution
       is possible.
-
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 25]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
 
    o  mbj - Addressed WGLC comments by Nat Sakimura.
 
@@ -1430,6 +1449,15 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
 
    o  Added a RISC event example, courtesy of Marius Scurtescu.
 
+
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 26]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
+
+
    o  Applied wording clarifications suggested by Annabelle Backman and
       Yaron Sheffer.
 
@@ -1450,14 +1478,6 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    o  Changed to using the RFC 8174 boilerplate instead of the RFC 2119
       boilerplate.
 
-
-
-
-Hunt, et al.            Expires September 5, 2018              [Page 26]
-
-Internet-Draft          draft-ietf-secevent-token             March 2018
-
-
    Draft 06 - mbj - Changes were as follows:
 
    o  Changed "when the event was issued" to "when the SET was issued"
@@ -1470,12 +1490,28 @@ Internet-Draft          draft-ietf-secevent-token             March 2018
    Draft 07 - PH - Text refinement to Section 3 proposed by Annabelle
    Backman post WGLC
 
+   Draft 08 - mbj - Changes were as follows:
+
+   o  Incorporated wording improvements resulting from Russ Housley's
+      SecDir comments.
+
+   o  Acknowledged individuals who made significant contributions.
+
+   Draft 09 - pjh/mbj - Changes from AD review by Benjamin Kaduk
+
 Authors' Addresses
 
    Phil Hunt (editor)
    Oracle Corporation
 
    Email: phil.hunt@yahoo.com
+
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 27]
+
+Internet-Draft          draft-ietf-secevent-token             April 2018
 
 
    Michael B. Jones
@@ -1509,4 +1545,24 @@ Authors' Addresses
 
 
 
-Hunt, et al.            Expires September 5, 2018              [Page 27]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.            Expires October 17, 2018               [Page 28]
