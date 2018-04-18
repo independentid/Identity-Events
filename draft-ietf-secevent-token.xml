@@ -67,7 +67,7 @@
 	This specification defines the Security Event Token (SET) data structure.
 	A SET describes statements of fact from the perspective of an issuer
 	about a subject. These statements of fact represent an event 
-  that occurred directly to or about a security subject. For example
+  that occurred directly to or about a security subject, for example,
   a statement about the issuance or revocation of a token on
   behalf of a subject. This specification is intended to enable 
   representing security- and identity-related events. A SET is a 
@@ -103,7 +103,7 @@
       an issuer about a subject (e.g., a web resource, token, IP 
       address, the issuer itself). These statements of fact 
       represent a logical event that occurred directly to or about a 
-      security subject. For example a statement about the issuance 
+      security subject, for example, a statement about the issuance 
       or revocation of a token on behalf of a subject. A security 
       subject may be permanent (e.g., a user account) or temporary
       (e.g., an HTTP session) in nature. A state change could 
@@ -391,9 +391,14 @@
 	  </t>
 	  <t>
 	    Note that the above SET has an empty JSON object and
-          uses the JWT registered claims <spanx style="verb">sub</spanx> 
+          uses the JWT claims <spanx style="verb">sub</spanx> 
           and <spanx style="verb">sid</spanx> to identify the subject
-          that was logged out.</t>
+          that was logged out.
+	    At the time of this writing, this example
+	    corresponds to the logout token defined in the
+	    <xref target="OpenID.BackChannel">OpenID Connect Back-Channel Logout 1.0</xref>
+	    specification.
+	  </t>
 
 	</section>
 
@@ -612,7 +617,8 @@
 	      This value is a NumericDate (see Section 2 of <xref target="RFC7519"/>).
 	      By omitting this claim, the issuer indicates that
 	      they are not sharing an event time with the recipient.
-	      (Note that in some use cases, the represented time might be approximate.)
+	      (Note that in some use cases, the represented time might be approximate;
+	      statements about the accuracy of this field MAY be made by profiling specifications.)
 	      This claim is OPTIONAL.
 	    </t>
 
@@ -787,93 +793,21 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       </t>
     </section>
 
-    <section anchor="Security" title="Security Considerations" toc="default">
-      
-      <section anchor="ConfidentialityIntegrity" title="Confidentiality and Integrity">
-
-      <t>SETs may contain sensitive information. Therefore,
-      methods for distribution of events SHOULD require the use of a 
-      transport-layer security mechanism when distributing events. 
-      Parties MUST support TLS 1.2 <xref target="RFC5246"/> or a higher version and MAY support
-      additional transport-layer mechanisms meeting its security
-      requirements. When using TLS, the client MUST perform a TLS server
-      certificate check, per <xref target="RFC6125"/>. Implementation
-      security considerations for TLS can be found in "Recommendations for
-      Secure Use of TLS and DTLS" <xref target="RFC7525"/>.</t>
-      
-      <t>Security events distributed through third parties or that carry personally
-      identifiable information SHOULD be encrypted using JWE <xref target="RFC7516"/>
-      or secured for confidentiality by other means.
+    <section anchor="SETsAndJWTs" title="Preventing Confusion between SETs and other JWTs">
+      <t>
+	  Because <xref target="RFC7519"/> states that "all claims that are not understood
+	  by implementations MUST be ignored", there is a consideration that 
+	  a SET might be confused with another kind of JWT from the same issuer.
+	  Unless this confusion is prevented, this might enable an attacker who possesses
+	  a SET to use it in a context in which another kind of JWT is expected, or vice-versa.
+	  This section presents concrete techniques for preventing confusion between
+	  SETs and several other specific kinds of JWTs, as well as generic techniques
+	  for preventing possible confusion between SETs and other kinds of JWTs.
       </t>
-
-      <t>Unless integrity of the JWT is ensured by other means, it
-      MUST be signed using JWS <xref target="RFC7515"/> so
-      that the SET can be authenticated and validated by the 
-      SET recipient.</t>
-
-      </section>
-
-      <section anchor="Delivery" title="Delivery">
-
-      <t>This specification does not define a delivery mechanism for SETs.
-      In addition to confidentiality and integrity (discussed above), implementers
-      and profiling specifications MUST consider the consequences of delivery 
-      mechanisms that are not secure and/or not assured. For example, while
-      a SET may be end-to-end secured using JWE encrypted SETs, without (mutual) TLS,
-      there is no assurance that the correct endpoint received the SET and 
-      that it could be successfully processed.</t>
-      </section>
-      
-      <section anchor="Sequencing" title="Sequencing">
-
-        <t>
-	  This specification defines no means of ordering multiple SETs in a sequence.
-	  Depending on the type and nature of the events represented by SETs,
-	order may or may not matter. For example, in provisioning, 
-        event order is critical -- an object cannot be modified before it
-        is created. In other SET types, such as a token revocation, the order
-        of SETs for revoked tokens does not matter. If, however, the event conveys
-        a logged in or logged out status for a user subject, then
-        order becomes important.</t>
-
-        <t>Profiling specifications and implementers SHOULD take caution when
-        using timestamps such as <spanx style="verb">iat</spanx> to define order. Distributed systems will have 
-        some amount of clock skew. Thus, time by itself will not guarantee order.</t>
-        
-        <t>Specifications profiling SET SHOULD define a mechanism for detecting
-        order or sequence of events when the order matters.
-	For example, the <spanx style="verb">txn</spanx>
-        claim could contain an ordered value (e.g., a counter) that the issuer includes.</t>
-      </section>
-      
-      <section anchor="Timing" title="Timing Issues">
-
-        <t>When SETs are delivered asynchronously and/or out-of-band 
-        with respect to the original action that incurred the 
-        security event, it is important to consider that a SET 
-        might be delivered to a SET recipient in advance of
-        or behind the process that caused the event. For example, 
-        a user having been required to log out and then log back 
-        in again, may cause a token revoked SET to be issued, 
-        typically causing the receiver to reset all active 
-        sessions at the receiver that are related to that user. 
-        If revocation SET arrives at the same time as the user 
-        agent re-logs in, timing could cause problems by 
-        erroneously treating the new user session as logged out. 
-        Profiling specifications SHOULD be careful to consider 
-        both SET expression and timing issues. For example, it 
-        might be more appropriate to revoke a specific session or 
-        identity token rather than a general logout statement 
-        about a "user". Alternatively, profiling specifications 
-        could use timestamps that allow new sessions to be started 
-        immediately after a stated logout event time.</t>
-      </section>
 
       <section anchor="SETsAndIDTokens" title="Distinguishing SETs from ID Tokens">
         <t>
-	  Because <xref target="RFC7519"/> states that "all claims that are not understood
-	  by implementations MUST be ignored", there is a consideration that 
-	  a SET might be confused with ID Token <xref target="OpenID.Core"/>
+	  A SET might be confused with ID Token <xref target="OpenID.Core"/>
 	  if a SET is mistakenly or maliciously used in a context requiring an ID Token.
 	  If a SET could otherwise be interpreted as a valid ID Token
 	  (because it includes the required claims for an ID Token
@@ -933,14 +867,14 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	</t>
       </section>
 
-      <section anchor="SETsAndJWTs" title="Distinguishing SETs from other kinds of JWTs">
+      <section anchor="SETsAndOtherJWTs" title="Distinguishing SETs from other kinds of JWTs">
 	<t>
 	  JWTs are now being used in application areas beyond the identity applications
 	  in which they first appeared.
 	  For instance, the
 	  Session Initiation Protocol (SIP) Via Header Field <xref target="RFC8055"/>
 	  and
-	  Personal Assertion Token (PASSporT) <xref target="I-D.ietf-stir-passport"/>
+	  Personal Assertion Token (PASSporT) <xref target="RFC8225"/>
 	  specifications both define JWT profiles that use mostly or completely different sets of claims
 	  than are used by ID Tokens.
 	  If it would otherwise be possible for an attacker to substitute a SET for one of these (or other)
@@ -965,7 +899,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	  claims that are required for the kind of JWT that might be the target of an attack.
 	  For example, for <xref target="RFC8055"/>,
 	  the <spanx style="verb">sip_callid</spanx> claim could be omitted
-	  and for <xref target="I-D.ietf-stir-passport"/>,
+	  and for <xref target="RFC8225"/>,
 	  the <spanx style="verb">orig</spanx> claim could be omitted.
 	</t>
 	<t>
@@ -975,6 +909,99 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	  JSON Web Token Best Current Practices <xref target="I-D.ietf-oauth-jwt-bcp"/>.
 	  The proposed best practices in that draft may also be applicable
 	  for particular SET profiles and use cases.
+	</t>
+      </section>
+    </section>
+
+    <section anchor="Security" title="Security Considerations" toc="default">
+      
+      <section anchor="ConfidentialityIntegrity" title="Confidentiality and Integrity">
+
+      <t>SETs may contain sensitive information. Therefore,
+      methods for distribution of events SHOULD require the use of a 
+      transport-layer security mechanism when distributing events. 
+      Parties MUST support TLS 1.2 <xref target="RFC5246"/> or a higher version and MAY support
+      additional transport-layer mechanisms meeting its security
+      requirements. When using TLS, the client MUST perform a TLS server
+      certificate check, per <xref target="RFC6125"/>. Implementation
+      security considerations for TLS can be found in "Recommendations for
+      Secure Use of TLS and DTLS" <xref target="RFC7525"/>.</t>
+      
+      <t>Security events distributed through third parties or that carry personally
+      identifiable information SHOULD be encrypted using JWE <xref target="RFC7516"/>
+      or secured for confidentiality by other means.
+      </t>
+
+      <t>Unless integrity of the JWT is ensured by other means, it
+      MUST be signed using JWS <xref target="RFC7515"/> so
+      that the SET can be authenticated and validated by the 
+      SET recipient.</t>
+
+      </section>
+
+      <section anchor="Delivery" title="Delivery">
+
+      <t>This specification does not define a delivery mechanism for SETs.
+      In addition to confidentiality and integrity (discussed above), implementers
+      and profiling specifications MUST consider the consequences of delivery 
+      mechanisms that are not secure and/or not assured. For example, while
+      a SET may be end-to-end secured using JWE encrypted SETs, without (mutual) TLS,
+      there is no assurance that the correct endpoint received the SET and 
+      that it could be successfully processed.</t>
+      </section>
+      
+      <section anchor="Sequencing" title="Sequencing">
+
+        <t>
+	  This specification defines no means of ordering multiple SETs in a sequence.
+	  Depending on the type and nature of the events represented by SETs,
+	order may or may not matter. For example, in provisioning, 
+        event order is critical -- an object cannot be modified before it
+        is created. In other SET types, such as a token revocation, the order
+        of SETs for revoked tokens does not matter. If, however, the event conveys
+        a logged in or logged out status for a user subject, then
+        order becomes important.</t>
+
+        <t>Profiling specifications and implementers SHOULD take caution when
+        using timestamps such as <spanx style="verb">iat</spanx> to define order. Distributed systems will have 
+        some amount of clock skew. Thus, time by itself will not guarantee order.</t>
+        
+        <t>Specifications profiling SET SHOULD define a mechanism for detecting
+        order or sequence of events when the order matters.
+	For example, the <spanx style="verb">txn</spanx>
+        claim could contain an ordered value (e.g., a counter) that the issuer includes,
+	  although just as for timestamps,
+	  ensuring such ordering can be difficult in distributed systems.
+	</t>
+      </section>
+      
+      <section anchor="Timing" title="Timing Issues">
+
+        <t>When SETs are delivered asynchronously and/or out-of-band 
+        with respect to the original action that incurred the 
+        security event, it is important to consider that a SET 
+        might be delivered to a SET recipient in advance of
+        or behind the process that caused the event. For example, 
+        a user having been required to log out and then log back 
+        in again, may cause a token revoked SET to be issued, 
+        typically causing the receiver to reset all active 
+        sessions at the receiver that are related to that user. 
+        If revocation SET arrives at the same time as the user 
+        agent re-logs in, timing could cause problems by 
+        erroneously treating the new user session as logged out. 
+        Profiling specifications SHOULD be careful to consider 
+        both SET expression and timing issues. For example, it 
+        might be more appropriate to revoke a specific session or 
+        identity token rather than a general logout statement 
+        about a "user". Alternatively, profiling specifications 
+        could use timestamps that allow new sessions to be started 
+        immediately after a stated logout event time.</t>
+      </section>
+
+      <section anchor="ConfusionConsiderations" title="Preventing Confusion">
+	<t>
+	  Also, see <xref target="SETsAndJWTs"/> above for both additional security considerations
+	  and normative text on preventing SETs from being confused with other kinds of JWTs.
 	</t>
       </section>
 
@@ -1211,9 +1238,9 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7517.xml'?><!-- JWK -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7644.xml'?><!-- SCIM Protocol -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8055.xml'?><!-- SIP Via Header -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8225.xml'?><!-- PASSporT -->
 
-      <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-stir-passport-11.xml" ?>
-      <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-oauth-jwt-bcp-00.xml" ?>
+      <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-oauth-jwt-bcp-01.xml" ?>
 
        
       <reference anchor="OpenID.Core" target="http://openid.net/specs/openid-connect-core-1_0.html">
@@ -1242,6 +1269,22 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
  
           <date day="8" month="November" year="2014"/>
         </front>
+      </reference>
+
+      <reference anchor="OpenID.BackChannel" target="http://openid.net/specs/openid-connect-backchannel-1_0.html">
+	<front>
+	  <title>OpenID Connect Back-Channel Logout 1.0</title>
+
+	  <author fullname="Michael B. Jones" initials="M.B." surname="Jones">
+	    <organization abbrev="Microsoft">Microsoft</organization>
+	  </author>
+
+          <author fullname="John Bradley" initials="J." surname="Bradley">
+            <organization abbrev="Ping Identity">Ping Identity</organization>
+          </author>
+
+	  <date day="25" month="January" year="2017" />
+	</front>
       </reference>
 
       <reference anchor="RISC" target="http://openid.net/wg/risc/">
@@ -1477,7 +1520,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	</list>
       </t>
 
-      <t>Draft 09 - pjh/mbj - Changes from AD review by Benjamin Kaduk</t>
+      <t>Draft 09 - pjh/mbj - Changes addressing AD review comments by Benjamin Kaduk</t>
     </section>
   </back>
 </rfc>
