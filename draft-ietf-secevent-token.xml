@@ -13,7 +13,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="std" docName="draft-ietf-secevent-token-09" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-token-10" ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-token">Security Event Token (SET)</title>
 
@@ -47,7 +47,7 @@
       </address>
     </author>
 
-    <date year="2018" month="April" />
+    <date year="2018" month="May" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
@@ -1118,6 +1118,78 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	<?rfc subcompact="no"?>
       </section>
 
+      <section title="Structured Syntax Suffix Registration" anchor="SuffixReg">
+	<t>
+	  This section registers the <spanx style="verb">+jwt</spanx>
+	  structured syntax suffix <xref target="RFC6838"/>
+	  in the "Structured Syntax Suffix" registry <xref target="IANA.StructuredSuffix"/>
+	  in the manner described in <xref target="RFC6838"/>,
+	  which can be used to indicate that the media type is encoded as a JWT.
+	</t>
+	<section title="Registry Contents" anchor="SuffixContents">
+	  <t>
+	    <?rfc subcompact="yes"?>
+	    <list style="symbols">
+	      <t>
+		Name: JSON Web Token (JWT)
+	      </t>
+	      <t>
+		+suffix: +jwt
+	      </t>
+	      <t>
+		References: <xref target="RFC7519"/>
+	      </t>
+	      <t>
+		Encoding considerations: 8bit;
+		JWT values are encoded as a
+		series of base64url-encoded values (some of which may be the
+		empty string) separated by period ('.') characters.
+	      </t>
+	      <t>
+		Interoperability considerations: n/a
+	      </t>
+	      <t>
+		Fragment identifier considerations:
+		<vspace/>
+		The syntax and semantics of fragment identifiers specified for
+		+jwt SHOULD be as specified for "application/jwt".  (At
+		publication of this document, there is no fragment identification
+		syntax defined for "application/jwt".)
+		<vspace blankLines="1"/>
+		The syntax and semantics for fragment identifiers for a specific
+		"xxx/yyy+jwt" SHOULD be processed as follows:
+		<vspace blankLines="1"/>
+		For cases defined in +jwt, where the fragment identifier resolves
+		per the +jwt rules, then process as specified in +jwt.
+		<vspace blankLines="1"/>
+		For cases defined in +jwt, where the fragment identifier does not
+		resolve per the +jwt rules, then process as specified in
+		"xxx/yyy+jwt".
+		<vspace blankLines="1"/>
+		For cases not defined in +jwt, then process as specified in
+		"xxx/yyy+jwt".
+	      </t>
+	      <t>
+		Security considerations: See the Security Considerations section of <xref target="RFC7519"/>.
+	      </t>
+	      <t>
+		Contact:
+		<vspace/>
+		Michael B.&nbsp;Jones, mbj@microsoft.com
+	      </t>
+	      <t>
+		Author/Change controller:
+		<vspace/>
+		Security Events Working Group.
+		<vspace/>
+		The IESG has change control over this registration.
+	      </t>
+	    </list>
+	  </t>
+	</section>
+	<?rfc subcompact="no"?>
+      </section>
+
       <section title="Media Type Registration" anchor="MediaReg">
 	<section title="Registry Contents" anchor="MediaContents">
 	  <t>
@@ -1222,7 +1294,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6749.xml'?><!-- OAuth 2.0 -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml'?><!-- JWT -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7525.xml'?><!-- TLS BCP -->
-      <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174"?>
+      <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"?> <!--RFC 2119 bis-->
 
       <reference anchor="IANA.JWT.Claims" target="http://www.iana.org/assignments/jwt">
         <front>
@@ -1237,6 +1309,16 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       <reference anchor="IANA.MediaTypes" target="http://www.iana.org/assignments/media-types">
         <front>
           <title>Media Types</title>
+          <author>
+            <organization>IANA</organization>
+          </author>
+	  <date/>
+        </front>
+      </reference>
+
+      <reference anchor="IANA.StructuredSuffix" target="https://www.iana.org/assignments/media-type-structured-suffix/">
+        <front>
+          <title>Structured Syntax Suffix</title>
           <author>
             <organization>IANA</organization>
           </author>
@@ -1538,6 +1620,18 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       </t>
 
       <t>Draft 09 - pjh/mbj - Changes addressing AD review comments by Benjamin Kaduk</t>
+
+      <t>
+	Draft 10 - pjh/mbj - Changes were as follows:
+	<list style="symbols">
+	  <t>
+	    Incorporated wording improvements resulting from Russ Housley's additional SecDir comments.
+	  </t>
+	  <t>
+	    Registered +jwt structured syntax suffix.
+	  </t>
+	</list>
+      </t>
     </section>
   </back>
 </rfc>
