@@ -747,50 +747,67 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
     </section>
 
     <section anchor="Profiles" title="Requirements for SET Profiles">
-      <t>
-	Profiling specifications of this specification define actual SETs to be used in particular use cases.
-	These profiling specifications define the syntax and semantics
-	of SETs conforming to that SET profile and rules for validating those SETs.
-	The syntax defined by profiling specifications includes what claims
-	and event payload values are used by SETs utilizing the profile.
-      </t>
-      <t>
-	Defining the semantics of the SET contents for SETs utilizing the profile
-	is equally important.
-	Possibly most important is defining the procedures used to validate the SET issuer
-	and to obtain the keys controlled by the issuer that were used for
-	cryptographic operations used in the JWT representing the SET.
-	For instance, some profiles may define an algorithm for retrieving
-	the SET issuer's keys that uses the <spanx style="verb">iss</spanx> claim value as its input.
-	Likewise, if the profile allows (or requires) that the JWT be unsecured,
-	the means by which the integrity of the JWT is ensured MUST be specified.
-      </t>
-      <t>
-	Profiling specifications MUST define how the event subject is identified in the SET,
-	as well as how to differentiate between the event subject's issuer and the SET issuer, if applicable.
-	It is NOT RECOMMENDED for profiling specifications to use the <spanx style="verb">sub</spanx> claim
-	in cases in which the subject is not globally unique and has a different issuer from the SET itself.
-      </t>
-      <t>
+       <t>
+  Profiling specifications of this specification define actual SETs 
+  to be used in particular use cases. These profiling 
+  specifications define the syntax and semantics of SETs conforming 
+  to that SET profile and rules for validating those SETs.
       
+  Profiling specifications SHOULD define syntax, semantics, subject 
+  identification, and validation.<list style="hanging">
+    
+    <t hangText="Syntax"><vspace/>
+    The syntax of the SETs defined, including:  
+    <list style="hanging">
+      <t hangText="Top-Level Claims"><vspace/>Claims and values 
+      placed at the JWT Claims Set. Examples are claims
+      defined by the JWT specification (see <xref target="RFC7519"/>),
+      the SET specification, and by the profiling specification.</t>
+      
+      <t hangText="Event Payload"><vspace/>The JSON data structure
+      contents and format, containing event-specific information,
+      if any (see <xref target="defs"/>).</t>
+    </list></t>
+  
+    <t hangText="Semantics"><vspace/> 
+  Defining the semantics of the SET contents for SETs utilizing 
+  the profile is equally important. Possibly most important is 
+  defining the procedures used to validate the SET issuer
+  and to obtain the keys controlled by the issuer that were used for
+  cryptographic operations used in the JWT representing the SET.
+  For instance, some profiles may define an algorithm for retrieving
+  the SET issuer's keys that uses the <spanx style="verb">iss</spanx> 
+  claim value as its input. Likewise, if the profile allows (or 
+  requires) that the JWT be unsecured, the means by which the 
+  integrity of the JWT is ensured MUST be specified.
+    </t>
+  
+    <t hangText="Subject Identification"><vspace/>
+  Profiling specifications MUST define how the event subject is identified in the SET,
+  as well as how to differentiate between the event subject's issuer and the SET issuer, if applicable.
+  It is NOT RECOMMENDED for profiling specifications to use the <spanx style="verb">sub</spanx> claim
+  in cases in which the subject is not globally unique and has a different issuer from the SET itself.
+    </t>
+  
+    <t hangText="Validation"><vspace/>
+  Profiling specifications MUST clearly specify the steps that a recipient of a SET
+  utilizing that profile MUST perform to validate that the SET is
+  both syntactically and semantically valid.
+    </t>
+    <t> 
   Among the syntax and semantics of SETs that a profiling specification 
   may define is whether the value of the <spanx style="verb">events</spanx>  
   claim may contain multiple members, and what processing instructions 
   are employed in the single- and multiple-valued cases for SETs 
   conforming to that profile.  Many valid choices are possible.
-	For instance, some profiles might allow multiple event identifiers to be present
-	and specify that any that are not understood by recipients be ignored,
-	thus enabling extensibility.
-	Other profiles might allow multiple event identifiers to be present
-	but require that all be understood if the SET is to be accepted.
-	Some profiles might require that only a single value be present.
-	All such choices are within the scope of profiling specifications to define.
-      </t>
-      <t>
-	Profiling specifications MUST clearly specify the steps that a recipient of a SET
-	utilizing that profile MUST perform to validate that the SET is
-	both syntactically and semantically valid.
-      </t>
+  For instance, some profiles might allow multiple event identifiers to be present
+  and specify that any that are not understood by recipients be ignored,
+  thus enabling extensibility.
+  Other profiles might allow multiple event identifiers to be present
+  but require that all be understood if the SET is to be accepted.
+  Some profiles might require that only a single value be present.
+  All such choices are within the scope of profiling specifications to define.</t>
+  </list></t>
     </section>
 
     <section anchor="SETsAndJWTs" title="Preventing Confusion between SETs and other JWTs">
