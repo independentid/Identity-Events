@@ -747,6 +747,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
     </section>
 
     <section anchor="Profiles" title="Requirements for SET Profiles">
+
        <t>
   Profiling specifications of this specification define actual SETs 
   to be used in particular use cases. These profiling 
