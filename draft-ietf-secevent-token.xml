@@ -47,7 +47,7 @@
       </address>
     </author>
 
-    <date year="2018" month="April" />
+    <date year="2018" month="May" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
@@ -1622,7 +1622,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       <t>Draft 09 - pjh/mbj - Changes addressing AD review comments by Benjamin Kaduk</t>
 
       <t>
-	Draft 10 - phj/mbj - Changes were as follows:
+	Draft 10 - pjh/mbj - Changes were as follows:
 	<list style="symbols">
 	  <t>
 	    Incorporated wording improvements resulting from Russ Housley's additional SecDir comments.
