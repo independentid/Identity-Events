@@ -13,7 +13,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="std" docName="draft-ietf-secevent-token-10" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-token-11" ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-token">Security Event Token (SET)</title>
 
@@ -498,10 +498,16 @@
 	      As defined by Section 4.1.1 of <xref target="RFC7519"/>,
 	      this claim contains a string identifying the service provider publishing
 	      the SET (the issuer).
-	      In some cases, the SET issuer is not the issuer of the security subject.
-	      Therefore, implementers cannot assume that the issuers are the same
+        In other uses of JWT <xref target="RFC7519"/>, it is 
+        common for the issuer of the JWT to also be the issuer of
+        the <spanx style="verb">sub</spanx> which together, uniquely
+        identifies a subject. However, a SET MAY be about
+        a subject whose <spanx style="verb">sub</spanx> value is
+        unique only within the domain of another issuer. 
+	      Therefore, implementers SHOULD NOT assume that the issuer of the
+        SET and the issuer of the subject are the same value
 	      unless the profiling specification specifies that they are
-	      for SETs conforming to that profile.
+	      the same for SETs conforming to that profile.
 	      This claim is REQUIRED.
 	    </t>
 
@@ -549,7 +555,7 @@
               <t>a token identifier (e.g. <spanx style="verb">jti</spanx>) 
               for a revoked token.</t>
             </list>
-            If used, the profiling specification SHOULD define the 
+            If used, the profiling specification MUST define the 
             content and format semantics for the value. This claim
             is OPTIONAL, as the principal for any given profile may 
             already be identified without the inclusion of a subject 
@@ -952,7 +958,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       <t>Unless integrity of the JWT is ensured by other means, it
       MUST be signed using JWS <xref target="RFC7515"/> so
       that the SET can be authenticated and validated by the 
-      SET recipient.</t>
+      SET recipient as per Section 5 of <xref target="RFC7515"/>.</t>
 
       </section>
 
@@ -1000,7 +1006,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
         might be delivered to a SET recipient in advance of
         or behind the process that caused the event. For example, 
         a user having been required to log out and then log back 
-        in again, may cause a token revoked SET to be issued, 
+        in again, may cause a \"token revoked SET\" to be issued, 
         typically causing the receiver to reset all active 
         sessions at the receiver that are related to that user. 
         If revocation SET arrives at the same time as the user 
@@ -1631,6 +1637,16 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	    Registered +jwt structured syntax suffix.
 	  </t>
 	</list>
+      </t>
+      <t>
+    Draft 11 - pjh/mbj - Comments incorporating feedback from Eric Rescorla, and IANA
+    <list style="symbols">
+      <t>Clarified disambiguation regarding iss and sub</t>
+      <t>Corrected sec 2.2, changed SHOULD to MUST in regards to profiling specifications
+      defining content and format semantics in order to be consistent with Sec 3.</t>
+      <t>Sec 5.1, clarified meaning of validation in regards to signed SETs.</t>
+      <t>Sec 5.4, added quotes /token revoked SET/"token revoked" SET/ to be issued.</t>
+    </list>
       </t>
     </section>
   </back>
