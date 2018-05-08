@@ -498,16 +498,11 @@
 	      As defined by Section 4.1.1 of <xref target="RFC7519"/>,
 	      this claim contains a string identifying the service provider publishing
 	      the SET (the issuer).
-        In other uses of JWT <xref target="RFC7519"/>, it is 
-        common for the issuer of the JWT to also be the issuer of
-        the <spanx style="verb">sub</spanx> which together, uniquely
-        identifies a subject. However, a SET MAY be about
-        a subject whose <spanx style="verb">sub</spanx> value is
-        unique only within the domain of another issuer. 
-	      Therefore, implementers SHOULD NOT assume that the issuer of the
-        SET and the issuer of the subject are the same value
+	      In some cases, the issuer of the SET will not be
+	      the issuer associated with the security subject of the SET.
+	      Therefore, implementers cannot assume that the issuers are the same
 	      unless the profiling specification specifies that they are
-	      the same for SETs conforming to that profile.
+	      for SETs conforming to that profile.
 	      This claim is REQUIRED.
 	    </t>
 
@@ -916,6 +911,8 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	  is to have the JWT validation logic reject JWTs containing an <spanx style="verb">events</spanx> claim
 	  unless the JWT is intended to be a SET.
 	  This approach can be employed for new systems but may not be applicable to existing systems.
+	  Validating that the JWT has an <spanx style="verb">events</spanx> claim will be effective
+	  in preventing attackers from passing other kinds of JWTs off as SETs.
 	</t>
 	<t>
 	  For many use cases, the simplest way to prevent substitution is requiring that the SET not include
@@ -956,9 +953,10 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       </t>
 
       <t>Unless integrity of the JWT is ensured by other means, it
-      MUST be signed using JWS <xref target="RFC7515"/> so
+      MUST be signed using JWS <xref target="RFC7515"/>
+      by an issuer that is trusted to do so for the use case so
       that the SET can be authenticated and validated by the 
-      SET recipient as per Section 5 of <xref target="RFC7515"/>.</t>
+      SET recipient.</t>
 
       </section>
 
@@ -1006,7 +1004,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
         might be delivered to a SET recipient in advance of
         or behind the process that caused the event. For example, 
         a user having been required to log out and then log back 
-        in again, may cause a \"token revoked SET\" to be issued, 
+        in again, may cause a "token revoked" SET to be issued,
         typically causing the receiver to reset all active 
         sessions at the receiver that are related to that user. 
         If revocation SET arrives at the same time as the user 
@@ -1143,10 +1141,10 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 		+suffix: +jwt
 	      </t>
 	      <t>
-		References: <xref target="RFC7519"/>
+		References: Section 3 of <xref target="RFC7519"/>
 	      </t>
 	      <t>
-		Encoding considerations: 8bit;
+		Encoding considerations: binary;
 		JWT values are encoded as a
 		series of base64url-encoded values (some of which may be the
 		empty string) separated by period ('.') characters.
@@ -1176,7 +1174,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 		"xxx/yyy+jwt".
 	      </t>
 	      <t>
-		Security considerations: See the Security Considerations section of <xref target="RFC7519"/>.
+		Security considerations: See Section 11 of <xref target="RFC7519"/>.
 	      </t>
 	      <t>
 		Contact:
@@ -1220,14 +1218,14 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 		Optional parameters: n/a
 	      </t>
 	      <t>
-		Encoding considerations: 8bit;
+		Encoding considerations: binary;
 		A SET is a JWT;
 		JWT values are encoded as a
 		series of base64url-encoded values (some of which may be the
 		empty string) separated by period ('.') characters.
 	      </t>
 	      <t>
-		Security considerations: See the Security Considerations section of [[ this specification ]]
+		Security considerations: See <xref target="Security"/> of [[ this specification ]]
 	      </t>
 	      <t>
 		Interoperability considerations: n/a
@@ -1237,7 +1235,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	      </t>
 	      <t>
 		Applications that use this media type:
-		TBD
+		Applications that exchange SETs
 	      </t>
 	      <t>
 		Fragment identifier considerations: n/a
@@ -1425,11 +1423,13 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       The specification incorporates suggestions made by many people, including
       Annabelle Backman,
       John Bradley,
+      Ned Freed,
       Dick Hardt,
       Russ Housley,
       Benjamin Kaduk,
       Mark Lizar,
       Andrew Nash,
+      Eric Rescorla,
       Justin Richer,
       Nat Sakimura,
       Marius Scurtescu,
@@ -1639,14 +1639,36 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	</list>
       </t>
       <t>
-    Draft 11 - pjh/mbj - Comments incorporating feedback from Eric Rescorla, and IANA
-    <list style="symbols">
-      <t>Clarified disambiguation regarding iss and sub</t>
-      <t>Corrected sec 2.2, changed SHOULD to MUST in regards to profiling specifications
-      defining content and format semantics in order to be consistent with Sec 3.</t>
-      <t>Sec 5.1, clarified meaning of validation in regards to signed SETs.</t>
-      <t>Sec 5.4, added quotes /token revoked SET/"token revoked" SET/ to be issued.</t>
-    </list>
+	Draft 11 - pjh/mbj - Incorporated feedback from Security Area Director Eric Rescorla and IANA Designated Expert Ned Freed.
+	<list style="symbols">
+	  <t>
+	    Clarified "iss" claim language about the SET issuer versus the security subject issuer.
+	  </t>
+	  <t>
+	    Changed a "SHOULD" to a "MUST" in the "sub" claim description to be consistent with the Requirements for SET Profiles section.
+	  </t>
+	  <t>
+	    Described the use of the "events" claim to prevent attackers from passing off other kinds of JWTs as SETs.
+	  </t>
+	  <t>
+	    Stated that SETs are to be signed by an issuer that is trusted to do so for the use case.
+	  </t>
+	  <t>
+	    Added quotes in the phrase '"token revoked" SET to be issued' in the Timing Issues section.
+	  </t>
+	  <t>
+	    Added section number references to the media type and media type suffix registrations.
+	  </t>
+	  <t>
+	    Changed the encodings of the media type and media type suffix registrations to binary (since no line breaks are allowed).
+	  </t>
+	  <t>
+	    Replaced a "TBD" in the media type registration with descriptive text.
+	  </t>
+	  <t>
+	    Acknowledged Eric Rescorla and Ned Freed.
+	  </t>
+	</list>
       </t>
     </section>
   </back>
