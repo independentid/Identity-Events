@@ -100,10 +100,10 @@ Table of Contents
      7.2.  Structured Syntax Suffix Registration . . . . . . . . . .  21
        7.2.1.  Registry Contents . . . . . . . . . . . . . . . . . .  21
      7.3.  Media Type Registration . . . . . . . . . . . . . . . . .  21
-       7.3.1.  Registry Contents . . . . . . . . . . . . . . . . . .  22
+       7.3.1.  Registry Contents . . . . . . . . . . . . . . . . . .  21
    8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  22
      8.1.  Normative References  . . . . . . . . . . . . . . . . . .  22
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .  24
+     8.2.  Informative References  . . . . . . . . . . . . . . . . .  23
    Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  25
    Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  25
 
@@ -545,15 +545,15 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
    "iss" (Issuer) Claim
       As defined by Section 4.1.1 of [RFC7519], this claim contains a
       string identifying the service provider publishing the SET (the
-      issuer).  In other uses of JWT [RFC7519], it is common for the
-      issuer of the JWT to also be the issuer of the "sub" which
-      together, uniquely identifies a subject.  However, a SET MAY be
-      about a subject whose "sub" value is unique only within the domain
-      of another issuer.  Therefore, implementers SHOULD NOT assume that
-      the issuer of the SET and the issuer of the subject are the same
-      value unless the profiling specification specifies that they are
-      the same for SETs conforming to that profile.  This claim is
-      REQUIRED.
+      issuer).  In some cases, the issuer of the SET will not be the
+      issuer associated with the security subject of the SET.
+      Therefore, implementers cannot assume that the issuers are the
+      same unless the profiling specification specifies that they are
+      for SETs conforming to that profile.  This claim is REQUIRED.
+
+   "iat" (Issued At) Claim
+
+
 
 
 
@@ -562,7 +562,6 @@ Hunt, et al.            Expires November 8, 2018               [Page 10]
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
-   "iat" (Issued At) Claim
       As defined by Section 4.1.6 of [RFC7519], this claim contains a
       value representing when the SET was issued.  This claim is
       REQUIRED.
@@ -610,6 +609,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
       (Also, see Section 4.1 for additional reasons not to use the "exp"
       claim in some SET use cases.)
 
+   The following new claims are defined by this specification:
 
 
 
@@ -617,8 +617,6 @@ Hunt, et al.            Expires November 8, 2018               [Page 11]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
-
-   The following new claims are defined by this specification:
 
    "events" (Security Events) Claim
       This claim contains a set of event statements that each provide
@@ -664,6 +662,8 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
    Per the definition of "typ" in Section 4.1.9 of [RFC7515], it is
    RECOMMENDED that the "application/" prefix be omitted.  Therefore,
    the "typ" value used SHOULD be "secevent+jwt".
+
+
 
 
 
@@ -937,15 +937,15 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
    JWT is to have the JWT validation logic reject JWTs containing an
    "events" claim unless the JWT is intended to be a SET.  This approach
    can be employed for new systems but may not be applicable to existing
-   systems.
+   systems.  Validating that the JWT has an "events" claim will be
+   effective in preventing attackers from passing other kinds of JWTs
+   off as SETs.
 
    For many use cases, the simplest way to prevent substitution is
    requiring that the SET not include claims that are required for the
    kind of JWT that might be the target of an attack.  For example, for
    [RFC8055], the "sip_callid" claim could be omitted and for [RFC8225],
    the "orig" claim could be omitted.
-
-
 
 
 
@@ -979,8 +979,9 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
    [RFC7516] or secured for confidentiality by other means.
 
    Unless integrity of the JWT is ensured by other means, it MUST be
-   signed using JWS [RFC7515] so that the SET can be authenticated and
-   validated by the SET recipient as per Section 5 of [RFC7515].
+   signed using JWS [RFC7515] by an issuer that is trusted to do so for
+   the use case so that the SET can be authenticated and validated by
+   the SET recipient.
 
 5.2.  Delivery
 
@@ -1001,7 +1002,6 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
    event order is critical -- an object cannot be modified before it is
    created.  In other SET types, such as a token revocation, the order
    of SETs for revoked tokens does not matter.  If, however, the event
-
 
 
 
@@ -1031,7 +1031,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
    is important to consider that a SET might be delivered to a SET
    recipient in advance of or behind the process that caused the event.
    For example, a user having been required to log out and then log back
-   in again, may cause a \"token revoked SET\" to be issued, typically
+   in again, may cause a "token revoked" SET to be issued, typically
    causing the receiver to reset all active sessions at the receiver
    that are related to that user.  If revocation SET arrives at the same
    time as the user agent re-logs in, timing could cause problems by
@@ -1133,9 +1133,9 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
    o  Name: JSON Web Token (JWT)
    o  +suffix: +jwt
-   o  References: [RFC7519]
-   o  Encoding considerations: 8bit; JWT values are encoded as a series
-      of base64url-encoded values (some of which may be the empty
+   o  References: Section 3 of [RFC7519]
+   o  Encoding considerations: binary; JWT values are encoded as a
+      series of base64url-encoded values (some of which may be the empty
       string) separated by period ('.') characters.
    o  Interoperability considerations: n/a
    o  Fragment identifier considerations:
@@ -1156,8 +1156,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
       For cases not defined in +jwt, then process as specified in "xxx/
       yyy+jwt".
-   o  Security considerations: See the Security Considerations section
-      of [RFC7519].
+   o  Security considerations: See Section 11 of [RFC7519].
    o  Contact:
       Michael B. Jones, mbj@microsoft.com
    o  Author/Change controller:
@@ -1166,9 +1165,10 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 7.3.  Media Type Registration
 
+7.3.1.  Registry Contents
 
-
-
+   This section registers the "application/secevent+jwt" media type
+   [RFC2046] in the "Media Types" registry [IANA.MediaTypes] in the
 
 
 
@@ -1178,10 +1178,6 @@ Hunt, et al.            Expires November 8, 2018               [Page 21]
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
-7.3.1.  Registry Contents
-
-   This section registers the "application/secevent+jwt" media type
-   [RFC2046] in the "Media Types" registry [IANA.MediaTypes] in the
    manner described in [RFC6838], which can be used to indicate that the
    content is a SET.
 
@@ -1189,14 +1185,14 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
    o  Subtype name: secevent+jwt
    o  Required parameters: n/a
    o  Optional parameters: n/a
-   o  Encoding considerations: 8bit; A SET is a JWT; JWT values are
+   o  Encoding considerations: binary; A SET is a JWT; JWT values are
       encoded as a series of base64url-encoded values (some of which may
       be the empty string) separated by period ('.') characters.
-   o  Security considerations: See the Security Considerations section
-      of [[ this specification ]]
+   o  Security considerations: See Section 5 of [[ this specification ]]
    o  Interoperability considerations: n/a
    o  Published specification: Section 2.3 of [[ this specification ]]
-   o  Applications that use this media type: TBD
+   o  Applications that use this media type: Applications that exchange
+      SETs
    o  Fragment identifier considerations: n/a
    o  Additional information:
 
@@ -1224,6 +1220,10 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
               IANA, "Media Types",
               <http://www.iana.org/assignments/media-types>.
 
+   [IANA.StructuredSuffix]
+              IANA, "Structured Syntax Suffix",
+              <https://www.iana.org/assignments/
+              media-type-structured-suffix/>.
 
 
 
@@ -1233,11 +1233,6 @@ Hunt, et al.            Expires November 8, 2018               [Page 22]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
-
-   [IANA.StructuredSuffix]
-              IANA, "Structured Syntax Suffix",
-              <https://www.iana.org/assignments/
-              media-type-structured-suffix/>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -1279,7 +1274,12 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
+8.2.  Informative References
 
+   [I-D.ietf-oauth-jwt-bcp]
+              Sheffer, Y., Hardt, D., and M. Jones, "JSON Web Token Best
+              Current Practices", draft-ietf-oauth-jwt-bcp-01 (work in
+              progress), March 2018.
 
 
 
@@ -1289,13 +1289,6 @@ Hunt, et al.            Expires November 8, 2018               [Page 23]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
-
-8.2.  Informative References
-
-   [I-D.ietf-oauth-jwt-bcp]
-              Sheffer, Y., Hardt, D., and M. Jones, "JSON Web Token Best
-              Current Practices", draft-ietf-oauth-jwt-bcp-01 (work in
-              progress), March 2018.
 
    [OpenID.BackChannel]
               Jones, M. and J. Bradley, "OpenID Connect Back-Channel
@@ -1338,6 +1331,13 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
               Management: Protocol", RFC 7644, DOI 10.17487/RFC7644,
               September 2015, <https://www.rfc-editor.org/info/rfc7644>.
 
+   [RFC8055]  Holmberg, C. and Y. Jiang, "Session Initiation Protocol
+              (SIP) Via Header Field Parameter to Indicate Received
+              Realm", RFC 8055, DOI 10.17487/RFC8055, January 2017,
+              <https://www.rfc-editor.org/info/rfc8055>.
+
+
+
 
 
 
@@ -1345,11 +1345,6 @@ Hunt, et al.            Expires November 8, 2018               [Page 24]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
-
-   [RFC8055]  Holmberg, C. and Y. Jiang, "Session Initiation Protocol
-              (SIP) Via Header Field Parameter to Indicate Received
-              Realm", RFC 8055, DOI 10.17487/RFC8055, January 2017,
-              <https://www.rfc-editor.org/info/rfc8055>.
 
    [RFC8225]  Wendt, C. and J. Peterson, "PASSporT: Personal Assertion
               Token", RFC 8225, DOI 10.17487/RFC8225, February 2018,
@@ -1368,9 +1363,9 @@ Appendix A.  Acknowledgments
    Events working group, and related working groups for their
    contributions to this specification.  The specification incorporates
    suggestions made by many people, including Annabelle Backman, John
-   Bradley, Dick Hardt, Russ Housley, Benjamin Kaduk, Mark Lizar, Andrew
-   Nash, Justin Richer, Nat Sakimura, Marius Scurtescu, and Yaron
-   Sheffer.
+   Bradley, Ned Freed, Dick Hardt, Russ Housley, Benjamin Kaduk, Mark
+   Lizar, Andrew Nash, Eric Rescorla, Justin Richer, Nat Sakimura,
+   Marius Scurtescu, and Yaron Sheffer.
 
 Appendix B.  Change Log
 
@@ -1395,17 +1390,17 @@ Appendix B.  Change Log
 
       Changed "event" term to "SET"
 
+      Corrected author organization for William Denniss to Google
+
+      Changed definition of SET to be 2 parts, an envelope and 1 or more
+      payloads.
+
 
 
 Hunt, et al.            Expires November 8, 2018               [Page 25]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
-
-      Corrected author organization for William Denniss to Google
-
-      Changed definition of SET to be 2 parts, an envelope and 1 or more
-      payloads.
 
       Clarified that the intent is to express a single event with
       optional extensions only.
@@ -1451,6 +1446,11 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
    Draft 08 - PH -
 
+   o  Added clarification to status of examples
+
+   o  Changed from primary vs. extension to state that multiple events
+      may be expressed, some of which may or may not be considered
+
 
 
 Hunt, et al.            Expires November 8, 2018               [Page 26]
@@ -1458,10 +1458,6 @@ Hunt, et al.            Expires November 8, 2018               [Page 26]
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
-   o  Added clarification to status of examples
-
-   o  Changed from primary vs. extension to state that multiple events
-      may be expressed, some of which may or may not be considered
       extensions of others (which is for the subscriber or profiling
       specifications to determine).
 
@@ -1505,7 +1501,11 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
    Draft 03 - Changes are as follows:
 
+   o  pjh - Corrected old "subscriber" to "Event Receiver".  Added
+      clarification in definition that Event Receiver is the same as JWT
+      recipient.
 
+   o  pjh - Added definition for "toe" (and IANA registration).
 
 
 
@@ -1513,12 +1513,6 @@ Hunt, et al.            Expires November 8, 2018               [Page 27]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
-
-   o  pjh - Corrected old "subscriber" to "Event Receiver".  Added
-      clarification in definition that Event Receiver is the same as JWT
-      recipient.
-
-   o  pjh - Added definition for "toe" (and IANA registration).
 
    o  pjh - Removed "nbf" claim.
 
@@ -1562,6 +1556,12 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
    Draft 05 - mbj - Changes were as follows:
 
+   o  Simplified the definitions of the "iat" and "toe" claims in ways
+      suggested by Annabelle Backman.
+
+   o  Added privacy considerations text suggested by Annabelle Backman.
+
+   o  Updated the RISC event example, courtesy of Marius Scurtescu.
 
 
 
@@ -1569,13 +1569,6 @@ Hunt, et al.            Expires November 8, 2018               [Page 28]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
-
-   o  Simplified the definitions of the "iat" and "toe" claims in ways
-      suggested by Annabelle Backman.
-
-   o  Added privacy considerations text suggested by Annabelle Backman.
-
-   o  Updated the RISC event example, courtesy of Marius Scurtescu.
 
    o  Reordered the claim definitions to place the required claims
       first.
@@ -1612,10 +1605,17 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
    o  Registered +jwt structured syntax suffix.
 
-   Draft 11 - pjh/mbj - Comments incorporating feedback from Eric
-   Rescorla, and IANA
+   Draft 11 - pjh/mbj - Incorporated feedback from Security Area
+   Director Eric Rescorla and IANA Designated Expert Ned Freed.
 
-   o  Clarified disambiguation regarding iss and sub
+   o  Clarified "iss" claim language about the SET issuer versus the
+      security subject issuer.
+
+   o  Changed a "SHOULD" to a "MUST" in the "sub" claim description to
+      be consistent with the Requirements for SET Profiles section.
+
+   o  Described the use of the "events" claim to prevent attackers from
+      passing off other kinds of JWTs as SETs.
 
 
 
@@ -1626,15 +1626,22 @@ Hunt, et al.            Expires November 8, 2018               [Page 29]
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
-   o  Corrected sec 2.2, changed SHOULD to MUST in regards to profiling
-      specifications defining content and format semantics in order to
-      be consistent with Sec 3.
+   o  Stated that SETs are to be signed by an issuer that is trusted to
+      do so for the use case.
 
-   o  Sec 5.1, clarified meaning of validation in regards to signed
-      SETs.
+   o  Added quotes in the phrase '"token revoked" SET to be issued' in
+      the Timing Issues section.
 
-   o  Sec 5.4, added quotes /token revoked SET/"token revoked" SET/ to
-      be issued.
+   o  Added section number references to the media type and media type
+      suffix registrations.
+
+   o  Changed the encodings of the media type and media type suffix
+      registrations to binary (since no line breaks are allowed).
+
+   o  Replaced a "TBD" in the media type registration with descriptive
+      text.
+
+   o  Acknowledged Eric Rescorla and Ned Freed.
 
 Authors' Addresses
 
@@ -1661,13 +1668,6 @@ Authors' Addresses
    Cisco
 
    Email: morteza.ansari@cisco.com
-
-
-
-
-
-
-
 
 
 
