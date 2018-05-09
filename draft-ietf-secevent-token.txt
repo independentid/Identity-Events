@@ -5,16 +5,16 @@
 Security Events Working Group                               P. Hunt, Ed.
 Internet-Draft                                                    Oracle
 Intended status: Standards Track                                M. Jones
-Expires: November 8, 2018                                      Microsoft
+Expires: November 10, 2018                                     Microsoft
                                                               W. Denniss
                                                                   Google
                                                                M. Ansari
                                                                    Cisco
-                                                             May 7, 2018
+                                                             May 9, 2018
 
 
                        Security Event Token (SET)
-                      draft-ietf-secevent-token-11
+                      draft-ietf-secevent-token-12
 
 Abstract
 
@@ -43,7 +43,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on November 8, 2018.
+   This Internet-Draft will expire on November 10, 2018.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Hunt, et al.            Expires November 8, 2018                [Page 1]
+Hunt, et al.            Expires November 10, 2018               [Page 1]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -103,13 +103,13 @@ Table of Contents
        7.3.1.  Registry Contents . . . . . . . . . . . . . . . . . .  21
    8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  22
      8.1.  Normative References  . . . . . . . . . . . . . . . . . .  22
-     8.2.  Informative References  . . . . . . . . . . . . . . . . .  23
+     8.2.  Informative References  . . . . . . . . . . . . . . . . .  24
    Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  25
    Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  25
 
 
 
-Hunt, et al.            Expires November 8, 2018                [Page 2]
+Hunt, et al.            Expires November 10, 2018               [Page 2]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -165,7 +165,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018                [Page 3]
+Hunt, et al.            Expires November 10, 2018               [Page 3]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -221,7 +221,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018                [Page 4]
+Hunt, et al.            Expires November 10, 2018               [Page 4]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -277,7 +277,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018                [Page 5]
+Hunt, et al.            Expires November 10, 2018               [Page 5]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -333,7 +333,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018                [Page 6]
+Hunt, et al.            Expires November 10, 2018               [Page 6]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -389,7 +389,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018                [Page 7]
+Hunt, et al.            Expires November 10, 2018               [Page 7]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -445,7 +445,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018                [Page 8]
+Hunt, et al.            Expires November 10, 2018               [Page 8]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -501,7 +501,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018                [Page 9]
+Hunt, et al.            Expires November 10, 2018               [Page 9]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -557,7 +557,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 10]
+Hunt, et al.            Expires November 10, 2018              [Page 10]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -613,7 +613,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 11]
+Hunt, et al.            Expires November 10, 2018              [Page 11]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -669,7 +669,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 12]
+Hunt, et al.            Expires November 10, 2018              [Page 12]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -708,8 +708,8 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
    {"typ":"secevent+jwt","alg":"none"}
 
-   Base64url encoding of the octets of the UTF-8 representation of the
-   JOSE Header yields:
+   Base64url (see Section 2 [RFC7515]) encoding of the octets of the
+   UTF-8 [RFC3629] representation of the JOSE Header yields:
 
    eyJ0eXAiOiJzZWNldmVudCtqd3QiLCJhbGciOiJub25lIn0
 
@@ -725,7 +725,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 13]
+Hunt, et al.            Expires November 10, 2018              [Page 13]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -781,7 +781,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 14]
+Hunt, et al.            Expires November 10, 2018              [Page 14]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -837,7 +837,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 15]
+Hunt, et al.            Expires November 10, 2018              [Page 15]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -893,7 +893,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 16]
+Hunt, et al.            Expires November 10, 2018              [Page 16]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -918,14 +918,14 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
    JWTs are now being used in application areas beyond the identity
    applications in which they first appeared.  For instance, the Session
-   Initiation Protocol (SIP) Via Header Field [RFC8055] and Personal
-   Assertion Token (PASSporT) [RFC8225] specifications both define JWT
-   profiles that use mostly or completely different sets of claims than
-   are used by ID Tokens.  If it would otherwise be possible for an
-   attacker to substitute a SET for one of these (or other) kinds of
-   JWTs, then the SET profile must be defined in such a way that any
-   substituted SET will result in its rejection when validated as the
-   intended kind of JWT.
+   Initiation Protocol (SIP) Via Header Field Received Realm parameter
+   [RFC8055] and Personal Assertion Token (PASSporT) [RFC8225]
+   specifications both define JWT profiles that use mostly or completely
+   different sets of claims than are used by ID Tokens.  If it would
+   otherwise be possible for an attacker to substitute a SET for one of
+   these (or other) kinds of JWTs, then the SET profile must be defined
+   in such a way that any substituted SET will result in its rejection
+   when validated as the intended kind of JWT.
 
    The most direct way to prevent confusion is to employ explicit
    typing, as described in Section 2.3, and modify applicable token
@@ -949,7 +949,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 17]
+Hunt, et al.            Expires November 10, 2018              [Page 17]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -975,7 +975,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
    found in "Recommendations for Secure Use of TLS and DTLS" [RFC7525].
 
    Security events distributed through third parties or that carry
-   personally identifiable information SHOULD be encrypted using JWE
+   personally identifiable information MUST be encrypted using JWE
    [RFC7516] or secured for confidentiality by other means.
 
    Unless integrity of the JWT is ensured by other means, it MUST be
@@ -987,7 +987,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
    This specification does not define a delivery mechanism for SETs.  In
    addition to confidentiality and integrity (discussed above),
-   implementers and profiling specifications MUST consider the
+   implementers and profiling specifications must consider the
    consequences of delivery mechanisms that are not secure and/or not
    assured.  For example, while a SET may be end-to-end secured using
    JWE encrypted SETs, without (mutual) TLS, there is no assurance that
@@ -1005,7 +1005,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 18]
+Hunt, et al.            Expires November 10, 2018              [Page 18]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -1061,7 +1061,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 19]
+Hunt, et al.            Expires November 10, 2018              [Page 19]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -1117,7 +1117,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 20]
+Hunt, et al.            Expires November 10, 2018              [Page 20]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -1173,7 +1173,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 21]
+Hunt, et al.            Expires November 10, 2018              [Page 21]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -1229,7 +1229,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 22]
+Hunt, et al.            Expires November 10, 2018              [Page 22]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -1238,6 +1238,10 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
               Requirement Levels", BCP 14, RFC 2119,
               DOI 10.17487/RFC2119, March 1997,
               <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC3629]  Yergeau, F., "UTF-8, a transformation format of ISO
+              10646", STD 63, RFC 3629, DOI 10.17487/RFC3629, November
+              2003, <https://www.rfc-editor.org/info/rfc3629>.
 
    [RFC3986]  Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
               Resource Identifier (URI): Generic Syntax", STD 66,
@@ -1260,6 +1264,10 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
               RFC 6749, DOI 10.17487/RFC6749, October 2012,
               <https://www.rfc-editor.org/info/rfc6749>.
 
+   [RFC7515]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
+              Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May
+              2015, <https://www.rfc-editor.org/info/rfc7515>.
+
    [RFC7519]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
               <https://www.rfc-editor.org/info/rfc7519>.
@@ -1274,21 +1282,20 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
+
+
+
+Hunt, et al.            Expires November 10, 2018              [Page 23]
+
+Internet-Draft          draft-ietf-secevent-token               May 2018
+
+
 8.2.  Informative References
 
    [I-D.ietf-oauth-jwt-bcp]
               Sheffer, Y., Hardt, D., and M. Jones, "JSON Web Token Best
               Current Practices", draft-ietf-oauth-jwt-bcp-01 (work in
               progress), March 2018.
-
-
-
-
-
-Hunt, et al.            Expires November 8, 2018               [Page 23]
-
-Internet-Draft          draft-ietf-secevent-token               May 2018
-
 
    [OpenID.BackChannel]
               Jones, M. and J. Bradley, "OpenID Connect Back-Channel
@@ -1314,10 +1321,6 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
               2.0 Token Revocation", RFC 7009, DOI 10.17487/RFC7009,
               August 2013, <https://www.rfc-editor.org/info/rfc7009>.
 
-   [RFC7515]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
-              Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May
-              2015, <https://www.rfc-editor.org/info/rfc7515>.
-
    [RFC7516]  Jones, M. and J. Hildebrand, "JSON Web Encryption (JWE)",
               RFC 7516, DOI 10.17487/RFC7516, May 2015,
               <https://www.rfc-editor.org/info/rfc7516>.
@@ -1338,10 +1341,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-
-
-
-Hunt, et al.            Expires November 8, 2018               [Page 24]
+Hunt, et al.            Expires November 10, 2018              [Page 24]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -1363,9 +1363,10 @@ Appendix A.  Acknowledgments
    Events working group, and related working groups for their
    contributions to this specification.  The specification incorporates
    suggestions made by many people, including Annabelle Backman, John
-   Bradley, Ned Freed, Dick Hardt, Russ Housley, Benjamin Kaduk, Mark
-   Lizar, Andrew Nash, Eric Rescorla, Justin Richer, Nat Sakimura,
-   Marius Scurtescu, and Yaron Sheffer.
+   Bradley, Alissa Cooper, Ned Freed, Dick Hardt, Russ Housley, Benjamin
+   Kaduk, Mark Lizar, Alexey Melnikov, Andrew Nash, Eric Rescorla, Adam
+   Roach, Justin Richer, Nat Sakimura, Marius Scurtescu, and Yaron
+   Sheffer.
 
 Appendix B.  Change Log
 
@@ -1392,15 +1393,17 @@ Appendix B.  Change Log
 
       Corrected author organization for William Denniss to Google
 
-      Changed definition of SET to be 2 parts, an envelope and 1 or more
-      payloads.
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 25]
+
+Hunt, et al.            Expires November 10, 2018              [Page 25]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
+
+      Changed definition of SET to be 2 parts, an envelope and 1 or more
+      payloads.
 
       Clarified that the intent is to express a single event with
       optional extensions only.
@@ -1448,16 +1451,15 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
    o  Added clarification to status of examples
 
-   o  Changed from primary vs. extension to state that multiple events
-      may be expressed, some of which may or may not be considered
 
 
-
-Hunt, et al.            Expires November 8, 2018               [Page 26]
+Hunt, et al.            Expires November 10, 2018              [Page 26]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
+   o  Changed from primary vs. extension to state that multiple events
+      may be expressed, some of which may or may not be considered
       extensions of others (which is for the subscriber or profiling
       specifications to determine).
 
@@ -1505,14 +1507,14 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
       clarification in definition that Event Receiver is the same as JWT
       recipient.
 
-   o  pjh - Added definition for "toe" (and IANA registration).
 
 
-
-Hunt, et al.            Expires November 8, 2018               [Page 27]
+Hunt, et al.            Expires November 10, 2018              [Page 27]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
+
+   o  pjh - Added definition for "toe" (and IANA registration).
 
    o  pjh - Removed "nbf" claim.
 
@@ -1561,14 +1563,14 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
    o  Added privacy considerations text suggested by Annabelle Backman.
 
-   o  Updated the RISC event example, courtesy of Marius Scurtescu.
 
 
-
-Hunt, et al.            Expires November 8, 2018               [Page 28]
+Hunt, et al.            Expires November 10, 2018              [Page 28]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
+
+   o  Updated the RISC event example, courtesy of Marius Scurtescu.
 
    o  Reordered the claim definitions to place the required claims
       first.
@@ -1619,9 +1621,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
 
-
-
-Hunt, et al.            Expires November 8, 2018               [Page 29]
+Hunt, et al.            Expires November 10, 2018              [Page 29]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
@@ -1643,6 +1643,21 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
    o  Acknowledged Eric Rescorla and Ned Freed.
 
+   Draft 12 - ph - Incorporated feedback from Adam Roach, Alexey
+   Melnikov, and Alissa Cooper
+
+   o  Removed unused references to RFC7009 and RFC7517
+
+   o  Corrected sec 4.3 to "...the Session Initiated Protocol (SIP) Via
+      Header Field Received Realm parameter[RFC8055]...
+
+   o  Added normative reference for base64url and UTF-8
+
+   o  Sec 5.1 - Changed SHOULD to MUST - "personally identifiable
+      information MUST be encrypted using JWT [RFC7516] or...
+
+   o  Sec 5.2 - changed /MUST consider/must consider/
+
 Authors' Addresses
 
    Phil Hunt (editor)
@@ -1656,6 +1671,15 @@ Authors' Addresses
 
    Email: mbj@microsoft.com
    URI:   http://self-issued.info/
+
+
+
+
+
+
+Hunt, et al.            Expires November 10, 2018              [Page 30]
+
+Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
    William Denniss
@@ -1677,4 +1701,36 @@ Authors' Addresses
 
 
 
-Hunt, et al.            Expires November 8, 2018               [Page 30]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Hunt, et al.            Expires November 10, 2018              [Page 31]

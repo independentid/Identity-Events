@@ -13,7 +13,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="std" docName="draft-ietf-secevent-token-11" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-token-12" ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-token">Security Event Token (SET)</title>
 
@@ -693,8 +693,8 @@
 	</t>
 	<t>
 	  <figure>
-            <preamble>Base64url encoding of the octets of the UTF-8
-            representation of the JOSE Header yields:</preamble>
+            <preamble>Base64url (see <xref target="RFC7515">Section 2</xref>) encoding of the octets of the UTF-8
+            <xref target="RFC3629"/> representation of the JOSE Header yields:</preamble>
 
             <artwork>eyJ0eXAiOiJzZWNldmVudCtqd3QiLCJhbGciOiJub25lIn0</artwork>
           </figure>
@@ -888,9 +888,8 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       <section anchor="SETsAndOtherJWTs" title="Distinguishing SETs from other kinds of JWTs">
 	<t>
 	  JWTs are now being used in application areas beyond the identity applications
-	  in which they first appeared.
-	  For instance, the
-	  Session Initiation Protocol (SIP) Via Header Field <xref target="RFC8055"/>
+	  in which they first appeared. For instance, the Session 
+    Initiation Protocol (SIP) Via Header Field Received Realm parameter <xref target="RFC8055"/>
 	  and
 	  Personal Assertion Token (PASSporT) <xref target="RFC8225"/>
 	  specifications both define JWT profiles that use mostly or completely different sets of claims
@@ -948,7 +947,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       Secure Use of TLS and DTLS" <xref target="RFC7525"/>.</t>
       
       <t>Security events distributed through third parties or that carry personally
-      identifiable information SHOULD be encrypted using JWE <xref target="RFC7516"/>
+      identifiable information MUST be encrypted using JWE <xref target="RFC7516"/>
       or secured for confidentiality by other means.
       </t>
 
@@ -964,7 +963,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 
       <t>This specification does not define a delivery mechanism for SETs.
       In addition to confidentiality and integrity (discussed above), implementers
-      and profiling specifications MUST consider the consequences of delivery 
+      and profiling specifications must consider the consequences of delivery 
       mechanisms that are not secure and/or not assured. For example, while
       a SET may be end-to-end secured using JWE encrypted SETs, without (mutual) TLS,
       there is no assurance that the correct endpoint received the SET and 
@@ -1292,10 +1291,12 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
        -->
        
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml' ?><!-- Keywords -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3629.xml'?><!-- UTF-8 -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3986.xml'?><!-- URIs -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml'?><!-- TLS 1.2 -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6125.xml'?><!-- TLS Cert-->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6749.xml'?><!-- OAuth 2.0 -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7515.xml'?><!-- JWS -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml'?><!-- JWT -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7525.xml'?><!-- TLS BCP -->
       <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml"?> <!--RFC 2119 bis-->
@@ -1336,7 +1337,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2046.xml' ?><!-- MIME -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6838.xml' ?><!-- MIME Registration -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7009.xml'?><!-- OAuth Revocation -->
-      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7515.xml'?><!-- JWS -->
+      
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7516.xml'?><!-- JWE -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7517.xml'?><!-- JWK -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7644.xml'?><!-- SCIM Protocol -->
@@ -1423,13 +1424,16 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       The specification incorporates suggestions made by many people, including
       Annabelle Backman,
       John Bradley,
+      Alissa Cooper,
       Ned Freed,
       Dick Hardt,
       Russ Housley,
       Benjamin Kaduk,
       Mark Lizar,
+      Alexey Melnikov,
       Andrew Nash,
       Eric Rescorla,
+      Adam Roach,
       Justin Richer,
       Nat Sakimura,
       Marius Scurtescu,
@@ -1670,6 +1674,13 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
 	  </t>
 	</list>
       </t>
+      <t>Draft 12 - ph - Incorporated feedback from Adam Roach, Alexey Melnikov, and Alissa Cooper<list style="symbols">
+        <t>Removed unused references to RFC7009 and RFC7517</t>
+        <t>Corrected sec 4.3 to "...the Session Initiated Protocol (SIP) Via Header Field Received Realm parameter[RFC8055]...</t>
+        <t>Added normative reference for base64url and UTF-8</t>
+        <t>Sec 5.1 - Changed SHOULD to MUST - "personally identifiable information MUST be encrypted using JWT [RFC7516] or...</t>
+        <t>Sec 5.2 - changed /MUST consider/must consider/</t>
+      </list></t>
     </section>
   </back>
 </rfc>
