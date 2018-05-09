@@ -99,8 +99,8 @@ Table of Contents
        7.1.1.  Registry Contents . . . . . . . . . . . . . . . . . .  20
      7.2.  Structured Syntax Suffix Registration . . . . . . . . . .  21
        7.2.1.  Registry Contents . . . . . . . . . . . . . . . . . .  21
-     7.3.  Media Type Registration . . . . . . . . . . . . . . . . .  21
-       7.3.1.  Registry Contents . . . . . . . . . . . . . . . . . .  21
+     7.3.  Media Type Registration . . . . . . . . . . . . . . . . .  22
+       7.3.1.  Registry Contents . . . . . . . . . . . . . . . . . .  22
    8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  22
      8.1.  Normative References  . . . . . . . . . . . . . . . . . .  22
      8.2.  Informative References  . . . . . . . . . . . . . . . . .  24
@@ -708,7 +708,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
    {"typ":"secevent+jwt","alg":"none"}
 
-   Base64url (see Section 2 [RFC7515]) encoding of the octets of the
+   Base64url encoding (see Section 2 of [RFC7515]) of the octets of the
    UTF-8 [RFC3629] representation of the JOSE Header yields:
 
    eyJ0eXAiOiJzZWNldmVudCtqd3QiLCJhbGciOiJub25lIn0
@@ -917,15 +917,16 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 4.3.  Distinguishing SETs from other kinds of JWTs
 
    JWTs are now being used in application areas beyond the identity
-   applications in which they first appeared.  For instance, the Session
-   Initiation Protocol (SIP) Via Header Field Received Realm parameter
-   [RFC8055] and Personal Assertion Token (PASSporT) [RFC8225]
-   specifications both define JWT profiles that use mostly or completely
-   different sets of claims than are used by ID Tokens.  If it would
-   otherwise be possible for an attacker to substitute a SET for one of
-   these (or other) kinds of JWTs, then the SET profile must be defined
-   in such a way that any substituted SET will result in its rejection
-   when validated as the intended kind of JWT.
+   applications in which they first appeared.  For instance, the
+   "Session Initiation Protocol (SIP) Via Header Field Parameter to
+   Indicate Received Realm" [RFC8055] and "Personal Assertion Token
+   (PASSporT)" [RFC8225] specifications both define JWT profiles that
+   use mostly or completely different sets of claims than are used by ID
+   Tokens.  If it would otherwise be possible for an attacker to
+   substitute a SET for one of these (or other) kinds of JWTs, then the
+   SET profile must be defined in such a way that any substituted SET
+   will result in its rejection when validated as the intended kind of
+   JWT.
 
    The most direct way to prevent confusion is to employ explicit
    typing, as described in Section 2.3, and modify applicable token
@@ -944,8 +945,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
    For many use cases, the simplest way to prevent substitution is
    requiring that the SET not include claims that are required for the
    kind of JWT that might be the target of an attack.  For example, for
-   [RFC8055], the "sip_callid" claim could be omitted and for [RFC8225],
-   the "orig" claim could be omitted.
+
 
 
 
@@ -953,6 +953,9 @@ Hunt, et al.            Expires November 10, 2018              [Page 17]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
+
+   [RFC8055], the "sip_callid" claim could be omitted and for [RFC8225],
+   the "orig" claim could be omitted.
 
    In many contexts, simple measures such as these will accomplish the
    task, should confusion otherwise even be possible.  Note that this
@@ -999,9 +1002,6 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
    This specification defines no means of ordering multiple SETs in a
    sequence.  Depending on the type and nature of the events represented
    by SETs, order may or may not matter.  For example, in provisioning,
-   event order is critical -- an object cannot be modified before it is
-   created.  In other SET types, such as a token revocation, the order
-   of SETs for revoked tokens does not matter.  If, however, the event
 
 
 
@@ -1010,6 +1010,9 @@ Hunt, et al.            Expires November 10, 2018              [Page 18]
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
+   event order is critical -- an object cannot be modified before it is
+   created.  In other SET types, such as a token revocation, the order
+   of SETs for revoked tokens does not matter.  If, however, the event
    conveys a logged in or logged out status for a user subject, then
    order becomes important.
 
@@ -1054,9 +1057,6 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
    If a SET needs to be retained for audit purposes, the signature can
    be used to provide verification of its authenticity.
 
-   SET issuers SHOULD attempt to specialize SETs so that their content
-   is targeted to the specific business and protocol needs of the
-   intended SET recipients.
 
 
 
@@ -1065,6 +1065,10 @@ Hunt, et al.            Expires November 10, 2018              [Page 19]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
+
+   SET issuers SHOULD attempt to specialize SETs so that their content
+   is targeted to the specific business and protocol needs of the
+   intended SET recipients.
 
    When sharing personally identifiable information or information that
    is otherwise considered confidential to affected users, SET issuers
@@ -1110,10 +1114,6 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
    o  Change Controller: IESG
    o  Specification Document(s): Section 2.2 of [[ this specification ]]
 
-   o  Claim Name: "txn"
-   o  Claim Description: Transaction Identifier
-   o  Change Controller: IESG
-   o  Specification Document(s): Section 2.2 of [[ this specification ]]
 
 
 
@@ -1121,6 +1121,11 @@ Hunt, et al.            Expires November 10, 2018              [Page 20]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
+
+   o  Claim Name: "txn"
+   o  Claim Description: Transaction Identifier
+   o  Change Controller: IESG
+   o  Specification Document(s): Section 2.2 of [[ this specification ]]
 
 7.2.  Structured Syntax Suffix Registration
 
@@ -1163,12 +1168,7 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
       Security Events Working Group.
       The IESG has change control over this registration.
 
-7.3.  Media Type Registration
 
-7.3.1.  Registry Contents
-
-   This section registers the "application/secevent+jwt" media type
-   [RFC2046] in the "Media Types" registry [IANA.MediaTypes] in the
 
 
 
@@ -1178,6 +1178,12 @@ Hunt, et al.            Expires November 10, 2018              [Page 21]
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
 
+7.3.  Media Type Registration
+
+7.3.1.  Registry Contents
+
+   This section registers the "application/secevent+jwt" media type
+   [RFC2046] in the "Media Types" registry [IANA.MediaTypes] in the
    manner described in [RFC6838], which can be used to indicate that the
    content is a SET.
 
@@ -1220,12 +1226,6 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
               IANA, "Media Types",
               <http://www.iana.org/assignments/media-types>.
 
-   [IANA.StructuredSuffix]
-              IANA, "Structured Syntax Suffix",
-              <https://www.iana.org/assignments/
-              media-type-structured-suffix/>.
-
-
 
 
 
@@ -1233,6 +1233,11 @@ Hunt, et al.            Expires November 10, 2018              [Page 22]
 
 Internet-Draft          draft-ietf-secevent-token               May 2018
 
+
+   [IANA.StructuredSuffix]
+              IANA, "Structured Syntax Suffix",
+              <https://www.iana.org/assignments/
+              media-type-structured-suffix/>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -1268,9 +1273,22 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
               Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May
               2015, <https://www.rfc-editor.org/info/rfc7515>.
 
+   [RFC7516]  Jones, M. and J. Hildebrand, "JSON Web Encryption (JWE)",
+              RFC 7516, DOI 10.17487/RFC7516, May 2015,
+              <https://www.rfc-editor.org/info/rfc7516>.
+
    [RFC7519]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web Token
               (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015,
               <https://www.rfc-editor.org/info/rfc7519>.
+
+
+
+
+
+Hunt, et al.            Expires November 10, 2018              [Page 23]
+
+Internet-Draft          draft-ietf-secevent-token               May 2018
+
 
    [RFC7525]  Sheffer, Y., Holz, R., and P. Saint-Andre,
               "Recommendations for Secure Use of Transport Layer
@@ -1282,20 +1300,12 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/info/rfc8174>.
 
-
-
-
-Hunt, et al.            Expires November 10, 2018              [Page 23]
-
-Internet-Draft          draft-ietf-secevent-token               May 2018
-
-
 8.2.  Informative References
 
    [I-D.ietf-oauth-jwt-bcp]
               Sheffer, Y., Hardt, D., and M. Jones, "JSON Web Token Best
-              Current Practices", draft-ietf-oauth-jwt-bcp-01 (work in
-              progress), March 2018.
+              Current Practices", draft-ietf-oauth-jwt-bcp-03 (work in
+              progress), May 2018.
 
    [OpenID.BackChannel]
               Jones, M. and J. Bradley, "OpenID Connect Back-Channel
@@ -1317,18 +1327,6 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
               RFC 6838, DOI 10.17487/RFC6838, January 2013,
               <https://www.rfc-editor.org/info/rfc6838>.
 
-   [RFC7009]  Lodderstedt, T., Ed., Dronia, S., and M. Scurtescu, "OAuth
-              2.0 Token Revocation", RFC 7009, DOI 10.17487/RFC7009,
-              August 2013, <https://www.rfc-editor.org/info/rfc7009>.
-
-   [RFC7516]  Jones, M. and J. Hildebrand, "JSON Web Encryption (JWE)",
-              RFC 7516, DOI 10.17487/RFC7516, May 2015,
-              <https://www.rfc-editor.org/info/rfc7516>.
-
-   [RFC7517]  Jones, M., "JSON Web Key (JWK)", RFC 7517,
-              DOI 10.17487/RFC7517, May 2015,
-              <https://www.rfc-editor.org/info/rfc7517>.
-
    [RFC7644]  Hunt, P., Ed., Grizzle, K., Ansari, M., Wahlstroem, E.,
               and C. Mortimore, "System for Cross-domain Identity
               Management: Protocol", RFC 7644, DOI 10.17487/RFC7644,
@@ -1338,6 +1336,8 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
               (SIP) Via Header Field Parameter to Indicate Received
               Realm", RFC 8055, DOI 10.17487/RFC8055, January 2017,
               <https://www.rfc-editor.org/info/rfc8055>.
+
+
 
 
 
@@ -1643,20 +1643,21 @@ Internet-Draft          draft-ietf-secevent-token               May 2018
 
    o  Acknowledged Eric Rescorla and Ned Freed.
 
-   Draft 12 - ph - Incorporated feedback from Adam Roach, Alexey
-   Melnikov, and Alissa Cooper
+   Draft 12 - pjh/mbj - Incorporated feedback from Adam Roach, Alexey
+   Melnikov, and Alissa Cooper.
 
-   o  Removed unused references to RFC7009 and RFC7517
+   o  Removed unused references to RFC 7009 and RFC 7517.
 
-   o  Corrected sec 4.3 to "...the Session Initiated Protocol (SIP) Via
-      Header Field Received Realm parameter[RFC8055]...
+   o  Corrected name of RFC 8055 in Section 4.3 to "Session Initiation
+      Protocol (SIP) Via Header Field Parameter to Indicate Received
+      Realm".
 
-   o  Added normative reference for base64url and UTF-8
+   o  Added normative references for base64url and UTF-8.
 
-   o  Sec 5.1 - Changed SHOULD to MUST - "personally identifiable
-      information MUST be encrypted using JWT [RFC7516] or...
+   o  Section 5.1 - Changed SHOULD to MUST in "personally identifiable
+      information MUST be encrypted using JWE [RFC7516] or ...".
 
-   o  Sec 5.2 - changed /MUST consider/must consider/
+   o  Section 5.2 - Changed "MUST consider" to "must consider".
 
 Authors' Addresses
 
@@ -1671,7 +1672,6 @@ Authors' Addresses
 
    Email: mbj@microsoft.com
    URI:   http://self-issued.info/
-
 
 
 
