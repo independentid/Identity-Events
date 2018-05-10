@@ -13,7 +13,7 @@
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
 
-<rfc category="std" docName="draft-ietf-secevent-token-12" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-token-13" ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-token">Security Event Token (SET)</title>
 
@@ -152,7 +152,7 @@
         Implementers MUST percent encode URLs as described in
 	Section 2.1 of <xref target="RFC3986"/>.</t>
 
-        <t>Throughout this document, all figures MAY contain spaces and extra
+        <t>Throughout this document, all figures may contain spaces and extra
         line-wrapping for readability and space limitations. Similarly, some
         URIs contained within examples have been shortened for space and
         readability reasons.</t>
@@ -1427,6 +1427,7 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       Dick Hardt,
       Russ Housley,
       Benjamin Kaduk,
+      Mirja Kuehlewind,
       Mark Lizar,
       Alexey Melnikov,
       Andrew Nash,
@@ -1435,8 +1436,8 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
       Justin Richer,
       Nat Sakimura,
       Marius Scurtescu,
-      and
-      Yaron Sheffer.
+      Yaron Sheffer,
+      and Martin Vigoureux.
       </t>
     </section>
 
@@ -1680,6 +1681,8 @@ dXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.
         <t>Section 5.1 - Changed SHOULD to MUST in "personally identifiable information MUST be encrypted using JWE [RFC7516] or ...".</t>
         <t>Section 5.2 - Changed "MUST consider" to "must consider".</t>
       </list></t>
+      
+      <t>Draft 13 - ph - Added edit from Martin Vigoureaux regarding a non-normative "MAY" in Section 1.1. Updated acknowledgements.</t>
     </section>
   </back>
 </rfc>
