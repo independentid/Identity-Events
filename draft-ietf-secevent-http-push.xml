@@ -342,33 +342,8 @@ Content-Type: application/json
       <t>The SET delivery method described in this specification is
       based upon HTTP and depends on the use of TLS and/or standard 
       HTTP authentication and authorization schemes as per 
-      <xref target="RFC7235" />. For example, the following
-      methodologies could be used among others: <list style="hanging">
-          <t hangText="TLS Client Authentication"><vspace />Event delivery
-          endpoints MAY request TLS mutual client authentication. 
-          See <xref target="RFC5246">Section 7.3</xref>. </t>
-
-          <t hangText="Bearer Tokens"><vspace />Bearer tokens 
-          <xref target="RFC6750" /> MAY be used when combined with TLS and a token
-          framework such as OAuth 2.0 <xref target="RFC6749" />. 
-          For security considerations regarding the use of bearer tokens in
-          SET delivery see <xref target="bearerConsiderations" />.</t>
-
-          <t hangText="Basic Authentication"><vspace />Usage of basic
-          authentication should be avoided due to its use of a single factor
-          that is based upon a relatively static, symmetric secret.
-          Implementers SHOULD combine the use of basic authentication with
-          other factors. The security considerations of HTTP BASIC, are well
-          documented in <xref target="RFC7617" /> and SHOULD be considered
-          along with using signed SETs (see SET Payload Authentication below).</t>
-          
-          <t hangText="SET Payload Authentication"><vspace/>In scenarios 
-          where SETs are signed and
-          the delivery method is HTTP POST (see <xref target="httpPost" />),
-          SET Receivers MAY elect to use Basic Authentication or not 
-          to use HTTP or TLS based authentication at all. See 
-          <xref target="payloadAuthentication" /> for considerations.</t>
-        </list></t>
+      <xref target="RFC7235" />.
+      </t>
 
       <t>As per <xref target="RFC7235">Section 4.1 of</xref>, a SET
       delivery endpoint SHALL indicate supported HTTP authentication 
@@ -376,8 +351,8 @@ Content-Type: application/json
 
       <t>Because SET Delivery describes a simple function, authorization
       for the ability to pick-up or deliver SETs can be derived by
-      considering the identity of the SET issuer, or via an authentication
-      method above. This specification considers authentication as a
+      considering the identity of the SET issuer, or via other employed
+      authentication methods. This specification considers authentication as a
       feature to prevent denial-of-service attacks. Because SETs are
       not commands (see ), SET Receivers are free to ignore SETs that 
       are not of interest.</t>
@@ -422,17 +397,6 @@ Content-Type: application/json
       to validate that the SET issuer is authorized to deliver SETs.
       </t>
       </section>
-      <section title="HTTP Considerations">
-        <t>SET delivery depends on the use of Hypertext Transfer Protocol and thus
-        subject to the security considerations of HTTP <xref
-        target="RFC7230">Section 9</xref> and its related specifications.</t>
-
-        <t>As stated in <xref target="RFC7230">Section 2.7.1</xref>, an 
-        HTTP requestor MUST NOT generate the <spanx style="verb">userinfo</spanx>
-        (i.e., username and password) component (and its "@" delimiter) when
-        an "http" URI reference is generated with a message as they are now
-        disallowed in HTTP.</t>
-      </section>
 
       <section title="TLS Support Considerations">
         <t>SETs contain sensitive information that is considered PII
@@ -446,43 +410,6 @@ Content-Type: application/json
         security considerations for TLS can be found in "Recommendations for
         Secure Use of TLS and DTLS" <xref target="RFC7525"/>.</t>
       </section>
-
-      <section title="Authorization Token Considerations">
-        <t>When using authorization tokens such as those issued by OAuth 2.0
-        <xref target="RFC6749"/>, implementers MUST take into account threats
-        and countermeasures documented in Section 8 of <xref
-        target="RFC7521"/>.</t>
-        
-        <section anchor="bearerConsiderations"
-               title="Bearer Token Considerations">
-        <t>Due to the possibility of interception, Bearer tokens MUST be 
-        exchanged using TLS.</t>
-
-        <t>Bearer tokens MUST have a limited lifetime that can be determined
-        directly or indirectly (e.g., by checking with a validation service)
-        by the service provider. By expiring tokens, clients are forced to
-        obtain a new token (which usually involves re-authentication) for
-        continued authorized access. For example, in OAuth2, a client MAY use
-        OAuth token refresh to obtain a new bearer token after authenticating
-        to an authorization server. See Section 6 of <xref
-        target="RFC6749"/>.</t>
-
-        <t>Implementations supporting OAuth bearer tokens need to factor in
-        security considerations of this authorization method <xref
-        target="RFC7521"/>. Since security is only as good
-        as the weakest link, implementers also need to consider authentication
-        choices coupled with OAuth bearer tokens. The security considerations
-        of the default authentication method for OAuth bearer tokens, HTTP
-        BASIC, are well documented in <xref
-        target="RFC7617"/>, therefore implementers
-        are encouraged to prefer stronger authentication methods. Designating
-        the specific methods of authentication and authorization are
-        out-of-scope for the delivery of SET tokens, however this 
-        information is provided as a resource to implementers.</t>
-      </section>
-      </section>
-
-      
    </section>
    
    <section title="Privacy Considerations">
@@ -829,6 +756,17 @@ Content-Type: application/json
         <t>Removed references to the HTTP Polling delivery method.</t>
         <t>Removed informative reference to RFC6202.</t>
       </list></t>
+      <t>
+          Draft 01 - AB:
+          <list style="symbols">
+              <t>Fixed area and workgroup to match secevent.</t>
+              <t>Removed unused definitions and definitions already covered by SET.</t>
+              <t>Renamed Event Transmitter and Event Receiver to SET Transmitter and SET Receiver, respectively.</t>
+              <t>Added IANA registry for SET Delivery Error Codes.</t>
+              <t>Removed enumeration of HTTP authentication methods.</t>
+              <t>Removed generally applicable guidance for HTTP, authorization tokens, and bearer tokens.</t>
+          </list>
+      </t>
     </section>
   </back>
 </rfc>
