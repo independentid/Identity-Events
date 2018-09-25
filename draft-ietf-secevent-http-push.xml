@@ -193,7 +193,7 @@
   
     
   
-  <section anchor="httpPost" title="Push Delivery using HTTP">
+  <section anchor="httpPost" title="Transmitting a SET">
         
      <t>This method allows a SET Transmitter to use HTTP POST 
      (<xref target="RFC7231">Section 4.3.3</xref>) to deliver
@@ -212,7 +212,7 @@
      media type (<spanx style="verb">Accept</spanx> header) response is 
      <spanx style="verb">application/json</spanx>.</t>
      
-     <figure align="left" anchor="postSet" title="Example HTTP POST Request">
+     <figure align="left" anchor="postSet" title="Example SET Transmission Request">
      <preamble>To deliver an Event, the SET Transmitter generates an event 
      delivery message and uses HTTP POST to the configured endpoint with
      the appropriate <spanx style="verb">Accept</spanx> and 
@@ -237,12 +237,16 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
 1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
 .</artwork>
      </figure>
-            
+ </section>
+
+ <section anchor="requestHandling" title="Handling a SET Transmission Request">
      <t>Upon receipt of the request, the SET Receiver SHALL 
      validate the JWT structure of the SET as defined in 
      <xref target="RFC7519">Section 7.2</xref>. The SET Receiver 
      SHALL also validate the SET information as described
      in <xref target="RFC8417">Section 2</xref>.</t>
+
+    <section anchor="successResponse" title="Success Response">
      <t>If the SET is determined to be valid, the SET Receiver SHALL
      "acknowledge" successful submission by responding with HTTP Status
      202 as <spanx style="verb">Accepted</spanx> 
@@ -270,7 +274,8 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
        to information retention requirements appropriate to the SET 
        event types signaled. The level and method of retention of SETs
        by SET Receivers is out-of-scope of this specification.</t>
-          
+    </section>
+    <section anchor="failureResponse" title="Failure Response">
      <t>In the Event of a general HTTP error condition, the SET Receiver
      MAY respond with an appropriate HTTP Status code as defined in 
      <xref target="RFC7231">Section 6</xref>.</t>
@@ -280,7 +285,7 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
      error response as described in <xref target="errorResponse"/>.
      </t>
      
-     <figure anchor="badPostResponse" title="Example HTTP Status 400 Response">
+     <figure anchor="badPostResponse" title="Example Error Response">
         <preamble>The following is an example non-normative error 
         response.</preamble>
         <artwork>HTTP/1.1 400 Bad Request
@@ -292,8 +297,8 @@ Content-Type: application/json
 
 }</artwork>
      </figure>    
-     </section>
-     
+    </section>
+
      <section anchor="error_codes" title="Security Event Token Delivery Error Codes">
          <t>Security Event Token Delivery Error Codes are strings that identify a
             specific type of error that may occur when parsing or validating a SET.
@@ -319,8 +324,9 @@ Content-Type: application/json
           <c>setData</c><c>SET event claims incomplete or invalid.</c>
           <c>dup</c><c>A duplicate SET was received and has been ignored.</c>
         </texttable>
-            
-        <section anchor="errorResponse" title="Error Response Handling">
+    </section>
+
+        <section anchor="errorResponse" title="Error Responses">
             <t>An error response SHALL include a JSON
             object which provides details about the error. The JSON object
             includes the JSON attributes: <list style="hanging">
@@ -332,10 +338,8 @@ Content-Type: application/json
             When included as part of an HTTP Status 400 response, the above
             JSON is the HTTP response body (see <xref target="badPostResponse"/>).</t>
         </section>
-         
-        </section>  
-       
    </section>
+</section>
    
    <section anchor="aa" title="Authentication and Authorization" toc="default">
       <t>The SET delivery method described in this specification is
@@ -744,6 +748,7 @@ Content-Type: application/json
               <t>Removed redundant instruction to use WWW-Authenticate header.</t>
               <t>Removed further generally applicable guidance for authorization tokens.</t>
               <t>Removed bearer token from example delivery request, and text referencing it.</t>
+              <t>Broke delivery method description into separate request/response sections.</t>
           </list>
       </t>
     </section>
