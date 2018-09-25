@@ -345,10 +345,6 @@ Content-Type: application/json
       <xref target="RFC7235" />.
       </t>
 
-      <t>As per <xref target="RFC7235">Section 4.1 of</xref>, a SET
-      delivery endpoint SHALL indicate supported HTTP authentication 
-      schemes via the <spanx style="verb">WWW-Authenticate</spanx> header.</t>
-
       <t>Because SET Delivery describes a simple function, authorization
       for the ability to pick-up or deliver SETs can be derived by
       considering the identity of the SET issuer, or via other employed
@@ -776,6 +772,7 @@ Content-Type: application/json
               <t>Removed enumeration of HTTP authentication methods.</t>
               <t>Removed generally applicable guidance for HTTP, authorization tokens, and bearer tokens.</t>
               <t>Moved guidance for using authentication methods as DoS protection to Security Considerations.</t>
+              <t>Removed redundant instruction to use WWW-Authenticate header.</t>
           </list>
       </t>
     </section>
