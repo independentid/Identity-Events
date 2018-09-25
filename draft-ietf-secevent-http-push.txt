@@ -69,7 +69,7 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 Table of Contents
 
    1.  Introduction and Overview . . . . . . . . . . . . . . . . . .   2
-     1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   3
+     1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   2
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   3
    2.  Event Delivery  . . . . . . . . . . . . . . . . . . . . . . .   3
      2.1.  Event Delivery Process  . . . . . . . . . . . . . . . . .   3
@@ -77,23 +77,22 @@ Table of Contents
      2.3.  Security Event Token Delivery Error Codes . . . . . . . .   6
        2.3.1.  Error Response Handling . . . . . . . . . . . . . . .   7
    3.  Authentication and Authorization  . . . . . . . . . . . . . .   7
-     3.1.  Use of Tokens as Authorizations . . . . . . . . . . . . .   8
    4.  Security Considerations . . . . . . . . . . . . . . . . . . .   8
-     4.1.  Authentication Using Signed SETs  . . . . . . . . . . . .   9
-     4.2.  TLS Support Considerations  . . . . . . . . . . . . . . .   9
-     4.3.  Denial of Service . . . . . . . . . . . . . . . . . . . .   9
-   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .   9
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  10
-     6.1.  Security Event Token Delivery Error Codes . . . . . . . .  10
-       6.1.1.  Registration Template . . . . . . . . . . . . . . . .  10
+     4.1.  Authentication Using Signed SETs  . . . . . . . . . . . .   8
+     4.2.  TLS Support Considerations  . . . . . . . . . . . . . . .   8
+     4.3.  Denial of Service . . . . . . . . . . . . . . . . . . . .   8
+   5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .   8
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   9
+     6.1.  Security Event Token Delivery Error Codes . . . . . . . .   9
+       6.1.1.  Registration Template . . . . . . . . . . . . . . . .   9
        6.1.2.  Initial Registry Contents . . . . . . . . . . . . . .  10
-   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  14
-     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  14
+   7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  13
+     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  13
      7.2.  Informative References  . . . . . . . . . . . . . . . . .  15
    Appendix A.  Other Streaming Specifications . . . . . . . . . . .  16
-   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  18
-   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  18
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  19
+   Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  17
+   Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  17
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  18
 
 1.  Introduction and Overview
 
@@ -102,10 +101,11 @@ Table of Contents
    [RFC7231] over TLS.  The specification defines a method to push SETs
    via HTTP POST.
 
+1.1.  Notational Conventions
 
-
-
-
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP
 
 
 
@@ -114,11 +114,6 @@ Backman, et al.          Expires March 29, 2019                 [Page 2]
 Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
 
-1.1.  Notational Conventions
-
-   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
-   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
-   "OPTIONAL" in this document are to be interpreted as described in BCP
    14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
@@ -162,6 +157,11 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    o  The SET Transmitter uses an HTTP/1.1 POST to the SET Receiver
       endpoint to deliver the SET;
 
+   o  Or, the SET Transmitter delivers the Event through a different
+      method not defined by this specification.
+
+   In Push-Based SET Delivery Using HTTP, SETs are delivered one at a
+   time using HTTP POST requests by a SET Transmitter to a SET Receiver.
 
 
 
@@ -170,11 +170,6 @@ Backman, et al.          Expires March 29, 2019                 [Page 3]
 Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
 
-   o  Or, the SET Transmitter delivers the Event through a different
-      method not defined by this specification.
-
-   In Push-Based SET Delivery Using HTTP, SETs are delivered one at a
-   time using HTTP POST requests by a SET Transmitter to a SET Receiver.
    The HTTP request body is a JSON Web Token [RFC7519] with a "Content-
    Type" header of "application/secevent+jwt" as defined in Section 2.2
    and 6.2 of [RFC8417].  Upon receipt, the SET Receiver acknowledges
@@ -214,6 +209,11 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    POST is "application/secevent+jwt" and SHALL consist of a single SET
    (see [RFC8417]).  As per Section 5.3.2 [RFC7231], the expected media
    type ("Accept" header) response is "application/json".
+
+
+
+
+
 
 
 
@@ -384,8 +384,8 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    HTTP and depends on the use of TLS and/or standard HTTP
    authentication and authorization schemes as per [RFC7235].
 
-
-
+   Because SET Delivery describes a simple function, authorization for
+   the ability to pick-up or deliver SETs can be derived by considering
 
 
 
@@ -394,12 +394,6 @@ Backman, et al.          Expires March 29, 2019                 [Page 7]
 Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
 
-   As per Section 4.1 of [RFC7235], a SET delivery endpoint SHALL
-   indicate supported HTTP authentication schemes via the "WWW-
-   Authenticate" header.
-
-   Because SET Delivery describes a simple function, authorization for
-   the ability to pick-up or deliver SETs can be derived by considering
    the identity of the SET issuer, or via other employed authentication
    methods.  Because SETs are not commands (see ), SET Receivers are
    free to ignore SETs that are not of interest.
@@ -410,45 +404,7 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    use of bearer tokens in the specification does reflect common
    practice.
 
-3.1.  Use of Tokens as Authorizations
-
-   When using bearer tokens or proof-of-possession tokens that represent
-   an authorization grant such as issued by OAuth (see [RFC6749]),
-   implementers SHOULD consider the type of authorization granted, any
-   authorized scopes (see Section 3.3 of [RFC6749]), and the security
-   subject(s) that SHOULD be mapped from the authorization when
-   considering local access control rules.  Section 6 of the OAuth
-   Assertions draft [RFC7521], documents common scenarios for
-   authorization including:
-
-   o  Clients using an assertion to authenticate and/or act on behalf of
-      itself;
-
-   o  Clients acting on behalf of a user; and,
-
-   o  A Client acting on behalf of an anonymous user (e.g., see next
-      section).
-
-   When using OAuth authorization tokens, implementers MUST take into
-   account the threats and countermeasures documented in the security
-   considerations for the use of client authorizations (see Section 8 of
-   [RFC7521]).  When using other token formats or frameworks,
-   implementers MUST take into account similar threats and
-   countermeasures, especially those documented by the relevant
-   specifications.
-
 4.  Security Considerations
-
-
-
-
-
-
-
-Backman, et al.          Expires March 29, 2019                 [Page 8]
-
-Internet-Draft        draft-ietf-secevent-http-push       September 2018
-
 
 4.1.  Authentication Using Signed SETs
 
@@ -485,6 +441,15 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    If a SET needs to be retained for audit purposes, JWS MAY be used to
    provide verification of its authenticity.
 
+
+
+
+
+Backman, et al.          Expires March 29, 2019                 [Page 8]
+
+Internet-Draft        draft-ietf-secevent-http-push       September 2018
+
+
    When sharing personally identifiable information or information that
    is otherwise considered confidential to affected users, SET
    Transmitters and Receivers MUST have the appropriate legal agreements
@@ -495,16 +460,6 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    Receivers SHOULD devise approaches that prevent propagation -- for
    example, the passing of a hash value that requires the subscriber to
    already know the subject.
-
-
-
-
-
-
-Backman, et al.          Expires March 29, 2019                 [Page 9]
-
-Internet-Draft        draft-ietf-secevent-http-push       September 2018
-
 
 6.  IANA Considerations
 
@@ -544,6 +499,13 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
       circumstances the error code may be used.  URIs that can be used
       to retrieve copies of each document at no cost SHOULD be included.
 
+
+
+Backman, et al.          Expires March 29, 2019                 [Page 9]
+
+Internet-Draft        draft-ietf-secevent-http-push       September 2018
+
+
 6.1.2.  Initial Registry Contents
 
    o
@@ -553,14 +515,6 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
       Description
          Invalid JSON object.
-
-
-
-
-Backman, et al.          Expires March 29, 2019                [Page 10]
-
-Internet-Draft        draft-ietf-secevent-http-push       September 2018
-
 
       Change Controller
          IETF Secevent Working Group
@@ -601,6 +555,13 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
       Name
          jwtCrypto
 
+
+
+Backman, et al.          Expires March 29, 2019                [Page 10]
+
+Internet-Draft        draft-ietf-secevent-http-push       September 2018
+
+
       Description
          Unable to parse due to unsupported algorithm.
 
@@ -609,14 +570,6 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
       Defining Document(s)
          Section 2.3 of this document.
-
-
-
-
-Backman, et al.          Expires March 29, 2019                [Page 11]
-
-Internet-Draft        draft-ietf-secevent-http-push       September 2018
-
 
    o
 
@@ -657,6 +610,14 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
       Change Controller
          IETF Secevent Working Group
 
+
+
+
+Backman, et al.          Expires March 29, 2019                [Page 11]
+
+Internet-Draft        draft-ietf-secevent-http-push       September 2018
+
+
       Defining Document(s)
          Section 2.3 of this document.
 
@@ -666,14 +627,6 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
          jwtIss
 
       Description
-
-
-
-Backman, et al.          Expires March 29, 2019                [Page 12]
-
-Internet-Draft        draft-ietf-secevent-http-push       September 2018
-
-
          Issuer not recognized.
 
       Change Controller
@@ -713,6 +666,14 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    o
 
       Name
+
+
+
+Backman, et al.          Expires March 29, 2019                [Page 12]
+
+Internet-Draft        draft-ietf-secevent-http-push       September 2018
+
+
          setData
 
       Description
@@ -722,14 +683,6 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
          IETF Secevent Working Group
 
       Defining Document(s)
-
-
-
-Backman, et al.          Expires March 29, 2019                [Page 13]
-
-Internet-Draft        draft-ietf-secevent-http-push       September 2018
-
-
          Section 2.3 of this document.
 
    o
@@ -769,22 +722,20 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
               DOI 10.17487/RFC5988, October 2010, <https://www.rfc-
               editor.org/info/rfc5988>.
 
+
+
+
+Backman, et al.          Expires March 29, 2019                [Page 13]
+
+Internet-Draft        draft-ietf-secevent-http-push       September 2018
+
+
    [RFC6125]  Saint-Andre, P. and J. Hodges, "Representation and
               Verification of Domain-Based Application Service Identity
               within Internet Public Key Infrastructure Using X.509
               (PKIX) Certificates in the Context of Transport Layer
               Security (TLS)", RFC 6125, DOI 10.17487/RFC6125, March
               2011, <https://www.rfc-editor.org/info/rfc6125>.
-
-
-
-
-
-
-Backman, et al.          Expires March 29, 2019                [Page 14]
-
-Internet-Draft        draft-ietf-secevent-http-push       September 2018
-
 
    [RFC7159]  Bray, T., Ed., "The JavaScript Object Notation (JSON) Data
               Interchange Format", RFC 7159, DOI 10.17487/RFC7159, March
@@ -823,6 +774,18 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
               DOI 10.17487/RFC8417, July 2018, <https://www.rfc-
               editor.org/info/rfc8417>.
 
+
+
+
+
+
+
+
+Backman, et al.          Expires March 29, 2019                [Page 14]
+
+Internet-Draft        draft-ietf-secevent-http-push       September 2018
+
+
 7.2.  Informative References
 
    [openid-connect-core]
@@ -831,16 +794,6 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    [RFC3339]  Klyne, G. and C. Newman, "Date and Time on the Internet:
               Timestamps", RFC 3339, DOI 10.17487/RFC3339, July 2002,
               <https://www.rfc-editor.org/info/rfc3339>.
-
-
-
-
-
-
-Backman, et al.          Expires March 29, 2019                [Page 15]
-
-Internet-Draft        draft-ietf-secevent-http-push       September 2018
-
 
    [RFC6749]  Hardt, D., Ed., "The OAuth 2.0 Authorization Framework",
               RFC 6749, DOI 10.17487/RFC6749, October 2012,
@@ -878,6 +831,17 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
               RFC 7617, DOI 10.17487/RFC7617, September 2015,
               <https://www.rfc-editor.org/info/rfc7617>.
 
+
+
+
+
+
+
+Backman, et al.          Expires March 29, 2019                [Page 15]
+
+Internet-Draft        draft-ietf-secevent-http-push       September 2018
+
+
    [saml-core-2.0]
               Internet2, "Assertions and Protocols for the OASIS
               Security Assertion Markup Language (SAML) V2.0", March
@@ -889,14 +853,6 @@ Appendix A.  Other Streaming Specifications
 
    The following pub/sub, queuing, streaming systems were reviewed as
    possible solutions or as input to the current draft:
-
-
-
-
-Backman, et al.          Expires March 29, 2019                [Page 16]
-
-Internet-Draft        draft-ietf-secevent-http-push       September 2018
-
 
    XMPP Events
 
@@ -935,6 +891,13 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
       http://docs.aws.amazon.com/AWSSimpleQueueService/latest/
       SQSDeveloperGuide/sqs-visibility-timeout.html
 
+
+
+Backman, et al.          Expires March 29, 2019                [Page 16]
+
+Internet-Draft        draft-ietf-secevent-http-push       September 2018
+
+
    Apache Kafka
 
    Apache Kafka is an Apache open source project based upon TCP for
@@ -945,14 +908,6 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    performance advantage.  See: https://kafka.apache.org/intro
 
    Google Pub/Sub
-
-
-
-
-Backman, et al.          Expires March 29, 2019                [Page 17]
-
-Internet-Draft        draft-ietf-secevent-http-push       September 2018
-
 
    Google Pub Sub system favours a model whereby polling and
    acknowledgement of events is done as separate endpoints as separate
@@ -992,6 +947,13 @@ Appendix C.  Change Log
 
    Draft 01 - AB:
 
+
+
+Backman, et al.          Expires March 29, 2019                [Page 17]
+
+Internet-Draft        draft-ietf-secevent-http-push       September 2018
+
+
    o  Fixed area and workgroup to match secevent.
 
    o  Removed unused definitions and definitions already covered by SET.
@@ -1003,18 +965,16 @@ Appendix C.  Change Log
 
    o  Removed enumeration of HTTP authentication methods.
 
-
-
-Backman, et al.          Expires March 29, 2019                [Page 18]
-
-Internet-Draft        draft-ietf-secevent-http-push       September 2018
-
-
    o  Removed generally applicable guidance for HTTP, authorization
       tokens, and bearer tokens.
 
    o  Moved guidance for using authentication methods as DoS protection
       to Security Considerations.
+
+   o  Removed redundant instruction to use WWW-Authenticate header.
+
+   o  Removed further generally applicable guidance for authorization
+      tokens.
 
 Authors' Addresses
 
@@ -1043,6 +1003,13 @@ Authors' Addresses
    Email: mscurtescu@google.com
 
 
+
+
+Backman, et al.          Expires March 29, 2019                [Page 18]
+
+Internet-Draft        draft-ietf-secevent-http-push       September 2018
+
+
    Morteza Ansari
    Cisco
 
@@ -1053,6 +1020,39 @@ Authors' Addresses
    Microsoft
 
    Email: tonynad@microsoft.com
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

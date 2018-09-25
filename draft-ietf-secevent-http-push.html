@@ -383,7 +383,6 @@
 <link href="#rfc.section.2.3" rel="Chapter" title="2.3 Security Event Token Delivery Error Codes">
 <link href="#rfc.section.2.3.1" rel="Chapter" title="2.3.1 Error Response Handling">
 <link href="#rfc.section.3" rel="Chapter" title="3 Authentication and Authorization">
-<link href="#rfc.section.3.1" rel="Chapter" title="3.1 Use of Tokens as Authorizations">
 <link href="#rfc.section.4" rel="Chapter" title="4 Security Considerations">
 <link href="#rfc.section.4.1" rel="Chapter" title="4.1 Authentication Using Signed SETs">
 <link href="#rfc.section.4.2" rel="Chapter" title="4.2 TLS Support Considerations">
@@ -512,9 +511,7 @@
 </li>
 </ul></ul><li>3.   <a href="#rfc.section.3">Authentication and Authorization</a>
 </li>
-<ul><li>3.1.   <a href="#rfc.section.3.1">Use of Tokens as Authorizations</a>
-</li>
-</ul><li>4.   <a href="#rfc.section.4">Security Considerations</a>
+<li>4.   <a href="#rfc.section.4">Security Considerations</a>
 </li>
 <ul><li>4.1.   <a href="#rfc.section.4.1">Authentication Using Signed SETs</a>
 </li>
@@ -732,21 +729,8 @@ Content-Type: application/json
 <a href="#rfc.section.3">3.</a> <a href="#aa" id="aa">Authentication and Authorization</a>
 </h1>
 <p id="rfc.section.3.p.1">The SET delivery method described in this specification is based upon HTTP and depends on the use of TLS and/or standard HTTP authentication and authorization schemes as per <a href="#RFC7235" class="xref">[RFC7235]</a>.  </p>
-<p id="rfc.section.3.p.2">As per <a href="#RFC7235" class="xref">Section 4.1 of</a>, a SET delivery endpoint SHALL indicate supported HTTP authentication schemes via the <samp>WWW-Authenticate</samp> header.</p>
-<p id="rfc.section.3.p.3">Because SET Delivery describes a simple function, authorization for the ability to pick-up or deliver SETs can be derived by considering the identity of the SET issuer, or via other employed authentication methods.  Because SETs are not commands (see ), SET Receivers are free to ignore SETs that are not of interest.</p>
-<p id="rfc.section.3.p.4">For illustrative purposes only, SET delivery examples show an OAuth2 bearer token value <a href="#RFC6750" class="xref">[RFC6750]</a> in the authorization header.  This is not intended to imply that bearer tokens are preferred. However, the use of bearer tokens in the specification does reflect common practice. </p>
-<h1 id="rfc.section.3.1">
-<a href="#rfc.section.3.1">3.1.</a> <a href="#authzTokens" id="authzTokens">Use of Tokens as Authorizations</a>
-</h1>
-<p id="rfc.section.3.1.p.1">When using bearer tokens or proof-of-possession tokens that represent an authorization grant such as issued by OAuth (see <a href="#RFC6749" class="xref">[RFC6749]</a>), implementers SHOULD consider the type of authorization granted, any authorized scopes (see Section 3.3 of <a href="#RFC6749" class="xref">[RFC6749]</a>), and the security subject(s) that SHOULD be mapped from the authorization when considering local access control rules.  Section 6 of the OAuth Assertions draft <a href="#RFC7521" class="xref">[RFC7521]</a>, documents common scenarios for authorization including:<a href="#RFC7521" class="xref">[RFC7521]</a>). When using other token formats or frameworks, implementers MUST take into account similar threats and countermeasures, especially those documented by the relevant specifications.</p>
-
-<ul>
-<li>Clients using an assertion to authenticate and/or act on behalf of itself;</li>
-<li>Clients acting on behalf of a user; and,</li>
-<li>A Client acting on behalf of an anonymous user (e.g., see next section).</li>
-</ul>
-
-<p>When using OAuth authorization tokens, implementers MUST take into account the threats and countermeasures documented in the security considerations for the use of client authorizations (see Section 8 of </p>
+<p id="rfc.section.3.p.2">Because SET Delivery describes a simple function, authorization for the ability to pick-up or deliver SETs can be derived by considering the identity of the SET issuer, or via other employed authentication methods.  Because SETs are not commands (see ), SET Receivers are free to ignore SETs that are not of interest.</p>
+<p id="rfc.section.3.p.3">For illustrative purposes only, SET delivery examples show an OAuth2 bearer token value <a href="#RFC6750" class="xref">[RFC6750]</a> in the authorization header.  This is not intended to imply that bearer tokens are preferred. However, the use of bearer tokens in the specification does reflect common practice. </p>
 <h1 id="rfc.section.4">
 <a href="#rfc.section.4">4.</a> <a href="#Security" id="Security">Security Considerations</a>
 </h1>
@@ -1183,6 +1167,8 @@ Content-Type: application/json
 <li>Removed enumeration of HTTP authentication methods.</li>
 <li>Removed generally applicable guidance for HTTP, authorization tokens, and bearer tokens.</li>
 <li>Moved guidance for using authentication methods as DoS protection to Security Considerations.</li>
+<li>Removed redundant instruction to use WWW-Authenticate header.</li>
+<li>Removed further generally applicable guidance for authorization tokens.</li>
 </ul>
 
 <p> </p>
