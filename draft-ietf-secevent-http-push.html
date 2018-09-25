@@ -586,30 +586,19 @@
 <h1 id="rfc.section.2.1">
 <a href="#rfc.section.2.1">2.1.</a> <a href="#process" id="process">Event Delivery Process</a>
 </h1>
-<p id="rfc.section.2.1.p.1">When an Event occurs, the SET Transmitter constructs a SET token <a href="#RFC8417" class="xref">[RFC8417]</a> that describes the Event.  </p>
-<p id="rfc.section.2.1.p.2">How SETs are defined and the process by which Events are identified for SET Receivers is out-of-scope of this	specification.  </p>
-<p id="rfc.section.2.1.p.3">When a SET is available for a SET Receiver, the SET Transmitter attempts to deliver the SET based on the SET Receiver's registered delivery mechanism: </p>
-
-<ul>
-<li>The SET Transmitter uses an HTTP/1.1 POST to the SET Receiver endpoint to deliver the SET; </li>
-<li>Or, the SET Transmitter delivers the Event through a different method not defined by this specification.  </li>
-</ul>
-
-<p> </p>
-<p id="rfc.section.2.1.p.4">In Push-Based SET Delivery Using HTTP, SETs are delivered one at a time using HTTP POST requests by a SET Transmitter to a SET Receiver. The HTTP request body is a JSON Web Token <a href="#RFC7519" class="xref">[RFC7519]</a> with a <samp>Content-Type</samp> header of <samp>application/secevent+jwt</samp> as defined in Section 2.2 and 6.2 of <a href="#RFC8417" class="xref">[RFC8417]</a>. Upon receipt, the SET Receiver acknowledges receipt with a response with HTTP Status 202, as described below in <a href="#httpPost" class="xref">Section 2.2</a>.</p>
-<p id="rfc.section.2.1.p.5">After successful (acknowledged) SET delivery, SET Transmitters SHOULD NOT be required to maintain or record SETs for recovery. Once a SET is acknowledged, the SET Receiver SHALL be responsible for retention and recovery.</p>
-<p id="rfc.section.2.1.p.6">Transmitted SETs SHOULD be self-validating (e.g. signed) if there is a requirement to verify they were issued by the SET Transmitter at a later date when de-coupled from the original delivery where authenticity could be checked via the HTTP or TLS mutual authentication.  </p>
-<p id="rfc.section.2.1.p.7">Upon receiving a SET, the SET Receiver reads the SET and validates it. The SET Receiver MUST acknowledge receipt to the SET Transmitter, using the defined acknowledgement or error method.</p>
-<p id="rfc.section.2.1.p.8">The SET Receiver SHALL NOT use the Event acknowledgement mechanism to report Event errors other than relating to the parsing and validation of the SET.</p>
+<p id="rfc.section.2.1.p.1">In Push-Based SET Delivery Using HTTP, SETs are delivered one at a time using HTTP POST requests by a SET Transmitter to a SET Receiver, as described below in <a href="#httpPost" class="xref">Section 2.2</a>.  Upon receipt, the SET Receiver acknowledges receipt or indicates an error via the HTTP response, as described below in <a href="#requestHandling" class="xref">Section 2.3</a>.  </p>
+<p id="rfc.section.2.1.p.2">After successful (acknowledged) SET delivery, SET Transmitters SHOULD NOT be required to maintain or record SETs for recovery. Once a SET is acknowledged, the SET Receiver SHALL be responsible for retention and recovery.</p>
+<p id="rfc.section.2.1.p.3">Transmitted SETs SHOULD be self-validating (e.g. signed) if there is a requirement to verify they were issued by the SET Transmitter at a later date when de-coupled from the original delivery where authenticity could be checked via the HTTP or TLS mutual authentication.  </p>
+<p id="rfc.section.2.1.p.4">Upon receiving a SET, the SET Receiver reads the SET and validates it. The SET Receiver MUST acknowledge receipt to the SET Transmitter, using the defined acknowledgement or error method.</p>
+<p id="rfc.section.2.1.p.5">The SET Receiver SHALL NOT use the Event acknowledgement mechanism to report Event errors other than relating to the parsing and validation of the SET.</p>
 <h1 id="rfc.section.2.2">
 <a href="#rfc.section.2.2">2.2.</a> <a href="#httpPost" id="httpPost">Transmitting a SET</a>
 </h1>
 <p id="rfc.section.2.2.p.1">This method allows a SET Transmitter to use HTTP POST (<a href="#RFC7231" class="xref">Section 4.3.3</a>) to deliver SETs to a previously registered web callback URI supplied by the SET Receiver as part of a configuration process (not defined by this document).</p>
 <p id="rfc.section.2.2.p.2">The SET to be delivered MAY be signed and/or encrypted as defined in <a href="#RFC8417" class="xref">[RFC8417]</a>.</p>
-<p id="rfc.section.2.2.p.3">The HTTP Content-Type (see <a href="#RFC7231" class="xref">Section 3.1.1.5</a>) for the HTTP POST is <samp>application/secevent+jwt</samp> and SHALL consist of a single SET (see <a href="#RFC8417" class="xref">[RFC8417]</a>).  As per <a href="#RFC7231" class="xref">Section 5.3.2</a>, the expected media type (<samp>Accept</samp> header) response is <samp>application/json</samp>.</p>
+<p id="rfc.section.2.2.p.3">The HTTP Content-Type (see <a href="#RFC7231" class="xref">Section 3.1.1.5</a>) for the HTTP POST is <samp>application/secevent+jwt</samp> and the request body SHALL consist of a single SET (see <a href="#RFC8417" class="xref">[RFC8417]</a>).  As per <a href="#RFC7231" class="xref">Section 5.3.2</a>, the value of the <samp>Accept</samp> header is <samp>application/json</samp>.</p>
 <div id="rfc.figure.1"></div>
 <div id="postSet"></div>
-<p>To deliver an Event, the SET Transmitter generates an event delivery message and uses HTTP POST to the configured endpoint with the appropriate <samp>Accept</samp> and <samp>Content-Type</samp> headers.</p>
 <pre>POST /Events  HTTP/1.1
 
 Host: notify.examplerp.com
@@ -1189,6 +1178,8 @@ Content-Type: application/json
 <li>Broke delivery method description into separate request/response sections.</li>
 <li>Added missing empty line between headers and body in example request.</li>
 <li>Removed unapplicable notes about example formatting.</li>
+<li>Removed text about SET creation and handling.</li>
+<li>Removed duplication in protocol description.</li>
 </ul>
 
 <p> </p>

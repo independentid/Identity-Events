@@ -127,38 +127,13 @@
    
   <section title="Event Delivery">
     <section anchor="process" title="Event Delivery Process">
-			<t>When an Event occurs, the SET Transmitter constructs a SET
-      token <xref target="RFC8417" /> that describes the	
-      Event.
-      </t>
-      <t> 
-      How SETs are defined and the process by which Events are identified for 
-      SET Receivers is out-of-scope of this	specification.
-			</t>
-
-			<t>
-			When a SET is available for a SET Receiver, the SET Transmitter
-			attempts to deliver the SET based on the SET Receiver's registered
-			delivery mechanism:
-			<list style="symbols">
-				<t>The SET Transmitter uses an HTTP/1.1 POST to the SET
-        Receiver endpoint to deliver the SET;
-			  </t>
-			  <t>Or, the SET Transmitter delivers the Event through a different
-        method not defined by this specification.
-			  </t>
-			</list>
-			</t>
-      
       <t>In Push-Based SET Delivery Using HTTP, SETs are delivered
         one at a time using HTTP POST requests by a SET Transmitter 
-        to a SET Receiver. The HTTP request body is a JSON Web Token 
-        <xref target="RFC7519"/> with a <spanx style="verb">Content-Type</spanx> 
-        header of <spanx style="verb">application/secevent+jwt</spanx> 
-        as defined in Section 2.2 and 6.2 of 
-        <xref target="RFC8417"/>. Upon receipt, the 
-        SET Receiver acknowledges receipt with a response with HTTP 
-        Status 202, as described below in <xref target="httpPost"/>.</t>
+        to a SET Receiver, as described below in <xref target="httpPost"/>.
+        Upon receipt, the
+        SET Receiver acknowledges receipt or indicates an error via the HTTP
+        response, as described below in <xref target="requestHandling"/>.
+      </t>
 
 			<t>After successful (acknowledged) SET delivery, SET
       Transmitters SHOULD NOT be required to maintain or record SETs for 
@@ -197,17 +172,13 @@
            
      <t>The HTTP Content-Type (see 
      <xref target="RFC7231">Section 3.1.1.5</xref>) for the HTTP POST is 
-     <spanx style="verb">application/secevent+jwt</spanx> and SHALL consist of 
+     <spanx style="verb">application/secevent+jwt</spanx> and the request body SHALL consist of 
      a single SET (see <xref target="RFC8417" />).
-     As per <xref target="RFC7231">Section 5.3.2</xref>, the expected 
-     media type (<spanx style="verb">Accept</spanx> header) response is 
+     As per <xref target="RFC7231">Section 5.3.2</xref>, the
+     value of the <spanx style="verb">Accept</spanx> header is
      <spanx style="verb">application/json</spanx>.</t>
      
      <figure align="left" anchor="postSet" title="Example SET Transmission Request">
-     <preamble>To deliver an Event, the SET Transmitter generates an event 
-     delivery message and uses HTTP POST to the configured endpoint with
-     the appropriate <spanx style="verb">Accept</spanx> and 
-     <spanx style="verb">Content-Type</spanx> headers.</preamble>
 <artwork align="left">POST /Events  HTTP/1.1
 
 Host: notify.examplerp.com
@@ -743,6 +714,8 @@ Content-Type: application/json
               <t>Broke delivery method description into separate request/response sections.</t>
               <t>Added missing empty line between headers and body in example request.</t>
               <t>Removed unapplicable notes about example formatting.</t>
+              <t>Removed text about SET creation and handling.</t>
+              <t>Removed duplication in protocol description.</t>
           </list>
       </t>
     </section>
