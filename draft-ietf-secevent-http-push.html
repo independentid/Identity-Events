@@ -559,8 +559,8 @@
 <h1 id="rfc.section.1.2">
 <a href="#rfc.section.1.2">1.2.</a> <a href="#defs" id="defs">Definitions</a>
 </h1>
-<p id="rfc.section.1.2.p.1">This specification assumes terminology defined in the Security Event Token specification<a href="#RFC8417" class="xref">[RFC8417]</a> .</p>
-<p id="rfc.section.1.2.p.2">The following definitions are defined for Security Event distribution: </p>
+<p id="rfc.section.1.2.p.1">This specification assumes terminology defined in the Security Event Token specification<a href="#RFC8417" class="xref">[RFC8417]</a>, as well as the terms defined below: </p>
+<p></p>
 
 <dl>
 <dt>Event Transmitter</dt>
@@ -572,15 +572,6 @@
 <dt>Event Stream</dt>
 <dd style="margin-left: 8">
 <br> An Event Stream is a defined location, distribution method and whereby an Event Transmitter and Event Receiver exchange a pre-defined family of SETs. A Stream is assumed to have configuration data such as HTTP endpoints, timeouts, public key sets for signing and encryption, and Event Families.  </dd>
-<dt>Subject</dt>
-<dd style="margin-left: 8">
-<br> The security subject around which a security event has occurred. For example, a security subject might per a user, a person, an email address, a service provider entity, an IP address, an OAuth Client, a mobile device, or any identifiable thing referenced in security and authorization systems.  </dd>
-<dt>Event</dt>
-<dd style="margin-left: 8">
-<br>An Event is defined to be an event as represented by a security event token (SET).  See <a href="#RFC8417" class="xref">[RFC8417]</a>.</dd>
-<dt>NumericDate</dt>
-<dd style="margin-left: 8">
-<br> A JSON numeric value representing the number of seconds from 1970-01-01T00:00:00Z UTC until the specified UTC date/time, ignoring leap seconds.  This is equivalent to the IEEE Std 1003.1, 2013 Edition <a href="#POSIX.1" class="xref">[POSIX.1]</a> definition "Seconds Since the Epoch", in which each day is accounted for by exactly 86400 seconds, other than that non-integer values can be represented.  See <a href="#RFC3339" class="xref">[RFC3339]</a> for details regarding date/times in general and UTC in particular.</dd>
 </dl>
 
 <p> </p>
@@ -875,11 +866,6 @@ Content-Type: application/json
 <td class="reference"><b id="openid-connect-core">[openid-connect-core]</b></td>
 <td class="top">
 <a>NRI</a>, "<a>OpenID Connect Core 1.0</a>", Nov 2014.</td>
-</tr>
-<tr>
-<td class="reference"><b id="POSIX.1">[POSIX.1]</b></td>
-<td class="top">
-<a>Institute of Electrical and Electronics Engineers</a>, "<a>The Open Group Base Specifications Issue 7</a>", IEEE Std 1003.1, 2013 Edition, 2013.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC3339">[RFC3339]</b></td>

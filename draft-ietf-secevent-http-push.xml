@@ -120,10 +120,9 @@
 
 			<section anchor="defs" title="Definitions" toc="default">
         <t>This specification assumes terminology defined in the Security
-        Event Token specification<xref target="RFC8417"/>
-        .</t>
+        Event Token specification<xref target="RFC8417"/>, as well as the terms defined below:
+        </t>
 				<t>
-					The following definitions are defined for Security Event distribution:
 					<list style="hanging">
           
             <t hangText="Event Transmitter"><vspace/>
@@ -152,30 +151,6 @@
               Event Families.
             </t>
                           
-            <t hangText="Subject"><vspace/>
-              The security subject around which a security event has 
-              occurred. For example, a security subject might per a user, 
-              a person, an email address, a service provider entity, an
-              IP address, an OAuth Client, a mobile device, or any identifiable
-              thing referenced in security and authorization systems.
-            </t>
-            
-            <t hangText="Event"><vspace/>An Event is defined to be an 
-            event as represented by a security event token (SET).
-            See <xref target="RFC8417"/>.</t>
-
-            <t hangText="NumericDate"><vspace/>
-            A JSON numeric value representing the number of seconds from
-            1970-01-01T00:00:00Z UTC until the specified UTC date/time,
-            ignoring leap seconds.  This is equivalent to the 
-            IEEE Std 1003.1, 2013 Edition <xref target="POSIX.1"/> 
-            definition "Seconds Since the Epoch", in which each day is 
-            accounted for by exactly 86400 seconds, other than that 
-            non-integer values can be represented.  See 
-            <xref target="RFC3339"/> for details regarding date/times 
-            in general and UTC in particular.</t>
-
-      
 					</list>
 				</t>
 			</section>
@@ -598,19 +573,6 @@ Content-Type: application/json
 
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7617.xml' ?><!-- Basic Auth Update -->
       
-     <reference anchor="POSIX.1">
-  <front>
-    <title>The Open Group Base Specifications Issue 7</title>
-    <author>
-      <organization>Institute of Electrical and Electronics Engineers</organization>
-    </author>
-    <date year="2013"/>
-  </front>
-  <seriesInfo value="Std 1003.1, 2013 Edition" name="IEEE"/>
-  <format target="http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap04.html#tag_04_15"
-    type="HTML" />
-      </reference>
-
       <reference anchor="openid-connect-core">
         <front>
           <title>OpenID Connect Core 1.0</title>
