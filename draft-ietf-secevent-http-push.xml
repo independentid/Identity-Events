@@ -221,7 +221,6 @@
 
 Host: notify.examplerp.com
 Accept: application/json
-Authorization: Bearer h480djs93hd8
 Content-Type: application/secevent+jwt
 eyJhbGciOiJub25lIn0
 .
@@ -351,12 +350,6 @@ Content-Type: application/json
       authentication methods.  Because SETs are
       not commands (see ), SET Receivers are free to ignore SETs that 
       are not of interest.</t>
-
-      <t>For illustrative purposes only, SET delivery examples show an OAuth2
-      bearer token value <xref target="RFC6750" /> in the authorization header.
-      This is not intended to imply that bearer tokens are
-      preferred. However, the use of bearer tokens in the specification does
-      reflect common practice. </t>
   </section>
   <section anchor="Security" title="Security Considerations" toc="default">
       
@@ -750,6 +743,7 @@ Content-Type: application/json
               <t>Moved guidance for using authentication methods as DoS protection to Security Considerations.</t>
               <t>Removed redundant instruction to use WWW-Authenticate header.</t>
               <t>Removed further generally applicable guidance for authorization tokens.</t>
+              <t>Removed bearer token from example delivery request, and text referencing it.</t>
           </list>
       </t>
     </section>

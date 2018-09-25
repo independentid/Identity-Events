@@ -606,7 +606,6 @@
 
 Host: notify.examplerp.com
 Accept: application/json
-Authorization: Bearer h480djs93hd8
 Content-Type: application/secevent+jwt
 eyJhbGciOiJub25lIn0
 .
@@ -730,7 +729,6 @@ Content-Type: application/json
 </h1>
 <p id="rfc.section.3.p.1">The SET delivery method described in this specification is based upon HTTP and depends on the use of TLS and/or standard HTTP authentication and authorization schemes as per <a href="#RFC7235" class="xref">[RFC7235]</a>.  </p>
 <p id="rfc.section.3.p.2">Because SET Delivery describes a simple function, authorization for the ability to pick-up or deliver SETs can be derived by considering the identity of the SET issuer, or via other employed authentication methods.  Because SETs are not commands (see ), SET Receivers are free to ignore SETs that are not of interest.</p>
-<p id="rfc.section.3.p.3">For illustrative purposes only, SET delivery examples show an OAuth2 bearer token value <a href="#RFC6750" class="xref">[RFC6750]</a> in the authorization header.  This is not intended to imply that bearer tokens are preferred. However, the use of bearer tokens in the specification does reflect common practice. </p>
 <h1 id="rfc.section.4">
 <a href="#rfc.section.4">4.</a> <a href="#Security" id="Security">Security Considerations</a>
 </h1>
@@ -1169,6 +1167,7 @@ Content-Type: application/json
 <li>Moved guidance for using authentication methods as DoS protection to Security Considerations.</li>
 <li>Removed redundant instruction to use WWW-Authenticate header.</li>
 <li>Removed further generally applicable guidance for authorization tokens.</li>
+<li>Removed bearer token from example delivery request, and text referencing it.</li>
 </ul>
 
 <p> </p>
