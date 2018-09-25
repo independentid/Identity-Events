@@ -78,22 +78,13 @@
 		<section anchor="intro" title="Introduction and Overview" toc="default">
 			
       <t>
-        This specification defines how a stream of SETs (see <xref target="RFC8417"/>)
+        This specification defines how SETs (see <xref target="RFC8417"/>)
         can be transmitted to a previously registered 
         Event Receiver using HTTP <xref target="RFC7231"/>
         over TLS. The specification defines a method to push SETs via 
         HTTP POST. 
       			</t>
 
-      <t>This specification defines a method for SET delivery in what
-      is known as Event Streams.</t>
-        
-      <t>This specification does not define the method by which Event 
-      Streams are defined, provisioned, managed, monitored,
-      and configured and is out of scope of this specification.
-      </t>
-      
-      
 
 			<section anchor="notat" title="Notational Conventions" toc="default">
 				<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
@@ -127,44 +118,26 @@
           
             <t hangText="Event Transmitter"><vspace/>
               A service provider that delivers SETs to other providers known
-              as Event Receivers. An Event Transmitter
-              is responsible for offering a service that allows the Event
-              Receiver to check the Event Stream configuration and status
-              known as the "Control Plane". 
+              as Event Receivers.
             </t>
             
             <t hangText="Event Receiver"><vspace/>
               A service provider that registers to receive SETs from 
               an Event Transmitter and provides an endpoint to receive
-              SETs via HTTP POST. 
-              Event Receivers
-              can check current Event Stream configuration and status by
-              accessing the Event Transmitters "Control Plane".
+              SETs via HTTP POST.
             </t>
-  
-            <t hangText="Event Stream"><vspace/>
-              An Event Stream is a defined location, distribution method
-              and whereby an Event Transmitter and Event Receiver 
-              exchange a pre-defined family of SETs. A Stream is assumed
-              to have configuration data such as HTTP endpoints, timeouts,
-              public key sets for signing and encryption, and 
-              Event Families.
-            </t>
-                          
+
 					</list>
 				</t>
 			</section>
 		</section>
    
-  <section title="SET Event Stream Protocol">
-    <t>An Event Stream represents the communication channel over which a 
-    series of SETs are delivered to a configured Event Receiver. </t>
-    
+  <section title="Event Delivery">
     <section anchor="process" title="Event Delivery Process">
 			<t>When an Event occurs, the Event Transmitter constructs a SET
       token <xref target="RFC8417" /> that describes the	
-      Event. The Event Transmitter determines the Event Streams over which the
-      SET should be distributed to.</t>
+      Event.
+      </t>
       <t> 
       How SETs are defined and the process by which Events are identified for 
       Event Receivers is out-of-scope of this	specification.
@@ -223,16 +196,12 @@
      <t>This method allows an Event Transmitter to use HTTP POST 
      (<xref target="RFC7231">Section 4.3.3</xref>) to deliver
      SETs to a previously registered web callback URI supplied by the
-     Event Receiver as part of an Event Stream configuration process 
+     Event Receiver as part of a configuration process 
      (not defined by this document).</t>
           
      <t>The SET to be delivered MAY be signed 
      and/or encrypted as defined in <xref target="RFC8417" />.</t>
            
-     <t>The Event Stream configuration defines a URI of an Event 
-     Receiver provided endpoint which accepts HTTP POST requests (e.g. 
-     <spanx style="verb">https://rp.example.com/Events</spanx>).</t>
-
      <t>The HTTP Content-Type (see 
      <xref target="RFC7231">Section 3.1.1.5</xref>) for the HTTP POST is 
      <spanx style="verb">application/secevent+jwt</spanx> and SHALL consist of 
@@ -510,10 +479,6 @@ Content-Type: application/json
    
       <t>If a SET needs to be retained for audit purposes, JWS MAY 
       be used to provide verification of its authenticity.</t>
-      
-      <t>Event Transmitters SHOULD attempt to specialize Event Streams 
-      so that the content is targeted to the specific business and 
-      protocol needs of subscribers.</t>
       
       <t>When sharing personally identifiable information or information
       that is otherwise considered confidential to affected users, Event 
