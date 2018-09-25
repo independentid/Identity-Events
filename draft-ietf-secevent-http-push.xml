@@ -78,7 +78,7 @@
 		<section anchor="intro" title="Introduction and Overview" toc="default">
 			
       <t>
-        This specification defines how a stream of SETs (see <xref target="I-D.ietf-secevent-token"/>)
+        This specification defines how a stream of SETs (see <xref target="RFC8417"/>)
         can be transmitted to a previously registered 
         Event Receiver using HTTP <xref target="RFC7231"/>
         over TLS. The specification defines a method to push SETs via 
@@ -91,7 +91,7 @@
       <t>This specification does not define the method by which Event 
       Streams are defined, provisioned, managed, monitored,
       and configured and is out of scope of this specification.
-      <vspace/>[[This work is TBD by the SECEVENTS WG]]</t>
+      </t>
       
       
 
@@ -120,7 +120,7 @@
 
 			<section anchor="defs" title="Definitions" toc="default">
         <t>This specification assumes terminology defined in the Security
-        Event Token specification<xref target="I-D.ietf-secevent-token"/>
+        Event Token specification<xref target="RFC8417"/>
         .</t>
 				<t>
 					The following definitions are defined for Security Event distribution:
@@ -162,7 +162,7 @@
             
             <t hangText="Event"><vspace/>An Event is defined to be an 
             event as represented by a security event token (SET).
-            See <xref target="I-D.ietf-secevent-token"/>.</t>
+            See <xref target="RFC8417"/>.</t>
 
             <t hangText="NumericDate"><vspace/>
             A JSON numeric value representing the number of seconds from
@@ -187,7 +187,7 @@
     
     <section anchor="process" title="Event Delivery Process">
 			<t>When an Event occurs, the Event Transmitter constructs a SET
-      token <xref target="I-D.ietf-secevent-token" /> that describes the	
+      token <xref target="RFC8417" /> that describes the	
       Event. The Event Transmitter determines the Event Streams over which the
       SET should be distributed to.</t>
       <t> 
@@ -215,7 +215,7 @@
         <xref target="RFC7519"/> with a <spanx style="verb">Content-Type</spanx> 
         header of <spanx style="verb">application/secevent+jwt</spanx> 
         as defined in Section 2.2 and 6.2 of 
-        <xref target="I-D.ietf-secevent-token"/>. Upon receipt, the 
+        <xref target="RFC8417"/>. Upon receipt, the 
         Event Receiver acknowledges receipt with a response with HTTP 
         Status 202, as described below in <xref target="httpPost"/>.</t>
 
@@ -252,7 +252,7 @@
      (not defined by this document).</t>
           
      <t>The SET to be delivered MAY be signed 
-     and/or encrypted as defined in <xref target="I-D.ietf-secevent-token" />.</t>
+     and/or encrypted as defined in <xref target="RFC8417" />.</t>
            
      <t>The Event Stream configuration defines a URI of an Event 
      Receiver provided endpoint which accepts HTTP POST requests (e.g. 
@@ -261,7 +261,7 @@
      <t>The HTTP Content-Type (see 
      <xref target="RFC7231">Section 3.1.1.5</xref>) for the HTTP POST is 
      <spanx style="verb">application/secevent+jwt</spanx> and SHALL consist of 
-     a single SET (see <xref target="I-D.ietf-secevent-token" />).
+     a single SET (see <xref target="RFC8417" />).
      As per <xref target="RFC7231">Section 5.3.2</xref>, the expected 
      media type (<spanx style="verb">Accept</spanx> header) response is 
      <spanx style="verb">application/json</spanx>.</t>
@@ -297,7 +297,7 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
      validate the JWT structure of the SET as defined in 
      <xref target="RFC7519">Section 7.2</xref>. The Event Receiver 
      SHALL also validate the SET information as described
-     in <xref target="I-D.ietf-secevent-token">Section 2</xref>.</t>
+     in <xref target="RFC8417">Section 2</xref>.</t>
      <t>If the SET is determined to be valid, the Event Receiver SHALL
      "acknowledge" successful submission by responding with HTTP Status
      202 as <spanx style="verb">Accepted</spanx> 
@@ -330,7 +330,7 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
      MAY respond with an appropriate HTTP Status code as defined in 
      <xref target="RFC7231">Section 6</xref>.</t>
      <t>When the Event Receiver detects an error parsing or 
-     validating a received SET (as defined by <xref target="I-D.ietf-secevent-token"/>), 
+     validating a received SET (as defined by <xref target="RFC8417"/>), 
      the Event Receiver SHALL indicate an HTTP Status 400 error with an 
      error code as described in <xref target="errorResponse"/>.
      </t>
@@ -463,7 +463,7 @@ Content-Type: application/json
       <section anchor="payloadAuthentication" title="Authentication Using Signed SETs">
       <t>In scenarios where HTTP authorization or TLS mutual authentication
       are not used or are considered weak, JWS signed SETs SHOULD be 
-      used (see <xref target="RFC7515"/> and <xref target="I-D.ietf-secevent-token">
+      used (see <xref target="RFC7515"/> and <xref target="RFC8417">
       Security Considerations</xref>). This enables the Event Receiver
       to validate that the SET issuer is authorized to deliver SETs.
       </t>
@@ -579,7 +579,7 @@ Content-Type: application/json
 
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml' ?>
    
-      <?rfc include='http://xml.resource.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-token-00.xml'?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8417.xml'?>
 
     </references>
 
