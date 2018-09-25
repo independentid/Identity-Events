@@ -18,7 +18,7 @@ Expires: March 29, 2019                                        Microsoft
 
 
                 Push-Based SET Token Delivery Using HTTP
-                    draft-ietf-secevent-http-push-00
+                    draft-ietf-secevent-http-push-01
 
 Abstract
 
