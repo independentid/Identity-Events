@@ -380,7 +380,8 @@
 <link href="#rfc.section.2" rel="Chapter" title="2 Event Delivery">
 <link href="#rfc.section.2.1" rel="Chapter" title="2.1 Event Delivery Process">
 <link href="#rfc.section.2.2" rel="Chapter" title="2.2 Push Delivery using HTTP">
-<link href="#rfc.section.2.3" rel="Chapter" title="2.3 Error Response Handling">
+<link href="#rfc.section.2.3" rel="Chapter" title="2.3 Security Event Token Delivery Error Codes">
+<link href="#rfc.section.2.3.1" rel="Chapter" title="2.3.1 Error Response Handling">
 <link href="#rfc.section.3" rel="Chapter" title="3 Authentication and Authorization">
 <link href="#rfc.section.3.1" rel="Chapter" title="3.1 Use of Tokens as Authorizations">
 <link href="#rfc.section.4" rel="Chapter" title="4 Security Considerations">
@@ -391,6 +392,9 @@
 <link href="#rfc.section.4.4.1" rel="Chapter" title="4.4.1 Bearer Token Considerations">
 <link href="#rfc.section.5" rel="Chapter" title="5 Privacy Considerations">
 <link href="#rfc.section.6" rel="Chapter" title="6 IANA Considerations">
+<link href="#rfc.section.6.1" rel="Chapter" title="6.1 Security Event Token Delivery Error Codes">
+<link href="#rfc.section.6.1.1" rel="Chapter" title="6.1.1 Registration Template">
+<link href="#rfc.section.6.1.2" rel="Chapter" title="6.1.2 Initial Registry Contents">
 <link href="#rfc.references" rel="Chapter" title="7 References">
 <link href="#rfc.references.1" rel="Chapter" title="7.1 Normative References">
 <link href="#rfc.references.2" rel="Chapter" title="7.2 Informative References">
@@ -504,9 +508,11 @@
 </li>
 <li>2.2.   <a href="#rfc.section.2.2">Push Delivery using HTTP</a>
 </li>
-<li>2.3.   <a href="#rfc.section.2.3">Error Response Handling</a>
+<li>2.3.   <a href="#rfc.section.2.3">Security Event Token Delivery Error Codes</a>
 </li>
-</ul><li>3.   <a href="#rfc.section.3">Authentication and Authorization</a>
+<ul><li>2.3.1.   <a href="#rfc.section.2.3.1">Error Response Handling</a>
+</li>
+</ul></ul><li>3.   <a href="#rfc.section.3">Authentication and Authorization</a>
 </li>
 <ul><li>3.1.   <a href="#rfc.section.3.1">Use of Tokens as Authorizations</a>
 </li>
@@ -526,7 +532,13 @@
 </li>
 <li>6.   <a href="#rfc.section.6">IANA Considerations</a>
 </li>
-<li>7.   <a href="#rfc.references">References</a>
+<ul><li>6.1.   <a href="#rfc.section.6.1">Security Event Token Delivery Error Codes</a>
+</li>
+<ul><li>6.1.1.   <a href="#rfc.section.6.1.1">Registration Template</a>
+</li>
+<li>6.1.2.   <a href="#rfc.section.6.1.2">Initial Registry Contents</a>
+</li>
+</ul></ul><li>7.   <a href="#rfc.references">References</a>
 </li>
 <ul><li>7.1.   <a href="#rfc.references.1">Normative References</a>
 </li>
@@ -630,7 +642,7 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
 <p class="figure">Figure 2: Example Successful Delivery Response</p>
 <p id="rfc.section.2.2.p.7">Note that the purpose of the "acknowledgement" response is to let the SET Transmitter know that a SET has been delivered and the information no longer needs to be retained by the SET Transmitter.  Before acknowledgement, SET Receivers SHOULD ensure they have validated received SETs and retained them in a manner appropriate to information retention requirements appropriate to the SET event types signaled. The level and method of retention of SETs by SET Receivers is out-of-scope of this specification.</p>
 <p id="rfc.section.2.2.p.8">In the Event of a general HTTP error condition, the SET Receiver MAY respond with an appropriate HTTP Status code as defined in <a href="#RFC7231" class="xref">Section 6</a>.</p>
-<p id="rfc.section.2.2.p.9">When the SET Receiver detects an error parsing or validating a received SET (as defined by <a href="#RFC8417" class="xref">[RFC8417]</a>), the SET Receiver SHALL indicate an HTTP Status 400 error with an error code as described in <a href="#errorResponse" class="xref">Section 2.3</a>.  </p>
+<p id="rfc.section.2.2.p.9">When the SET Receiver detects an error parsing or validating a received SET (as defined by <a href="#RFC8417" class="xref">[RFC8417]</a>), the SET Receiver SHALL indicate an HTTP Status 400 error with an error response as described in <a href="#errorResponse" class="xref">Section 2.3.1</a>.  </p>
 <div id="rfc.figure.3"></div>
 <div id="badPostResponse"></div>
 <p>The following is an example non-normative error response.</p>
@@ -644,14 +656,14 @@ Content-Type: application/json
 }</pre>
 <p class="figure">Figure 3: Example HTTP Status 400 Response</p>
 <h1 id="rfc.section.2.3">
-<a href="#rfc.section.2.3">2.3.</a> <a href="#errorResponse" id="errorResponse">Error Response Handling</a>
+<a href="#rfc.section.2.3">2.3.</a> <a href="#error_codes" id="error_codes">Security Event Token Delivery Error Codes</a>
 </h1>
-<p></p>
-<p id="rfc.section.2.3.p.2">If a SET is invalid, the following error codes are defined:</p>
+<p id="rfc.section.2.3.p.1">Security Event Token Delivery Error Codes are strings that identify a specific type of error that may occur when parsing or validating a SET.  Every Security Event Token Delivery Error Code MUST have a unique name registered in the IANA "Security Event Token Delivery Error Codes" registry established by <a href="#iana_set_errors" class="xref">Section 6.1</a>.</p>
+<p id="rfc.section.2.3.p.2">The following table presents the initial set of Error Codes that are registered in the IANA "Security Event Token Delivery Error Codes" registry:</p>
 <div id="rfc.table.1"></div>
 <div id="reqErrors"></div>
 <table cellpadding="3" cellspacing="0" class="tt full center">
-<caption>SET Errors</caption>
+<caption>SET Delivery Error Codes</caption>
 <thead><tr>
 <th class="left">Err Value</th>
 <th class="left">Description</th>
@@ -707,7 +719,10 @@ Content-Type: application/json
 </tr>
 </tbody>
 </table>
-<p id="rfc.section.2.3.p.3">An error response SHALL include a JSON object which provides details about the error. The JSON object includes the JSON attributes: <a href="#badPostResponse" class="xref">Figure 3</a>).</p>
+<h1 id="rfc.section.2.3.1">
+<a href="#rfc.section.2.3.1">2.3.1.</a> <a href="#errorResponse" id="errorResponse">Error Response Handling</a>
+</h1>
+<p id="rfc.section.2.3.1.p.1">An error response SHALL include a JSON object which provides details about the error. The JSON object includes the JSON attributes: <a href="#badPostResponse" class="xref">Figure 3</a>).</p>
 
 <dl>
 <dt>err</dt>
@@ -784,7 +799,242 @@ Content-Type: application/json
 <h1 id="rfc.section.6">
 <a href="#rfc.section.6">6.</a> <a href="#IANA" id="IANA">IANA Considerations</a>
 </h1>
-<p id="rfc.section.6.p.1">There are no IANA considerations.</p>
+<h1 id="rfc.section.6.1">
+<a href="#rfc.section.6.1">6.1.</a> <a href="#iana_set_errors" id="iana_set_errors">Security Event Token Delivery Error Codes</a>
+</h1>
+<p id="rfc.section.6.1.p.1">This document defines Security Event Token Delivery Error Codes, for which IANA is asked to create and maintain a new registry titled "Security Event Token Delivery Error Codes".  Initial values for the Security Event Token Delivery Error Codes registry are given in <a href="#reqErrors" class="xref">Table 1</a>.  Future assignments are to be made through the Expert Review registration policy (<a href="#RFC8126" class="xref">[RFC8126]</a>) and shall follow the template presented in <a href="#iana_set_errors_template" class="xref">Section 6.1.1</a>.  </p>
+<h1 id="rfc.section.6.1.1">
+<a href="#rfc.section.6.1.1">6.1.1.</a> <a href="#iana_set_errors_template" id="iana_set_errors_template">Registration Template</a>
+</h1>
+<p></p>
+
+<dl>
+<dt>Error Code</dt>
+<dd style="margin-left: 8">
+<br> The name of the Security Event Token Delivery Error Code, as described in <a href="#error_codes" class="xref">Section 2.3</a>. The name MUST be a case-sensitive ASCII string consisting only of upper-case letters ("A" - "Z"), lower-case letters ("a" - "z"), and digits ("0" - "9").  </dd>
+<dt>Description</dt>
+<dd style="margin-left: 8">
+<br> A brief human-readable description of the Security Event Token Delivery Error Code.  </dd>
+<dt>Change Controller</dt>
+<dd style="margin-left: 8">
+<br> For error codes registered by the IETF or its working groups, list "IETF Secevent Working Group".  For all other error codes, list the name of the party responsible for the registration.  Contact information such as mailing address, email address, or phone number may also be provided.  </dd>
+<dt>Defining Document(s)</dt>
+<dd style="margin-left: 8">
+<br> A reference to the document or documents that define the Security Event Token Delivery Error Code. The definition MUST specify the name and description of the error code, and explain under what circumstances the error code may be used. URIs that can be used to retrieve copies of each document at no cost SHOULD be included.  </dd>
+</dl>
+
+<p> </p>
+<h1 id="rfc.section.6.1.2">
+<a href="#rfc.section.6.1.2">6.1.2.</a> Initial Registry Contents</h1>
+<p></p>
+
+<ul>
+<li>
+<dl>
+<dt>Name</dt>
+<dd style="margin-left: 8">
+<br>json</dd>
+<dt>Description</dt>
+<dd style="margin-left: 8">
+<br>Invalid JSON object.</dd>
+<dt>Change Controller</dt>
+<dd style="margin-left: 8">
+<br>IETF Secevent Working Group</dd>
+<dt>Defining Document(s)</dt>
+<dd style="margin-left: 8">
+<br> <a href="#error_codes" class="xref">Section 2.3</a> of this document.  </dd>
+</dl>
+<p> </p>
+</li>
+<li>
+<dl>
+<dt>Name</dt>
+<dd style="margin-left: 8">
+<br>jwtParse</dd>
+<dt>Description</dt>
+<dd style="margin-left: 8">
+<br>Invalid or unparsable JWT or JSON structure.</dd>
+<dt>Change Controller</dt>
+<dd style="margin-left: 8">
+<br>IETF Secevent Working Group</dd>
+<dt>Defining Document(s)</dt>
+<dd style="margin-left: 8">
+<br> <a href="#error_codes" class="xref">Section 2.3</a> of this document.  </dd>
+</dl>
+<p> </p>
+</li>
+<li>
+<dl>
+<dt>Name</dt>
+<dd style="margin-left: 8">
+<br>jwtHdr</dd>
+<dt>Description</dt>
+<dd style="margin-left: 8">
+<br>An invalid JWT header was detected.</dd>
+<dt>Change Controller</dt>
+<dd style="margin-left: 8">
+<br>IETF Secevent Working Group</dd>
+<dt>Defining Document(s)</dt>
+<dd style="margin-left: 8">
+<br> <a href="#error_codes" class="xref">Section 2.3</a> of this document.  </dd>
+</dl>
+<p> </p>
+</li>
+<li>
+<dl>
+<dt>Name</dt>
+<dd style="margin-left: 8">
+<br>jwtCrypto</dd>
+<dt>Description</dt>
+<dd style="margin-left: 8">
+<br>Unable to parse due to unsupported algorithm.</dd>
+<dt>Change Controller</dt>
+<dd style="margin-left: 8">
+<br>IETF Secevent Working Group</dd>
+<dt>Defining Document(s)</dt>
+<dd style="margin-left: 8">
+<br> <a href="#error_codes" class="xref">Section 2.3</a> of this document.  </dd>
+</dl>
+<p> </p>
+</li>
+<li>
+<dl>
+<dt>Name</dt>
+<dd style="margin-left: 8">
+<br>jws</dd>
+<dt>Description</dt>
+<dd style="margin-left: 8">
+<br>Signature was not validated.</dd>
+<dt>Change Controller</dt>
+<dd style="margin-left: 8">
+<br>IETF Secevent Working Group</dd>
+<dt>Defining Document(s)</dt>
+<dd style="margin-left: 8">
+<br> <a href="#error_codes" class="xref">Section 2.3</a> of this document.  </dd>
+</dl>
+<p> </p>
+</li>
+<li>
+<dl>
+<dt>Name</dt>
+<dd style="margin-left: 8">
+<br>jwe</dd>
+<dt>Description</dt>
+<dd style="margin-left: 8">
+<br>Unable to decrypt JWE encoded data.</dd>
+<dt>Change Controller</dt>
+<dd style="margin-left: 8">
+<br>IETF Secevent Working Group</dd>
+<dt>Defining Document(s)</dt>
+<dd style="margin-left: 8">
+<br> <a href="#error_codes" class="xref">Section 2.3</a> of this document.  </dd>
+</dl>
+<p> </p>
+</li>
+<li>
+<dl>
+<dt>Name</dt>
+<dd style="margin-left: 8">
+<br>jwtAud</dd>
+<dt>Description</dt>
+<dd style="margin-left: 8">
+<br>Invalid audience value.</dd>
+<dt>Change Controller</dt>
+<dd style="margin-left: 8">
+<br>IETF Secevent Working Group</dd>
+<dt>Defining Document(s)</dt>
+<dd style="margin-left: 8">
+<br> <a href="#error_codes" class="xref">Section 2.3</a> of this document.  </dd>
+</dl>
+<p> </p>
+</li>
+<li>
+<dl>
+<dt>Name</dt>
+<dd style="margin-left: 8">
+<br>jwtIss</dd>
+<dt>Description</dt>
+<dd style="margin-left: 8">
+<br>Issuer not recognized.</dd>
+<dt>Change Controller</dt>
+<dd style="margin-left: 8"><br></dd>
+<dt>Defining Document(s)</dt>
+<dd style="margin-left: 8">
+<br> <a href="#error_codes" class="xref">Section 2.3</a> of this document.  </dd>
+</dl>
+<p> </p>
+</li>
+<li>
+<dl>
+<dt>Name</dt>
+<dd style="margin-left: 8">
+<br>setType</dd>
+<dt>Description</dt>
+<dd style="margin-left: 8">
+<br>An unexpected Event type was received.</dd>
+<dt>Change Controller</dt>
+<dd style="margin-left: 8">
+<br>IETF Secevent Working Group</dd>
+<dt>Defining Document(s)</dt>
+<dd style="margin-left: 8">
+<br> <a href="#error_codes" class="xref">Section 2.3</a> of this document.  </dd>
+</dl>
+<p> </p>
+</li>
+<li>
+<dl>
+<dt>Name</dt>
+<dd style="margin-left: 8">
+<br>setParse</dd>
+<dt>Description</dt>
+<dd style="margin-left: 8">
+<br> Invalid structure was encountered such as an inability to parse or an incomplete set of Event claims.  </dd>
+<dt>Change Controller</dt>
+<dd style="margin-left: 8">
+<br>IETF Secevent Working Group</dd>
+<dt>Defining Document(s)</dt>
+<dd style="margin-left: 8">
+<br> <a href="#error_codes" class="xref">Section 2.3</a> of this document.  </dd>
+</dl>
+<p> </p>
+</li>
+<li>
+<dl>
+<dt>Name</dt>
+<dd style="margin-left: 8">
+<br>setData</dd>
+<dt>Description</dt>
+<dd style="margin-left: 8">
+<br>SET event claims incomplete or invalid.</dd>
+<dt>Change Controller</dt>
+<dd style="margin-left: 8">
+<br>IETF Secevent Working Group</dd>
+<dt>Defining Document(s)</dt>
+<dd style="margin-left: 8">
+<br> <a href="#error_codes" class="xref">Section 2.3</a> of this document.  </dd>
+</dl>
+<p> </p>
+</li>
+<li>
+<dl>
+<dt>Name</dt>
+<dd style="margin-left: 8">
+<br>dup</dd>
+<dt>Description</dt>
+<dd style="margin-left: 8">
+<br> A duplicate SET was received and has been ignored.  </dd>
+<dt>Change Controller</dt>
+<dd style="margin-left: 8">
+<br>IETF Secevent Working Group</dd>
+<dt>Defining Document(s)</dt>
+<dd style="margin-left: 8">
+<br> <a href="#error_codes" class="xref">Section 2.3</a> of this document.  </dd>
+</dl>
+<p> </p>
+</li>
+</ul>
+
+<p> </p>
 <h1 id="rfc.references">
 <a href="#rfc.references">7.</a> References</h1>
 <h1 id="rfc.references.1">
@@ -839,6 +1089,11 @@ Content-Type: application/json
 <td class="reference"><b id="RFC7525">[RFC7525]</b></td>
 <td class="top">
 <a>Sheffer, Y.</a>, <a>Holz, R.</a> and <a>P. Saint-Andre</a>, "<a href="http://tools.ietf.org/html/rfc7525">Recommendations for Secure Use of Transport Layer Security (TLS) and Datagram Transport Layer Security (DTLS)</a>", BCP 195, RFC 7525, DOI 10.17487/RFC7525, May 2015.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC8126">[RFC8126]</b></td>
+<td class="top">
+<a>Cotton, M.</a>, <a>Leiba, B.</a> and <a>T. Narten</a>, "<a href="http://tools.ietf.org/html/rfc8126">Guidelines for Writing an IANA Considerations Section in RFCs</a>", BCP 26, RFC 8126, DOI 10.17487/RFC8126, June 2017.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC8174">[RFC8174]</b></td>

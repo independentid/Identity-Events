@@ -278,7 +278,7 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
      <t>When the SET Receiver detects an error parsing or 
      validating a received SET (as defined by <xref target="RFC8417"/>), 
      the SET Receiver SHALL indicate an HTTP Status 400 error with an 
-     error code as described in <xref target="errorResponse"/>.
+     error response as described in <xref target="errorResponse"/>.
      </t>
      
      <figure anchor="badPostResponse" title="Example HTTP Status 400 Response">
@@ -295,10 +295,16 @@ Content-Type: application/json
      </figure>    
      </section>
      
-     <section anchor="errorResponse" title="Error Response Handling">
-        <t></t>
-        <t>If a SET is invalid, the following error codes are defined:</t>
-        <texttable anchor="reqErrors" title="SET Errors">
+     <section anchor="error_codes" title="Security Event Token Delivery Error Codes">
+         <t>Security Event Token Delivery Error Codes are strings that identify a
+            specific type of error that may occur when parsing or validating a SET.
+            Every Security Event Token Delivery Error Code MUST have a unique name
+            registered in the IANA "Security Event Token Delivery Error Codes"
+            registry established by <xref target="iana_set_errors"/>.</t>
+
+        <t>The following table presents the initial set of Error Codes that are registered
+           in the IANA "Security Event Token Delivery Error Codes" registry:</t>
+        <texttable anchor="reqErrors" title="SET Delivery Error Codes">
           <ttcol>Err Value</ttcol><ttcol>Description</ttcol>
           <c>json</c><c>Invalid JSON object.</c>
           <c>jwtParse</c><c>Invalid or unparsable JWT or JSON structure.</c>
@@ -315,16 +321,18 @@ Content-Type: application/json
           <c>dup</c><c>A duplicate SET was received and has been ignored.</c>
         </texttable>
             
-        <t>An error response SHALL include a JSON
-        object which provides details about the error. The JSON object
-        includes the JSON attributes: <list style="hanging">
-          <t hangText="err"><vspace />A value which is a keyword that 
-          describes the error (see <xref target="reqErrors" />).</t>
-          <t hangText="description"><vspace />A human-readable text that provides
-          additional diagnostic information.</t>
-        </list>
-        When included as part of an HTTP Status 400 response, the above
-        JSON is the HTTP response body (see <xref target="badPostResponse"/>).</t>
+        <section anchor="errorResponse" title="Error Response Handling">
+            <t>An error response SHALL include a JSON
+            object which provides details about the error. The JSON object
+            includes the JSON attributes: <list style="hanging">
+              <t hangText="err"><vspace />A value which is a keyword that 
+              describes the error (see <xref target="reqErrors" />).</t>
+              <t hangText="description"><vspace />A human-readable text that provides
+              additional diagnostic information.</t>
+            </list>
+            When included as part of an HTTP Status 400 response, the above
+            JSON is the HTTP response body (see <xref target="badPostResponse"/>).</t>
+        </section>
          
         </section>  
        
@@ -497,7 +505,195 @@ Content-Type: application/json
 
     <section anchor="IANA" title="IANA Considerations">
       
-      <t>There are no IANA considerations.</t>
+        <section anchor="iana_set_errors" title="Security Event Token Delivery Error Codes">
+            <t>
+                This document defines Security Event Token Delivery Error Codes, for which IANA
+                is asked to create and maintain a new registry titled "Security Event Token
+                Delivery Error Codes".  Initial values for the Security Event Token Delivery
+                Error Codes registry are given in <xref target="reqErrors"/>.  Future assignments
+                are to be made through the Expert Review registration policy (<xref target="RFC8126"/>)
+                and shall follow the template presented in <xref target="iana_set_errors_template"/>.
+            </t>
+
+            <section anchor="iana_set_errors_template" title="Registration Template">
+                <t>
+                    <list style="hanging">
+                        <t hangText="Error Code">
+                            <vspace/>
+                            The name of the Security Event Token Delivery Error Code, as described
+                            in <xref target="error_codes"/>. The name MUST be a case-sensitive ASCII
+                            string consisting only of upper-case letters ("A" - "Z"), lower-case
+                            letters ("a" - "z"), and digits ("0" - "9").
+                        </t>
+                        <t hangText="Description">
+                            <vspace/>
+                            A brief human-readable description of the Security Event Token Delivery
+                            Error Code.
+                        </t>
+                        <t hangText="Change Controller">
+                            <vspace/>
+                            For error codes registered by the IETF or its working groups, list "IETF
+                            Secevent Working Group".  For all other error codes, list the name of the
+                            party responsible for the registration.  Contact information such as
+                            mailing address, email address, or phone number may also be provided.
+                        </t>
+                        <t hangText="Defining Document(s)">
+                            <vspace/>
+                            A reference to the document or documents that define the Security Event
+                            Token Delivery Error Code. The definition MUST specify the name and
+                            description of the error code, and explain under what circumstances the
+                            error code may be used. URIs that can be used to retrieve copies of each
+                            document at no cost SHOULD be included.
+                        </t>
+                    </list>
+                </t>
+            </section>
+            <section title="Initial Registry Contents">
+                <t>
+                    <!-- [richanna] This needs better formatting. -->
+                    <list style="symbols">
+                        <t>
+                            <list style="hanging">
+                                <t hangText="Name"><vspace/>json</t>
+                                <t hangText="Description"><vspace/>Invalid JSON object.</t>
+                                <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
+                                <t hangText="Defining Document(s)">
+                                    <vspace/>
+                                    <xref target="error_codes"/> of this document.
+                                </t>
+                            </list>
+                        </t>
+                        <t>
+                            <list style="hanging">
+                                <t hangText="Name"><vspace/>jwtParse</t>
+                                <t hangText="Description"><vspace/>Invalid or unparsable JWT or JSON structure.</t>
+                                <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
+                                <t hangText="Defining Document(s)">
+                                    <vspace/>
+                                    <xref target="error_codes"/> of this document.
+                                </t>
+                            </list>
+                        </t>
+                        <t>
+                            <list style="hanging">
+                                <t hangText="Name"><vspace/>jwtHdr</t>
+                                <t hangText="Description"><vspace/>An invalid JWT header was detected.</t>
+                                <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
+                                <t hangText="Defining Document(s)">
+                                    <vspace/>
+                                    <xref target="error_codes"/> of this document.
+                                </t>
+                            </list>
+                        </t>
+                        <t>
+                            <list style="hanging">
+                                <t hangText="Name"><vspace/>jwtCrypto</t>
+                                <t hangText="Description"><vspace/>Unable to parse due to unsupported algorithm.</t>
+                                <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
+                                <t hangText="Defining Document(s)">
+                                    <vspace/>
+                                    <xref target="error_codes"/> of this document.
+                                </t>
+                            </list>
+                        </t>
+                        <t>
+                            <list style="hanging">
+                                <t hangText="Name"><vspace/>jws</t>
+                                <t hangText="Description"><vspace/>Signature was not validated.</t>
+                                <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
+                                <t hangText="Defining Document(s)">
+                                    <vspace/>
+                                    <xref target="error_codes"/> of this document.
+                                </t>
+                            </list>
+                        </t>
+                        <t>
+                            <list style="hanging">
+                                <t hangText="Name"><vspace/>jwe</t>
+                                <t hangText="Description"><vspace/>Unable to decrypt JWE encoded data.</t>
+                                <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
+                                <t hangText="Defining Document(s)">
+                                    <vspace/>
+                                    <xref target="error_codes"/> of this document.
+                                </t>
+                            </list>
+                        </t>
+                        <t>
+                            <list style="hanging">
+                                <t hangText="Name"><vspace/>jwtAud</t>
+                                <t hangText="Description"><vspace/>Invalid audience value.</t>
+                                <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
+                                <t hangText="Defining Document(s)">
+                                    <vspace/>
+                                    <xref target="error_codes"/> of this document.
+                                </t>
+                            </list>
+                        </t>
+                        <t>
+                            <list style="hanging">
+                                <t hangText="Name"><vspace/>jwtIss</t>
+                                <t hangText="Description"><vspace/>Issuer not recognized.</t>
+                                <t hangText="Change Controller"><vspace/></t>
+                                <t hangText="Defining Document(s)">
+                                    <vspace/>
+                                    <xref target="error_codes"/> of this document.
+                                </t>
+                            </list>
+                        </t>
+                        <t>
+                            <list style="hanging">
+                                <t hangText="Name"><vspace/>setType</t>
+                                <t hangText="Description"><vspace/>An unexpected Event type was received.</t>
+                                <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
+                                <t hangText="Defining Document(s)">
+                                    <vspace/>
+                                    <xref target="error_codes"/> of this document.
+                                </t>
+                            </list>
+                        </t>
+                        <t>
+                            <list style="hanging">
+                                <t hangText="Name"><vspace/>setParse</t>
+                                <t hangText="Description">
+                                    <vspace/>
+                                    Invalid structure was encountered such as an inability to parse or an
+                                    incomplete set of Event claims.
+                                </t>
+                                <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
+                                <t hangText="Defining Document(s)">
+                                    <vspace/>
+                                    <xref target="error_codes"/> of this document.
+                                </t>
+                            </list>
+                        </t>
+                        <t>
+                            <list style="hanging">
+                                <t hangText="Name"><vspace/>setData</t>
+                                <t hangText="Description"><vspace/>SET event claims incomplete or invalid.</t>
+                                <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
+                                <t hangText="Defining Document(s)">
+                                    <vspace/>
+                                    <xref target="error_codes"/> of this document.
+                                </t>
+                            </list>
+                        </t>
+                        <t>
+                            <list style="hanging">
+                                <t hangText="Name"><vspace/>dup</t>
+                                <t hangText="Description">
+                                    <vspace/> A duplicate SET was received and has been ignored.
+                                </t>
+                                <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
+                                <t hangText="Defining Document(s)">
+                                    <vspace/>
+                                    <xref target="error_codes"/> of this document.
+                                </t>
+                            </list>
+                        </t>
+                    </list>
+                </t>
+            </section>
+        </section>
   
     </section>
   </middle>
@@ -522,6 +718,7 @@ Content-Type: application/json
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml' ?>
    
       <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8417.xml'?>
+      <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8126.xml' ?>
 
     </references>
 
