@@ -275,7 +275,7 @@ Content-Type: application/json
         <t>The following table presents the initial set of Error Codes that are registered
            in the IANA "Security Event Token Delivery Error Codes" registry:</t>
         <texttable anchor="reqErrors" title="SET Delivery Error Codes">
-          <ttcol>Err Value</ttcol><ttcol>Description</ttcol>
+          <ttcol>Error Code</ttcol><ttcol>Description</ttcol>
           <c>json</c><c>Invalid JSON object.</c>
           <c>jwtParse</c><c>Invalid or unparsable JWT or JSON structure.</c>
           <c>jwtHdr</c><c>In invalid JWT header was detected.</c>
@@ -426,7 +426,7 @@ Content-Type: application/json
                     <list style="symbols">
                         <t>
                             <list style="hanging">
-                                <t hangText="Name"><vspace/>json</t>
+                                <t hangText="Error Code"><vspace/>json</t>
                                 <t hangText="Description"><vspace/>Invalid JSON object.</t>
                                 <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
                                 <t hangText="Defining Document(s)">
@@ -437,7 +437,7 @@ Content-Type: application/json
                         </t>
                         <t>
                             <list style="hanging">
-                                <t hangText="Name"><vspace/>jwtParse</t>
+                                <t hangText="Error Code"><vspace/>jwtParse</t>
                                 <t hangText="Description"><vspace/>Invalid or unparsable JWT or JSON structure.</t>
                                 <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
                                 <t hangText="Defining Document(s)">
@@ -448,7 +448,7 @@ Content-Type: application/json
                         </t>
                         <t>
                             <list style="hanging">
-                                <t hangText="Name"><vspace/>jwtHdr</t>
+                                <t hangText="Error Code"><vspace/>jwtHdr</t>
                                 <t hangText="Description"><vspace/>An invalid JWT header was detected.</t>
                                 <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
                                 <t hangText="Defining Document(s)">
@@ -459,7 +459,7 @@ Content-Type: application/json
                         </t>
                         <t>
                             <list style="hanging">
-                                <t hangText="Name"><vspace/>jwtCrypto</t>
+                                <t hangText="Error Code"><vspace/>jwtCrypto</t>
                                 <t hangText="Description"><vspace/>Unable to parse due to unsupported algorithm.</t>
                                 <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
                                 <t hangText="Defining Document(s)">
@@ -470,7 +470,7 @@ Content-Type: application/json
                         </t>
                         <t>
                             <list style="hanging">
-                                <t hangText="Name"><vspace/>jws</t>
+                                <t hangText="Error Code"><vspace/>jws</t>
                                 <t hangText="Description"><vspace/>Signature was not validated.</t>
                                 <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
                                 <t hangText="Defining Document(s)">
@@ -481,7 +481,7 @@ Content-Type: application/json
                         </t>
                         <t>
                             <list style="hanging">
-                                <t hangText="Name"><vspace/>jwe</t>
+                                <t hangText="Error Code"><vspace/>jwe</t>
                                 <t hangText="Description"><vspace/>Unable to decrypt JWE encoded data.</t>
                                 <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
                                 <t hangText="Defining Document(s)">
@@ -492,7 +492,7 @@ Content-Type: application/json
                         </t>
                         <t>
                             <list style="hanging">
-                                <t hangText="Name"><vspace/>jwtAud</t>
+                                <t hangText="Error Code"><vspace/>jwtAud</t>
                                 <t hangText="Description"><vspace/>Invalid audience value.</t>
                                 <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
                                 <t hangText="Defining Document(s)">
@@ -503,7 +503,7 @@ Content-Type: application/json
                         </t>
                         <t>
                             <list style="hanging">
-                                <t hangText="Name"><vspace/>jwtIss</t>
+                                <t hangText="Error Code"><vspace/>jwtIss</t>
                                 <t hangText="Description"><vspace/>Issuer not recognized.</t>
                                 <t hangText="Change Controller"><vspace/></t>
                                 <t hangText="Defining Document(s)">
@@ -514,7 +514,7 @@ Content-Type: application/json
                         </t>
                         <t>
                             <list style="hanging">
-                                <t hangText="Name"><vspace/>setType</t>
+                                <t hangText="Error Code"><vspace/>setType</t>
                                 <t hangText="Description"><vspace/>An unexpected Event type was received.</t>
                                 <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
                                 <t hangText="Defining Document(s)">
@@ -525,7 +525,7 @@ Content-Type: application/json
                         </t>
                         <t>
                             <list style="hanging">
-                                <t hangText="Name"><vspace/>setParse</t>
+                                <t hangText="Error Code"><vspace/>setParse</t>
                                 <t hangText="Description">
                                     <vspace/>
                                     Invalid structure was encountered such as an inability to parse or an
@@ -540,7 +540,7 @@ Content-Type: application/json
                         </t>
                         <t>
                             <list style="hanging">
-                                <t hangText="Name"><vspace/>setData</t>
+                                <t hangText="Error Code"><vspace/>setData</t>
                                 <t hangText="Description"><vspace/>SET event claims incomplete or invalid.</t>
                                 <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
                                 <t hangText="Defining Document(s)">
@@ -551,7 +551,7 @@ Content-Type: application/json
                         </t>
                         <t>
                             <list style="hanging">
-                                <t hangText="Name"><vspace/>dup</t>
+                                <t hangText="Error Code"><vspace/>dup</t>
                                 <t hangText="Description">
                                     <vspace/> A duplicate SET was received and has been ignored.
                                 </t>
@@ -720,6 +720,7 @@ Content-Type: application/json
               <t>Removed text about SET creation and handling.</t>
               <t>Removed duplication in protocol description.</t>
               <t>Added "non-normative example" text to example transmission request.</t>
+              <t>Fixed inconsistencies in use of Error Code term.</t>
           </list>
       </t>
     </section>

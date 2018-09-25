@@ -308,7 +308,8 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    registry:
 
    +-----------+-------------------------------------------------------+
-   | Err Value | Description                                           |
+   | Error     | Description                                           |
+   | Code      |                                                       |
    +-----------+-------------------------------------------------------+
    | json      | Invalid JSON object.                                  |
    | jwtParse  | Invalid or unparsable JWT or JSON structure.          |
@@ -327,7 +328,6 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    +-----------+-------------------------------------------------------+
 
                      Table 1: SET Delivery Error Codes
-
 
 
 
@@ -471,7 +471,7 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
    o
 
-      Name
+      Error Code
          json
 
       Description
@@ -485,7 +485,7 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
    o
 
-      Name
+      Error Code
          jwtParse
 
       Description
@@ -506,7 +506,7 @@ Backman, et al.          Expires March 29, 2019                 [Page 9]
 Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
 
-      Name
+      Error Code
          jwtHdr
 
       Description
@@ -520,7 +520,7 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
    o
 
-      Name
+      Error Code
          jwtCrypto
 
       Description
@@ -534,7 +534,7 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
    o
 
-      Name
+      Error Code
          jws
 
       Description
@@ -548,7 +548,7 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
    o
 
-      Name
+      Error Code
          jwe
 
       Description
@@ -570,7 +570,7 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
    o
 
-      Name
+      Error Code
          jwtAud
 
       Description
@@ -584,7 +584,7 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
    o
 
-      Name
+      Error Code
          jwtIss
 
       Description
@@ -597,7 +597,7 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
    o
 
-      Name
+      Error Code
          setType
 
       Description
@@ -618,7 +618,7 @@ Backman, et al.          Expires March 29, 2019                [Page 11]
 Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
 
-      Name
+      Error Code
          setParse
 
       Description
@@ -633,7 +633,7 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
    o
 
-      Name
+      Error Code
          setData
 
       Description
@@ -647,7 +647,7 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
    o
 
-      Name
+      Error Code
          dup
 
       Description
@@ -961,6 +961,8 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    o  Added "non-normative example" text to example transmission
       request.
 
+   o  Fixed inconsistencies in use of Error Code term.
+
 Authors' Addresses
 
    Annabelle Backman (editor)
@@ -998,8 +1000,6 @@ Authors' Addresses
    Microsoft
 
    Email: tonynad@microsoft.com
-
-
 
 
 
