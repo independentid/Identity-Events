@@ -352,8 +352,7 @@ Content-Type: application/json
       <t>Because SET Delivery describes a simple function, authorization
       for the ability to pick-up or deliver SETs can be derived by
       considering the identity of the SET issuer, or via other employed
-      authentication methods. This specification considers authentication as a
-      feature to prevent denial-of-service attacks. Because SETs are
+      authentication methods.  Because SETs are
       not commands (see ), SET Receivers are free to ignore SETs that 
       are not of interest.</t>
 
@@ -409,6 +408,17 @@ Content-Type: application/json
         certificate check, per <xref target="RFC6125"/>. Implementation
         security considerations for TLS can be found in "Recommendations for
         Secure Use of TLS and DTLS" <xref target="RFC7525"/>.</t>
+      </section>
+
+      <section title="Denial of Service">
+        <t>
+            The SET Receiver may be vulnerable to a denial-of-service attack where a
+            malicious party makes a high volume of requests containing invalid SETs,
+            causing the endpoint to expend significant resources on cryptographic
+            operations that are bound to fail. This may be mitigated by authenticating
+            SET Transmitters with a mechanism with low runtime overhead, such as mutual
+            TLS or statically assigned bearer tokens.
+        </t>
       </section>
    </section>
    
@@ -765,6 +775,7 @@ Content-Type: application/json
               <t>Added IANA registry for SET Delivery Error Codes.</t>
               <t>Removed enumeration of HTTP authentication methods.</t>
               <t>Removed generally applicable guidance for HTTP, authorization tokens, and bearer tokens.</t>
+              <t>Moved guidance for using authentication methods as DoS protection to Security Considerations.</t>
           </list>
       </t>
     </section>

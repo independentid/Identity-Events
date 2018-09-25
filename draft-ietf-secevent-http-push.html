@@ -387,6 +387,7 @@
 <link href="#rfc.section.4" rel="Chapter" title="4 Security Considerations">
 <link href="#rfc.section.4.1" rel="Chapter" title="4.1 Authentication Using Signed SETs">
 <link href="#rfc.section.4.2" rel="Chapter" title="4.2 TLS Support Considerations">
+<link href="#rfc.section.4.3" rel="Chapter" title="4.3 Denial of Service">
 <link href="#rfc.section.5" rel="Chapter" title="5 Privacy Considerations">
 <link href="#rfc.section.6" rel="Chapter" title="6 IANA Considerations">
 <link href="#rfc.section.6.1" rel="Chapter" title="6.1 Security Event Token Delivery Error Codes">
@@ -518,6 +519,8 @@
 <ul><li>4.1.   <a href="#rfc.section.4.1">Authentication Using Signed SETs</a>
 </li>
 <li>4.2.   <a href="#rfc.section.4.2">TLS Support Considerations</a>
+</li>
+<li>4.3.   <a href="#rfc.section.4.3">Denial of Service</a>
 </li>
 </ul><li>5.   <a href="#rfc.section.5">Privacy Considerations</a>
 </li>
@@ -730,7 +733,7 @@ Content-Type: application/json
 </h1>
 <p id="rfc.section.3.p.1">The SET delivery method described in this specification is based upon HTTP and depends on the use of TLS and/or standard HTTP authentication and authorization schemes as per <a href="#RFC7235" class="xref">[RFC7235]</a>.  </p>
 <p id="rfc.section.3.p.2">As per <a href="#RFC7235" class="xref">Section 4.1 of</a>, a SET delivery endpoint SHALL indicate supported HTTP authentication schemes via the <samp>WWW-Authenticate</samp> header.</p>
-<p id="rfc.section.3.p.3">Because SET Delivery describes a simple function, authorization for the ability to pick-up or deliver SETs can be derived by considering the identity of the SET issuer, or via other employed authentication methods. This specification considers authentication as a feature to prevent denial-of-service attacks. Because SETs are not commands (see ), SET Receivers are free to ignore SETs that are not of interest.</p>
+<p id="rfc.section.3.p.3">Because SET Delivery describes a simple function, authorization for the ability to pick-up or deliver SETs can be derived by considering the identity of the SET issuer, or via other employed authentication methods.  Because SETs are not commands (see ), SET Receivers are free to ignore SETs that are not of interest.</p>
 <p id="rfc.section.3.p.4">For illustrative purposes only, SET delivery examples show an OAuth2 bearer token value <a href="#RFC6750" class="xref">[RFC6750]</a> in the authorization header.  This is not intended to imply that bearer tokens are preferred. However, the use of bearer tokens in the specification does reflect common practice. </p>
 <h1 id="rfc.section.3.1">
 <a href="#rfc.section.3.1">3.1.</a> <a href="#authzTokens" id="authzTokens">Use of Tokens as Authorizations</a>
@@ -754,6 +757,9 @@ Content-Type: application/json
 <h1 id="rfc.section.4.2">
 <a href="#rfc.section.4.2">4.2.</a> TLS Support Considerations</h1>
 <p id="rfc.section.4.2.p.1">SETs contain sensitive information that is considered PII (e.g. subject claims). Therefore, SET Transmitters and SET Receivers MUST require the use of a transport-layer security mechanism. Event delivery endpoints MUST support TLS 1.2 <a href="#RFC5246" class="xref">[RFC5246]</a> and MAY support additional transport-layer mechanisms meeting its security requirements.  When using TLS, the client MUST perform a TLS/SSL server certificate check, per <a href="#RFC6125" class="xref">[RFC6125]</a>. Implementation security considerations for TLS can be found in "Recommendations for Secure Use of TLS and DTLS" <a href="#RFC7525" class="xref">[RFC7525]</a>.</p>
+<h1 id="rfc.section.4.3">
+<a href="#rfc.section.4.3">4.3.</a> Denial of Service</h1>
+<p id="rfc.section.4.3.p.1">The SET Receiver may be vulnerable to a denial-of-service attack where a malicious party makes a high volume of requests containing invalid SETs, causing the endpoint to expend significant resources on cryptographic operations that are bound to fail. This may be mitigated by authenticating SET Transmitters with a mechanism with low runtime overhead, such as mutual TLS or statically assigned bearer tokens.  </p>
 <h1 id="rfc.section.5">
 <a href="#rfc.section.5">5.</a> Privacy Considerations</h1>
 <p id="rfc.section.5.p.1">If a SET needs to be retained for audit purposes, JWS MAY be used to provide verification of its authenticity.</p>
@@ -1176,6 +1182,7 @@ Content-Type: application/json
 <li>Added IANA registry for SET Delivery Error Codes.</li>
 <li>Removed enumeration of HTTP authentication methods.</li>
 <li>Removed generally applicable guidance for HTTP, authorization tokens, and bearer tokens.</li>
+<li>Moved guidance for using authentication methods as DoS protection to Security Considerations.</li>
 </ul>
 
 <p> </p>
