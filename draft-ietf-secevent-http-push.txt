@@ -122,14 +122,8 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
-   For purposes of readability examples are not URL encoded.
-   Implementers MUST percent encode URLs as described in Section 2.1 of
-   [RFC3986] .
-
-   Throughout this documents all figures MAY contain spaces and extra
-   line-wrapping for readability and space limitations.  Similarly, some
-   URI's contained within examples, have been shortened for space and
-   readability reasons.
+   Throughout this documents all figures may contain spaces and extra
+   line-wrapping for readability and space limitations.
 
 1.2.  Definitions
 
@@ -162,6 +156,12 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    o  The SET Transmitter uses an HTTP/1.1 POST to the SET Receiver
       endpoint to deliver the SET;
 
+   o  Or, the SET Transmitter delivers the Event through a different
+      method not defined by this specification.
+
+   In Push-Based SET Delivery Using HTTP, SETs are delivered one at a
+   time using HTTP POST requests by a SET Transmitter to a SET Receiver.
+   The HTTP request body is a JSON Web Token [RFC7519] with a "Content-
 
 
 
@@ -170,12 +170,6 @@ Backman, et al.          Expires March 29, 2019                 [Page 3]
 Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
 
-   o  Or, the SET Transmitter delivers the Event through a different
-      method not defined by this specification.
-
-   In Push-Based SET Delivery Using HTTP, SETs are delivered one at a
-   time using HTTP POST requests by a SET Transmitter to a SET Receiver.
-   The HTTP request body is a JSON Web Token [RFC7519] with a "Content-
    Type" header of "application/secevent+jwt" as defined in Section 2.2
    and 6.2 of [RFC8417].  Upon receipt, the SET Receiver acknowledges
    receipt with a response with HTTP Status 202, as described below in
@@ -221,6 +215,12 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
 
 
+
+
+
+
+
+
 Backman, et al.          Expires March 29, 2019                 [Page 4]
 
 Internet-Draft        draft-ietf-secevent-http-push       September 2018
@@ -235,6 +235,7 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    Host: notify.examplerp.com
    Accept: application/json
    Content-Type: application/secevent+jwt
+
    eyJhbGciOiJub25lIn0
    .
    eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
@@ -271,7 +272,6 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    status is when acknowledging success.  In the case of an error (e.g.
    HTTP Status 400), the purpose of the HTTP response body is to
    indicate any SET parsing, validation, or cryptographic errors.
-
 
 
 
@@ -971,6 +971,11 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    o  Broke delivery method description into separate request/response
       sections.
 
+   o  Added missing empty line between headers and body in example
+      request.
+
+   o  Removed unapplicable notes about example formatting.
+
 Authors' Addresses
 
    Annabelle Backman (editor)
@@ -998,11 +1003,6 @@ Authors' Addresses
    Email: mscurtescu@google.com
 
 
-   Morteza Ansari
-   Cisco
-
-   Email: morteza.ansari@cisco.com
-
 
 
 Backman, et al.          Expires March 29, 2019                [Page 18]
@@ -1010,16 +1010,16 @@ Backman, et al.          Expires March 29, 2019                [Page 18]
 Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
 
+   Morteza Ansari
+   Cisco
+
+   Email: morteza.ansari@cisco.com
+
+
    Anthony Nadalin
    Microsoft
 
    Email: tonynad@microsoft.com
-
-
-
-
-
-
 
 
 

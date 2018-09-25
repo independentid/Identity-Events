@@ -96,18 +96,9 @@
 				  when, and only when, they appear in all capitals, as shown here.
 			        </t>
 
-				<t>
-					For purposes of readability examples are not URL encoded.
-					Implementers MUST percent encode URLs as described in
-					<xref target="RFC3986">Section 2.1 of</xref>
-					.
-				</t>
-
-				<t>Throughout this documents all figures MAY contain spaces and
+				<t>Throughout this documents all figures may contain spaces and
 					extra
-					line-wrapping for readability and space limitations. Similarly, some
-					URI's contained within examples, have been shortened for space and
-					readability reasons.
+					line-wrapping for readability and space limitations.
 				</t>
 			</section>
 
@@ -222,6 +213,7 @@
 Host: notify.examplerp.com
 Accept: application/json
 Content-Type: application/secevent+jwt
+
 eyJhbGciOiJub25lIn0
 .
 eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
@@ -749,6 +741,8 @@ Content-Type: application/json
               <t>Removed further generally applicable guidance for authorization tokens.</t>
               <t>Removed bearer token from example delivery request, and text referencing it.</t>
               <t>Broke delivery method description into separate request/response sections.</t>
+              <t>Added missing empty line between headers and body in example request.</t>
+              <t>Removed unapplicable notes about example formatting.</t>
           </list>
       </t>
     </section>
