@@ -2,7 +2,7 @@
 
 
 
-Network Working Group                                    A. Backman, Ed.
+Security Events Working Group                            A. Backman, Ed.
 Internet-Draft                                                    Amazon
 Intended status: Standards Track                           M. Jones, Ed.
 Expires: March 29, 2019                                        Microsoft
