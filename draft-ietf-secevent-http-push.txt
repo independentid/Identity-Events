@@ -193,6 +193,9 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    of a single SET (see [RFC8417]).  As per Section 5.3.2 [RFC7231], the
    value of the "Accept" header is "application/json".
 
+   The following is a non-normative example of a SET transmission HTTP
+   POST request:
+
    POST /Events  HTTP/1.1
 
    Host: notify.examplerp.com
@@ -215,9 +218,6 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
    .
 
                 Figure 1: Example SET Transmission Request
-
-
-
 
 
 
@@ -958,6 +958,9 @@ Internet-Draft        draft-ietf-secevent-http-push       September 2018
 
    o  Removed duplication in protocol description.
 
+   o  Added "non-normative example" text to example transmission
+      request.
+
 Authors' Addresses
 
    Annabelle Backman (editor)
@@ -995,9 +998,6 @@ Authors' Addresses
    Microsoft
 
    Email: tonynad@microsoft.com
-
-
-
 
 
 

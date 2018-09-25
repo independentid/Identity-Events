@@ -599,6 +599,7 @@
 <p id="rfc.section.2.2.p.3">The HTTP Content-Type (see <a href="#RFC7231" class="xref">Section 3.1.1.5</a>) for the HTTP POST is <samp>application/secevent+jwt</samp> and the request body SHALL consist of a single SET (see <a href="#RFC8417" class="xref">[RFC8417]</a>).  As per <a href="#RFC7231" class="xref">Section 5.3.2</a>, the value of the <samp>Accept</samp> header is <samp>application/json</samp>.</p>
 <div id="rfc.figure.1"></div>
 <div id="postSet"></div>
+<p>The following is a non-normative example of a SET transmission HTTP POST request: </p>
 <pre>POST /Events  HTTP/1.1
 
 Host: notify.examplerp.com
@@ -1180,6 +1181,7 @@ Content-Type: application/json
 <li>Removed unapplicable notes about example formatting.</li>
 <li>Removed text about SET creation and handling.</li>
 <li>Removed duplication in protocol description.</li>
+<li>Added "non-normative example" text to example transmission request.</li>
 </ul>
 
 <p> </p>

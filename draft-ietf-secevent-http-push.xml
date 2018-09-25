@@ -179,6 +179,9 @@
      <spanx style="verb">application/json</spanx>.</t>
      
      <figure align="left" anchor="postSet" title="Example SET Transmission Request">
+         <preamble>
+            The following is a non-normative example of a SET transmission HTTP POST request:
+         </preamble>
 <artwork align="left">POST /Events  HTTP/1.1
 
 Host: notify.examplerp.com
@@ -716,6 +719,7 @@ Content-Type: application/json
               <t>Removed unapplicable notes about example formatting.</t>
               <t>Removed text about SET creation and handling.</t>
               <t>Removed duplication in protocol description.</t>
+              <t>Added "non-normative example" text to example transmission request.</t>
           </list>
       </t>
     </section>
