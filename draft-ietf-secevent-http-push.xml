@@ -30,13 +30,6 @@
         </address>
     </author>
 
-    <author fullname="Phil Hunt" initials="P." role="editor" surname="Hunt">
-        <organization abbrev="Oracle">Oracle Corporation</organization>
-        <address>
-            <email>phil.hunt@yahoo.com</email>
-        </address>
-    </author>
-
     <author fullname="Marius Scurtescu" initials="M.S." surname="Scurtescu">
       <organization abbrev="Google">Google</organization>
 
@@ -687,7 +680,7 @@ Content-Type: application/json
       <t>The editors would like to thanks the members of the SCIM WG which 
       began discussions of provisioning events starting with: draft-hunt-scim-notify-00 in 2015.</t>
 
-      <t>The editors would like to thank the authors of draft-ietf-secevent-delivery-02,
+      <t>The editors would like to thank Phil Hunt and the other authors of draft-ietf-secevent-delivery-02,
           on which this draft is based.</t>
       
       <t>The editor would like to thank the participants in the the SECEVENTS
