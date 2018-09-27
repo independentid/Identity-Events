@@ -58,9 +58,11 @@
 
         <abstract>
             <t>
-                This specification defines how a series of security event tokens
-                (SETs) may be delivered to a previously registered receiver
-                using HTTP POST over TLS initiated as a push to the receiver.
+                This specification defines how a Security Event Token (SET)
+                may be delivered to an intended recipient using HTTP POST.
+                The SET is transmitted in the body of an HTTP POST reqest to an
+                endpoint operated by the recipient, and the recipient indicates
+                successful or failed transmission via the HTTP response.
             </t>
         </abstract>
     </front>
@@ -69,11 +71,25 @@
         <section anchor="intro" title="Introduction and Overview" toc="default">
 
             <t>
-                This specification defines how SETs (see <xref target="RFC8417"/>)
-                can be transmitted to a previously registered
-                SET Receiver using HTTP <xref target="RFC7231"/>
-                over TLS. The specification defines a method to push SETs via
-                HTTP POST.
+                This specification defines a mechanism by which a holder of a
+                <xref target="RFC8417">Security Event Token (SET)</xref> may deliver
+                the SET to an intended recipient via <xref target="RFC7231">HTTP POST</xref>.
+            </t>
+            <t>
+                Push-Based SET Delivery over HTTP POST is intended for scenarios where all of
+                the following apply:
+                <list style="symbols">
+                    <t>The holder of the SET is capable of making outbound HTTP requests.</t>
+                    <t>
+                        The recipient is capable of hosting an HTTP endpoint that is accessible
+                        to the transmitter.
+                    </t>
+                    <t>The transmitter and recipient are known to one another.</t>
+                    <t>
+                        The transmitter and recipient have an out-of-band mechanism for exchanging
+                        configuration metadata such as endpoint URLs and security key parameters.
+                    </t>
+                </list>
             </t>
 
 
@@ -92,8 +108,9 @@
             </section>
 
             <section anchor="defs" title="Definitions" toc="default">
-                <t>This specification assumes terminology defined in the Security
-                    Event Token specification<xref target="RFC8417"/>, as well as the terms defined below:
+                <t>
+                    This specification utilizes terminology defined in <xref target="RFC8417"/>,
+                    as well as the terms defined below:
                 </t>
                 <t>
                     <list style="hanging">
