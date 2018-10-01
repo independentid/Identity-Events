@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-push-01" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-http-push-02" ipr="trust200902">
     <front>
         <title abbrev="draft-ietf-secevent-http-push">Push-Based SET Token Delivery Using HTTP</title>
 
@@ -189,12 +189,6 @@
                 The SET Transmitter MAY provide an out-of-band mechanism by which a SET Receiver
                 may be notified of delivery failures, and MAY retain SETs that it failed to
                 deliver and make them available to the SET Receiver via other means.
-            </t>
-            <t>Transmitted SETs SHOULD be self-validating (e.g. signed)
-                if there is a requirement to verify they were issued by the SET
-                Transmitter at a later date when de-coupled from the original
-                delivery where authenticity could be checked via the HTTP or
-                TLS mutual authentication.
             </t>
 
             <section anchor="httpPost" title="Transmitting a SET">
@@ -396,6 +390,20 @@ Content-Type: application/json
                     operations that are bound to fail. This may be mitigated by authenticating
                     SET Transmitters with a mechanism with low runtime overhead, such as mutual
                     TLS or statically assigned bearer tokens.
+                </t>
+            </section>
+
+            <section title="Authenticating Persisted SETs">
+                <t>
+                    At the time of receipt, the SET Receiver can rely upon transport layer
+                    mechanisms, HTTP authentication methods, and/or other context from the
+                    transmission request to authenticate the SET Transmitter and validate the
+                    authenticity of the SET.  However, this context is typically unavailable to
+                    systems that the SET Receiver forwards the SET onto, or to systems that
+                    retrieve the SET from storage.  If the SET Receiver requires the ability to
+                    validate SET authenticity outside of the context of the transmission request,
+                    then the SET Transmitter SHOULD sign the SET in accordance with <xref target="RFC7515"/>,
+                    or encrypt it using an authenticated encryption scheme in accordance with <xref target="RFC7516"/>.
                 </t>
             </section>
         </section>
@@ -773,6 +781,7 @@ Content-Type: application/json
                     <t>Added callout that SET Receiver HTTP endpoint configuration is out-of-scope.</t>
                     <t>Added callout that SET verification mechanisms are out-of-scope.</t>
                     <t>Added retry guidance, notes regarding delivery reliability requirements.</t>
+                    <t>Added guidance around using JWS and/or JWE to authenticate persisted SETs.</t>
                 </list>
             </t>
         </section>

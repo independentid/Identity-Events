@@ -388,6 +388,7 @@
 <link href="#rfc.section.5.1" rel="Chapter" title="5.1 Authentication Using Signed SETs">
 <link href="#rfc.section.5.2" rel="Chapter" title="5.2 TLS Support Considerations">
 <link href="#rfc.section.5.3" rel="Chapter" title="5.3 Denial of Service">
+<link href="#rfc.section.5.4" rel="Chapter" title="5.4 Authenticating Persisted SETs">
 <link href="#rfc.section.6" rel="Chapter" title="6 Privacy Considerations">
 <link href="#rfc.section.7" rel="Chapter" title="7 IANA Considerations">
 <link href="#rfc.section.7.1" rel="Chapter" title="7.1 Security Event Token Delivery Error Codes">
@@ -406,7 +407,7 @@
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Backman, A., Ed., Jones, M., Ed., Scurtescu, M., Ansari, M., and A. Nadalin" />
-  <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-secevent-http-push-01" />
+  <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-secevent-http-push-02" />
   <meta name="dct.issued" scheme="ISO8601" content="2018-10-1" />
   <meta name="dct.abstract" content="This specification defines how a Security Event Token (SET) may be delivered to an intended recipient using HTTP POST.  The SET is transmitted in the body of an HTTP POST reqest to an endpoint operated by the recipient, and the recipient indicates successful or failed transmission via the HTTP response.  " />
   <meta name="description" content="This specification defines how a Security Event Token (SET) may be delivered to an intended recipient using HTTP POST.  The SET is transmitted in the body of an HTTP POST reqest to an endpoint operated by the recipient, and the recipient indicates successful or failed transmission via the HTTP response.  " />
@@ -468,7 +469,7 @@
   </table>
 
   <p class="title">Push-Based SET Token Delivery Using HTTP<br />
-  <span class="filename">draft-ietf-secevent-http-push-01</span></p>
+  <span class="filename">draft-ietf-secevent-http-push-02</span></p>
   
   <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
 <p>This specification defines how a Security Event Token (SET) may be delivered to an intended recipient using HTTP POST.  The SET is transmitted in the body of an HTTP POST reqest to an endpoint operated by the recipient, and the recipient indicates successful or failed transmission via the HTTP response.  </p>
@@ -513,6 +514,8 @@
 <li>5.2.   <a href="#rfc.section.5.2">TLS Support Considerations</a>
 </li>
 <li>5.3.   <a href="#rfc.section.5.3">Denial of Service</a>
+</li>
+<li>5.4.   <a href="#rfc.section.5.4">Authenticating Persisted SETs</a>
 </li>
 </ul><li>6.   <a href="#rfc.section.6">Privacy Considerations</a>
 </li>
@@ -594,7 +597,6 @@
 <p id="rfc.section.2.p.5">Once the SET has been validated and persisted, the SET Receiver SHOULD immediately return a response indicating that the SET was successfully delivered. The SET Receiver SHOULD NOT perform extensive business logic that processes the event expressed by the SET prior to sending this response.  Such logic SHOULD be executed asynchronously from delivery, in order to minimize the expense and impact of SET delivery on the SET Transmitter.  </p>
 <p id="rfc.section.2.p.6">The SET Transmitter SHOULD NOT re-transmit a SET, unless the response from the SET Receiver in previous transmissions indicated a potentially recoverable error (such as server unavailability that may be transient, or a decryption failure that may be due to misconfigured keys on the SET Receiver's side).  In the latter case, the SET Transmitter MAY re-transmit a SET, after an appropriate delay to avoid overwhelming the SET Receiver (see <a href="#reliability" class="xref">Section 4</a>).  </p>
 <p id="rfc.section.2.p.7">The SET Transmitter MAY provide an out-of-band mechanism by which a SET Receiver may be notified of delivery failures, and MAY retain SETs that it failed to deliver and make them available to the SET Receiver via other means.  </p>
-<p id="rfc.section.2.p.8">Transmitted SETs SHOULD be self-validating (e.g. signed) if there is a requirement to verify they were issued by the SET Transmitter at a later date when de-coupled from the original delivery where authenticity could be checked via the HTTP or TLS mutual authentication.  </p>
 <h1 id="rfc.section.2.1">
 <a href="#rfc.section.2.1">2.1.</a> <a href="#httpPost" id="httpPost">Transmitting a SET</a>
 </h1>
@@ -746,6 +748,9 @@ Content-Type: application/json
 <h1 id="rfc.section.5.3">
 <a href="#rfc.section.5.3">5.3.</a> Denial of Service</h1>
 <p id="rfc.section.5.3.p.1">The SET Receiver may be vulnerable to a denial-of-service attack where a malicious party makes a high volume of requests containing invalid SETs, causing the endpoint to expend significant resources on cryptographic operations that are bound to fail. This may be mitigated by authenticating SET Transmitters with a mechanism with low runtime overhead, such as mutual TLS or statically assigned bearer tokens.  </p>
+<h1 id="rfc.section.5.4">
+<a href="#rfc.section.5.4">5.4.</a> Authenticating Persisted SETs</h1>
+<p id="rfc.section.5.4.p.1">At the time of receipt, the SET Receiver can rely upon transport layer mechanisms, HTTP authentication methods, and/or other context from the transmission request to authenticate the SET Transmitter and validate the authenticity of the SET.  However, this context is typically unavailable to systems that the SET Receiver forwards the SET onto, or to systems that retrieve the SET from storage.  If the SET Receiver requires the ability to validate SET authenticity outside of the context of the transmission request, then the SET Transmitter SHOULD sign the SET in accordance with <a href="#RFC7515" class="xref">[RFC7515]</a>, or encrypt it using an authenticated encryption scheme in accordance with <a href="#RFC7516" class="xref">[RFC7516]</a>.  </p>
 <h1 id="rfc.section.6">
 <a href="#rfc.section.6">6.</a> Privacy Considerations</h1>
 <p id="rfc.section.6.p.1">If a SET needs to be retained for audit purposes, JWS MAY be used to provide verification of its authenticity.</p>
@@ -1195,6 +1200,7 @@ Content-Type: application/json
 <li>Added callout that SET Receiver HTTP endpoint configuration is out-of-scope.</li>
 <li>Added callout that SET verification mechanisms are out-of-scope.</li>
 <li>Added retry guidance, notes regarding delivery reliability requirements.</li>
+<li>Added guidance around using JWS and/or JWE to authenticate persisted SETs.</li>
 </ul>
 
 <p> </p>
