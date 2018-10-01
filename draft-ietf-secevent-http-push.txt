@@ -71,8 +71,8 @@ Table of Contents
    1.  Introduction and Overview . . . . . . . . . . . . . . . . . .   2
      1.1.  Notational Conventions  . . . . . . . . . . . . . . . . .   3
      1.2.  Definitions . . . . . . . . . . . . . . . . . . . . . . .   3
-   2.  Event Delivery  . . . . . . . . . . . . . . . . . . . . . . .   3
-     2.1.  Event Delivery Process  . . . . . . . . . . . . . . . . .   3
+   2.  SET Delivery  . . . . . . . . . . . . . . . . . . . . . . . .   3
+     2.1.  SET Delivery Process  . . . . . . . . . . . . . . . . . .   3
      2.2.  Transmitting a SET  . . . . . . . . . . . . . . . . . . .   4
      2.3.  Handling a SET Transmission Request . . . . . . . . . . .   5
        2.3.1.  Success Response  . . . . . . . . . . . . . . . . . .   5
@@ -95,7 +95,7 @@ Table of Contents
    Appendix A.  Other Streaming Specifications . . . . . . . . . . .  16
    Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  17
    Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  17
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  18
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  19
 
 1.  Introduction and Overview
 
@@ -149,9 +149,9 @@ Internet-Draft        draft-ietf-secevent-http-push         October 2018
       An entity that operates an endpoint where it expects to receive
       SETs from one or more SET Transmitters.
 
-2.  Event Delivery
+2.  SET Delivery
 
-2.1.  Event Delivery Process
+2.1.  SET Delivery Process
 
    In Push-Based SET Delivery Using HTTP, SETs are delivered one at a
    time using HTTP POST requests by a SET Transmitter to a SET Receiver,
@@ -183,9 +183,9 @@ Internet-Draft        draft-ietf-secevent-http-push         October 2018
    it.  The SET Receiver MUST acknowledge receipt to the SET
    Transmitter, using the defined acknowledgement or error method.
 
-   The SET Receiver SHALL NOT use the Event acknowledgement mechanism to
-   report Event errors other than relating to the parsing and validation
-   of the SET.
+   The SET Receiver SHALL NOT use the acknowledgement mechanism to
+   report errors other than relating to the parsing and validation of
+   the SET.
 
 2.2.  Transmitting a SET
 
@@ -300,7 +300,7 @@ Internet-Draft        draft-ietf-secevent-http-push         October 2018
 
 2.3.2.  Failure Response
 
-   In the Event of a general HTTP error condition, the SET Receiver MAY
+   In the event of a general HTTP error condition, the SET Receiver MAY
    respond with an appropriate HTTP Status code as defined in Section 6
    [RFC7231].
 
@@ -996,18 +996,29 @@ Internet-Draft        draft-ietf-secevent-http-push         October 2018
 
    o  Fixed inconsistencies in use of Error Code term.
 
-Authors' Addresses
+   Draft 02 - AB:
 
-   Annabelle Backman (editor)
-   Amazon
+   o  Rewrote abstract and introduction.
 
-   Email: richanna@amazon.com
+   o  Rewrote definitions for SET Transmitter, SET Receiver.
+
 
 
 
 Backman, et al.           Expires April 4, 2019                [Page 18]
 
 Internet-Draft        draft-ietf-secevent-http-push         October 2018
+
+
+   o  Renamed Event Delivery section to SET Delivery, and Event Delivery
+      Process section to SET Delivery Process.
+
+Authors' Addresses
+
+   Annabelle Backman (editor)
+   Amazon
+
+   Email: richanna@amazon.com
 
 
    Michael B. Jones (editor)
@@ -1033,17 +1044,6 @@ Internet-Draft        draft-ietf-secevent-http-push         October 2018
    Microsoft
 
    Email: tonynad@microsoft.com
-
-
-
-
-
-
-
-
-
-
-
 
 
 

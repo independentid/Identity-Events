@@ -129,8 +129,8 @@
             </section>
         </section>
 
-        <section title="Event Delivery">
-            <section anchor="process" title="Event Delivery Process">
+        <section title="SET Delivery">
+            <section anchor="process" title="SET Delivery Process">
                 <t>In Push-Based SET Delivery Using HTTP, SETs are delivered
                     one at a time using HTTP POST requests by a SET Transmitter
                     to a SET Receiver, as described below in <xref target="httpPost"/>.
@@ -156,8 +156,8 @@
                     it. The SET Receiver MUST acknowledge receipt to the SET Transmitter, using the
                     defined acknowledgement or error method.</t>
 
-                <t>The SET Receiver SHALL NOT use the Event acknowledgement mechanism
-                    to report Event errors other than relating to the parsing and validation
+                <t>The SET Receiver SHALL NOT use the acknowledgement mechanism
+                    to report errors other than relating to the parsing and validation
                     of the SET.</t>
             </section>
 
@@ -243,7 +243,7 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
                         by SET Receivers is out-of-scope of this specification.</t>
                 </section>
                 <section anchor="failureResponse" title="Failure Response">
-                    <t>In the Event of a general HTTP error condition, the SET Receiver
+                    <t>In the event of a general HTTP error condition, the SET Receiver
                         MAY respond with an appropriate HTTP Status code as defined in
                         <xref target="RFC7231">Section 6</xref>.</t>
                     <t>When the SET Receiver detects an error parsing or
@@ -717,6 +717,14 @@ Content-Type: application/json
                     <t>Removed duplication in protocol description.</t>
                     <t>Added "non-normative example" text to example transmission request.</t>
                     <t>Fixed inconsistencies in use of Error Code term.</t>
+                </list>
+            </t>
+            <t>
+                Draft 02 - AB:
+                <list style="symbols">
+                    <t>Rewrote abstract and introduction.</t>
+                    <t>Rewrote definitions for SET Transmitter, SET Receiver.</t>
+                    <t>Renamed Event Delivery section to SET Delivery, and Event Delivery Process section to SET Delivery Process.</t>
                 </list>
             </t>
         </section>

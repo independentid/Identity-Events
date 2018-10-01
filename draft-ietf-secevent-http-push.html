@@ -377,8 +377,8 @@
 <link href="#rfc.section.1" rel="Chapter" title="1 Introduction and Overview">
 <link href="#rfc.section.1.1" rel="Chapter" title="1.1 Notational Conventions">
 <link href="#rfc.section.1.2" rel="Chapter" title="1.2 Definitions">
-<link href="#rfc.section.2" rel="Chapter" title="2 Event Delivery">
-<link href="#rfc.section.2.1" rel="Chapter" title="2.1 Event Delivery Process">
+<link href="#rfc.section.2" rel="Chapter" title="2 SET Delivery">
+<link href="#rfc.section.2.1" rel="Chapter" title="2.1 SET Delivery Process">
 <link href="#rfc.section.2.2" rel="Chapter" title="2.2 Transmitting a SET">
 <link href="#rfc.section.2.3" rel="Chapter" title="2.3 Handling a SET Transmission Request">
 <link href="#rfc.section.2.3.1" rel="Chapter" title="2.3.1 Success Response">
@@ -494,9 +494,9 @@
 </li>
 <li>1.2.   <a href="#rfc.section.1.2">Definitions</a>
 </li>
-</ul><li>2.   <a href="#rfc.section.2">Event Delivery</a>
+</ul><li>2.   <a href="#rfc.section.2">SET Delivery</a>
 </li>
-<ul><li>2.1.   <a href="#rfc.section.2.1">Event Delivery Process</a>
+<ul><li>2.1.   <a href="#rfc.section.2.1">SET Delivery Process</a>
 </li>
 <li>2.2.   <a href="#rfc.section.2.2">Transmitting a SET</a>
 </li>
@@ -584,15 +584,15 @@
 
 <p> </p>
 <h1 id="rfc.section.2">
-<a href="#rfc.section.2">2.</a> Event Delivery</h1>
+<a href="#rfc.section.2">2.</a> SET Delivery</h1>
 <h1 id="rfc.section.2.1">
-<a href="#rfc.section.2.1">2.1.</a> <a href="#process" id="process">Event Delivery Process</a>
+<a href="#rfc.section.2.1">2.1.</a> <a href="#process" id="process">SET Delivery Process</a>
 </h1>
 <p id="rfc.section.2.1.p.1">In Push-Based SET Delivery Using HTTP, SETs are delivered one at a time using HTTP POST requests by a SET Transmitter to a SET Receiver, as described below in <a href="#httpPost" class="xref">Section 2.2</a>.  Upon receipt, the SET Receiver acknowledges receipt or indicates an error via the HTTP response, as described below in <a href="#requestHandling" class="xref">Section 2.3</a>.  </p>
 <p id="rfc.section.2.1.p.2">After successful (acknowledged) SET delivery, SET Transmitters SHOULD NOT be required to maintain or record SETs for recovery. Once a SET is acknowledged, the SET Receiver SHALL be responsible for retention and recovery.</p>
 <p id="rfc.section.2.1.p.3">Transmitted SETs SHOULD be self-validating (e.g. signed) if there is a requirement to verify they were issued by the SET Transmitter at a later date when de-coupled from the original delivery where authenticity could be checked via the HTTP or TLS mutual authentication.  </p>
 <p id="rfc.section.2.1.p.4">Upon receiving a SET, the SET Receiver reads the SET and validates it. The SET Receiver MUST acknowledge receipt to the SET Transmitter, using the defined acknowledgement or error method.</p>
-<p id="rfc.section.2.1.p.5">The SET Receiver SHALL NOT use the Event acknowledgement mechanism to report Event errors other than relating to the parsing and validation of the SET.</p>
+<p id="rfc.section.2.1.p.5">The SET Receiver SHALL NOT use the acknowledgement mechanism to report errors other than relating to the parsing and validation of the SET.</p>
 <h1 id="rfc.section.2.2">
 <a href="#rfc.section.2.2">2.2.</a> <a href="#httpPost" id="httpPost">Transmitting a SET</a>
 </h1>
@@ -640,7 +640,7 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
 <h1 id="rfc.section.2.3.2">
 <a href="#rfc.section.2.3.2">2.3.2.</a> <a href="#failureResponse" id="failureResponse">Failure Response</a>
 </h1>
-<p id="rfc.section.2.3.2.p.1">In the Event of a general HTTP error condition, the SET Receiver MAY respond with an appropriate HTTP Status code as defined in <a href="#RFC7231" class="xref">Section 6</a>.</p>
+<p id="rfc.section.2.3.2.p.1">In the event of a general HTTP error condition, the SET Receiver MAY respond with an appropriate HTTP Status code as defined in <a href="#RFC7231" class="xref">Section 6</a>.</p>
 <p id="rfc.section.2.3.2.p.2">When the SET Receiver detects an error parsing or validating a received SET (as defined by <a href="#RFC8417" class="xref">[RFC8417]</a>), the SET Receiver SHALL indicate an HTTP Status 400 error with an error response as described in <a href="#errorResponse" class="xref">Section 2.3.4</a>.  </p>
 <div id="rfc.figure.3"></div>
 <div id="badPostResponse"></div>
@@ -1184,6 +1184,15 @@ Content-Type: application/json
 <li>Removed duplication in protocol description.</li>
 <li>Added "non-normative example" text to example transmission request.</li>
 <li>Fixed inconsistencies in use of Error Code term.</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.C.p.3">Draft 02 - AB: </p>
+
+<ul>
+<li>Rewrote abstract and introduction.</li>
+<li>Rewrote definitions for SET Transmitter, SET Receiver.</li>
+<li>Renamed Event Delivery section to SET Delivery, and Event Delivery Process section to SET Delivery Process.</li>
 </ul>
 
 <p> </p>
