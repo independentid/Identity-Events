@@ -384,7 +384,6 @@
 <link href="#rfc.section.2.3.1" rel="Chapter" title="2.3.1 Success Response">
 <link href="#rfc.section.2.3.2" rel="Chapter" title="2.3.2 Failure Response">
 <link href="#rfc.section.2.3.3" rel="Chapter" title="2.3.3 Security Event Token Delivery Error Codes">
-<link href="#rfc.section.2.3.4" rel="Chapter" title="2.3.4 Error Responses">
 <link href="#rfc.section.3" rel="Chapter" title="3 Authentication and Authorization">
 <link href="#rfc.section.4" rel="Chapter" title="4 Security Considerations">
 <link href="#rfc.section.4.1" rel="Chapter" title="4.1 Authentication Using Signed SETs">
@@ -508,8 +507,6 @@
 </li>
 <li>2.3.3.   <a href="#rfc.section.2.3.3">Security Event Token Delivery Error Codes</a>
 </li>
-<li>2.3.4.   <a href="#rfc.section.2.3.4">Error Responses</a>
-</li>
 </ul></ul><li>3.   <a href="#rfc.section.3">Authentication and Authorization</a>
 </li>
 <li>4.   <a href="#rfc.section.4">Security Considerations</a>
@@ -629,19 +626,27 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
 <h1 id="rfc.section.2.3.1">
 <a href="#rfc.section.2.3.1">2.3.1.</a> <a href="#successResponse" id="successResponse">Success Response</a>
 </h1>
-<p id="rfc.section.2.3.1.p.1">If the SET is determined to be valid, the SET Receiver SHALL "acknowledge" successful submission by responding with HTTP Status 202 as <samp>Accepted</samp> (see <a href="#RFC7231" class="xref">Section 6.3.3</a>).</p>
-<p id="rfc.section.2.3.1.p.2">In order to maintain compatibility with other methods of transmission, the SET Receiver SHOULD NOT include an HTTP response body representation of the submitted SET or what the SET's pending status is when acknowledging success. In the case of an error (e.g. HTTP Status 400), the purpose of the HTTP response body is to indicate any SET parsing, validation, or cryptographic errors.</p>
+<p id="rfc.section.2.3.1.p.1">If the SET is determined to be valid, the SET Receiver SHALL "acknowledge" successful transmission by responding with HTTP Response Status Code 202 (see <a href="#RFC7231" class="xref">Section 6.3.3 of RFC7231</a>).  The body of the response MUST be empty.  </p>
 <div id="rfc.figure.2"></div>
 <div id="goodPostResponse"></div>
 <p>The following is a non-normative example of a successful receipt of a SET.</p>
 <pre>HTTP/1.1 202 Accepted</pre>
 <p class="figure">Figure 2: Example Successful Delivery Response</p>
-<p id="rfc.section.2.3.1.p.3">Note that the purpose of the "acknowledgement" response is to let the SET Transmitter know that a SET has been delivered and the information no longer needs to be retained by the SET Transmitter.  Before acknowledgement, SET Receivers SHOULD ensure they have validated received SETs and retained them in a manner appropriate to information retention requirements appropriate to the SET event types signaled. The level and method of retention of SETs by SET Receivers is out-of-scope of this specification.</p>
+<p id="rfc.section.2.3.1.p.2">Note that the purpose of the "acknowledgement" response is to let the SET Transmitter know that a SET has been delivered and the information no longer needs to be retained by the SET Transmitter.  Before acknowledgement, SET Receivers SHOULD ensure they have validated received SETs and retained them in a manner appropriate to information retention requirements appropriate to the SET event types signaled. The level and method of retention of SETs by SET Receivers is out-of-scope of this specification.</p>
 <h1 id="rfc.section.2.3.2">
 <a href="#rfc.section.2.3.2">2.3.2.</a> <a href="#failureResponse" id="failureResponse">Failure Response</a>
 </h1>
-<p id="rfc.section.2.3.2.p.1">In the event of a general HTTP error condition, the SET Receiver MAY respond with an appropriate HTTP Status code as defined in <a href="#RFC7231" class="xref">Section 6</a>.</p>
-<p id="rfc.section.2.3.2.p.2">When the SET Receiver detects an error parsing or validating a received SET (as defined by <a href="#RFC8417" class="xref">[RFC8417]</a>), the SET Receiver SHALL indicate an HTTP Status 400 error with an error response as described in <a href="#errorResponse" class="xref">Section 2.3.4</a>.  </p>
+<p id="rfc.section.2.3.2.p.1">In the event of a general HTTP error condition, the SET Receiver MAY respond with an appropriate HTTP Status Code as defined in <a href="#RFC7231" class="xref">Section 6 of RFC7231</a>.</p>
+<p id="rfc.section.2.3.2.p.2">When the SET Receiver detects an error parsing or validating a SET transmitted in a SET Transmission Request, the SET Receiver SHALL respond with an HTTP Response Status Code of 400.  The <samp>Content-Type</samp> header of this response MUST be "application/json", and the body MUST be a JSON object containing the following name/value pairs: </p>
+
+<dl>
+<dt>err</dt>
+<dd style="margin-left: 8">A Security Event Token Error Code (see <a href="#error_codes" class="xref">Section 2.3.3</a>).  </dd>
+<dt>description</dt>
+<dd style="margin-left: 8">Human-readable text that describes the error and MAY contain additional diagnostic information.  </dd>
+</dl>
+
+<p> </p>
 <div id="rfc.figure.3"></div>
 <div id="badPostResponse"></div>
 <p>The following is an example non-normative error response.</p>
@@ -718,21 +723,6 @@ Content-Type: application/json
 </tr>
 </tbody>
 </table>
-<h1 id="rfc.section.2.3.4">
-<a href="#rfc.section.2.3.4">2.3.4.</a> <a href="#errorResponse" id="errorResponse">Error Responses</a>
-</h1>
-<p id="rfc.section.2.3.4.p.1">An error response SHALL include a JSON object which provides details about the error. The JSON object includes the JSON attributes: <a href="#badPostResponse" class="xref">Figure 3</a>).</p>
-
-<dl>
-<dt>err</dt>
-<dd style="margin-left: 8">
-<br>A value which is a keyword that describes the error (see <a href="#reqErrors" class="xref">Table 1</a>).</dd>
-<dt>description</dt>
-<dd style="margin-left: 8">
-<br>A human-readable text that provides additional diagnostic information.</dd>
-</dl>
-
-<p> When included as part of an HTTP Status 400 response, the above JSON is the HTTP response body (see </p>
 <h1 id="rfc.section.3">
 <a href="#rfc.section.3">3.</a> <a href="#aa" id="aa">Authentication and Authorization</a>
 </h1>
@@ -1193,6 +1183,8 @@ Content-Type: application/json
 <li>Rewrote abstract and introduction.</li>
 <li>Rewrote definitions for SET Transmitter, SET Receiver.</li>
 <li>Renamed Event Delivery section to SET Delivery, and Event Delivery Process section to SET Delivery Process.</li>
+<li>Readability edits to Success Response and Failure Response sections.</li>
+<li>Consolidated definition of error response under Failure Response section.</li>
 </ul>
 
 <p> </p>

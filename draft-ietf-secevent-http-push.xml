@@ -215,17 +215,10 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
 
                 <section anchor="successResponse" title="Success Response">
                     <t>If the SET is determined to be valid, the SET Receiver SHALL
-                    "acknowledge" successful submission by responding with HTTP Status
-                    202 as <spanx style="verb">Accepted</spanx>
-                    (see <xref target="RFC7231">Section 6.3.3</xref>).</t>
-
-                    <t>In order
-                    to maintain compatibility with other methods of transmission, the
-                    SET Receiver SHOULD NOT include an HTTP response body representation
-                    of the submitted SET or what the SET's pending status is when
-                    acknowledging success. In the case of an error (e.g. HTTP Status 400),
-                    the purpose of the HTTP response body is to indicate any SET parsing,
-                    validation, or cryptographic errors.</t>
+                        "acknowledge" successful transmission by responding with HTTP
+                        Response Status Code 202 (see <xref target="RFC7231">Section
+                        6.3.3 of RFC7231</xref>).  The body of the response MUST be empty.
+                    </t>
 
                     <figure anchor="goodPostResponse" title="Example Successful Delivery Response">
                         <preamble>The following is a non-normative example of a successful
@@ -244,13 +237,25 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
                 </section>
                 <section anchor="failureResponse" title="Failure Response">
                     <t>In the event of a general HTTP error condition, the SET Receiver
-                        MAY respond with an appropriate HTTP Status code as defined in
-                        <xref target="RFC7231">Section 6</xref>.</t>
-                    <t>When the SET Receiver detects an error parsing or
-                        validating a received SET (as defined by <xref target="RFC8417"/>),
-                        the SET Receiver SHALL indicate an HTTP Status 400 error with an
-                        error response as described in <xref target="errorResponse"/>.
-                        </t>
+                        MAY respond with an appropriate HTTP Status Code as defined in
+                        <xref target="RFC7231">Section 6 of RFC7231</xref>.</t>
+                    <t>
+                        When the SET Receiver detects an error parsing or
+                        validating a SET transmitted in a SET Transmission Request,
+                        the SET Receiver SHALL respond with an HTTP Response Status Code
+                        of 400.  The <spanx style="verb">Content-Type</spanx> header of this
+                        response MUST be "application/json", and the body MUST be a JSON
+                        object containing the following name/value pairs:
+                        <list style="hanging">
+                            <t hangText="err">
+                                A Security Event Token Error Code (see <xref target="error_codes"/>).
+                            </t>
+                            <t hangText="description">
+                                Human-readable text that describes the error and MAY contain
+                                additional diagnostic information.
+                            </t>
+                        </list>
+                    </t>
 
                     <figure anchor="badPostResponse" title="Example Error Response">
                         <preamble>The following is an example non-normative error
@@ -291,20 +296,6 @@ Content-Type: application/json
                         <c>setData</c><c>SET event claims incomplete or invalid.</c>
                         <c>dup</c><c>A duplicate SET was received and has been ignored.</c>
                     </texttable>
-                </section>
-
-                <section anchor="errorResponse" title="Error Responses">
-                    <t>An error response SHALL include a JSON
-                        object which provides details about the error. The JSON object
-                        includes the JSON attributes:
-                        <list style="hanging">
-                            <t hangText="err"><vspace />A value which is a keyword that
-                                describes the error (see <xref target="reqErrors" />).</t>
-                            <t hangText="description"><vspace />A human-readable text that provides
-                                additional diagnostic information.</t>
-                        </list>
-                        When included as part of an HTTP Status 400 response, the above
-                        JSON is the HTTP response body (see <xref target="badPostResponse"/>).</t>
                 </section>
            </section>
         </section>
@@ -725,6 +716,8 @@ Content-Type: application/json
                     <t>Rewrote abstract and introduction.</t>
                     <t>Rewrote definitions for SET Transmitter, SET Receiver.</t>
                     <t>Renamed Event Delivery section to SET Delivery, and Event Delivery Process section to SET Delivery Process.</t>
+                    <t>Readability edits to Success Response and Failure Response sections.</t>
+                    <t>Consolidated definition of error response under Failure Response section.</t>
                 </list>
             </t>
         </section>
