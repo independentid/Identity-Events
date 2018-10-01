@@ -115,14 +115,13 @@
                 <t>
                     <list style="hanging">
                         <t hangText="SET Transmitter"><vspace/>
-                            A service provider that delivers SETs to other providers known
-                            as SET Receivers.
+                            An entity that delivers SETs in its possession to one or more SET
+                            Receivers.
                         </t>
 
                         <t hangText="SET Receiver"><vspace/>
-                            A service provider that registers to receive SETs from
-                            a SET Transmitter and provides an endpoint to receive
-                            SETs via HTTP POST.
+                            An entity that operates an endpoint where it expects to receive
+                            SETs from one or more SET Transmitters.
                         </t>
 
                     </list>
