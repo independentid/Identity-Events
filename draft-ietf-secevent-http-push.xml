@@ -177,10 +177,19 @@
                 Such logic SHOULD be executed asynchronously from delivery, in order to
                 minimize the expense and impact of SET delivery on the SET Transmitter.
             </t>
-            <t>After successful (acknowledged) SET delivery, SET
-                Transmitters SHOULD NOT be required to maintain or record SETs for
-                recovery. Once a SET is acknowledged, the SET Receiver SHALL be
-                responsible for retention and recovery.</t>
+            <t>
+                The SET Transmitter SHOULD NOT re-transmit a SET, unless the response from
+                the SET Receiver in previous transmissions indicated a potentially recoverable
+                error (such as server unavailability that may be transient, or a decryption
+                failure that may be due to misconfigured keys on the SET Receiver's side).  In
+                the latter case, the SET Transmitter MAY re-transmit a SET, after an appropriate
+                delay to avoid overwhelming the SET Receiver (see <xref target="reliability"/>).
+            </t>
+            <t>
+                The SET Transmitter MAY provide an out-of-band mechanism by which a SET Receiver
+                may be notified of delivery failures, and MAY retain SETs that it failed to
+                deliver and make them available to the SET Receiver via other means.
+            </t>
             <t>Transmitted SETs SHOULD be self-validating (e.g. signed)
                 if there is a requirement to verify they were issued by the SET
                 Transmitter at a later date when de-coupled from the original
@@ -330,6 +339,30 @@ Content-Type: application/json
                 authentication methods.  Because SETs are
                 not commands (see ), SET Receivers are free to ignore SETs that
                 are not of interest.</t>
+        </section>
+        <section anchor="reliability" title="Delivery Reliability" toc="default">
+            <t>
+                Delivery reliability requirements may vary from implementation to
+                implementation.  This specification defines the response from the SET
+                Receiver in such a way as to provide the SET Transmitter with the
+                information necessary to determine what further action is required,
+                if any, in order to meet their requirements.  SET Transmitters with
+                high reliability requirements may be tempted to always retry failed
+                transmissions, however it should be noted that for many types of SET
+                delivery errors, a retry is extremely unlikely to be successful.  For
+                example, <spanx style="verb">json</spanx>, <spanx style="verb">jwtParse</spanx>,
+                and <spanx style="verb">setParse</spanx> all indicate structural errors
+                in the content of the SET that are likely to remain when re-transmitting
+                the same SET.  Others such as <spanx style="verb">jws</spanx> or
+                <spanx style="verb">jwe</spanx> may be transient, for example if
+                cryptographic material has not been properly distributed to the SET
+                Receiver's systems.
+            </t>
+            <t>
+                Implementers SHOULD evaluate their reliability requirements and the
+                impact of various retry mechanisms on the performance of their systems
+                to determine the correct strategy for various error conditions.
+            </t>
         </section>
         <section anchor="Security" title="Security Considerations" toc="default">
 
@@ -739,6 +772,7 @@ Content-Type: application/json
                     <t>Readability edits to SET Delivery section and its subsections.</t>
                     <t>Added callout that SET Receiver HTTP endpoint configuration is out-of-scope.</t>
                     <t>Added callout that SET verification mechanisms are out-of-scope.</t>
+                    <t>Added retry guidance, notes regarding delivery reliability requirements.</t>
                 </list>
             </t>
         </section>
