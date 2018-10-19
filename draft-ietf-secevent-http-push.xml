@@ -11,9 +11,9 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-push-02" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-http-push-03" ipr="trust200902">
     <front>
-        <title abbrev="draft-ietf-secevent-http-push">Push-Based SET Token Delivery Using HTTP</title>
+        <title abbrev="draft-ietf-secevent-http-push">Push-Based Security Event Token (SET) Delivery Using HTTP</title>
 
         <author fullname="Annabelle Backman" initials="A." surname="Backman" role="editor">
             <organization abbrev="Amazon">Amazon</organization>
@@ -31,9 +31,9 @@
         </author>
 
         <author fullname="Marius Scurtescu" initials="M.S." surname="Scurtescu">
-            <organization abbrev="Google">Google</organization>
+            <organization abbrev="Coinbase">Coinbase</organization>
             <address>
-                <email>mscurtescu@google.com</email>
+                <email>marius.scurtescu@coinbase.com</email>
             </address>
         </author>
 
@@ -71,7 +71,7 @@
         <section anchor="intro" title="Introduction and Overview" toc="default">
 
             <t>
-                This specification defines a mechanism by which a holder of a
+                This specification defines a mechanism by which a transmitter of a
                 <xref target="RFC8417">Security Event Token (SET)</xref> may deliver
                 the SET to an intended recipient via <xref target="RFC7231">HTTP POST</xref>.
             </t>
@@ -79,7 +79,7 @@
                 Push-Based SET Delivery over HTTP POST is intended for scenarios where all of
                 the following apply:
                 <list style="symbols">
-                    <t>The holder of the SET is capable of making outbound HTTP requests.</t>
+                    <t>The transmitter of the SET is capable of making outbound HTTP requests.</t>
                     <t>
                         The recipient is capable of hosting an HTTP endpoint that is accessible
                         to the transmitter.
@@ -87,7 +87,7 @@
                     <t>The transmitter and recipient are known to one another.</t>
                     <t>
                         The transmitter and recipient have an out-of-band mechanism for exchanging
-                        configuration metadata such as endpoint URLs and security key parameters.
+                        configuration metadata such as endpoint URLs and cryptographic key parameters.
                     </t>
                 </list>
             </t>
@@ -103,7 +103,7 @@
 
                 <t>Throughout this documents all figures may contain spaces and
                     extra
-                    line-wrapping for readability and space limitations.
+                    line-wrapping for readability and due to space limitations.
                 </t>
             </section>
 
@@ -116,12 +116,7 @@
                     <list style="hanging">
                         <t hangText="SET Transmitter"><vspace/>
                             An entity that delivers SETs in its possession to one or more SET
-                            Receivers.
-                        </t>
-
-                        <t hangText="SET Receiver"><vspace/>
-                            An entity that operates an endpoint where it expects to receive
-                            SETs from one or more SET Transmitters.
+                            Recipients.
                         </t>
 
                     </list>
@@ -131,81 +126,76 @@
 
         <section title="SET Delivery">
             <t>
-                To deliver a SET to a given SET Receiver, the SET Transmitter
-                makes a SET Transmission Request to the SET Receiver, with the SET
-                itself contained within the request. The SET Receiver replies to
+                To deliver a SET to a given SET Recipient, the SET Transmitter
+                makes a SET Transmission Request to the SET Recipient, with the SET
+                itself contained within the request. The SET Recipient replies to
                 this request with a response either acknowledging successful
                 transmission of the SET, or indicating that an error occurred
                 while receiving, parsing, and/or validating the SET.
 
             </t>
             <t>
-                Upon receipt of a SET, the SET Receiver SHALL validate that all of
+                Upon receipt of a SET, the SET Recipient SHALL validate that all of
                 the following are true:
                 <list style="symbols">
-                    <t>The SET Receiver can parse the SET.</t>
+                    <t>The SET Recipient can parse the SET.</t>
                     <t>
-                        The SET is authentic (i.e. it was issued by the issuer
+                        The SET is authentic (i.e., it was issued by the issuer
                         specified within the SET).
                     </t>
                     <t>
-                        The SET Receiver is identified as the intended audience of
+                        The SET Recipient is identified as an intended audience of
                         the SET.
                     </t>
                 </list>
             </t>
             <t>
-                The mechanisms by which the SET Receiver performs this validation
-                are out-of-scope for this document. SET parsing and issuer and
+                The mechanisms by which the SET Recipient performs this validation
+                are out of scope for this document. SET parsing and issuer and
                 audience identification are defined in <xref target="RFC8417"/>.
                 The mechanism for validating the authenticity of a SET is implementation
                 specific, and may vary depending on the authentication mechanisms in
                 use, and whether the SET is signed and/or encrypted (See <xref target="aa"/>).
             </t>
             <t>
-                The SET Receiver SHOULD ensure that the SET is persisted in a way that
-                is sufficient to meet the SET Receiver's own reliability requirements,
+                The SET Recipient SHOULD ensure that the SET is persisted in a way that
+                is sufficient to meet the SET Recipient's own reliability requirements,
                 and MUST NOT expect or depend on a SET Transmitter to re-transmit or
-                otherwise make available to the SET Receiver a SET once the SET Receiver
+                otherwise make available to the SET Recipient a SET once the SET Recipient
                 acknowledges that it was received successfully.
             </t>
             <t>
-                Once the SET has been validated and persisted, the SET Receiver SHOULD
+                Once the SET has been validated and persisted, the SET Recipient SHOULD
                 immediately return a response indicating that the SET was successfully
-                delivered. The SET Receiver SHOULD NOT perform extensive business logic that
+                delivered. The SET Recipient SHOULD NOT perform extensive business logic that
                 processes the event expressed by the SET prior to sending this response.
                 Such logic SHOULD be executed asynchronously from delivery, in order to
                 minimize the expense and impact of SET delivery on the SET Transmitter.
             </t>
             <t>
                 The SET Transmitter SHOULD NOT re-transmit a SET, unless the response from
-                the SET Receiver in previous transmissions indicated a potentially recoverable
+                the SET Recipient in previous transmissions indicated a potentially recoverable
                 error (such as server unavailability that may be transient, or a decryption
-                failure that may be due to misconfigured keys on the SET Receiver's side).  In
+                failure that may be due to misconfigured keys on the SET Recipient's side).  In
                 the latter case, the SET Transmitter MAY re-transmit a SET, after an appropriate
-                delay to avoid overwhelming the SET Receiver (see <xref target="reliability"/>).
-            </t>
-            <t>
-                The SET Transmitter MAY provide an out-of-band mechanism by which a SET Receiver
-                may be notified of delivery failures, and MAY retain SETs that it failed to
-                deliver and make them available to the SET Receiver via other means.
+                delay to avoid overwhelming the SET Recipient (see <xref target="reliability"/>).
             </t>
 
             <section anchor="httpPost" title="Transmitting a SET">
 
                 <t>
-                    To transmit a SET to a SET Receiver, the SET Transmitter makes
-                    an HTTP POST request to an HTTP endpoint provided by the SET Receiver.  The
+                    To transmit a SET to a SET Recipient, the SET Transmitter makes
+                    an HTTP POST request to an HTTP endpoint provided by the SET Recipient.  The
                     <spanx style="verb">Content-Type</spanx> header of this request MUST
                     be "application/secevent+jwt" as defined in
-                    <xref target="RFC8417">Sections 2.2 and 6.2 of RFC8417</xref>, and the
+                    Sections 2.2 and 6.2 of <xref target="RFC8417"/>, and the
                     <spanx style="verb">Accept</spanx> header MUST be "application/json".  The
                     request body MUST consist of the SET itself, represented as a
                     <xref target="RFC7519">JWT</xref>.
                 </t>
                 <t>
                     The mechanisms by which the SET Transmitter determines the HTTP endpoint to
-                    use when transmitting a SET to a given SET Receiver are not defined by this
+                    use when transmitting a SET to a given SET Recipient are not defined by this
                     specification and may be implementation-specific.
                 </t>
                 <figure align="left" anchor="postSet" title="Example SET Transmission Request">
@@ -213,7 +203,7 @@
                         The following is a non-normative example of a SET transmission request:
                     </preamble>
                     <artwork align="left">POST /Events  HTTP/1.1
-Host: notify.examplerp.com
+Host: notify.rp.example.com
 Accept: application/json
 Content-Type: application/secevent+jwt
 
@@ -235,10 +225,10 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
             </section>
 
             <section anchor="successResponse" title="Success Response">
-                <t>If the SET is determined to be valid, the SET Receiver SHALL
+                <t>If the SET is determined to be valid, the SET Recipient SHALL
                     "acknowledge" successful transmission by responding with HTTP
-                    Response Status Code 202 (see <xref target="RFC7231">Section
-                    6.3.3 of RFC7231</xref>).  The body of the response MUST be empty.
+                    Response Status Code 202 (Accepted) (see Section 6.3.3 of <xref target="RFC7231"/>).
+		    The body of the response MUST be empty.
                 </t>
 
                 <figure anchor="goodPostResponse" title="Example Successful Delivery Response">
@@ -250,21 +240,21 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
                 <t>Note that the purpose of the "acknowledgement" response is to let the
                     SET Transmitter know that a SET has been delivered and the
                     information no longer needs to be retained by the SET Transmitter.
-                    Before acknowledgement, SET Receivers SHOULD ensure they have
+                    Before acknowledgement, SET Recipients SHOULD ensure they have
                     validated received SETs and retained them in a manner appropriate
                     to information retention requirements appropriate to the SET
                     event types signaled. The level and method of retention of SETs
-                    by SET Receivers is out-of-scope of this specification.</t>
+                    by SET Recipients is out of scope of this specification.</t>
             </section>
             <section anchor="failureResponse" title="Failure Response">
-                <t>In the event of a general HTTP error condition, the SET Receiver
+                <t>In the event of a general HTTP error condition, the SET Recipient
                     MAY respond with an appropriate HTTP Status Code as defined in
-                    <xref target="RFC7231">Section 6 of RFC7231</xref>.</t>
+                    Section 6 of <xref target="RFC7231"/>.</t>
                 <t>
-                    When the SET Receiver detects an error parsing or
+                    When the SET Recipient detects an error parsing or
                     validating a SET transmitted in a SET Transmission Request,
-                    the SET Receiver SHALL respond with an HTTP Response Status Code
-                    of 400.  The <spanx style="verb">Content-Type</spanx> header of this
+                    the SET Recipient SHALL respond with an HTTP Response Status Code
+                    of 400 (Bad Request).  The <spanx style="verb">Content-Type</spanx> header of this
                     response MUST be "application/json", and the body MUST be a JSON
                     object containing the following name/value pairs:
                     <list style="hanging">
@@ -305,7 +295,7 @@ Content-Type: application/json
                     <ttcol>Error Code</ttcol><ttcol>Description</ttcol>
                     <c>json</c><c>Invalid JSON object.</c>
                     <c>jwtParse</c><c>Invalid or unparsable JWT or JSON structure.</c>
-                    <c>jwtHdr</c><c>In invalid JWT header was detected.</c>
+                    <c>jwtHdr</c><c>An invalid JWT header was detected.</c>
                     <c>jwtCrypto</c><c>Unable to parse due to unsupported algorithm.</c>
                     <c>jws</c><c>Signature was not validated.</c>
                     <c>jwe</c><c>Unable to decrypt JWE encoded data.</c>
@@ -314,7 +304,7 @@ Content-Type: application/json
                     <c>setType</c><c>An unexpected Event type was received.</c>
                     <c>setParse</c><c>Invalid structure was encountered such as an
                         inability to parse or an incomplete set of Event claims.</c>
-                    <c>setData</c><c>SET event claims incomplete or invalid.</c>
+                    <c>setData</c><c>SET claims incomplete or invalid.</c>
                     <c>dup</c><c>A duplicate SET was received and has been ignored.</c>
                 </texttable>
             </section>
@@ -331,14 +321,14 @@ Content-Type: application/json
                 for the ability to pick-up or deliver SETs can be derived by
                 considering the identity of the SET issuer, or via other employed
                 authentication methods.  Because SETs are
-                not commands (see ), SET Receivers are free to ignore SETs that
+                not commands, SET Recipients are free to ignore SETs that
                 are not of interest.</t>
         </section>
         <section anchor="reliability" title="Delivery Reliability" toc="default">
             <t>
                 Delivery reliability requirements may vary from implementation to
                 implementation.  This specification defines the response from the SET
-                Receiver in such a way as to provide the SET Transmitter with the
+                Recipient in such a way as to provide the SET Transmitter with the
                 information necessary to determine what further action is required,
                 if any, in order to meet their requirements.  SET Transmitters with
                 high reliability requirements may be tempted to always retry failed
@@ -350,7 +340,7 @@ Content-Type: application/json
                 the same SET.  Others such as <spanx style="verb">jws</spanx> or
                 <spanx style="verb">jwe</spanx> may be transient, for example if
                 cryptographic material has not been properly distributed to the SET
-                Receiver's systems.
+                Recipient's systems.
             </t>
             <t>
                 Implementers SHOULD evaluate their reliability requirements and the
@@ -364,15 +354,15 @@ Content-Type: application/json
                 <t>In scenarios where HTTP authorization or TLS mutual authentication
                     are not used or are considered weak, JWS signed SETs SHOULD be
                     used (see <xref target="RFC7515"/> and <xref target="RFC8417">
-                    Security Considerations</xref>). This enables the SET Receiver
-                    to validate that the SET issuer is authorized to deliver SETs.
+                    Security Considerations</xref>). This enables the SET Recipient
+                    to validate that the SET issuer is authorized to deliver the SET.
                 </t>
             </section>
 
             <section title="TLS Support Considerations">
-                <t>SETs contain sensitive information that is considered PII
-                    (e.g. subject claims). Therefore, SET Transmitters and
-                    SET Receivers MUST require the use of a transport-layer
+                <t>SETs may contain sensitive information that is considered PII
+                    (e.g., subject claims). In such cases, SET Transmitters and
+                    SET Recipients MUST require the use of a transport-layer
                     security mechanism. Event delivery endpoints MUST support TLS
                     1.2 <xref target="RFC5246"/> and MAY support additional
                     transport-layer mechanisms meeting its security requirements.
@@ -384,41 +374,41 @@ Content-Type: application/json
 
             <section title="Denial of Service">
                 <t>
-                    The SET Receiver may be vulnerable to a denial-of-service attack where a
+                    The SET Recipient may be vulnerable to a denial-of-service attack where a
                     malicious party makes a high volume of requests containing invalid SETs,
                     causing the endpoint to expend significant resources on cryptographic
                     operations that are bound to fail. This may be mitigated by authenticating
                     SET Transmitters with a mechanism with low runtime overhead, such as mutual
-                    TLS or statically assigned bearer tokens.
+                    TLS.
                 </t>
             </section>
 
             <section title="Authenticating Persisted SETs">
                 <t>
-                    At the time of receipt, the SET Receiver can rely upon transport layer
+                    At the time of receipt, the SET Recipient can rely upon transport layer
                     mechanisms, HTTP authentication methods, and/or other context from the
                     transmission request to authenticate the SET Transmitter and validate the
                     authenticity of the SET.  However, this context is typically unavailable to
-                    systems that the SET Receiver forwards the SET onto, or to systems that
-                    retrieve the SET from storage.  If the SET Receiver requires the ability to
+                    systems that the SET Recipient forwards the SET onto, or to systems that
+                    retrieve the SET from storage.  If the SET Recipient requires the ability to
                     validate SET authenticity outside of the context of the transmission request,
-                    then the SET Transmitter SHOULD sign the SET in accordance with <xref target="RFC7515"/>,
-                    or encrypt it using an authenticated encryption scheme in accordance with <xref target="RFC7516"/>.
+                    then the SET Transmitter SHOULD sign the SET in accordance with <xref target="RFC7515"/>
+                    and optionally also encrypt it in accordance with <xref target="RFC7516"/>.
                 </t>
             </section>
         </section>
 
         <section title="Privacy Considerations">
-            <t>If a SET needs to be retained for audit purposes, JWS MAY
+            <t>If a SET needs to be retained for audit purposes, a JWS signature MAY
                 be used to provide verification of its authenticity.</t>
 
             <t>When sharing personally identifiable information or information
                 that is otherwise considered confidential to affected users, SET
-                Transmitters and Receivers MUST have the appropriate legal agreements
+                Transmitters and Recipients MUST have the appropriate legal agreements
                 and user consent or terms of service in place.</t>
 
             <t>The propagation of subject identifiers can be perceived as personally
-                identifiable information. Where possible, SET Transmitters and Receivers
+                identifiable information. Where possible, SET Transmitters and Recipients
                 SHOULD devise approaches that prevent propagation -- for example, the
                 passing of a hash value that requires the subscriber to already know
                 the subject.</t>
@@ -471,150 +461,133 @@ Content-Type: application/json
                 </section>
 
                 <section title="Initial Registry Contents">
-                    <t>
-                        <!-- [richanna] This needs better formatting. -->
-                        <list style="symbols">
-                            <t>
-                                <list style="hanging">
-                                    <t hangText="Error Code"><vspace/>json</t>
-                                    <t hangText="Description"><vspace/>Invalid JSON object.</t>
-                                    <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
-                                    <t hangText="Defining Document(s)">
-                                        <vspace/>
-                                        <xref target="error_codes"/> of this document.
-                                    </t>
-                                </list>
-                            </t>
-                            <t>
-                                <list style="hanging">
-                                    <t hangText="Error Code"><vspace/>jwtParse</t>
-                                    <t hangText="Description"><vspace/>Invalid or unparsable JWT or JSON structure.</t>
-                                    <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
-                                    <t hangText="Defining Document(s)">
-                                        <vspace/>
-                                        <xref target="error_codes"/> of this document.
-                                    </t>
-                                </list>
-                            </t>
-                            <t>
-                                <list style="hanging">
-                                    <t hangText="Error Code"><vspace/>jwtHdr</t>
-                                    <t hangText="Description"><vspace/>An invalid JWT header was detected.</t>
-                                    <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
-                                    <t hangText="Defining Document(s)">
-                                        <vspace/>
-                                        <xref target="error_codes"/> of this document.
-                                    </t>
-                                </list>
-                            </t>
-                            <t>
-                                <list style="hanging">
-                                    <t hangText="Error Code"><vspace/>jwtCrypto</t>
-                                    <t hangText="Description"><vspace/>Unable to parse due to unsupported algorithm.</t>
-                                    <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
-                                    <t hangText="Defining Document(s)">
-                                        <vspace/>
-                                        <xref target="error_codes"/> of this document.
-                                    </t>
-                                </list>
-                            </t>
-                            <t>
-                                <list style="hanging">
-                                    <t hangText="Error Code"><vspace/>jws</t>
-                                    <t hangText="Description"><vspace/>Signature was not validated.</t>
-                                    <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
-                                    <t hangText="Defining Document(s)">
-                                        <vspace/>
-                                        <xref target="error_codes"/> of this document.
-                                    </t>
-                                </list>
-                            </t>
-                            <t>
-                                <list style="hanging">
-                                    <t hangText="Error Code"><vspace/>jwe</t>
-                                    <t hangText="Description"><vspace/>Unable to decrypt JWE encoded data.</t>
-                                    <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
-                                    <t hangText="Defining Document(s)">
-                                        <vspace/>
-                                        <xref target="error_codes"/> of this document.
-                                    </t>
-                                </list>
-                            </t>
-                            <t>
-                                <list style="hanging">
-                                    <t hangText="Error Code"><vspace/>jwtAud</t>
-                                    <t hangText="Description"><vspace/>Invalid audience value.</t>
-                                    <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
-                                    <t hangText="Defining Document(s)">
-                                        <vspace/>
-                                        <xref target="error_codes"/> of this document.
-                                    </t>
-                                </list>
-                            </t>
-                            <t>
-                                <list style="hanging">
-                                    <t hangText="Error Code"><vspace/>jwtIss</t>
-                                    <t hangText="Description"><vspace/>Issuer not recognized.</t>
-                                    <t hangText="Change Controller"><vspace/></t>
-                                    <t hangText="Defining Document(s)">
-                                        <vspace/>
-                                        <xref target="error_codes"/> of this document.
-                                    </t>
-                                </list>
-                            </t>
-                            <t>
-                                <list style="hanging">
-                                    <t hangText="Error Code"><vspace/>setType</t>
-                                    <t hangText="Description"><vspace/>An unexpected Event type was received.</t>
-                                    <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
-                                    <t hangText="Defining Document(s)">
-                                        <vspace/>
-                                        <xref target="error_codes"/> of this document.
-                                    </t>
-                                </list>
-                            </t>
-                            <t>
-                                <list style="hanging">
-                                    <t hangText="Error Code"><vspace/>setParse</t>
-                                    <t hangText="Description">
-                                        <vspace/>
-                                        Invalid structure was encountered such as an inability to parse or an
-                                        incomplete set of Event claims.
-                                    </t>
-                                    <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
-                                    <t hangText="Defining Document(s)">
-                                        <vspace/>
-                                        <xref target="error_codes"/> of this document.
-                                    </t>
-                                </list>
-                            </t>
-                            <t>
-                                <list style="hanging">
-                                    <t hangText="Error Code"><vspace/>setData</t>
-                                    <t hangText="Description"><vspace/>SET event claims incomplete or invalid.</t>
-                                    <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
-                                    <t hangText="Defining Document(s)">
-                                        <vspace/>
-                                        <xref target="error_codes"/> of this document.
-                                    </t>
-                                </list>
-                            </t>
-                            <t>
-                                <list style="hanging">
-                                    <t hangText="Error Code"><vspace/>dup</t>
-                                    <t hangText="Description">
-                                        <vspace/> A duplicate SET was received and has been ignored.
-                                    </t>
-                                    <t hangText="Change Controller"><vspace/>IETF Secevent Working Group</t>
-                                    <t hangText="Defining Document(s)">
-                                        <vspace/>
-                                        <xref target="error_codes"/> of this document.
-                                    </t>
-                                </list>
-                            </t>
-                        </list>
-                    </t>
+		  <t>
+		    <?rfc subcompact="yes"?>
+		    <list style="hanging">
+		      <t>Error Code: json</t>
+		      <t>Description: Invalid JSON object</t>
+		      <t>Change Controller: IETF Secevent Working Group</t>
+		      <t>Defining Document(s): 
+		      <xref target="error_codes"/> of this document
+		      </t>
+		    </list>
+		  </t>
+		  <t>
+		    <list style="hanging">
+		      <t>Error Code: jwtParse</t>
+		      <t>Description: Invalid or unparsable JWT or JSON structure</t>
+		      <t>Change Controller: IETF Secevent Working Group</t>
+		      <t>Defining Document(s): 
+		      <xref target="error_codes"/> of this document
+		      </t>
+		    </list>
+		  </t>
+		  <t>
+		    <list style="hanging">
+		      <t>Error Code: jwtHdr</t>
+		      <t>Description: An invalid JWT header was detected</t>
+		      <t>Change Controller: IETF Secevent Working Group</t>
+		      <t>Defining Document(s): 
+		      <xref target="error_codes"/> of this document
+		      </t>
+		    </list>
+		  </t>
+		  <t>
+		    <list style="hanging">
+		      <t>Error Code: jwtCrypto</t>
+		      <t>Description: Unable to parse due to unsupported algorithm</t>
+		      <t>Change Controller: IETF Secevent Working Group</t>
+		      <t>Defining Document(s): 
+		      <xref target="error_codes"/> of this document
+		      </t>
+		    </list>
+		  </t>
+		  <t>
+		    <list style="hanging">
+		      <t>Error Code: jws</t>
+		      <t>Description: Signature was not validated</t>
+		      <t>Change Controller: IETF Secevent Working Group</t>
+		      <t>Defining Document(s): 
+		      <xref target="error_codes"/> of this document
+		      </t>
+		    </list>
+		  </t>
+		  <t>
+		    <list style="hanging">
+		      <t>Error Code: jwe</t>
+		      <t>Description: Unable to decrypt JWE encoded data</t>
+		      <t>Change Controller: IETF Secevent Working Group</t>
+		      <t>Defining Document(s): 
+		      <xref target="error_codes"/> of this document
+		      </t>
+		    </list>
+		  </t>
+		  <t>
+		    <list style="hanging">
+		      <t>Error Code: jwtAud</t>
+		      <t>Description: Invalid audience value</t>
+		      <t>Change Controller: IETF Secevent Working Group</t>
+		      <t>Defining Document(s): 
+		      <xref target="error_codes"/> of this document
+		      </t>
+		    </list>
+		  </t>
+		  <t>
+		    <list style="hanging">
+		      <t>Error Code: jwtIss</t>
+		      <t>Description: Issuer not recognized</t>
+		      <t>Change Controller: </t>
+		      <t>Defining Document(s): 
+		      <xref target="error_codes"/> of this document
+		      </t>
+		    </list>
+		  </t>
+		  <t>
+		    <list style="hanging">
+		      <t>Error Code: setType</t>
+		      <t>Description: An unexpected Event type was received</t>
+		      <t>Change Controller: IETF Secevent Working Group</t>
+		      <t>Defining Document(s): 
+		      <xref target="error_codes"/> of this document
+		      </t>
+		    </list>
+		  </t>
+		  <t>
+		    <list style="hanging">
+		      <t>Error Code: setParse</t>
+		      <t>Description: 
+		      Invalid structure was encountered such as an inability to parse or an
+		      incomplete set of Event claims.
+		      </t>
+		      <t>Change Controller: IETF Secevent Working Group</t>
+		      <t>Defining Document(s): 
+		      <xref target="error_codes"/> of this document
+		      </t>
+		    </list>
+		  </t>
+		  <t>
+		    <list style="hanging">
+		      <t>Error Code: setData</t>
+		      <t>Description: SET claims incomplete or invalid</t>
+		      <t>Change Controller: IETF Secevent Working Group</t>
+		      <t>Defining Document(s): 
+		      <xref target="error_codes"/> of this document
+		      </t>
+		    </list>
+		  </t>
+		  <t>
+		    <list style="hanging">
+		      <t>Error Code: dup</t>
+		      <t>Description:  A duplicate SET was received and has been ignored.
+		      </t>
+		      <t>Change Controller: IETF Secevent Working Group</t>
+		      <t>Defining Document(s): 
+		      <xref target="error_codes"/> of this document
+		      </t>
+		    </list>
+		  </t>
                 </section>
+		<?rfc subcompact="no"?>
             </section>
         </section>
     </middle>
@@ -632,14 +605,15 @@ Content-Type: application/json
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7159.xml' ?><!-- JSON -->
 
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
+            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
+            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7517.xml' ?><!-- JWK -->
+            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7525.xml' ?><!-- TLS Recos -->
 
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml' ?>
-
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8417.xml'?>
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8126.xml' ?>
+            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml' ?>
+            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8417.xml'?><!-- SET -->
         </references>
 
         <references title="Informative References">
@@ -648,8 +622,6 @@ Content-Type: application/json
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6749.xml' ?><!-- OAuth -->
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6750.xml' ?><!-- OAuth Bearer-->
 
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7521.xml' ?><!-- Client Auth Assertions -->
 
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7230.xml' ?><!-- HTTP Msg -->
@@ -657,22 +629,6 @@ Content-Type: application/json
 
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7617.xml' ?><!-- Basic Auth Update -->
 
-            <reference anchor="openid-connect-core">
-                <front>
-                    <title>OpenID Connect Core 1.0</title>
-                    <author fullname="Nat Sakimura et al"><organization>NRI</organization></author>
-                    <date day="8" month="Nov" year="2014"/>
-                </front>
-                <format type="HTML" target="http://openid.net/specs/openid-connect-core-1_0.html"/>
-            </reference>
-            <reference anchor="saml-core-2.0">
-                <front>
-                    <title>Assertions and Protocols for the OASIS Security Assertion Markup Language (SAML) V2.0</title>
-                    <author fullname="Scott Cantor et al"><organization>Internet2</organization></author>
-                    <date day="15" month="March" year="2005"/>
-                </front>
-                <format type="PDF" target="http://docs.oasis-open.org/security/saml/v2.0/saml-core-2.0-os.pdf"/>
-            </reference>
         </references>
 
         <section title="Other Streaming Specifications">
@@ -702,7 +658,7 @@ Content-Type: application/json
                 The long tail of OIDC clients may not care about that, or may fail
                 to get it right. Regardless, I think we can learn something from the
                 Delivery Policies supported by SNS, as well as the delivery controls
-                that SQS offers (e.g. Visibility Timeout, Dead-Letter Queues). I’m
+                that SQS offers (e.g., Visibility Timeout, Dead-Letter Queues). I’m
                 not suggesting that we need all of these things in the spec, but
                 they give an idea of what features people have found useful.</t>
             <t>Other information:<list style="symbols">
@@ -729,17 +685,17 @@ Content-Type: application/json
         </section>
 
         <section title="Acknowledgments">
-            <t>The editors would like to thanks the members of the SCIM WG which
+            <t>The editors would like to thank the members of the SCIM working group, which
                 began discussions of provisioning events starting with: draft-hunt-scim-notify-00 in 2015.</t>
 
             <t>The editors would like to thank Phil Hunt and the other authors of draft-ietf-secevent-delivery-02,
                 on which this draft is based.</t>
 
-            <t>The editor would like to thank the participants in the the SECEVENTS
-                working group for their support of this specification.</t>
+            <t>The editors would like to thank the participants in the the SECEVENTS
+                working group for their contributions to this specification.</t>
         </section>
 
-        <section title="Change Log">
+        <section anchor="History" title="Change Log">
             <t>Draft 00 - AB - Based on draft-ietf-secevent-delivery-02 with the
                 following changes:<list style="symbols">
                 <t>Renamed to "Push-Based SET Token Delivery Using HTTP"</t>
@@ -783,6 +739,25 @@ Content-Type: application/json
                     <t>Added retry guidance, notes regarding delivery reliability requirements.</t>
                     <t>Added guidance around using JWS and/or JWE to authenticate persisted SETs.</t>
                 </list>
+            </t>
+            <t>
+	      Draft 03 - mbj:
+	      <list style="symbols">
+		<t>
+		  Addressed problems identified in my 18-Jul-18 review message titled
+		  "Issues for both the Push and Poll Specs".
+		</t>
+		<t>
+		  Changes to align terminology with RFC 8417, for instance,
+		  by using the already defined term SET Recipient rather than SET Receiver.
+		</t>
+		<t>
+		  Applied editorial and minor normative corrections.
+		</t>
+		<t>
+		  Updated Marius' contact information.
+		</t>
+	      </list>
             </t>
         </section>
     </back>
