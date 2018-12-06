@@ -194,6 +194,11 @@
                     <xref target="RFC7519">JWT</xref>.
                 </t>
                 <t>
+                    The SET Transmitter MAY include in the request an <spanx style="verb">Accept-Language</spanx>
+                    header to indicate to the SET Recipient the preferred language(s) in which to
+                    receive error messages.
+                </t>
+                <t>
                     The mechanisms by which the SET Transmitter determines the HTTP endpoint to
                     use when transmitting a SET to a given SET Recipient are not defined by this
                     specification and may be implementation-specific.
@@ -205,6 +210,7 @@
                     <artwork align="left">POST /Events  HTTP/1.1
 Host: notify.rp.example.com
 Accept: application/json
+Accept-Language: en-US, en;q=0.5
 Content-Type: application/secevent+jwt
 
 eyJhbGciOiJub25lIn0
@@ -255,24 +261,37 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
                     validating a SET transmitted in a SET Transmission Request,
                     the SET Recipient SHALL respond with an HTTP Response Status Code
                     of 400 (Bad Request).  The <spanx style="verb">Content-Type</spanx> header of this
-                    response MUST be "application/json", and the body MUST be a <xref target="RFC7159">JSON</xref>
+                    response MUST be "application/json", and the body MUST be a UTF-8 encoded <xref target="RFC7159">JSON</xref>
                     object containing the following name/value pairs:
                     <list style="hanging">
                         <t hangText="err">
                             A Security Event Token Error Code (see <xref target="error_codes"/>).
                         </t>
                         <t hangText="description">
-                            Human-readable text that describes the error and MAY contain
-                            additional diagnostic information. The exact content of this
-                            field is implementation-specific.
+                            A UTF-8 string containing a human-readable description of the error
+                            that MAY provide additional diagnostic information. The exact content
+                            of this field is implementation-specific.
                         </t>
                     </list>
                 </t>
 
+                <t>
+                    The response MUST include a <spanx style="verb">Content-Language</spanx> header, whose
+                    value indicates the language of the error descriptions included in the response body. If
+                    the SET Recipient can provide error descriptions in multiple languages, they SHOULD choose
+                    the language to use according to the value of the <spanx style="verb">Accept-Language</spanx>
+                    header sent by the SET Transmitter in the transmission request, as described in Section 5.3.5
+                    of <xref target="RFC7231"/>. If the SET Transmitter did not send an
+                    <spanx style="verb">Accept-Language</spanx> header, or if the SET Recipient does not support any
+                    of the languages included in the header, the SET Recipient MUST respond with messages that are
+                    understandable by an English-speaking person, as described in Section 4.5 of <xref target="RFC2277"/>.
+                </t>
+                    
                 <figure anchor="errorResponseInvalidKey" title="Example Error Response (invalid_key)">
                     <preamble>The following is an example non-normative error response indicating
                         that the key used to encrypt the SET has been revoked.</preamble>
                     <artwork>HTTP/1.1 400 Bad Request
+Content-Language: en-US
 Content-Type: application/json
 
 {
@@ -285,6 +304,7 @@ Content-Type: application/json
                     <preamble>The following is an example non-normative error response indicating
                         that the access token included in the request is expired.</preamble>
                     <artwork>HTTP/1.1 400 Bad Request
+Content-Language: en-US
 Content-Type: application/json
 
 {
@@ -298,6 +318,7 @@ Content-Type: application/json
                         that the SET Transmitter is not permitted to transmit SETs issued by the
                         issuer specified in the SET.</preamble>
                     <artwork>HTTP/1.1 400 Bad Request
+Content-Language: en-US
 Content-Type: application/json
 
 {
@@ -550,6 +571,7 @@ Content-Type: application/json
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8126.xml' ?>
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml' ?>
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8417.xml'?><!-- SET -->
+            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2277.xml'?><!-- IETF Language Policy -->
         </references>
 
         <references title="Informative References">
@@ -694,6 +716,11 @@ Content-Type: application/json
                     <t>
                         Added text clarifying that the value of the <spanx style="verb">description</spanx>
                         attribute in error responses is implementation specific.
+                    </t>
+                    <t>Added requirement that error descriptions and responses are UTF-8 encoded.</t>
+                    <t>
+                        Added error description language preferences and specification via <spanx style="verb">Accept-Language</spanx>
+                        and <spanx style="verb">Content-Language</spanx> headers.
                     </t>
                 </list>
             </t>
