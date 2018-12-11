@@ -5,14 +5,14 @@
 Security Events Working Group                            A. Backman, Ed.
 Internet-Draft                                                    Amazon
 Intended status: Standards Track                           M. Jones, Ed.
-Expires: June 9, 2019                                          Microsoft
+Expires: June 13, 2019                                         Microsoft
                                                             M. Scurtescu
                                                                 Coinbase
                                                                M. Ansari
                                                                    Cisco
                                                               A. Nadalin
                                                                Microsoft
-                                                        December 6, 2018
+                                                       December 10, 2018
 
 
        Push-Based Security Event Token (SET) Delivery Using HTTP
@@ -34,14 +34,14 @@ Status of This Memo
    Internet-Drafts are working documents of the Internet Engineering
    Task Force (IETF).  Note that other groups may also distribute
    working documents as Internet-Drafts.  The list of current Internet-
-   Drafts is at http://datatracker.ietf.org/drafts/current/.
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
 
    Internet-Drafts are draft documents valid for a maximum of six months
    and may be updated, replaced, or obsoleted by other documents at any
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on June 9, 2019.
+   This Internet-Draft will expire on June 13, 2019.
 
 Copyright Notice
 
@@ -53,12 +53,12 @@ Copyright Notice
 
 
 
-Backman, et al.           Expires June 9, 2019                  [Page 1]
+Backman, et al.           Expires June 13, 2019                 [Page 1]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
-   (http://trustee.ietf.org/license-info) in effect on the date of
+   (https://trustee.ietf.org/license-info) in effect on the date of
    publication of this document.  Please review these documents
    carefully, as they describe your rights and restrictions with respect
    to this document.  Code Components extracted from this document must
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Backman, et al.           Expires June 9, 2019                  [Page 2]
+Backman, et al.           Expires June 13, 2019                 [Page 2]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -165,7 +165,7 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 9, 2019                  [Page 3]
+Backman, et al.           Expires June 13, 2019                 [Page 3]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -221,7 +221,7 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 9, 2019                  [Page 4]
+Backman, et al.           Expires June 13, 2019                 [Page 4]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -277,7 +277,7 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 9, 2019                  [Page 5]
+Backman, et al.           Expires June 13, 2019                 [Page 5]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -333,7 +333,7 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 9, 2019                  [Page 6]
+Backman, et al.           Expires June 13, 2019                 [Page 6]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -389,7 +389,7 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 9, 2019                  [Page 7]
+Backman, et al.           Expires June 13, 2019                 [Page 7]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -445,7 +445,7 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 9, 2019                  [Page 8]
+Backman, et al.           Expires June 13, 2019                 [Page 8]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -501,7 +501,7 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 9, 2019                  [Page 9]
+Backman, et al.           Expires June 13, 2019                 [Page 9]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -557,7 +557,7 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 9, 2019                 [Page 10]
+Backman, et al.           Expires June 13, 2019                [Page 10]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -613,7 +613,7 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 9, 2019                 [Page 11]
+Backman, et al.           Expires June 13, 2019                [Page 11]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -624,8 +624,8 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
-              DOI 10.17487/RFC2119, March 1997, <https://www.rfc-
-              editor.org/info/rfc2119>.
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
 
    [RFC2277]  Alvestrand, H., "IETF Policy on Character Sets and
               Languages", BCP 18, RFC 2277, DOI 10.17487/RFC2277,
@@ -633,8 +633,8 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
    [RFC5246]  Dierks, T. and E. Rescorla, "The Transport Layer Security
               (TLS) Protocol Version 1.2", RFC 5246,
-              DOI 10.17487/RFC5246, August 2008, <https://www.rfc-
-              editor.org/info/rfc5246>.
+              DOI 10.17487/RFC5246, August 2008,
+              <https://www.rfc-editor.org/info/rfc5246>.
 
    [RFC6125]  Saint-Andre, P. and J. Hodges, "Representation and
               Verification of Domain-Based Application Service Identity
@@ -649,8 +649,8 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
    [RFC7231]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
               Protocol (HTTP/1.1): Semantics and Content", RFC 7231,
-              DOI 10.17487/RFC7231, June 2014, <https://www.rfc-
-              editor.org/info/rfc7231>.
+              DOI 10.17487/RFC7231, June 2014,
+              <https://www.rfc-editor.org/info/rfc7231>.
 
    [RFC7515]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
               Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May
@@ -669,7 +669,7 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 9, 2019                 [Page 12]
+Backman, et al.           Expires June 13, 2019                [Page 12]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -691,15 +691,15 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
    [RFC8417]  Hunt, P., Ed., Jones, M., Denniss, W., and M. Ansari,
               "Security Event Token (SET)", RFC 8417,
-              DOI 10.17487/RFC8417, July 2018, <https://www.rfc-
-              editor.org/info/rfc8417>.
+              DOI 10.17487/RFC8417, July 2018,
+              <https://www.rfc-editor.org/info/rfc8417>.
 
 8.2.  Informative References
 
    [RFC7235]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
               Protocol (HTTP/1.1): Authentication", RFC 7235,
-              DOI 10.17487/RFC7235, June 2014, <https://www.rfc-
-              editor.org/info/rfc7235>.
+              DOI 10.17487/RFC7235, June 2014,
+              <https://www.rfc-editor.org/info/rfc7235>.
 
 Appendix A.  Other Streaming Specifications
 
@@ -725,7 +725,7 @@ Appendix A.  Other Streaming Specifications
 
 
 
-Backman, et al.           Expires June 9, 2019                 [Page 13]
+Backman, et al.           Expires June 13, 2019                [Page 13]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -781,7 +781,7 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 9, 2019                 [Page 14]
+Backman, et al.           Expires June 13, 2019                [Page 14]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -837,7 +837,7 @@ Appendix C.  Change Log
 
 
 
-Backman, et al.           Expires June 9, 2019                 [Page 15]
+Backman, et al.           Expires June 13, 2019                [Page 15]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -893,7 +893,7 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 9, 2019                 [Page 16]
+Backman, et al.           Expires June 13, 2019                [Page 16]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -949,7 +949,7 @@ Authors' Addresses
 
 
 
-Backman, et al.           Expires June 9, 2019                 [Page 17]
+Backman, et al.           Expires June 13, 2019                [Page 17]
 
 Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
@@ -1005,4 +1005,4 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 9, 2019                 [Page 18]
+Backman, et al.           Expires June 13, 2019                [Page 18]
