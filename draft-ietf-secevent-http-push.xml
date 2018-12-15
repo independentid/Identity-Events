@@ -194,6 +194,11 @@
                     <xref target="RFC7519">JWT</xref>.
                 </t>
                 <t>
+                    The SET Transmitter MAY include in the request an <spanx style="verb">Accept-Language</spanx>
+                    header to indicate to the SET Recipient the preferred language(s) in which to
+                    receive error messages.
+                </t>
+                <t>
                     The mechanisms by which the SET Transmitter determines the HTTP endpoint to
                     use when transmitting a SET to a given SET Recipient are not defined by this
                     specification and may be implementation-specific.
@@ -205,6 +210,7 @@
                     <artwork align="left">POST /Events  HTTP/1.1
 Host: notify.rp.example.com
 Accept: application/json
+Accept-Language: en-US, en;q=0.5
 Content-Type: application/secevent+jwt
 
 eyJhbGciOiJub25lIn0
@@ -255,36 +261,76 @@ tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
                     validating a SET transmitted in a SET Transmission Request,
                     the SET Recipient SHALL respond with an HTTP Response Status Code
                     of 400 (Bad Request).  The <spanx style="verb">Content-Type</spanx> header of this
-                    response MUST be "application/json", and the body MUST be a JSON
+                    response MUST be "application/json", and the body MUST be a UTF-8 encoded <xref target="RFC7159">JSON</xref>
                     object containing the following name/value pairs:
                     <list style="hanging">
                         <t hangText="err">
                             A Security Event Token Error Code (see <xref target="error_codes"/>).
                         </t>
                         <t hangText="description">
-                            Human-readable text that describes the error and MAY contain
-                            additional diagnostic information.
+                            A UTF-8 string containing a human-readable description of the error
+                            that MAY provide additional diagnostic information. The exact content
+                            of this field is implementation-specific.
                         </t>
                     </list>
                 </t>
 
-                <figure anchor="badPostResponse" title="Example Error Response">
-                    <preamble>The following is an example non-normative error
-                        response.</preamble>
+                <t>
+                    The response MUST include a <spanx style="verb">Content-Language</spanx> header, whose
+                    value indicates the language of the error descriptions included in the response body. If
+                    the SET Recipient can provide error descriptions in multiple languages, they SHOULD choose
+                    the language to use according to the value of the <spanx style="verb">Accept-Language</spanx>
+                    header sent by the SET Transmitter in the transmission request, as described in Section 5.3.5
+                    of <xref target="RFC7231"/>. If the SET Transmitter did not send an
+                    <spanx style="verb">Accept-Language</spanx> header, or if the SET Recipient does not support any
+                    of the languages included in the header, the SET Recipient MUST respond with messages that are
+                    understandable by an English-speaking person, as described in Section 4.5 of <xref target="RFC2277"/>.
+                </t>
+                    
+                <figure anchor="errorResponseInvalidKey" title="Example Error Response (invalid_key)">
+                    <preamble>The following is an example non-normative error response indicating
+                        that the key used to encrypt the SET has been revoked.</preamble>
                     <artwork>HTTP/1.1 400 Bad Request
+Content-Language: en-US
 Content-Type: application/json
 
 {
-"err":"dup",
-"description":"SET already received. Ignored."
+  "err": "invalid_key",
+  "description": "Key ID 12345 has been revoked."
+}</artwork>
+                </figure>
 
+                <figure anchor="errorResponseExpiredToken" title="Example Error Response (authentication_failed)">
+                    <preamble>The following is an example non-normative error response indicating
+                        that the access token included in the request is expired.</preamble>
+                    <artwork>HTTP/1.1 400 Bad Request
+Content-Language: en-US
+Content-Type: application/json
+
+{
+  "err": "authentication_failed",
+  "description": "Access token is expired."
+}</artwork>
+                </figure>
+
+                <figure anchor="errorResponseBadIssuer" title="Example Error Response (access_denied)">
+                    <preamble>The following is an example non-normative error response indicating
+                        that the SET Transmitter is not permitted to transmit SETs issued by the
+                        issuer specified in the SET.</preamble>
+                    <artwork>HTTP/1.1 400 Bad Request
+Content-Language: en-US
+Content-Type: application/json
+
+{
+  "err": "access_denied",
+  "description": "Not authorized for issuer http://iss.example.com/."
 }</artwork>
                 </figure>
             </section>
 
             <section anchor="error_codes" title="Security Event Token Delivery Error Codes">
                 <t>Security Event Token Delivery Error Codes are strings that identify a
-                    specific type of error that may occur when parsing or validating a SET.
+                    specific category of error that may occur when parsing or validating a SET.
                     Every Security Event Token Delivery Error Code MUST have a unique name
                     registered in the IANA "Security Event Token Delivery Error Codes"
                     registry established by <xref target="iana_set_errors"/>.</t>
@@ -293,19 +339,15 @@ Content-Type: application/json
                     in the IANA "Security Event Token Delivery Error Codes" registry:</t>
                 <texttable anchor="reqErrors" title="SET Delivery Error Codes">
                     <ttcol>Error Code</ttcol><ttcol>Description</ttcol>
-                    <c>json</c><c>Invalid JSON object.</c>
-                    <c>jwtParse</c><c>Invalid or unparsable JWT or JSON structure.</c>
-                    <c>jwtHdr</c><c>An invalid JWT header was detected.</c>
-                    <c>jwtCrypto</c><c>Unable to parse due to unsupported algorithm.</c>
-                    <c>jws</c><c>Signature was not validated.</c>
-                    <c>jwe</c><c>Unable to decrypt JWE encoded data.</c>
-                    <c>jwtAud</c><c>Invalid audience value.</c>
-                    <c>jwtIss</c><c>Issuer not recognized.</c>
-                    <c>setType</c><c>An unexpected Event type was received.</c>
-                    <c>setParse</c><c>Invalid structure was encountered such as an
-                        inability to parse or an incomplete set of Event claims.</c>
-                    <c>setData</c><c>SET claims incomplete or invalid.</c>
-                    <c>dup</c><c>A duplicate SET was received and has been ignored.</c>
+                    <c>invalid_request</c><c>The request body cannot be parsed as a SET, or the
+                        event payload within the SET does not conform to the event's definition.</c>
+                    <c>invalid_key</c><c>One or more keys used to encrypt or sign the SET is
+                        invalid or otherwise unacceptable to the SET Recipient. (e.g., expired,
+                        revoked, failed certificate validation, etc.)</c>
+                    <c>authentication_failed</c><c>The SET Recipient could not authenticate the
+                        SET Transmitter from the contents of the request.</c>
+                    <c>access_denied</c><c>The SET Transmitter is not authorized to transmit the
+                        provided SET to the SET Recipient.</c>
                 </texttable>
             </section>
         </section>
@@ -334,13 +376,11 @@ Content-Type: application/json
                 high reliability requirements may be tempted to always retry failed
                 transmissions, however it should be noted that for many types of SET
                 delivery errors, a retry is extremely unlikely to be successful.  For
-                example, <spanx style="verb">json</spanx>, <spanx style="verb">jwtParse</spanx>,
-                and <spanx style="verb">setParse</spanx> all indicate structural errors
-                in the content of the SET that are likely to remain when re-transmitting
-                the same SET.  Others such as <spanx style="verb">jws</spanx> or
-                <spanx style="verb">jwe</spanx> may be transient, for example if
-                cryptographic material has not been properly distributed to the SET
-                Recipient's systems.
+                example, <spanx style="verb">invalid_request</spanx> indicates a structural
+                error in the content of the request body that is likely to remain when
+                re-transmitting the same SET.  Others such as <spanx style="verb">access_denied</spanx>
+                may be transient, for example if the SET Transmitter refreshes expired
+                credentials prior to re-transmission.
             </t>
             <t>
                 Implementers SHOULD evaluate their reliability requirements and the
@@ -464,8 +504,9 @@ Content-Type: application/json
 		  <t>
 		    <?rfc subcompact="yes"?>
 		    <list style="hanging">
-		      <t>Error Code: json</t>
-		      <t>Description: Invalid JSON object</t>
+		      <t>Error Code: invalid_request</t>
+                      <t>Description: The request body cannot be parsed as a SET, or the event
+                          payload within the SET does not conform to the event's definition.</t>
 		      <t>Change Controller: IETF Secevent Working Group</t>
 		      <t>Defining Document(s): 
 		      <xref target="error_codes"/> of this document
@@ -474,8 +515,10 @@ Content-Type: application/json
 		  </t>
 		  <t>
 		    <list style="hanging">
-		      <t>Error Code: jwtParse</t>
-		      <t>Description: Invalid or unparsable JWT or JSON structure</t>
+                      <t>Error Code: invalid_key</t>
+                      <t>Description: One or more keys used to encrypt or sign the SET is invalid
+                          or otherwise unacceptable to the SET Recipient. (e.g., expired, revoked,
+                          failed certificate validation, etc.)</t>
 		      <t>Change Controller: IETF Secevent Working Group</t>
 		      <t>Defining Document(s): 
 		      <xref target="error_codes"/> of this document
@@ -484,8 +527,9 @@ Content-Type: application/json
 		  </t>
 		  <t>
 		    <list style="hanging">
-		      <t>Error Code: jwtHdr</t>
-		      <t>Description: An invalid JWT header was detected</t>
+                      <t>Error Code: authentication_failed</t>
+                      <t>Description: The SET Recipient could not authenticate the SET Transmitter
+                          from the contents of the request.</t>
 		      <t>Change Controller: IETF Secevent Working Group</t>
 		      <t>Defining Document(s): 
 		      <xref target="error_codes"/> of this document
@@ -494,92 +538,9 @@ Content-Type: application/json
 		  </t>
 		  <t>
 		    <list style="hanging">
-		      <t>Error Code: jwtCrypto</t>
-		      <t>Description: Unable to parse due to unsupported algorithm</t>
-		      <t>Change Controller: IETF Secevent Working Group</t>
-		      <t>Defining Document(s): 
-		      <xref target="error_codes"/> of this document
-		      </t>
-		    </list>
-		  </t>
-		  <t>
-		    <list style="hanging">
-		      <t>Error Code: jws</t>
-		      <t>Description: Signature was not validated</t>
-		      <t>Change Controller: IETF Secevent Working Group</t>
-		      <t>Defining Document(s): 
-		      <xref target="error_codes"/> of this document
-		      </t>
-		    </list>
-		  </t>
-		  <t>
-		    <list style="hanging">
-		      <t>Error Code: jwe</t>
-		      <t>Description: Unable to decrypt JWE encoded data</t>
-		      <t>Change Controller: IETF Secevent Working Group</t>
-		      <t>Defining Document(s): 
-		      <xref target="error_codes"/> of this document
-		      </t>
-		    </list>
-		  </t>
-		  <t>
-		    <list style="hanging">
-		      <t>Error Code: jwtAud</t>
-		      <t>Description: Invalid audience value</t>
-		      <t>Change Controller: IETF Secevent Working Group</t>
-		      <t>Defining Document(s): 
-		      <xref target="error_codes"/> of this document
-		      </t>
-		    </list>
-		  </t>
-		  <t>
-		    <list style="hanging">
-		      <t>Error Code: jwtIss</t>
-		      <t>Description: Issuer not recognized</t>
-		      <t>Change Controller: </t>
-		      <t>Defining Document(s): 
-		      <xref target="error_codes"/> of this document
-		      </t>
-		    </list>
-		  </t>
-		  <t>
-		    <list style="hanging">
-		      <t>Error Code: setType</t>
-		      <t>Description: An unexpected Event type was received</t>
-		      <t>Change Controller: IETF Secevent Working Group</t>
-		      <t>Defining Document(s): 
-		      <xref target="error_codes"/> of this document
-		      </t>
-		    </list>
-		  </t>
-		  <t>
-		    <list style="hanging">
-		      <t>Error Code: setParse</t>
-		      <t>Description: 
-		      Invalid structure was encountered such as an inability to parse or an
-		      incomplete set of Event claims.
-		      </t>
-		      <t>Change Controller: IETF Secevent Working Group</t>
-		      <t>Defining Document(s): 
-		      <xref target="error_codes"/> of this document
-		      </t>
-		    </list>
-		  </t>
-		  <t>
-		    <list style="hanging">
-		      <t>Error Code: setData</t>
-		      <t>Description: SET claims incomplete or invalid</t>
-		      <t>Change Controller: IETF Secevent Working Group</t>
-		      <t>Defining Document(s): 
-		      <xref target="error_codes"/> of this document
-		      </t>
-		    </list>
-		  </t>
-		  <t>
-		    <list style="hanging">
-		      <t>Error Code: dup</t>
-		      <t>Description:  A duplicate SET was received and has been ignored.
-		      </t>
+                      <t>Error Code: access_denied</t>
+                      <t>Description: The SET Transmitter is not authorized to transmit the provided
+                          SET to the SET Recipient.</t>
 		      <t>Change Controller: IETF Secevent Working Group</t>
 		      <t>Defining Document(s): 
 		      <xref target="error_codes"/> of this document
@@ -595,10 +556,7 @@ Content-Type: application/json
     <back>
         <references title="Normative References">
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.3986.xml' ?>
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5246.xml' ?><!-- TLS 1.2 -->
-
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5988.xml' ?>
 
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6125.xml' ?><!-- TLS Certs -->
 
@@ -607,28 +565,17 @@ Content-Type: application/json
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7517.xml' ?><!-- JWK -->
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7525.xml' ?><!-- TLS Recos -->
 
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8126.xml' ?>
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml' ?>
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8417.xml'?><!-- SET -->
+            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2277.xml'?><!-- IETF Language Policy -->
         </references>
 
         <references title="Informative References">
-            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml' ?>
-
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6749.xml' ?><!-- OAuth -->
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6750.xml' ?><!-- OAuth Bearer-->
-
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7521.xml' ?><!-- Client Auth Assertions -->
-
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7230.xml' ?><!-- HTTP Msg -->
             <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7235.xml' ?><!-- HTTP Auth -->
-
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7617.xml' ?><!-- Basic Auth Update -->
-
         </references>
 
         <section title="Other Streaming Specifications">
@@ -758,6 +705,24 @@ Content-Type: application/json
 		  Updated Marius' contact information.
 		</t>
 	      </list>
+            </t>
+            <t>
+                Draft 04 - AB:
+                <list style="symbols">
+                    <t>Replaced Error Codes with smaller set of meaningfully differentiated codes.</t>
+                    <t>Added more error response examples.</t>
+                    <t>Removed un-referenced normative references.</t>
+                    <t>Added normative reference to JSON in error response definition.</t>
+                    <t>
+                        Added text clarifying that the value of the <spanx style="verb">description</spanx>
+                        attribute in error responses is implementation specific.
+                    </t>
+                    <t>Added requirement that error descriptions and responses are UTF-8 encoded.</t>
+                    <t>
+                        Added error description language preferences and specification via <spanx style="verb">Accept-Language</spanx>
+                        and <spanx style="verb">Content-Language</spanx> headers.
+                    </t>
+                </list>
             </t>
         </section>
     </back>
