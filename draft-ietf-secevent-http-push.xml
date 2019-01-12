@@ -51,7 +51,7 @@
             </address>
         </author>
 
-        <date year="2018" />
+        <date year="2019" />
         <area>Security</area>
         <workgroup>Security Events Working Group</workgroup>
         <keyword>Internet-Draft</keyword>
@@ -60,7 +60,7 @@
             <t>
                 This specification defines how a Security Event Token (SET)
                 may be delivered to an intended recipient using HTTP POST.
-                The SET is transmitted in the body of an HTTP POST reqest to an
+                The SET is transmitted in the body of an HTTP POST request to an
                 endpoint operated by the recipient, and the recipient indicates
                 successful or failed transmission via the HTTP response.
             </t>
@@ -86,8 +86,9 @@
                     </t>
                     <t>The transmitter and recipient are known to one another.</t>
                     <t>
-                        The transmitter and recipient have an out-of-band mechanism for exchanging
-                        configuration metadata such as endpoint URLs and cryptographic key parameters.
+                        A mechanism for exchanging configuration metadata such as endpoint URLs
+                        and cryptographic key parameters between the transmitter and receipt is
+                        out of scope for this specifications.
                     </t>
                 </list>
             </t>
@@ -116,9 +117,13 @@
                     <list style="hanging">
                         <t hangText="SET Transmitter"><vspace/>
                             An entity that delivers SETs in its possession to one or more SET
-                            Recipients.
+                            Recipients, as defined in <xref target="RFC8417"/>.
                         </t>
-
+                        <t hangText="SET Recipient"><vspace/>
+                            An entity that receives SETs through some distribution method, as 
+                            defined in <xref target="RFC8417"/>.
+                        </t>
+                        
                     </list>
                 </t>
             </section>
@@ -147,6 +152,11 @@
                         The SET Recipient is identified as an intended audience of
                         the SET.
                     </t>
+                    <t>
+                        The SET issuer is recognized as an issuer that the SET Recipient
+                        is willing to receive SETs from (i.e., the issuer is whitelisted
+                        by the SET Recipient).
+                    </t>
                 </list>
             </t>
             <t>
@@ -174,11 +184,12 @@
             </t>
             <t>
                 The SET Transmitter SHOULD NOT re-transmit a SET, unless the response from
-                the SET Recipient in previous transmissions indicated a potentially recoverable
-                error (such as server unavailability that may be transient, or a decryption
-                failure that may be due to misconfigured keys on the SET Recipient's side).  In
-                the latter case, the SET Transmitter MAY re-transmit a SET, after an appropriate
-                delay to avoid overwhelming the SET Recipient (see <xref target="reliability"/>).
+                the SET Recipient in previous transmissions times out or it indicated a 
+                potentially recoverable error (such as server unavailability that may be
+                transient, or a decryption failure that may be due to misconfigured keys on
+                the SET Recipient's side).  In the latter case, the SET Transmitter MAY
+                re-transmit a SET, after an appropriate delay to avoid overwhelming the SET 
+                Recipient (see <xref target="reliability"/>).
             </t>
 
             <section anchor="httpPost" title="Transmitting a SET">
@@ -226,7 +237,8 @@ SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
 b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
 tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
 1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
-.</artwork>
+.
+c2lnbmF0dXJl</artwork>
                 </figure>
             </section>
 
