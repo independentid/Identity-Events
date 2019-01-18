@@ -85,15 +85,14 @@
                         to the transmitter.
                     </t>
                     <t>The transmitter and recipient are known to one another.</t>
-                    <t>
-                        A mechanism for exchanging configuration metadata such as endpoint URLs
-                        and cryptographic key parameters between the transmitter and receipt is
-                        out of scope for this specifications.
-                    </t>
                 </list>
             </t>
-
-
+            <t>
+                A mechanism for exchanging configuration metadata such as endpoint URLs
+                and cryptographic key parameters between the transmitter and receipt is
+                out of scope for this specifications.
+            </t>
+            
             <section anchor="notat" title="Notational Conventions" toc="default">
                 <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
                     NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
@@ -154,7 +153,7 @@
                     </t>
                     <t>
                         The SET issuer is recognized as an issuer that the SET Recipient
-                        is willing to receive SETs from (i.e., the issuer is whitelisted
+                        is willing to receive SETs from (e.g., the issuer is whitelisted
                         by the SET Recipient).
                     </t>
                 </list>
@@ -183,15 +182,15 @@
                 minimize the expense and impact of SET delivery on the SET Transmitter.
             </t>
             <t>
-                The SET Transmitter SHOULD NOT re-transmit a SET, unless the response from
-                the SET Recipient in previous transmissions times out or it indicated a 
-                potentially recoverable error (such as server unavailability that may be
-                transient, or a decryption failure that may be due to misconfigured keys on
-                the SET Recipient's side).  In the latter case, the SET Transmitter MAY
-                re-transmit a SET, after an appropriate delay to avoid overwhelming the SET 
-                Recipient (see <xref target="reliability"/>).
+                The SET Transmitter MAY re-transmit a SET if the responses from previous
+                transmissions timed out or indicated potentially recoverable error (such
+                as server unavailability that may be transient, or a decryption failure
+                that may be due to misconfigured keys on the SET Recipient's side). In all
+                other cases, the SET Transmitter SHOULD NOT re-transmit a SET. The SET
+                Transmitter SHOULD delay retransmission for an appropriate amount of time
+                to avoid overwhelming the SET Recipient (see <xref target="reliability"/>).
             </t>
-
+            
             <section anchor="httpPost" title="Transmitting a SET">
 
                 <t>
