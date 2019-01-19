@@ -5,14 +5,14 @@
 Security Events Working Group                            A. Backman, Ed.
 Internet-Draft                                                    Amazon
 Intended status: Standards Track                           M. Jones, Ed.
-Expires: June 13, 2019                                         Microsoft
+Expires: July 21, 2019                                         Microsoft
                                                             M. Scurtescu
                                                                 Coinbase
                                                                M. Ansari
                                                                    Cisco
                                                               A. Nadalin
                                                                Microsoft
-                                                       December 10, 2018
+                                                        January 17, 2019
 
 
        Push-Based Security Event Token (SET) Delivery Using HTTP
@@ -22,7 +22,7 @@ Abstract
 
    This specification defines how a Security Event Token (SET) may be
    delivered to an intended recipient using HTTP POST.  The SET is
-   transmitted in the body of an HTTP POST reqest to an endpoint
+   transmitted in the body of an HTTP POST request to an endpoint
    operated by the recipient, and the recipient indicates successful or
    failed transmission via the HTTP response.
 
@@ -41,11 +41,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on June 13, 2019.
+   This Internet-Draft will expire on July 21, 2019.
 
 Copyright Notice
 
-   Copyright (c) 2018 IETF Trust and the persons identified as the
+   Copyright (c) 2019 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Backman, et al.           Expires June 13, 2019                 [Page 1]
+Backman, et al.           Expires July 21, 2019                 [Page 1]
 
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
    (https://trustee.ietf.org/license-info) in effect on the date of
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Backman, et al.           Expires June 13, 2019                 [Page 2]
+Backman, et al.           Expires July 21, 2019                 [Page 2]
 
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
    o  The transmitter of the SET is capable of making outbound HTTP
@@ -122,9 +122,9 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
    o  The transmitter and recipient are known to one another.
 
-   o  The transmitter and recipient have an out-of-band mechanism for
-      exchanging configuration metadata such as endpoint URLs and
-      cryptographic key parameters.
+   A mechanism for exchanging configuration metadata such as endpoint
+   URLs and cryptographic key parameters between the transmitter and
+   receipt is out of scope for this specifications.
 
 1.1.  Notational Conventions
 
@@ -144,7 +144,11 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
    SET Transmitter
       An entity that delivers SETs in its possession to one or more SET
-      Recipients.
+      Recipients, as defined in [RFC8417].
+
+   SET Recipient
+      An entity that receives SETs through some distribution method, as
+      defined in [RFC8417].
 
 2.  SET Delivery
 
@@ -158,20 +162,25 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
    Upon receipt of a SET, the SET Recipient SHALL validate that all of
    the following are true:
 
+
+
+
+Backman, et al.           Expires July 21, 2019                 [Page 3]
+
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
+
+
    o  The SET Recipient can parse the SET.
 
    o  The SET is authentic (i.e., it was issued by the issuer specified
       within the SET).
 
-
-
-Backman, et al.           Expires June 13, 2019                 [Page 3]
-
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
-
-
    o  The SET Recipient is identified as an intended audience of the
       SET.
+
+   o  The SET issuer is recognized as an issuer that the SET Recipient
+      is willing to receive SETs from (e.g., the issuer is whitelisted
+      by the SET Recipient).
 
    The mechanisms by which the SET Recipient performs this validation
    are out of scope for this document.  SET parsing and issuer and
@@ -195,19 +204,28 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
    asynchronously from delivery, in order to minimize the expense and
    impact of SET delivery on the SET Transmitter.
 
-   The SET Transmitter SHOULD NOT re-transmit a SET, unless the response
-   from the SET Recipient in previous transmissions indicated a
-   potentially recoverable error (such as server unavailability that may
-   be transient, or a decryption failure that may be due to
-   misconfigured keys on the SET Recipient's side).  In the latter case,
-   the SET Transmitter MAY re-transmit a SET, after an appropriate delay
-   to avoid overwhelming the SET Recipient (see Section 4).
+   The SET Transmitter MAY re-transmit a SET if the responses from
+   previous transmissions timed out or indicated potentially recoverable
+   error (such as server unavailability that may be transient, or a
+   decryption failure that may be due to misconfigured keys on the SET
+   Recipient's side).  In all other cases, the SET Transmitter SHOULD
+   NOT re-transmit a SET.  The SET Transmitter SHOULD delay
+   retransmission for an appropriate amount of time to avoid
+   overwhelming the SET Recipient (see Section 4).
 
 2.1.  Transmitting a SET
 
    To transmit a SET to a SET Recipient, the SET Transmitter makes an
    HTTP POST request to an HTTP endpoint provided by the SET Recipient.
    The "Content-Type" header of this request MUST be "application/
+
+
+
+Backman, et al.           Expires July 21, 2019                 [Page 4]
+
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
+
+
    secevent+jwt" as defined in Sections 2.2 and 6.2 of [RFC8417], and
    the "Accept" header MUST be "application/json".  The request body
    MUST consist of the SET itself, represented as a JWT [RFC7519].
@@ -215,16 +233,6 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
    The SET Transmitter MAY include in the request an "Accept-Language"
    header to indicate to the SET Recipient the preferred language(s) in
    which to receive error messages.
-
-
-
-
-
-
-Backman, et al.           Expires June 13, 2019                 [Page 4]
-
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
-
 
    The mechanisms by which the SET Transmitter determines the HTTP
    endpoint to use when transmitting a SET to a given SET Recipient are
@@ -253,6 +261,7 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
    tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
    1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQ
    .
+   c2lnbmF0dXJl
 
                 Figure 1: Example SET Transmission Request
 
@@ -262,6 +271,16 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
    "acknowledge" successful transmission by responding with HTTP
    Response Status Code 202 (Accepted) (see Section 6.3.3 of [RFC7231]).
    The body of the response MUST be empty.
+
+
+
+
+
+
+Backman, et al.           Expires July 21, 2019                 [Page 5]
+
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
+
 
    The following is a non-normative example of a successful receipt of a
    SET.
@@ -274,14 +293,6 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
    SET Transmitter know that a SET has been delivered and the
    information no longer needs to be retained by the SET Transmitter.
    Before acknowledgement, SET Recipients SHOULD ensure they have
-
-
-
-Backman, et al.           Expires June 13, 2019                 [Page 5]
-
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
-
-
    validated received SETs and retained them in a manner appropriate to
    information retention requirements appropriate to the SET event types
    signaled.  The level and method of retention of SETs by SET
@@ -322,20 +333,9 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-Backman, et al.           Expires June 13, 2019                 [Page 6]
+Backman, et al.           Expires July 21, 2019                 [Page 6]
 
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
    The following is an example non-normative error response indicating
@@ -389,9 +389,9 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 13, 2019                 [Page 7]
+Backman, et al.           Expires July 21, 2019                 [Page 7]
 
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
    unique name registered in the IANA "Security Event Token Delivery
@@ -445,9 +445,9 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 13, 2019                 [Page 8]
+Backman, et al.           Expires July 21, 2019                 [Page 8]
 
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
    high reliability requirements may be tempted to always retry failed
@@ -501,9 +501,9 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 13, 2019                 [Page 9]
+Backman, et al.           Expires July 21, 2019                 [Page 9]
 
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 5.4.  Authenticating Persisted SETs
@@ -557,9 +557,9 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 13, 2019                [Page 10]
+Backman, et al.           Expires July 21, 2019                [Page 10]
 
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
    Description
@@ -613,9 +613,9 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 13, 2019                [Page 11]
+Backman, et al.           Expires July 21, 2019                [Page 11]
 
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 8.  References
@@ -669,9 +669,9 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 13, 2019                [Page 12]
+Backman, et al.           Expires July 21, 2019                [Page 12]
 
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
    [RFC7525]  Sheffer, Y., Holz, R., and P. Saint-Andre,
@@ -725,9 +725,9 @@ Appendix A.  Other Streaming Specifications
 
 
 
-Backman, et al.           Expires June 13, 2019                [Page 13]
+Backman, et al.           Expires July 21, 2019                [Page 13]
 
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
    support pull, but subscribers can get the pull model by creating an
@@ -781,9 +781,9 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 13, 2019                [Page 14]
+Backman, et al.           Expires July 21, 2019                [Page 14]
 
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 Appendix B.  Acknowledgments
@@ -837,9 +837,9 @@ Appendix C.  Change Log
 
 
 
-Backman, et al.           Expires June 13, 2019                [Page 15]
+Backman, et al.           Expires July 21, 2019                [Page 15]
 
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
    o  Removed bearer token from example delivery request, and text
@@ -893,9 +893,9 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 13, 2019                [Page 16]
+Backman, et al.           Expires July 21, 2019                [Page 16]
 
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
    o  Added guidance around using JWS and/or JWE to authenticate
@@ -949,9 +949,9 @@ Authors' Addresses
 
 
 
-Backman, et al.           Expires June 13, 2019                [Page 17]
+Backman, et al.           Expires July 21, 2019                [Page 17]
 
-Internet-Draft        draft-ietf-secevent-http-push        December 2018
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
    Marius Scurtescu
@@ -1005,4 +1005,4 @@ Internet-Draft        draft-ietf-secevent-http-push        December 2018
 
 
 
-Backman, et al.           Expires June 13, 2019                [Page 18]
+Backman, et al.           Expires July 21, 2019                [Page 18]
