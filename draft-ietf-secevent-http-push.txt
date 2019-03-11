@@ -5,18 +5,18 @@
 Security Events Working Group                            A. Backman, Ed.
 Internet-Draft                                                    Amazon
 Intended status: Standards Track                           M. Jones, Ed.
-Expires: July 21, 2019                                         Microsoft
+Expires: July 27, 2019                                         Microsoft
                                                             M. Scurtescu
                                                                 Coinbase
                                                                M. Ansari
                                                                    Cisco
                                                               A. Nadalin
                                                                Microsoft
-                                                        January 17, 2019
+                                                        January 23, 2019
 
 
        Push-Based Security Event Token (SET) Delivery Using HTTP
-                    draft-ietf-secevent-http-push-03
+                    draft-ietf-secevent-http-push-04
 
 Abstract
 
@@ -41,7 +41,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on July 21, 2019.
+   This Internet-Draft will expire on July 27, 2019.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Backman, et al.           Expires July 21, 2019                 [Page 1]
+Backman, et al.           Expires July 27, 2019                 [Page 1]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -94,7 +94,7 @@ Table of Contents
    Appendix A.  Other Streaming Specifications . . . . . . . . . . .  13
    Appendix B.  Acknowledgments  . . . . . . . . . . . . . . . . . .  15
    Appendix C.  Change Log . . . . . . . . . . . . . . . . . . . . .  15
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  17
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  18
 
 1.  Introduction and Overview
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Backman, et al.           Expires July 21, 2019                 [Page 2]
+Backman, et al.           Expires July 27, 2019                 [Page 2]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -165,7 +165,7 @@ Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 
-Backman, et al.           Expires July 21, 2019                 [Page 3]
+Backman, et al.           Expires July 27, 2019                 [Page 3]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -221,7 +221,7 @@ Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 
-Backman, et al.           Expires July 21, 2019                 [Page 4]
+Backman, et al.           Expires July 27, 2019                 [Page 4]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -277,7 +277,7 @@ Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 
-Backman, et al.           Expires July 21, 2019                 [Page 5]
+Backman, et al.           Expires July 27, 2019                 [Page 5]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -333,7 +333,7 @@ Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 
-Backman, et al.           Expires July 21, 2019                 [Page 6]
+Backman, et al.           Expires July 27, 2019                 [Page 6]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -389,7 +389,7 @@ Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 
-Backman, et al.           Expires July 21, 2019                 [Page 7]
+Backman, et al.           Expires July 27, 2019                 [Page 7]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -445,7 +445,7 @@ Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 
-Backman, et al.           Expires July 21, 2019                 [Page 8]
+Backman, et al.           Expires July 27, 2019                 [Page 8]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -501,7 +501,7 @@ Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 
-Backman, et al.           Expires July 21, 2019                 [Page 9]
+Backman, et al.           Expires July 27, 2019                 [Page 9]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -557,7 +557,7 @@ Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 
-Backman, et al.           Expires July 21, 2019                [Page 10]
+Backman, et al.           Expires July 27, 2019                [Page 10]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -613,7 +613,7 @@ Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 
-Backman, et al.           Expires July 21, 2019                [Page 11]
+Backman, et al.           Expires July 27, 2019                [Page 11]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -669,7 +669,7 @@ Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 
-Backman, et al.           Expires July 21, 2019                [Page 12]
+Backman, et al.           Expires July 27, 2019                [Page 12]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -725,7 +725,7 @@ Appendix A.  Other Streaming Specifications
 
 
 
-Backman, et al.           Expires July 21, 2019                [Page 13]
+Backman, et al.           Expires July 27, 2019                [Page 13]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -781,7 +781,7 @@ Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 
-Backman, et al.           Expires July 21, 2019                [Page 14]
+Backman, et al.           Expires July 27, 2019                [Page 14]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -837,7 +837,7 @@ Appendix C.  Change Log
 
 
 
-Backman, et al.           Expires July 21, 2019                [Page 15]
+Backman, et al.           Expires July 27, 2019                [Page 15]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -893,7 +893,7 @@ Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 
-Backman, et al.           Expires July 21, 2019                [Page 16]
+Backman, et al.           Expires July 27, 2019                [Page 16]
 
 Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
@@ -933,6 +933,27 @@ Internet-Draft        draft-ietf-secevent-http-push         January 2019
    o  Added error description language preferences and specification via
       "Accept-Language" and "Content-Language" headers.
 
+   o  Added "recognized issuer" validation requirement in section 2.
+
+   o  Added time outs as an acceptable reason to resend a SET in section
+      2.
+
+   o  Edited text in section 1 to clarify that configuration is out of
+      scope.
+
+   o  Made minor editorial corrections.
+
+
+
+
+
+
+
+Backman, et al.           Expires July 27, 2019                [Page 17]
+
+Internet-Draft        draft-ietf-secevent-http-push         January 2019
+
+
 Authors' Addresses
 
    Annabelle Backman (editor)
@@ -946,12 +967,6 @@ Authors' Addresses
 
    Email: mbj@microsoft.com
    URI:   http://self-issued.info/
-
-
-
-Backman, et al.           Expires July 21, 2019                [Page 17]
-
-Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
    Marius Scurtescu
@@ -990,19 +1005,4 @@ Internet-Draft        draft-ietf-secevent-http-push         January 2019
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Backman, et al.           Expires July 21, 2019                [Page 18]
+Backman, et al.           Expires July 27, 2019                [Page 18]

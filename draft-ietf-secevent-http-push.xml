@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<?xml-stylesheet type='text/xsl' href='http://xml.resource.org/authoring/rfc2629.xslt' ?>
+<?xml-stylesheet type='text/xsl' href='http://xml2rfc.tools.ietf.org/authoring/rfc2629.xslt' ?>
 <!DOCTYPE rfc SYSTEM "rfc2629.dtd">
 <?rfc toc="yes"?>
 <?rfc tocompact="yes"?>
@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-push-03" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-http-push-04" ipr="trust200902">
     <front>
         <title abbrev="draft-ietf-secevent-http-push">Push-Based Security Event Token (SET) Delivery Using HTTP</title>
 
@@ -566,27 +566,27 @@ Content-Type: application/json
 
     <back>
         <references title="Normative References">
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.5246.xml' ?><!-- TLS 1.2 -->
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml' ?><!-- TLS 1.2 -->
 
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.6125.xml' ?><!-- TLS Certs -->
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6125.xml' ?><!-- TLS Certs -->
 
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7159.xml' ?><!-- JSON -->
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7159.xml' ?><!-- JSON -->
 
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7525.xml' ?><!-- TLS Recos -->
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7525.xml' ?><!-- TLS Recos -->
 
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8126.xml' ?>
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8174.xml' ?>
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.8417.xml'?><!-- SET -->
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.2277.xml'?><!-- IETF Language Policy -->
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8126.xml' ?>
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml' ?>
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8417.xml'?><!-- SET -->
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2277.xml'?><!-- IETF Language Policy -->
         </references>
 
         <references title="Informative References">
-            <?rfc include='http://xml.resource.org/public/rfc/bibxml/reference.RFC.7235.xml' ?><!-- HTTP Auth -->
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7235.xml' ?><!-- HTTP Auth -->
         </references>
 
         <section title="Other Streaming Specifications">
@@ -733,6 +733,10 @@ Content-Type: application/json
                         Added error description language preferences and specification via <spanx style="verb">Accept-Language</spanx>
                         and <spanx style="verb">Content-Language</spanx> headers.
                     </t>
+                    <t>Added "recognized issuer" validation requirement in section 2.</t>
+                    <t>Added time outs as an acceptable reason to resend a SET in section 2.</t>
+                    <t>Edited text in section 1 to clarify that configuration is out of scope.</t>
+                    <t>Made minor editorial corrections.</t>
                 </list>
             </t>
         </section>

@@ -403,12 +403,12 @@
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.10.3 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.17.1 - https://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Backman, A., Ed., Jones, M., Ed., Scurtescu, M., Ansari, M., and A. Nadalin" />
-  <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-secevent-http-push-03" />
-  <meta name="dct.issued" scheme="ISO8601" content="2019-17" />
+  <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-secevent-http-push-04" />
+  <meta name="dct.issued" scheme="ISO8601" content="2019-24" />
   <meta name="dct.abstract" content="This specification defines how a Security Event Token (SET) may be delivered to an intended recipient using HTTP POST.  The SET is transmitted in the body of an HTTP POST request to an endpoint operated by the recipient, and the recipient indicates successful or failed transmission via the HTTP response.  " />
   <meta name="description" content="This specification defines how a Security Event Token (SET) may be delivered to an intended recipient using HTTP POST.  The SET is transmitted in the body of an HTTP POST request to an endpoint operated by the recipient, and the recipient indicates successful or failed transmission via the HTTP response.  " />
 
@@ -432,7 +432,7 @@
 <td class="right">M. Jones, Ed.</td>
 </tr>
 <tr>
-<td class="left">Expires: July 21, 2019</td>
+<td class="left">Expires: July 28, 2019</td>
 <td class="right">Microsoft</td>
 </tr>
 <tr>
@@ -461,7 +461,7 @@
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">January 17, 2019</td>
+<td class="right">January 24, 2019</td>
 </tr>
 
     	
@@ -469,7 +469,7 @@
   </table>
 
   <p class="title">Push-Based Security Event Token (SET) Delivery Using HTTP<br />
-  <span class="filename">draft-ietf-secevent-http-push-03</span></p>
+  <span class="filename">draft-ietf-secevent-http-push-04</span></p>
   
   <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
 <p>This specification defines how a Security Event Token (SET) may be delivered to an intended recipient using HTTP POST.  The SET is transmitted in the body of an HTTP POST request to an endpoint operated by the recipient, and the recipient indicates successful or failed transmission via the HTTP response.  </p>
@@ -477,7 +477,7 @@
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on July 21, 2019.</p>
+<p>This Internet-Draft will expire on July 28, 2019.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2019 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -1016,6 +1016,10 @@ Content-Type: application/json
 <li>Added text clarifying that the value of the <samp>description</samp> attribute in error responses is implementation specific.  </li>
 <li>Added requirement that error descriptions and responses are UTF-8 encoded.</li>
 <li>Added error description language preferences and specification via <samp>Accept-Language</samp> and <samp>Content-Language</samp> headers.  </li>
+<li>Added "recognized issuer" validation requirement in section 2.</li>
+<li>Added time outs as an acceptable reason to resend a SET in section 2.</li>
+<li>Edited text in section 1 to clarify that configuration is out of scope.</li>
+<li>Made minor editorial corrections.</li>
 </ul>
 
 <p> </p>
