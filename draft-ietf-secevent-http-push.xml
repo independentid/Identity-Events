@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-push-04" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-http-push-05" ipr="trust200902">
     <front>
         <title abbrev="draft-ietf-secevent-http-push">Push-Based Security Event Token (SET) Delivery Using HTTP</title>
 
