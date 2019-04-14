@@ -414,7 +414,7 @@ Content-Type: application/json
                     are not used or are considered weak, JWS signed SETs SHOULD be
                     used (see <xref target="RFC7515"/> and <xref target="RFC8417">
                     Security Considerations</xref>). This enables the SET Recipient
-                    to validate that the SET Issuer is authorized to deliver the SET.
+                    to validate that the SET Transmitter is authorized to deliver the SET.
                 </t>
             </section>
 
@@ -452,9 +452,9 @@ Content-Type: application/json
                     systems that the SET Recipient forwards the SET onto, or to systems that
                     retrieve the SET from storage.  If the SET Recipient requires the ability to
                     validate SET authenticity outside of the context of the transmission request,
-                    then the SET Transmitter SHOULD sign the SET in accordance with <xref target="RFC7515"/>
-                    and/or encrypt it using authenticated encryption in accordance with
-                    <xref target="RFC7516"/>.
+                    then the SET Recipient SHOULD ensure that such SETs have been signed in
+                    accordance with <xref target="RFC7515"/> and/or encrypted using authenticated
+                    encryption in accordance with <xref target="RFC7516"/>.
                 </t>
             </section>
         </section>
