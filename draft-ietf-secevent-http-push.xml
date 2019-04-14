@@ -101,7 +101,7 @@
                     when, and only when, they appear in all capitals, as shown here.
                 </t>
 
-                <t>Throughout this documents all figures may contain spaces and
+                <t>Throughout this document all figures may contain spaces and
                     extra
                     line-wrapping for readability and due to space limitations.
                 </t>
@@ -172,8 +172,8 @@
             </t>
             <t>
                 SET Transmitters MAY transmit SETs issued by another entity. The SET
-                Recipient may accept or reject (i.e., return an <spanx style="verb">access_denied</spanx>
-                error response) at its own discretion.
+                Recipient may accept or reject (i.e., return an error response such as
+                <spanx style="verb">access_denied</spanx>) at its own discretion.
             </t>
             <t>
                 The SET Recipient SHOULD ensure that the SET is persisted in a way that
@@ -276,11 +276,11 @@ Y4rXxMD406P2edv00cr9Wf3/XwNtLjB9n+jTqN1/lLc</artwork>
                     SHOULD respond with an appropriate HTTP Status Code as defined in
                     Section 6 of <xref target="RFC7231"/>.</t>
                 <t>
-                    When the SET Recipient detects an error parsing or
-                    validating a SET transmitted in a SET Transmission Request,
-                    the SET Recipient SHALL respond with an HTTP Response Status Code
-                    of 400 (Bad Request).  The <spanx style="verb">Content-Type</spanx> header of this
-                    response MUST be "application/json", and the body MUST be a UTF-8 encoded <xref target="RFC8259">JSON</xref>
+                    When the SET Recipient detects an error parsing, validating or authenticating
+                    a SET transmitted in a SET Transmission Request, the SET Recipient SHALL respond
+                    with an HTTP Response Status Code of 400 (Bad Request).  The
+                    <spanx style="verb">Content-Type</spanx> header of this response MUST be
+                    "application/json", and the body MUST be a UTF-8 encoded <xref target="RFC8259">JSON</xref>
                     object containing the following name/value pairs:
                     <list style="hanging">
                         <t hangText="err">
@@ -419,8 +419,8 @@ Content-Type: application/json
             </section>
 
             <section title="Confidentiality of SETs">
-                <t>SETs may contain sensitive information that is considered PII
-                    (e.g., subject claims). In such cases, SET Transmitters and
+                <t>SETs may contain sensitive information that is considered Personally Identifiable
+                    Information (e.g., subject claims). In such cases, SET Transmitters and
                     SET Recipients MUST protect the confidentiality of the SET contents by
                     encrypting the SET as described in <xref target="RFC7516">JWE</xref>,
                     using a transport-layer security mechanism such as TLS, or both. If
@@ -453,8 +453,7 @@ Content-Type: application/json
                     retrieve the SET from storage.  If the SET Recipient requires the ability to
                     validate SET authenticity outside of the context of the transmission request,
                     then the SET Recipient SHOULD ensure that such SETs have been signed in
-                    accordance with <xref target="RFC7515"/> and/or encrypted using authenticated
-                    encryption in accordance with <xref target="RFC7516"/>.
+                    accordance with <xref target="RFC7515"/>.
                 </t>
             </section>
         </section>
@@ -500,8 +499,9 @@ Content-Type: application/json
                                 <vspace/>
                                 The name of the Security Event Token Delivery Error Code, as described
                                 in <xref target="error_codes"/>. The name MUST be a case-sensitive ASCII
-                                string consisting only of characters whose codes fall within the inclusive
-                                ranges 0x20-23, 0x25-5B, and 0x5D-7E.
+                                string consisting only of letters, digits and underscore, these are the 
+                                characters whose codes fall within the inclusive ranges 0x30-39, 0x41-5A,
+                                0x5F and 0x61-7A.
                             </t>
                             <t hangText="Description">
                                 <vspace/>

@@ -134,7 +134,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
    14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
-   Throughout this documents all figures may contain spaces and extra
+   Throughout this document all figures may contain spaces and extra
    line-wrapping for readability and due to space limitations.
 
 1.2.  Definitions
@@ -192,8 +192,8 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
    the SET is signed and/or encrypted (See Section 3).
 
    SET Transmitters MAY transmit SETs issued by another entity.  The SET
-   Recipient may accept or reject (i.e., return an "access_denied" error
-   response) at its own discretion.
+   Recipient may accept or reject (i.e., return an error response such
+   as "access_denied") at its own discretion.
 
    The SET Recipient SHOULD ensure that the SET is persisted in a way
    that is sufficient to meet the SET Recipient's own reliability
@@ -311,12 +311,12 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
    SHOULD respond with an appropriate HTTP Status Code as defined in
    Section 6 of [RFC7231].
 
-   When the SET Recipient detects an error parsing or validating a SET
-   transmitted in a SET Transmission Request, the SET Recipient SHALL
-   respond with an HTTP Response Status Code of 400 (Bad Request).  The
-   "Content-Type" header of this response MUST be "application/json",
-   and the body MUST be a UTF-8 encoded JSON [RFC8259] object containing
-   the following name/value pairs:
+   When the SET Recipient detects an error parsing, validating or
+   authenticating a SET transmitted in a SET Transmission Request, the
+   SET Recipient SHALL respond with an HTTP Response Status Code of 400
+   (Bad Request).  The "Content-Type" header of this response MUST be
+   "application/json", and the body MUST be a UTF-8 encoded JSON
+   [RFC8259] object containing the following name/value pairs:
 
    err  A Security Event Token Error Code (see Section 2.4).
 
@@ -483,17 +483,17 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 5.2.  Confidentiality of SETs
 
-   SETs may contain sensitive information that is considered PII (e.g.,
-   subject claims).  In such cases, SET Transmitters and SET Recipients
-   MUST protect the confidentiality of the SET contents by encrypting
-   the SET as described in JWE [RFC7516], using a transport-layer
-   security mechanism such as TLS, or both.  If an Event delivery
-   endpoint supports TLS, it MUST support at least TLS version 1.2
-   [RFC5246] and SHOULD support the newest version of TLS that meets its
-   security requirements.  When using TLS, the client MUST perform a
-   TLS/SSL server certificate check, per [RFC6125].  Implementation
-   security considerations for TLS can be found in "Recommendations for
-   Secure Use of TLS and DTLS" [RFC7525].
+   SETs may contain sensitive information that is considered Personally
+   Identifiable Information (e.g., subject claims).  In such cases, SET
+   Transmitters and SET Recipients MUST protect the confidentiality of
+   the SET contents by encrypting the SET as described in JWE [RFC7516],
+   using a transport-layer security mechanism such as TLS, or both.  If
+   an Event delivery endpoint supports TLS, it MUST support at least TLS
+   version 1.2 [RFC5246] and SHOULD support the newest version of TLS
+   that meets its security requirements.  When using TLS, the client
+   MUST perform a TLS/SSL server certificate check, per [RFC6125].
+   Implementation security considerations for TLS can be found in
+   "Recommendations for Secure Use of TLS and DTLS" [RFC7525].
 
 
 
@@ -526,8 +526,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
    SET Recipient requires the ability to validate SET authenticity
    outside of the context of the transmission request, then the SET
    Recipient SHOULD ensure that such SETs have been signed in accordance
-   with [RFC7515] and/or encrypted using authenticated encryption in
-   accordance with [RFC7516].
+   with [RFC7515].
 
 6.  Privacy Considerations
 
@@ -554,6 +553,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
    This document defines Security Event Token Delivery Error Codes, for
    which IANA is asked to create and maintain a new registry titled
    "Security Event Token Delivery Error Codes".  Initial values for the
+   Security Event Token Delivery Error Codes registry are given in
 
 
 
@@ -562,7 +562,6 @@ Backman, et al.         Expires October 16, 2019               [Page 10]
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
-   Security Event Token Delivery Error Codes registry are given in
    Table 1.  Future assignments are to be made through the First Come
    First Served registration policy ([RFC8126]) and shall follow the
    template presented in Section 7.1.1.
@@ -577,8 +576,9 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
    Error Code
       The name of the Security Event Token Delivery Error Code, as
       described in Section 2.4.  The name MUST be a case-sensitive ASCII
-      string consisting only of characters whose codes fall within the
-      inclusive ranges 0x20-23, 0x25-5B, and 0x5D-7E.
+      string consisting only of letters, digits and underscore, these
+      are the characters whose codes fall within the inclusive ranges
+      0x30-39, 0x41-5A, 0x5F and 0x61-7A.
 
    Description
       A brief human-readable description of the Security Event Token
