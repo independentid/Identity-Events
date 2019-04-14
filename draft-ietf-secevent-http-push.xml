@@ -280,7 +280,7 @@ Y4rXxMD406P2edv00cr9Wf3/XwNtLjB9n+jTqN1/lLc</artwork>
                     validating a SET transmitted in a SET Transmission Request,
                     the SET Recipient SHALL respond with an HTTP Response Status Code
                     of 400 (Bad Request).  The <spanx style="verb">Content-Type</spanx> header of this
-                    response MUST be "application/json", and the body MUST be a UTF-8 encoded <xref target="RFC7159">JSON</xref>
+                    response MUST be "application/json", and the body MUST be a UTF-8 encoded <xref target="RFC8259">JSON</xref>
                     object containing the following name/value pairs:
                     <list style="hanging">
                         <t hangText="err">
@@ -587,7 +587,7 @@ Content-Type: application/json
 
             <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6125.xml' ?><!-- TLS Certs -->
 
-            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7159.xml' ?><!-- JSON -->
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml' ?><!-- JSON -->
 
             <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
             <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
