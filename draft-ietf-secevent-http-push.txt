@@ -5,14 +5,14 @@
 Security Events Working Group                            A. Backman, Ed.
 Internet-Draft                                                    Amazon
 Intended status: Standards Track                           M. Jones, Ed.
-Expires: October 16, 2019                                      Microsoft
+Expires: October 17, 2019                                      Microsoft
                                                             M. Scurtescu
                                                                 Coinbase
                                                                M. Ansari
                                                                    Cisco
                                                               A. Nadalin
                                                                Microsoft
-                                                          April 14, 2019
+                                                          April 15, 2019
 
 
        Push-Based Security Event Token (SET) Delivery Using HTTP
@@ -41,7 +41,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on October 16, 2019.
+   This Internet-Draft will expire on October 17, 2019.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Backman, et al.         Expires October 16, 2019                [Page 1]
+Backman, et al.         Expires October 17, 2019                [Page 1]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Backman, et al.         Expires October 16, 2019                [Page 2]
+Backman, et al.         Expires October 17, 2019                [Page 2]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -134,7 +134,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
    14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
-   Throughout this document all figures may contain spaces and extra
+   Throughout this document, all figures may contain spaces and extra
    line-wrapping for readability and due to space limitations.
 
 1.2.  Definitions
@@ -165,7 +165,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 16, 2019                [Page 3]
+Backman, et al.         Expires October 17, 2019                [Page 3]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -193,7 +193,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
    SET Transmitters MAY transmit SETs issued by another entity.  The SET
    Recipient may accept or reject (i.e., return an error response such
-   as "access_denied") at its own discretion.
+   as "access_denied") a SET at its own discretion.
 
    The SET Recipient SHOULD ensure that the SET is persisted in a way
    that is sufficient to meet the SET Recipient's own reliability
@@ -221,7 +221,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 16, 2019                [Page 4]
+Backman, et al.         Expires October 17, 2019                [Page 4]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -277,7 +277,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 16, 2019                [Page 5]
+Backman, et al.         Expires October 17, 2019                [Page 5]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -333,7 +333,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 16, 2019                [Page 6]
+Backman, et al.         Expires October 17, 2019                [Page 6]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -389,7 +389,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 16, 2019                [Page 7]
+Backman, et al.         Expires October 17, 2019                [Page 7]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -445,7 +445,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 16, 2019                [Page 8]
+Backman, et al.         Expires October 17, 2019                [Page 8]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -501,7 +501,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 16, 2019                [Page 9]
+Backman, et al.         Expires October 17, 2019                [Page 9]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -557,7 +557,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 16, 2019               [Page 10]
+Backman, et al.         Expires October 17, 2019               [Page 10]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -613,7 +613,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 16, 2019               [Page 11]
+Backman, et al.         Expires October 17, 2019               [Page 11]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -669,7 +669,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 16, 2019               [Page 12]
+Backman, et al.         Expires October 17, 2019               [Page 12]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -725,7 +725,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 16, 2019               [Page 13]
+Backman, et al.         Expires October 17, 2019               [Page 13]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -781,7 +781,7 @@ Appendix A.  Other Streaming Specifications
 
 
 
-Backman, et al.         Expires October 16, 2019               [Page 14]
+Backman, et al.         Expires October 17, 2019               [Page 14]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -837,7 +837,7 @@ Appendix B.  Acknowledgments
 
 
 
-Backman, et al.         Expires October 16, 2019               [Page 15]
+Backman, et al.         Expires October 17, 2019               [Page 15]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -893,7 +893,7 @@ Appendix C.  Change Log
 
 
 
-Backman, et al.         Expires October 16, 2019               [Page 16]
+Backman, et al.         Expires October 17, 2019               [Page 16]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -949,7 +949,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 16, 2019               [Page 17]
+Backman, et al.         Expires October 17, 2019               [Page 17]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -1005,7 +1005,7 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 16, 2019               [Page 18]
+Backman, et al.         Expires October 17, 2019               [Page 18]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -1061,7 +1061,7 @@ Authors' Addresses
 
 
 
-Backman, et al.         Expires October 16, 2019               [Page 19]
+Backman, et al.         Expires October 17, 2019               [Page 19]
 
 Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
@@ -1117,4 +1117,4 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 16, 2019               [Page 20]
+Backman, et al.         Expires October 17, 2019               [Page 20]

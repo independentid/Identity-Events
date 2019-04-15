@@ -101,8 +101,7 @@
                     when, and only when, they appear in all capitals, as shown here.
                 </t>
 
-                <t>Throughout this document all figures may contain spaces and
-                    extra
+                <t>Throughout this document, all figures may contain spaces and extra
                     line-wrapping for readability and due to space limitations.
                 </t>
             </section>
@@ -173,7 +172,7 @@
             <t>
                 SET Transmitters MAY transmit SETs issued by another entity. The SET
                 Recipient may accept or reject (i.e., return an error response such as
-                <spanx style="verb">access_denied</spanx>) at its own discretion.
+                <spanx style="verb">access_denied</spanx>) a SET at its own discretion.
             </t>
             <t>
                 The SET Recipient SHOULD ensure that the SET is persisted in a way that
