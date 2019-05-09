@@ -5,18 +5,18 @@
 Security Events Working Group                            A. Backman, Ed.
 Internet-Draft                                                    Amazon
 Intended status: Standards Track                           M. Jones, Ed.
-Expires: October 17, 2019                                      Microsoft
+Expires: November 10, 2019                                     Microsoft
                                                             M. Scurtescu
                                                                 Coinbase
                                                                M. Ansari
                                                                    Cisco
                                                               A. Nadalin
                                                                Microsoft
-                                                          April 15, 2019
+                                                             May 9, 2019
 
 
        Push-Based Security Event Token (SET) Delivery Using HTTP
-                    draft-ietf-secevent-http-push-05
+                    draft-ietf-secevent-http-push-06
 
 Abstract
 
@@ -41,7 +41,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on October 17, 2019.
+   This Internet-Draft will expire on November 10, 2019.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Backman, et al.         Expires October 17, 2019                [Page 1]
+Backman, et al.         Expires November 10, 2019               [Page 1]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
    (https://trustee.ietf.org/license-info) in effect on the date of
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Backman, et al.         Expires October 17, 2019                [Page 2]
+Backman, et al.         Expires November 10, 2019               [Page 2]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
    o  The transmitter of the SET is capable of making outbound HTTP
@@ -165,9 +165,9 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 17, 2019                [Page 3]
+Backman, et al.         Expires November 10, 2019               [Page 3]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
    o  The SET is authentic (i.e., it was issued by the issuer specified
@@ -221,9 +221,9 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 17, 2019                [Page 4]
+Backman, et al.         Expires November 10, 2019               [Page 4]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
 2.1.  Transmitting a SET
@@ -277,9 +277,9 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 17, 2019                [Page 5]
+Backman, et al.         Expires November 10, 2019               [Page 5]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
 2.2.  Success Response
@@ -333,9 +333,9 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 17, 2019                [Page 6]
+Backman, et al.         Expires November 10, 2019               [Page 6]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
    Section 5.3.5 of [RFC7231].  If the SET Transmitter did not send an
@@ -389,9 +389,9 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 17, 2019                [Page 7]
+Backman, et al.         Expires November 10, 2019               [Page 7]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
 2.4.  Security Event Token Delivery Error Codes
@@ -445,9 +445,9 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 17, 2019                [Page 8]
+Backman, et al.         Expires November 10, 2019               [Page 8]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
 4.  Delivery Reliability
@@ -501,9 +501,9 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 17, 2019                [Page 9]
+Backman, et al.         Expires November 10, 2019               [Page 9]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
 5.3.  Denial of Service
@@ -557,9 +557,9 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 17, 2019               [Page 10]
+Backman, et al.         Expires November 10, 2019              [Page 10]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
    Table 1.  Future assignments are to be made through the First Come
@@ -613,9 +613,9 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 17, 2019               [Page 11]
+Backman, et al.         Expires November 10, 2019              [Page 11]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
       Description: One or more keys used to encrypt or sign the SET is
@@ -669,9 +669,9 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 17, 2019               [Page 12]
+Backman, et al.         Expires November 10, 2019              [Page 12]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
    [RFC7515]  Jones, M., Bradley, J., and N. Sakimura, "JSON Web
@@ -725,9 +725,9 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 17, 2019               [Page 13]
+Backman, et al.         Expires November 10, 2019              [Page 13]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
 Appendix A.  Other Streaming Specifications
@@ -781,9 +781,9 @@ Appendix A.  Other Streaming Specifications
 
 
 
-Backman, et al.         Expires October 17, 2019               [Page 14]
+Backman, et al.         Expires November 10, 2019              [Page 14]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
    o  API Reference:
@@ -837,9 +837,9 @@ Appendix B.  Acknowledgments
 
 
 
-Backman, et al.         Expires October 17, 2019               [Page 15]
+Backman, et al.         Expires November 10, 2019              [Page 15]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
 Appendix C.  Change Log
@@ -893,9 +893,9 @@ Appendix C.  Change Log
 
 
 
-Backman, et al.         Expires October 17, 2019               [Page 16]
+Backman, et al.         Expires November 10, 2019              [Page 16]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
    o  Removed duplication in protocol description.
@@ -949,9 +949,9 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 17, 2019               [Page 17]
+Backman, et al.         Expires November 10, 2019              [Page 17]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
    Draft 04 - AB:
@@ -1005,9 +1005,9 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 17, 2019               [Page 18]
+Backman, et al.         Expires November 10, 2019              [Page 18]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
    o  Added mention of HTTP Poll spec to list of other streaming specs
@@ -1061,9 +1061,9 @@ Authors' Addresses
 
 
 
-Backman, et al.         Expires October 17, 2019               [Page 19]
+Backman, et al.         Expires November 10, 2019              [Page 19]
 
-Internet-Draft        draft-ietf-secevent-http-push           April 2019
+Internet-Draft        draft-ietf-secevent-http-push             May 2019
 
 
    Morteza Ansari
@@ -1117,4 +1117,4 @@ Internet-Draft        draft-ietf-secevent-http-push           April 2019
 
 
 
-Backman, et al.         Expires October 17, 2019               [Page 20]
+Backman, et al.         Expires November 10, 2019              [Page 20]
