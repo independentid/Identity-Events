@@ -108,19 +108,19 @@
 
             <section anchor="defs" title="Definitions" toc="default">
                 <t>
+                    This specification utilizes the following terms defined in <xref target="RFC8417"/>:
+                    "Security Event Token (SET)", "SET Issuer", "SET Recipient", and "Event Payload".
+                </t>
+                <t>
                     This specification utilizes terminology defined in <xref target="RFC8417"/>,
                     as well as the terms defined below:
                 </t>
                 <t>
                     <list style="hanging">
-                        <t hangText="SET Transmitter"><vspace/>
+                        <t hangText="SET Transmitter">
                             An entity that delivers SETs in its possession to one or more SET
                             Recipients.
                         </t>
-                        <t hangText="SET Recipient"><vspace/>
-                            An entity that receives SETs through some distribution method.
-                        </t>
-                        
                     </list>
                 </t>
             </section>
@@ -358,7 +358,7 @@ Content-Type: application/json
                 <texttable anchor="reqErrors" title="SET Delivery Error Codes">
                     <ttcol>Error Code</ttcol><ttcol>Description</ttcol>
                     <c>invalid_request</c><c>The request body cannot be parsed as a SET, or the
-                        event payload within the SET does not conform to the event's definition.</c>
+                        Event Payload within the SET does not conform to the event's definition.</c>
                     <c>invalid_key</c><c>One or more keys used to encrypt or sign the SET is
                         invalid or otherwise unacceptable to the SET Recipient. (e.g., expired,
                         revoked, failed certificate validation, etc.)</c>
@@ -782,6 +782,23 @@ need for assurance.</artwork>
                     <t>Reworded guidance around signing and/or encrypting SETs for integrity protection.</t>
                     <t>Renamed TLS "Support Considerations" section to "Confidentiality of SETs".</t>
                     <t>Reworded guidance around subject identifier selection and privacy concerns.</t>
+                </list>
+            </t>
+            <t>
+                Draft 06 - mbj, MS:
+                <list style="symbols">
+                    <t>Made minor editorial corrections.</t>
+                    <t>Updated to indicate that failure response should be returned if errors occur in authenticating the SET.</t>
+                    <t>Updated reference for JSON from RFC 7159 to RFC 8259.</t>
+                    <t>Fixed Authentication Using Signed SETs to indicate the SET Transmitter must be authorized to deliver the SET, not the SET Issuer.</t>
+                    <t>Fixed Authenticating Persisted SETs to put the responsibility for ensuring the SET is signed on the SET Recipient.</t>
+                    <t>Fixed error code format definition to match error codes defined in doc.</t>
+                </list>
+            </t>
+            <t>
+                Draft 07 - AB:
+                <list style="symbols">
+                    <t>Removed "SET Recipient" definition and added explicit list of terms used from RFC8417.</t>
                 </list>
             </t>
         </section>

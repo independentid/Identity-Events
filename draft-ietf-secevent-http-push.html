@@ -408,7 +408,7 @@
 
   <meta name="dct.creator" content="Backman, A., Ed., Jones, M., Ed., Scurtescu, M., Ansari, M., and A. Nadalin" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-secevent-http-push-06" />
-  <meta name="dct.issued" scheme="ISO8601" content="2019-09" />
+  <meta name="dct.issued" scheme="ISO8601" content="2019-08" />
   <meta name="dct.abstract" content="This specification defines how a Security Event Token (SET) may be delivered to an intended recipient using HTTP POST.  The SET is transmitted in the body of an HTTP POST request to an endpoint operated by the recipient, and the recipient indicates successful or failed transmission via the HTTP response.  " />
   <meta name="description" content="This specification defines how a Security Event Token (SET) may be delivered to an intended recipient using HTTP POST.  The SET is transmitted in the body of an HTTP POST request to an endpoint operated by the recipient, and the recipient indicates successful or failed transmission via the HTTP response.  " />
 
@@ -432,7 +432,7 @@
 <td class="right">M. Jones, Ed.</td>
 </tr>
 <tr>
-<td class="left">Expires: November 10, 2019</td>
+<td class="left">Expires: January 9, 2020</td>
 <td class="right">Microsoft</td>
 </tr>
 <tr>
@@ -461,7 +461,7 @@
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">May 9, 2019</td>
+<td class="right">July 8, 2019</td>
 </tr>
 
     	
@@ -477,7 +477,7 @@
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on November 10, 2019.</p>
+<p>This Internet-Draft will expire on January 9, 2020.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2019 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -567,16 +567,13 @@
 <h1 id="rfc.section.1.2">
 <a href="#rfc.section.1.2">1.2.</a> <a href="#defs" id="defs">Definitions</a>
 </h1>
-<p id="rfc.section.1.2.p.1">This specification utilizes terminology defined in <a href="#RFC8417" class="xref">[RFC8417]</a>, as well as the terms defined below: </p>
+<p id="rfc.section.1.2.p.1">This specification utilizes the following terms defined in <a href="#RFC8417" class="xref">[RFC8417]</a>: "Security Event Token (SET)", "SET Issuer", "SET Recipient", and "Event Payload".  </p>
+<p id="rfc.section.1.2.p.2">This specification utilizes terminology defined in <a href="#RFC8417" class="xref">[RFC8417]</a>, as well as the terms defined below: </p>
 <p></p>
 
 <dl>
 <dt>SET Transmitter</dt>
-<dd style="margin-left: 8">
-<br> An entity that delivers SETs in its possession to one or more SET Recipients.  </dd>
-<dt>SET Recipient</dt>
-<dd style="margin-left: 8">
-<br> An entity that receives SETs through some distribution method.  </dd>
+<dd style="margin-left: 8">An entity that delivers SETs in its possession to one or more SET Recipients.  </dd>
 </dl>
 
 <p> </p>
@@ -707,7 +704,7 @@ Content-Type: application/json
 <tbody>
 <tr>
 <td class="left">invalid_request</td>
-<td class="left">The request body cannot be parsed as a SET, or the event payload within the SET does not conform to the event's definition.</td>
+<td class="left">The request body cannot be parsed as a SET, or the Event Payload within the SET does not conform to the event's definition.</td>
 </tr>
 <tr>
 <td class="left">invalid_key</td>
@@ -1051,6 +1048,23 @@ need for assurance.</pre>
 <li>Renamed TLS "Support Considerations" section to "Confidentiality of SETs".</li>
 <li>Reworded guidance around subject identifier selection and privacy concerns.</li>
 </ul>
+
+<p> </p>
+<p id="rfc.section.C.p.7">Draft 06 - mbj, MS: </p>
+
+<ul>
+<li>Made minor editorial corrections.</li>
+<li>Updated to indicate that failure response should be returned if errors occur in authenticating the SET.</li>
+<li>Updated reference for JSON from RFC 7159 to RFC 8259.</li>
+<li>Fixed Authentication Using Signed SETs to indicate the SET Transmitter must be authorized to deliver the SET, not the SET Issuer.</li>
+<li>Fixed Authenticating Persisted SETs to put the responsibility for ensuring the SET is signed on the SET Recipient.</li>
+<li>Fixed error code format definition to match error codes defined in doc.</li>
+</ul>
+
+<p> </p>
+<p id="rfc.section.C.p.8">Draft 07 - AB: </p>
+
+<ul><li>Removed "SET Recipient" definition and added explicit list of terms used from RFC8417.</li></ul>
 
 <p> </p>
 <h1 id="rfc.authors"><a href="#rfc.authors">Authors' Addresses</a></h1>
