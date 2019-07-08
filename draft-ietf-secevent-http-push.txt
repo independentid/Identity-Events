@@ -124,7 +124,7 @@ Internet-Draft        draft-ietf-secevent-http-push            July 2019
 
    A mechanism for exchanging configuration metadata such as endpoint
    URLs and cryptographic key parameters between the transmitter and
-   recipient is out of scope for this specifications.
+   recipient is out of scope for this specification.
 
 1.1.  Notational Conventions
 
@@ -1066,6 +1066,8 @@ Backman, et al.          Expires January 9, 2020               [Page 19]
 Internet-Draft        draft-ietf-secevent-http-push            July 2019
 
 
+   o  Made minor editorial corrections.
+
    o  Removed "SET Recipient" definition and added explicit list of
       terms used from RFC8417.
 
@@ -1100,8 +1102,6 @@ Authors' Addresses
    Microsoft
 
    Email: tonynad@microsoft.com
-
-
 
 
 

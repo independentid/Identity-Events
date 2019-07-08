@@ -90,7 +90,7 @@
             <t>
                 A mechanism for exchanging configuration metadata such as endpoint URLs
                 and cryptographic key parameters between the transmitter and recipient is
-                out of scope for this specifications.
+                out of scope for this specification.
             </t>
             
             <section anchor="notat" title="Notational Conventions" toc="default">
@@ -798,6 +798,7 @@ need for assurance.</artwork>
             <t>
                 Draft 07 - AB:
                 <list style="symbols">
+                    <t>Made minor editorial corrections.</t>
                     <t>Removed "SET Recipient" definition and added explicit list of terms used from RFC8417.</t>
                 </list>
             </t>
