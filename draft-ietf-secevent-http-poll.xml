@@ -104,17 +104,8 @@
 
       <section anchor="defs" title="Definitions" toc="default">
 	<t>
-	  This specification utilizes terminology defined in <xref target="RFC8417"/>,
-	  as well as the terms defined below:
-	</t>
-	<t>
-	  <list style="hanging">
-	
-            <t hangText="SET Transmitter"><vspace/>
-	      An entity that delivers SETs in its possession to one or more SET
-	      Recipients.
-            </t>
-	  </list>
+            This specification utilizes terminology defined in <xref target="RFC8417"/>
+            and <xref target="I-D.ietf-secevent-http-push"/>.
 	</t>
       </section>
     </section>

@@ -131,12 +131,8 @@ Internet-Draft        draft-ietf-secevent-http-poll            July 2019
 
 1.2.  Definitions
 
-   This specification utilizes terminology defined in [RFC8417], as well
-   as the terms defined below:
-
-   SET Transmitter
-      An entity that delivers SETs in its possession to one or more SET
-      Recipients.
+   This specification utilizes terminology defined in [RFC8417] and
+   [I-D.ietf-secevent-http-push].
 
 2.  SET Delivery
 
@@ -163,6 +159,10 @@ Internet-Draft        draft-ietf-secevent-http-poll            July 2019
    SET is acknowledged, the SET Recipient SHALL be responsible for
    retention, if needed.
 
+   Transmitted SETs SHOULD be self-validating (signed) if there is a
+   requirement to verify they were issued by the SET Transmitter at a
+   later date when de-coupled from the original delivery where
+
 
 
 Backman, et al.          Expires January 9, 2020                [Page 3]
@@ -170,9 +170,6 @@ Backman, et al.          Expires January 9, 2020                [Page 3]
 Internet-Draft        draft-ietf-secevent-http-poll            July 2019
 
 
-   Transmitted SETs SHOULD be self-validating (signed) if there is a
-   requirement to verify they were issued by the SET Transmitter at a
-   later date when de-coupled from the original delivery where
    authenticity could be checked via the HTTP or TLS mutual
    authentication.
 
@@ -218,6 +215,9 @@ Internet-Draft        draft-ietf-secevent-http-poll            July 2019
    payloads are delivered in a JSON document, as described in
    Section 2.4 and Section 2.5.
 
+   When making a request, the HTTP header "Content-Type" is set to
+   "application/json".
+
 
 
 
@@ -225,9 +225,6 @@ Backman, et al.          Expires January 9, 2020                [Page 4]
 
 Internet-Draft        draft-ietf-secevent-http-poll            July 2019
 
-
-   When making a request, the HTTP header "Content-Type" is set to
-   "application/json".
 
    The following JSON object members are used in a polling request:
 
@@ -275,6 +272,9 @@ Internet-Draft        draft-ietf-secevent-http-poll            July 2019
    available SETs and responds with a JSON document containing the
    following JSON object members:
 
+   sets
+
+
 
 
 Backman, et al.          Expires January 9, 2020                [Page 5]
@@ -282,7 +282,6 @@ Backman, et al.          Expires January 9, 2020                [Page 5]
 Internet-Draft        draft-ietf-secevent-http-poll            July 2019
 
 
-   sets
       A JSON object that contains zero or more nested JSON objects.
       Each nested JSON object corresponds to the "jti" of a SET to be
       delivered and whose value is a JSON string containing the value of
@@ -330,6 +329,7 @@ Internet-Draft        draft-ietf-secevent-http-poll            July 2019
       with "ack" and "err" members indicating the SET Recipient is
       acknowledging previously received SETs and does not want to
       receive any new SETs in response to the request.
+
 
 
 
