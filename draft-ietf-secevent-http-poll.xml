@@ -85,7 +85,9 @@
       <t>
 	A mechanism for exchanging configuration metadata such as endpoint URLs
 	and cryptographic key parameters between the transmitter and recipient is
-	out of scope for this specification.
+        out of scope for this specification.  How SETs are defined and the process
+        by which events are identified for SET Recipients is also out of scope for
+        this specification.
       </t>
 
       <section anchor="notat" title="Notational Conventions" toc="default">
@@ -112,14 +114,6 @@
 
     <section title="SET Delivery">
       <t>
-	When an event occurs, the SET Transmitter constructs a SET
-	<xref target="RFC8417"/> that describes the	
-	event. The SET Transmitter determines the SET Recipients that the
-	SET should be distributed to.
-      </t>
-      <t>
-	How SETs are defined and the process by which events are identified for
-	SET Recipients is out of scope of this specification.
       </t>
 
       <t>

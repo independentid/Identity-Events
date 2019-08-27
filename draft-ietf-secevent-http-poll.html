@@ -558,7 +558,7 @@
 <a href="#rfc.section.1">1.</a> <a href="#intro" id="intro">Introduction and Overview</a>
 </h1>
 <p id="rfc.section.1.p.1">This specification defines how a stream of Security Event Tokens (SETs) <a href="#RFC8417" class="xref">[RFC8417]</a> can be transmitted to an intended SET Recipient using HTTP <a href="#RFC7231" class="xref">[RFC7231]</a> over TLS. The specification defines a method to poll for SETs using HTTP POST.  </p>
-<p id="rfc.section.1.p.2">A mechanism for exchanging configuration metadata such as endpoint URLs and cryptographic key parameters between the transmitter and recipient is out of scope for this specification.  </p>
+<p id="rfc.section.1.p.2">A mechanism for exchanging configuration metadata such as endpoint URLs and cryptographic key parameters between the transmitter and recipient is out of scope for this specification.  How SETs are defined and the process by which events are identified for SET Recipients is also out of scope for this specification.  </p>
 <h1 id="rfc.section.1.1">
 <a href="#rfc.section.1.1">1.1.</a> <a href="#notat" id="notat">Notational Conventions</a>
 </h1>
@@ -570,13 +570,12 @@
 <p id="rfc.section.1.2.p.1">This specification utilizes terminology defined in <a href="#RFC8417" class="xref">[RFC8417]</a> and <a href="#I-D.ietf-secevent-http-push" class="xref">[I-D.ietf-secevent-http-push]</a>.  </p>
 <h1 id="rfc.section.2">
 <a href="#rfc.section.2">2.</a> SET Delivery</h1>
-<p id="rfc.section.2.p.1">When an event occurs, the SET Transmitter constructs a SET <a href="#RFC8417" class="xref">[RFC8417]</a> that describes the event. The SET Transmitter determines the SET Recipients that the SET should be distributed to.  </p>
-<p id="rfc.section.2.p.2">How SETs are defined and the process by which events are identified for SET Recipients is out of scope of this specification.  </p>
-<p id="rfc.section.2.p.3">When a SET is available for a SET Recipient, the SET Transmitter attempts to deliver the SET by queueing the SET in a buffer so that a SET Recipient can poll for SETs using HTTP/1.1 POST.  </p>
-<p id="rfc.section.2.p.4">In Poll-Based SET Delivery Using HTTP, zero or more SETs are delivered in a JSON <a href="#RFC8259" class="xref">[RFC8259]</a> document to a SET Recipient in response to an HTTP POST request to the SET Transmitter. Then in a following request, the SET Recipient acknowledges received SETs and can poll for more.  All requests and responses are JSON documents and use a <samp>Content-Type</samp> of <samp>application/json</samp>, as described in <a href="#httpPoll" class="xref">Section 2.1</a>.  </p>
-<p id="rfc.section.2.p.5">After successful (acknowledged) SET delivery, SET Transmitters are not be required to retain or record SETs for retransmission. Once a SET is acknowledged, the SET Recipient SHALL be responsible for retention, if needed.</p>
-<p id="rfc.section.2.p.6">Transmitted SETs SHOULD be self-validating (signed) if there is a requirement to verify they were issued by the SET Transmitter at a later date when de-coupled from the original delivery where authenticity could be checked via the HTTP or TLS mutual authentication.  </p>
-<p id="rfc.section.2.p.7">Upon receiving a SET, the SET Recipient reads the SET and validates it in the manner described in Section 2 of <a href="#I-D.ietf-secevent-http-push" class="xref">[I-D.ietf-secevent-http-push]</a>.  The SET Recipient MUST acknowledge receipt to the SET Transmitter.  The SET Recipient SHALL NOT use the event acknowledgement mechanism to report event errors other than relating to the parsing and validation of the SET.  </p>
+<p></p>
+<p id="rfc.section.2.p.2">When a SET is available for a SET Recipient, the SET Transmitter attempts to deliver the SET by queueing the SET in a buffer so that a SET Recipient can poll for SETs using HTTP/1.1 POST.  </p>
+<p id="rfc.section.2.p.3">In Poll-Based SET Delivery Using HTTP, zero or more SETs are delivered in a JSON <a href="#RFC8259" class="xref">[RFC8259]</a> document to a SET Recipient in response to an HTTP POST request to the SET Transmitter. Then in a following request, the SET Recipient acknowledges received SETs and can poll for more.  All requests and responses are JSON documents and use a <samp>Content-Type</samp> of <samp>application/json</samp>, as described in <a href="#httpPoll" class="xref">Section 2.1</a>.  </p>
+<p id="rfc.section.2.p.4">After successful (acknowledged) SET delivery, SET Transmitters are not be required to retain or record SETs for retransmission. Once a SET is acknowledged, the SET Recipient SHALL be responsible for retention, if needed.</p>
+<p id="rfc.section.2.p.5">Transmitted SETs SHOULD be self-validating (signed) if there is a requirement to verify they were issued by the SET Transmitter at a later date when de-coupled from the original delivery where authenticity could be checked via the HTTP or TLS mutual authentication.  </p>
+<p id="rfc.section.2.p.6">Upon receiving a SET, the SET Recipient reads the SET and validates it in the manner described in Section 2 of <a href="#I-D.ietf-secevent-http-push" class="xref">[I-D.ietf-secevent-http-push]</a>.  The SET Recipient MUST acknowledge receipt to the SET Transmitter.  The SET Recipient SHALL NOT use the event acknowledgement mechanism to report event errors other than relating to the parsing and validation of the SET.  </p>
 <h1 id="rfc.section.2.1">
 <a href="#rfc.section.2.1">2.1.</a> <a href="#httpPoll" id="httpPoll">Polling Delivery using HTTP</a>
 </h1>
