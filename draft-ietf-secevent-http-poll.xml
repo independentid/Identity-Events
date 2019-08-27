@@ -853,6 +853,29 @@ Content-Type: application/json
 	  </t>
 	</list>
       </t>
+      <t>
+        Draft 04 - AB
+        <list style="symbols">
+          <t>
+            Referenced SET Transmitter definition in http-push.
+          </t>
+          <t>
+            Removed incorrect normative text regarding SET construction.
+          </t>
+          <t>
+            Consolidated general out-of-scope items under Introduction.
+          </t>
+          <t>
+            Removed unnecessary HTTP headers in examples and added Content-Type.
+          </t>
+          <t>
+            Added Content-Language requirement for error descriptions, aligning with http-push.
+          </t>
+          <t>
+            Minor editorial fixes.
+          </t>
+        </list>
+      </t>
     </section>
   </back>
 </rfc>

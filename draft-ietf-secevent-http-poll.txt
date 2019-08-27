@@ -97,7 +97,7 @@ Table of Contents
      7.2.  Informative References  . . . . . . . . . . . . . . . . .  16
    Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  17
    Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  17
-   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  18
+   Authors' Addresses  . . . . . . . . . . . . . . . . . . . . . . .  19
 
 1.  Introduction and Overview
 
@@ -996,18 +996,36 @@ Internet-Draft        draft-ietf-secevent-http-poll            July 2019
 
    o  Further alignment with the push draft.
 
-Authors' Addresses
+   Draft 04 - AB
 
-   Annabelle Backman (editor)
-   Amazon
+   o  Referenced SET Transmitter definition in http-push.
 
-   Email: richanna@amazon.com
+   o  Removed incorrect normative text regarding SET construction.
+
 
 
 
 Backman, et al.          Expires January 9, 2020               [Page 18]
 
 Internet-Draft        draft-ietf-secevent-http-poll            July 2019
+
+
+   o  Consolidated general out-of-scope items under Introduction.
+
+   o  Removed unnecessary HTTP headers in examples and added Content-
+      Type.
+
+   o  Added Content-Language requirement for error descriptions,
+      aligning with http-push.
+
+   o  Minor editorial fixes.
+
+Authors' Addresses
+
+   Annabelle Backman (editor)
+   Amazon
+
+   Email: richanna@amazon.com
 
 
    Michael B. Jones (editor)
@@ -1033,24 +1051,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            July 2019
    Microsoft
 
    Email: tonynad@microsoft.com
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
