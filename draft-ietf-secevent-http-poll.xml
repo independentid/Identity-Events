@@ -429,6 +429,7 @@ Content-Type: application/json
 	    from the two SETs received in <xref target="pollResponse"/>:</preamble>
 	    <artwork>POST /Events HTTP/1.1
 Host: notify.exampleidp.com
+Content-Language: en-US
 Content-Type: application/json
 
 {
@@ -546,6 +547,14 @@ Content-Type: application/json
 	  as part of the <spanx style="verb">setErrs</spanx> member, as
           defined in <xref target="pollResp"/> and <xref target="pollAckErr"/>.
 	</t>
+        <t>
+            When the SET Recipient includes one or more error responses in a request to
+            the SET Transmitter, it must also include in the request a 
+            <spanx style="verb">Content-Language</spanx> header whose value indicates the
+            language of the error descriptions included in the request.  The method of
+            language selection in the case when the SET Recipient can provide error messages
+            in multiple languages is out of scope for this specification.
+        </t>
       </section>
 
     </section>

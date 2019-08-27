@@ -725,6 +725,7 @@ Content-Type: application/json
 <p>The following is a non-normative example of a response acknowledging one successfully received SET and one SET with an error from the two SETs received in <a href="#pollResponse" class="xref">Figure 6</a>:</p>
 <pre>POST /Events HTTP/1.1
 Host: notify.exampleidp.com
+Content-Language: en-US
 Content-Type: application/json
 
 {
@@ -804,6 +805,7 @@ Content-Type: application/json
 
 <p> </p>
 <p id="rfc.section.2.6.p.3">When included as part of a batch of SETs, the above JSON is included as part of the <samp>setErrs</samp> member, as defined in <a href="#pollResp" class="xref">Section 2.3</a> and <a href="#pollAckErr" class="xref">Section 2.4.4</a>.  </p>
+<p id="rfc.section.2.6.p.4">When the SET Recipient includes one or more error responses in a request to the SET Transmitter, it must also include in the request a <samp>Content-Language</samp> header whose value indicates the language of the error descriptions included in the request.  The method of language selection in the case when the SET Recipient can provide error messages in multiple languages is out of scope for this specification.  </p>
 <h1 id="rfc.section.3">
 <a href="#rfc.section.3">3.</a> <a href="#aa" id="aa">Authentication and Authorization</a>
 </h1>
