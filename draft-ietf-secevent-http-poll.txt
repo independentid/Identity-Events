@@ -150,8 +150,8 @@ Internet-Draft        draft-ietf-secevent-http-poll            July 2019
    "Content-Type" of "application/json", as described in Section 2.1.
 
    After successful (acknowledged) SET delivery, SET Transmitters are
-   not be required to retain or record SETs for retransmission.  Once a
-   SET is acknowledged, the SET Recipient SHALL be responsible for
+   not required to retain or record SETs for retransmission.  Once a SET
+   is acknowledged, the SET Recipient SHALL be responsible for
    retention, if needed.
 
    Transmitted SETs SHOULD be self-validating (signed) if there is a
@@ -173,7 +173,7 @@ Internet-Draft        draft-ietf-secevent-http-poll            July 2019
    [I-D.ietf-secevent-http-push].  The SET Recipient MUST acknowledge
    receipt to the SET Transmitter.  The SET Recipient SHALL NOT use the
    event acknowledgement mechanism to report event errors other than
-   relating to the parsing and validation of the SET.
+   those relating to the parsing and validation of the SET.
 
 2.1.  Polling Delivery using HTTP
 
@@ -269,10 +269,10 @@ Internet-Draft        draft-ietf-secevent-http-poll            July 2019
 
    sets
       A JSON object that contains zero or more nested JSON objects.
-      Each nested JSON object corresponds to the "jti" of a SET to be
-      delivered and whose value is a JSON string containing the value of
-      the encoded corresponding SET.  If there are no outstanding SETs
-      to be transmitted, the JSON object SHALL be empty.
+      Each nested JSON object's key corresponds to the "jti" of a SET to
+      be delivered, and its value is a JSON string containing the value
+      of the encoded corresponding SET.  If there are no outstanding
+      SETs to be transmitted, the JSON object SHALL be empty.
 
 
 
@@ -636,11 +636,11 @@ Internet-Draft        draft-ietf-secevent-http-poll            July 2019
       see Section 4.4.1.
 
    Basic Authentication
-      Use of HTTP BASIC authentication should be avoided due to its use
+      Use of HTTP Basic authentication should be avoided due to its use
       of a single factor that is based upon a relatively static,
       symmetric secret.  When used, implementers SHOULD combine the use
       of basic authentication with other factors.  The security
-      considerations of HTTP BASIC are well documented in [RFC7617] and
+      considerations of HTTP Basic are well documented in [RFC7617] and
       SHOULD be considered along with using signed SETs, as described in
       Section 4.1.
 
@@ -758,7 +758,7 @@ Internet-Draft        draft-ietf-secevent-http-poll            July 2019
    Since security is only as good as the weakest link, implementers also
    need to consider authentication choices coupled with OAuth bearer
    tokens.  The security considerations of the default authentication
-   method for OAuth bearer tokens, HTTP BASIC, are well documented in
+   method for OAuth bearer tokens, HTTP Basic, are well documented in
    [RFC7617], therefore implementers are encouraged to prefer stronger
    authentication methods.  Designating the specific methods of
    authentication and authorization are out of scope for the delivery of

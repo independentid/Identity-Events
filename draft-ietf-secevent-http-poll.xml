@@ -136,7 +136,7 @@
       </t>
 
       <t>After successful (acknowledged) SET delivery, SET
-      Transmitters are not be required to retain or record SETs for
+      Transmitters are not required to retain or record SETs for
       retransmission. Once a SET is acknowledged, the SET Recipient SHALL be
       responsible for retention, if needed.</t>
 
@@ -152,8 +152,8 @@
 	it in the manner described in Section 2 of <xref target="I-D.ietf-secevent-http-push"/>.
 	The SET Recipient MUST acknowledge receipt to the SET Transmitter.
 	The SET Recipient SHALL NOT use the event acknowledgement mechanism
-	to report event errors other than relating to the parsing and validation
-	of the SET.
+        to report event errors other than those relating to the parsing and
+        validation of the SET.
       </t>
 
       <section anchor="httpPoll" title="Polling Delivery using HTTP">
@@ -256,9 +256,9 @@
 	<list style="hanging">
 	
 	  <t hangText="sets"><vspace/>A JSON object that contains zero
-	  or more nested JSON objects. Each nested JSON object
+	  or more nested JSON objects. Each nested JSON object's key
 	  corresponds to the <spanx style="verb">jti</spanx> of a SET to
-	  be delivered and whose value is a JSON string containing the
+	  be delivered, and its value is a JSON string containing the
 	  value of the encoded corresponding SET. If there are no
 	  outstanding SETs to be transmitted, the JSON object SHALL be
 	  empty.</t>
@@ -575,11 +575,11 @@ Content-Type: application/json
       For security considerations regarding the use of bearer tokens in
       SET delivery, see <xref target="bearerConsiderations" />.</t>
 
-      <t hangText="Basic Authentication"><vspace />Use of HTTP BASIC
+      <t hangText="Basic Authentication"><vspace />Use of HTTP Basic
       authentication should be avoided due to its use of a single factor
       that is based upon a relatively static, symmetric secret.
       When used, implementers SHOULD combine the use of basic authentication with
-      other factors. The security considerations of HTTP BASIC are well
+      other factors. The security considerations of HTTP Basic are well
       documented in <xref target="RFC7617" /> and SHOULD be considered
       along with using signed SETs,
       as described in <xref target="payloadAuthentication"/>.
@@ -688,7 +688,7 @@ Content-Type: application/json
 	  as the weakest link, implementers also need to consider authentication
 	  choices coupled with OAuth bearer tokens. The security considerations
 	  of the default authentication method for OAuth bearer tokens, HTTP
-	  BASIC, are well documented in <xref
+	  Basic, are well documented in <xref
 	  target="RFC7617"/>, therefore implementers
 	  are encouraged to prefer stronger authentication methods. Designating
 	  the specific methods of authentication and authorization are
