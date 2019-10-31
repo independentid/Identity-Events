@@ -85,7 +85,9 @@
       <t>
 	A mechanism for exchanging configuration metadata such as endpoint URLs
 	and cryptographic key parameters between the transmitter and recipient is
-	out of scope for this specification.
+        out of scope for this specification.  How SETs are defined and the process
+        by which events are identified for SET Recipients is also out of scope for
+        this specification.
       </t>
 
       <section anchor="notat" title="Notational Conventions" toc="default">
@@ -104,31 +106,14 @@
 
       <section anchor="defs" title="Definitions" toc="default">
 	<t>
-	  This specification utilizes terminology defined in <xref target="RFC8417"/>,
-	  as well as the terms defined below:
-	</t>
-	<t>
-	  <list style="hanging">
-	
-            <t hangText="SET Transmitter"><vspace/>
-	      An entity that delivers SETs in its possession to one or more SET
-	      Recipients.
-            </t>
-	  </list>
+            This specification utilizes terminology defined in <xref target="RFC8417"/>
+            and <xref target="I-D.ietf-secevent-http-push"/>.
 	</t>
       </section>
     </section>
 
     <section title="SET Delivery">
       <t>
-	When an event occurs, the SET Transmitter constructs a SET
-	<xref target="RFC8417"/> that describes the	
-	event. The SET Transmitter determines the SET Recipients that the
-	SET should be distributed to.
-      </t>
-      <t>
-	How SETs are defined and the process by which events are identified for
-	SET Recipients is out of scope of this specification.
       </t>
 
       <t>
@@ -151,7 +136,7 @@
       </t>
 
       <t>After successful (acknowledged) SET delivery, SET
-      Transmitters are not be required to retain or record SETs for
+      Transmitters are not required to retain or record SETs for
       retransmission. Once a SET is acknowledged, the SET Recipient SHALL be
       responsible for retention, if needed.</t>
 
@@ -167,8 +152,8 @@
 	it in the manner described in Section 2 of <xref target="I-D.ietf-secevent-http-push"/>.
 	The SET Recipient MUST acknowledge receipt to the SET Transmitter.
 	The SET Recipient SHALL NOT use the event acknowledgement mechanism
-	to report event errors other than relating to the parsing and validation
-	of the SET.
+        to report event errors other than those relating to the parsing and
+        validation of the SET.
       </t>
 
       <section anchor="httpPoll" title="Polling Delivery using HTTP">
@@ -271,9 +256,9 @@
 	<list style="hanging">
 	
 	  <t hangText="sets"><vspace/>A JSON object that contains zero
-	  or more nested JSON objects. Each nested JSON object
+	  or more nested JSON objects. Each nested JSON object's key
 	  corresponds to the <spanx style="verb">jti</spanx> of a SET to
-	  be delivered and whose value is a JSON string containing the
+	  be delivered, and its value is a JSON string containing the
 	  value of the encoded corresponding SET. If there are no
 	  outstanding SETs to be transmitted, the JSON object SHALL be
 	  empty.</t>
@@ -352,10 +337,8 @@
 	      <spanx style="verb">https://nofity.exampleidp.com/Events</spanx>:
 	    </preamble>
 	    <artwork align="left">POST /Events HTTP/1.1
-
 Host: notify.exampleidp.com
-Authorization: Bearer h480djs93hd8
-Accept: application/json
+Content-Type: application/json
 
 {
  "returnImmediately": true
@@ -369,10 +352,8 @@ Accept: application/json
 	    <preamble>The following is a non-normative example default poll request to the
 	    endpoint <spanx style="verb">https://nofity.exampleidp.com/Events</spanx>:</preamble>
 	    <artwork align="left">POST /Events HTTP/1.1
-
 Host: notify.exampleidp.com
-Authorization: Bearer h480djs93hd8
-Accept: application/json
+Content-Type: application/json
 
 {}</artwork>
 	  </figure>
@@ -393,11 +374,8 @@ Accept: application/json
 	    of SETs received (for example as shown in
 	    <xref target="pollResponse"/>):</preamble>
 	    <artwork>POST /Events HTTP/1.1
-
 Host: notify.exampleidp.com
-Authorization: Bearer h480djs93hd8
 Content-Type: application/json
-Authorization: Bearer h480djs93hd8
 
 {
   "ack": [
@@ -420,11 +398,8 @@ Authorization: Bearer h480djs93hd8
 	    <preamble>The following is a non-normative example poll with acknowledgement
 	    of the SETs received in <xref target="pollResponse"/>:</preamble>
 	    <artwork>POST /Events HTTP/1.1
-
 Host: notify.exampleidp.com
-Authorization: Bearer h480djs93hd8
 Content-Type: application/json
-Authorization: Bearer h480djs93hd8
 
 {
   "ack": [
@@ -453,11 +428,9 @@ Authorization: Bearer h480djs93hd8
 	    acknowledging one successfully received SET and one SET with an error
 	    from the two SETs received in <xref target="pollResponse"/>:</preamble>
 	    <artwork>POST /Events HTTP/1.1
-
 Host: notify.exampleidp.com
-Authorization: Bearer h480djs93hd8
+Content-Language: en-US
 Content-Type: application/json
-Authorization: Bearer h480djs93hd8
 
 {
   "ack": ["3d0c3cf797584bd193bd0fb1bd4e7d30"],
@@ -494,7 +467,6 @@ Authorization: Bearer h480djs93hd8
 	  shows two SETs being returned:</preamble>
 	  <artwork align="left">HTTP/1.1 200 OK
 Content-Type: application/json
-Location: https://notify.exampleidp/Events
 
 {
 "sets": {
@@ -533,7 +505,6 @@ Location: https://notify.exampleidp/Events
 	  SETs or unacknowledged SETs are available:</preamble>
 	  <artwork align="left">HTTP/1.1 200 OK
 Content-Type: application/json
-Location: https://notify.exampleidp/Events
 
 {
  "sets": {}
@@ -576,6 +547,14 @@ Location: https://notify.exampleidp/Events
 	  as part of the <spanx style="verb">setErrs</spanx> member, as
           defined in <xref target="pollResp"/> and <xref target="pollAckErr"/>.
 	</t>
+        <t>
+            When the SET Recipient includes one or more error responses in a request to
+            the SET Transmitter, it must also include in the request a 
+            <spanx style="verb">Content-Language</spanx> header whose value indicates the
+            language of the error descriptions included in the request.  The method of
+            language selection in the case when the SET Recipient can provide error messages
+            in multiple languages is out of scope for this specification.
+        </t>
       </section>
 
     </section>
@@ -596,11 +575,11 @@ Location: https://notify.exampleidp/Events
       For security considerations regarding the use of bearer tokens in
       SET delivery, see <xref target="bearerConsiderations" />.</t>
 
-      <t hangText="Basic Authentication"><vspace />Use of HTTP BASIC
+      <t hangText="Basic Authentication"><vspace />Use of HTTP Basic
       authentication should be avoided due to its use of a single factor
       that is based upon a relatively static, symmetric secret.
       When used, implementers SHOULD combine the use of basic authentication with
-      other factors. The security considerations of HTTP BASIC are well
+      other factors. The security considerations of HTTP Basic are well
       documented in <xref target="RFC7617" /> and SHOULD be considered
       along with using signed SETs,
       as described in <xref target="payloadAuthentication"/>.
@@ -618,12 +597,6 @@ Location: https://notify.exampleidp/Events
       feature to prevent denial-of-service attacks. Because SETs are
       not commands, SET Recipients are free to ignore SETs that
       are not of interest after acknowledging their receipt.</t>
-
-      <t>For illustrative purposes only, SET delivery examples show an OAuth 2.0
-      bearer token value <xref target="RFC6750" /> in the authorization header.
-      This is not intended to imply that bearer tokens are
-      preferred. However, the use of bearer tokens in the specification does
-      reflect common practice. </t>
 
       <section anchor="authzTokens" title="Use of Tokens as Authorizations">
         <t>When using bearer tokens or proof-of-possession tokens that
@@ -715,7 +688,7 @@ Location: https://notify.exampleidp/Events
 	  as the weakest link, implementers also need to consider authentication
 	  choices coupled with OAuth bearer tokens. The security considerations
 	  of the default authentication method for OAuth bearer tokens, HTTP
-	  BASIC, are well documented in <xref
+	  Basic, are well documented in <xref
 	  target="RFC7617"/>, therefore implementers
 	  are encouraged to prefer stronger authentication methods. Designating
 	  the specific methods of authentication and authorization are
@@ -879,6 +852,29 @@ Location: https://notify.exampleidp/Events
 	    Further alignment with the push draft.
 	  </t>
 	</list>
+      </t>
+      <t>
+        Draft 04 - AB
+        <list style="symbols">
+          <t>
+            Referenced SET Transmitter definition in http-push.
+          </t>
+          <t>
+            Removed incorrect normative text regarding SET construction.
+          </t>
+          <t>
+            Consolidated general out-of-scope items under Introduction.
+          </t>
+          <t>
+            Removed unnecessary HTTP headers in examples and added Content-Type.
+          </t>
+          <t>
+            Added Content-Language requirement for error descriptions, aligning with http-push.
+          </t>
+          <t>
+            Minor editorial fixes.
+          </t>
+        </list>
       </t>
     </section>
   </back>
