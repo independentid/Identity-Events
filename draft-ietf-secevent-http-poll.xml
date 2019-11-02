@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-poll-03"
+<rfc category="std" docName="draft-ietf-secevent-http-poll-04"
 	ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-http-poll">
@@ -56,7 +56,7 @@
       </address>
     </author>
 
-    <date year="2019" month="July" day="8" />
+    <date year="2019" month="November" day="1" />
 
     <keyword>Internet-Draft</keyword>
 
@@ -113,9 +113,6 @@
     </section>
 
     <section title="SET Delivery">
-      <t>
-      </t>
-
       <t>
 	When a SET is available for a SET Recipient, the SET Transmitter
 	attempts to deliver the SET 
@@ -563,28 +560,8 @@ Content-Type: application/json
       <t>The SET delivery method described in this specification is
       based upon HTTP and depends on the use of TLS and/or standard
       HTTP authentication and authorization schemes, as per
-      <xref target="RFC7235" />. For example, the following
-      methodologies could be used among others: <list style="hanging">
-      <t hangText="TLS Client Authentication"><vspace />Event delivery
-      endpoints MAY request TLS mutual client authentication,
-      per Section 7.3 of <xref target="RFC5246"/>. </t>
-
-      <t hangText="Bearer Tokens"><vspace />Bearer tokens
-      <xref target="RFC6750" /> MAY be used when combined with TLS and a token
-      framework such as OAuth 2.0 <xref target="RFC6749" />.
-      For security considerations regarding the use of bearer tokens in
-      SET delivery, see <xref target="bearerConsiderations" />.</t>
-
-      <t hangText="Basic Authentication"><vspace />Use of HTTP Basic
-      authentication should be avoided due to its use of a single factor
-      that is based upon a relatively static, symmetric secret.
-      When used, implementers SHOULD combine the use of basic authentication with
-      other factors. The security considerations of HTTP Basic are well
-      documented in <xref target="RFC7617" /> and SHOULD be considered
-      along with using signed SETs,
-      as described in <xref target="payloadAuthentication"/>.
+      <xref target="RFC7235" />.
       </t>
-      </list></t>
 
       <t>As per Section 4.1 of <xref target="RFC7235"/>, a SET
       delivery endpoint SHALL indicate supported HTTP authentication
@@ -605,7 +582,8 @@ Content-Type: application/json
         from the authorization when considering local access control rules.
         Section 6 of the OAuth Assertion Framework specification <xref target="RFC7521" />
 	documents common scenarios for
-        authorization including:<list style="symbols">
+        authorization including:
+	<list style="symbols">
             <t>Clients using an assertion to authenticate and/or act on behalf
             of itself;</t>
 
@@ -673,7 +651,7 @@ Content-Type: application/json
 	  <t>Due to the possibility of interception, Bearer tokens MUST be
 	  exchanged using TLS.</t>
 
-	  <t>Bearer tokens MUST have a limited lifetime that can be determined
+	  <t>Bearer tokens SHOULD have a limited lifetime that can be determined
 	  directly or indirectly (e.g., by checking with a validation service)
 	  by the service provider. By expiring tokens, clients are forced to
 	  obtain a new token (which usually involves re-authentication) for
@@ -854,7 +832,7 @@ Content-Type: application/json
 	</list>
       </t>
       <t>
-        Draft 04 - AB
+        Draft 04 - AB + mbj
         <list style="symbols">
           <t>
             Referenced SET Transmitter definition in http-push.
@@ -871,6 +849,9 @@ Content-Type: application/json
           <t>
             Added Content-Language requirement for error descriptions, aligning with http-push.
           </t>
+	  <t>
+	    Stated that bearer tokens SHOULD have a limited lifetime.
+	  </t>
           <t>
             Minor editorial fixes.
           </t>
