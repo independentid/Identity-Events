@@ -874,6 +874,9 @@ Content-Type: application/json
 	    Stated that bearer tokens SHOULD have a limited lifetime.
 	  </t>
           <t>
+            Added normative text defining how to respond to invalid poll requests.
+          </t>
+          <t>
             Minor editorial fixes.
           </t>
         </list>

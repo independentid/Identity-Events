@@ -1024,6 +1024,9 @@ Internet-Draft        draft-ietf-secevent-http-poll        November 2019
 
    o  Stated that bearer tokens SHOULD have a limited lifetime.
 
+   o  Added normative text defining how to respond to invalid poll
+      requests.
+
    o  Minor editorial fixes.
 
 Authors' Addresses
@@ -1053,6 +1056,16 @@ Authors' Addresses
    Email: morteza.ansari@cisco.com
 
 
+
+
+
+
+
+Backman, et al.            Expires May 9, 2020                 [Page 19]
+
+Internet-Draft        draft-ietf-secevent-http-poll        November 2019
+
+
    Anthony Nadalin
    Microsoft
 
@@ -1061,4 +1074,47 @@ Authors' Addresses
 
 
 
-Backman, et al.            Expires May 9, 2020                 [Page 19]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Backman, et al.            Expires May 9, 2020                 [Page 20]
