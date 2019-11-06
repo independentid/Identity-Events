@@ -447,7 +447,7 @@ Content-Type: application/json
       <section anchor="pollGetAck"
 	       title="Poll Response">
 
-	<t>In response to a poll request, the service provider MAY
+	<t>In response to a valid poll request, the service provider MAY
 	respond immediately if SETs are available to be delivered.
 	If no SETs are available at the time of the request, the
 	SET Transmitter SHALL delay responding until a SET is
@@ -514,6 +514,27 @@ Content-Type: application/json
 	via the next poll request to the SET Transmitter, as described in
 	<xref target="pollAck"/> or <xref target="pollAckErr"/>.</t>
 	
+        <section title="Poll Error Response">
+            <t>In the event of a general HTTP error condition in the context of
+                processing a poll request, the service provider SHOULD respond with
+                an appropriate HTTP Response Status Code as defined in Section 6 of
+                <xref target="RFC7231" />.</t>
+
+            <t>Service providers MAY respond to any invalid poll request with an HTTP Response
+                Status Code of 400 (Bad Request) even when a more specific code might apply, for
+                example if the service provider deemed that a more specific code presented an
+                information disclosure risk. When no more specific code might apply, the service
+                provider SHALL respond to an invalid poll request with an HTTP Status Code of 400.</t>
+
+            <t>The response body for responses to invalid poll requests is left undefined.</t>
+
+            <figure title="Example Poll Error Response">
+                <preamble>
+                    The following is a non-normative example of a response to an invalid poll request:
+                </preamble>
+                <artwork>HTTP/1.1 400 Bad Request</artwork>
+            </figure>
+        </section>
       </section>
 
       <section anchor="errorResponse" title="Error Response Handling">
