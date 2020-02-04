@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-poll-05"
+<rfc category="std" docName="draft-ietf-secevent-http-poll-06"
 	ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-http-poll">
@@ -56,7 +56,7 @@
       </address>
     </author>
 
-    <date year="2019" month="November" day="18" />
+    <date year="2019" month="November" day="19" />
 
     <keyword>Internet-Draft</keyword>
 
@@ -334,10 +334,10 @@
 	      The following is an example request made by a SET Recipient
 	      that has no outstanding SETs to acknowledge and is polling
 	      for available SETs at the endpoint
-	      <spanx style="verb">https://nofity.exampleidp.com/Events</spanx>:
+	      <spanx style="verb">https://notify.idp.example.com/Events</spanx>:
 	    </preamble>
 	    <artwork align="left">POST /Events HTTP/1.1
-Host: notify.exampleidp.com
+Host: notify.idp.example.com
 Content-Type: application/json
 
 {
@@ -350,9 +350,9 @@ Content-Type: application/json
 	
 	  <figure anchor="pollDefaultRequest" title="Example Default Poll Request">
 	    <preamble>The following is a non-normative example default poll request to the
-	    endpoint <spanx style="verb">https://nofity.exampleidp.com/Events</spanx>:</preamble>
+	    endpoint <spanx style="verb">https://notify.idp.example.com/Events</spanx>:</preamble>
 	    <artwork align="left">POST /Events HTTP/1.1
-Host: notify.exampleidp.com
+Host: notify.idp.example.com
 Content-Type: application/json
 
 {}</artwork>
@@ -374,7 +374,7 @@ Content-Type: application/json
 	    of SETs received (for example as shown in
 	    <xref target="pollResponse"/>):</preamble>
 	    <artwork>POST /Events HTTP/1.1
-Host: notify.exampleidp.com
+Host: notify.idp.example.com
 Content-Type: application/json
 
 {
@@ -398,7 +398,7 @@ Content-Type: application/json
 	    <preamble>The following is a non-normative example poll with acknowledgement
 	    of the SETs received in <xref target="pollResponse"/>:</preamble>
 	    <artwork>POST /Events HTTP/1.1
-Host: notify.exampleidp.com
+Host: notify.idp.example.com
 Content-Type: application/json
 
 {
@@ -428,7 +428,7 @@ Content-Type: application/json
 	    acknowledging one successfully received SET and one SET with an error
 	    from the two SETs received in <xref target="pollResponse"/>:</preamble>
 	    <artwork>POST /Events HTTP/1.1
-Host: notify.exampleidp.com
+Host: notify.idp.example.com
 Content-Language: en-US
 Content-Type: application/json
 
@@ -714,14 +714,12 @@ Content-Type: application/json
   <back>
     <references title="Normative References">
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
-      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3986.xml' ?><!-- URI -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml' ?><!-- TLS 1.2 -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6125.xml' ?><!-- TLS Certs -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
 
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
-      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
 
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7525.xml' ?><!-- TLS Recos -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml' ?><!-- RFC 2119 bis -->
@@ -732,12 +730,9 @@ Content-Type: application/json
     </references>
 
     <references title="Informative References">
-      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.3339.xml' ?>
-
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6202.xml' ?><!-- HTTP Long Polling -->
 
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6749.xml' ?><!-- OAuth -->
-      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6750.xml' ?><!-- OAuth Bearer-->
 
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7521.xml' ?><!-- Client Auth Assertions -->
 
@@ -867,6 +862,14 @@ Content-Type: application/json
           </t>
           <t>
             Addressed shepherd comments by Yaron Sheffer.
+          </t>
+        </list>
+      </t>
+      <t>
+        Draft 06 - mbj
+        <list style="symbols">
+          <t>
+            Addressed nits identified by the idnits tool.
           </t>
         </list>
       </t>

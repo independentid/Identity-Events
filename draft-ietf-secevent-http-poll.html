@@ -410,8 +410,8 @@
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Backman, A., Ed., Jones, M., Ed., Scurtescu, M., Ansari, M., and A. Nadalin" />
-  <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-secevent-http-poll-05" />
-  <meta name="dct.issued" scheme="ISO8601" content="2019-11-18" />
+  <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-secevent-http-poll-06" />
+  <meta name="dct.issued" scheme="ISO8601" content="2019-11-19" />
   <meta name="dct.abstract" content="This specification defines how a series of Security Event Tokens (SETs) may be delivered to an intended recipient using HTTP POST over TLS initiated as a poll by the recipient. The specification also defines how delivery can be assured, subject to the SET Recipient's need for assurance.  " />
   <meta name="description" content="This specification defines how a series of Security Event Tokens (SETs) may be delivered to an intended recipient using HTTP POST over TLS initiated as a poll by the recipient. The specification also defines how delivery can be assured, subject to the SET Recipient's need for assurance.  " />
 
@@ -435,7 +435,7 @@
 <td class="right">M. Jones, Ed.</td>
 </tr>
 <tr>
-<td class="left">Expires: May 21, 2020</td>
+<td class="left">Expires: May 22, 2020</td>
 <td class="right">Microsoft</td>
 </tr>
 <tr>
@@ -464,7 +464,7 @@
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">November 18, 2019</td>
+<td class="right">November 19, 2019</td>
 </tr>
 
     	
@@ -472,7 +472,7 @@
   </table>
 
   <p class="title">Poll-Based Security Event Token (SET) Delivery Using HTTP<br />
-  <span class="filename">draft-ietf-secevent-http-poll-05</span></p>
+  <span class="filename">draft-ietf-secevent-http-poll-06</span></p>
   
   <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
 <p>This specification defines how a series of Security Event Tokens (SETs) may be delivered to an intended recipient using HTTP POST over TLS initiated as a poll by the recipient. The specification also defines how delivery can be assured, subject to the SET Recipient's need for assurance.  </p>
@@ -480,7 +480,7 @@
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on May 21, 2020.</p>
+<p>This Internet-Draft will expire on May 22, 2020.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2019 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -655,9 +655,9 @@
 <p></p>
 <div id="rfc.figure.1"></div>
 <div id="pollInitRequest"></div>
-<p>The following is an example request made by a SET Recipient that has no outstanding SETs to acknowledge and is polling for available SETs at the endpoint <samp>https://nofity.exampleidp.com/Events</samp>: </p>
+<p>The following is an example request made by a SET Recipient that has no outstanding SETs to acknowledge and is polling for available SETs at the endpoint <samp>https://notify.idp.example.com/Events</samp>: </p>
 <pre>POST /Events HTTP/1.1
-Host: notify.exampleidp.com
+Host: notify.idp.example.com
 Content-Type: application/json
 
 {
@@ -667,9 +667,9 @@ Content-Type: application/json
 <p id="rfc.section.2.4.1.p.3">A SET Recipient can poll using default parameter values by passing an empty JSON object.</p>
 <div id="rfc.figure.2"></div>
 <div id="pollDefaultRequest"></div>
-<p>The following is a non-normative example default poll request to the endpoint <samp>https://nofity.exampleidp.com/Events</samp>:</p>
+<p>The following is a non-normative example default poll request to the endpoint <samp>https://notify.idp.example.com/Events</samp>:</p>
 <pre>POST /Events HTTP/1.1
-Host: notify.exampleidp.com
+Host: notify.idp.example.com
 Content-Type: application/json
 
 {}</pre>
@@ -682,7 +682,7 @@ Content-Type: application/json
 <div id="pollAckOnly"></div>
 <p>The following is a non-normative example poll request with acknowledgement of SETs received (for example as shown in <a href="#pollResponse" class="xref">Figure 6</a>):</p>
 <pre>POST /Events HTTP/1.1
-Host: notify.exampleidp.com
+Host: notify.idp.example.com
 Content-Type: application/json
 
 {
@@ -702,7 +702,7 @@ Content-Type: application/json
 <div id="pollGoodResponse"></div>
 <p>The following is a non-normative example poll with acknowledgement of the SETs received in <a href="#pollResponse" class="xref">Figure 6</a>:</p>
 <pre>POST /Events HTTP/1.1
-Host: notify.exampleidp.com
+Host: notify.idp.example.com
 Content-Type: application/json
 
 {
@@ -722,7 +722,7 @@ Content-Type: application/json
 <div id="pollErrorResponse"></div>
 <p>The following is a non-normative example of a response acknowledging one successfully received SET and one SET with an error from the two SETs received in <a href="#pollResponse" class="xref">Figure 6</a>:</p>
 <pre>POST /Events HTTP/1.1
-Host: notify.exampleidp.com
+Host: notify.idp.example.com
 Content-Language: en-US
 Content-Type: application/json
 
@@ -867,11 +867,6 @@ Content-Type: application/json
 <a>Bradner, S.</a>, "<a href="https://tools.ietf.org/html/rfc2119">Key words for use in RFCs to Indicate Requirement Levels</a>", BCP 14, RFC 2119, DOI 10.17487/RFC2119, March 1997.</td>
 </tr>
 <tr>
-<td class="reference"><b id="RFC3986">[RFC3986]</b></td>
-<td class="top">
-<a>Berners-Lee, T.</a>, <a>Fielding, R.</a> and <a>L. Masinter</a>, "<a href="https://tools.ietf.org/html/rfc3986">Uniform Resource Identifier (URI): Generic Syntax</a>", STD 66, RFC 3986, DOI 10.17487/RFC3986, January 2005.</td>
-</tr>
-<tr>
 <td class="reference"><b id="RFC5246">[RFC5246]</b></td>
 <td class="top">
 <a>Dierks, T.</a> and <a>E. Rescorla</a>, "<a href="https://tools.ietf.org/html/rfc5246">The Transport Layer Security (TLS) Protocol Version 1.2</a>", RFC 5246, DOI 10.17487/RFC5246, August 2008.</td>
@@ -895,11 +890,6 @@ Content-Type: application/json
 <td class="reference"><b id="RFC7516">[RFC7516]</b></td>
 <td class="top">
 <a>Jones, M.</a> and <a>J. Hildebrand</a>, "<a href="https://tools.ietf.org/html/rfc7516">JSON Web Encryption (JWE)</a>", RFC 7516, DOI 10.17487/RFC7516, May 2015.</td>
-</tr>
-<tr>
-<td class="reference"><b id="RFC7519">[RFC7519]</b></td>
-<td class="top">
-<a>Jones, M.</a>, <a>Bradley, J.</a> and <a>N. Sakimura</a>, "<a href="https://tools.ietf.org/html/rfc7519">JSON Web Token (JWT)</a>", RFC 7519, DOI 10.17487/RFC7519, May 2015.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC7525">[RFC7525]</b></td>
@@ -926,11 +916,6 @@ Content-Type: application/json
 <a href="#rfc.references.2">7.2.</a> Informative References</h1>
 <table><tbody>
 <tr>
-<td class="reference"><b id="RFC3339">[RFC3339]</b></td>
-<td class="top">
-<a>Klyne, G.</a> and <a>C. Newman</a>, "<a href="https://tools.ietf.org/html/rfc3339">Date and Time on the Internet: Timestamps</a>", RFC 3339, DOI 10.17487/RFC3339, July 2002.</td>
-</tr>
-<tr>
 <td class="reference"><b id="RFC6202">[RFC6202]</b></td>
 <td class="top">
 <a>Loreto, S.</a>, <a>Saint-Andre, P.</a>, <a>Salsano, S.</a> and <a>G. Wilkins</a>, "<a href="https://tools.ietf.org/html/rfc6202">Known Issues and Best Practices for the Use of Long Polling and Streaming in Bidirectional HTTP</a>", RFC 6202, DOI 10.17487/RFC6202, April 2011.</td>
@@ -939,11 +924,6 @@ Content-Type: application/json
 <td class="reference"><b id="RFC6749">[RFC6749]</b></td>
 <td class="top">
 <a>Hardt, D.</a>, "<a href="https://tools.ietf.org/html/rfc6749">The OAuth 2.0 Authorization Framework</a>", RFC 6749, DOI 10.17487/RFC6749, October 2012.</td>
-</tr>
-<tr>
-<td class="reference"><b id="RFC6750">[RFC6750]</b></td>
-<td class="top">
-<a>Jones, M.</a> and <a>D. Hardt</a>, "<a href="https://tools.ietf.org/html/rfc6750">The OAuth 2.0 Authorization Framework: Bearer Token Usage</a>", RFC 6750, DOI 10.17487/RFC6750, October 2012.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC7230">[RFC7230]</b></td>
@@ -1033,6 +1013,11 @@ Content-Type: application/json
 <li>Added normative text defining how to respond to invalid poll requests.  </li>
 <li>Addressed shepherd comments by Yaron Sheffer.  </li>
 </ul>
+
+<p> </p>
+<p id="rfc.section.B.p.8">Draft 06 - mbj </p>
+
+<ul><li>Addressed nits identified by the idnits tool.  </li></ul>
 
 <p> </p>
 <h1 id="rfc.authors"><a href="#rfc.authors">Authors' Addresses</a></h1>
