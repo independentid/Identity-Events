@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-push-07" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-http-push-08" ipr="trust200902">
     <front>
         <title abbrev="draft-ietf-secevent-http-push">Push-Based Security Event Token (SET) Delivery Using HTTP</title>
 
@@ -51,7 +51,8 @@
             </address>
         </author>
 
-        <date year="2019" />
+	<date year="2020" month="February" day="5" />
+
         <area>Security</area>
         <workgroup>Security Events Working Group</workgroup>
         <keyword>Internet-Draft</keyword>
@@ -89,7 +90,7 @@
             </t>
             <t>
                 A mechanism for exchanging configuration metadata such as endpoint URLs
-                and cryptographic key parameters between the transmitter and recipient is
+                and cryptographic keys between the transmitter and recipient is
                 out of scope for this specification.
             </t>
             
@@ -101,8 +102,9 @@
                     when, and only when, they appear in all capitals, as shown here.
                 </t>
 
-                <t>Throughout this document, all figures may contain spaces and extra
-                    line-wrapping for readability and due to space limitations.
+                <t>
+		  Throughout this document, all figures may contain spaces and extra
+		  line wrapping for readability and due to space limitations.
                 </t>
             </section>
 
@@ -143,7 +145,8 @@
                     <t>The SET Recipient can parse the SET.</t>
                     <t>
                         The SET is authentic (i.e., it was issued by the issuer
-                        specified within the SET).
+                        specified within the SET,
+			and if signed, was signed by a key belonging to the issuer).
                     </t>
                     <t>
                         The SET Recipient is identified as an intended audience of
@@ -204,9 +207,9 @@
                     To transmit a SET to a SET Recipient, the SET Transmitter makes
                     an HTTP POST request to an HTTP endpoint provided by the SET Recipient.  The
                     <spanx style="verb">Content-Type</spanx> header of this request MUST
-                    be "application/secevent+jwt" as defined in
-                    Sections 2.2 and 6.2 of <xref target="RFC8417"/>, and the
-                    <spanx style="verb">Accept</spanx> header MUST be "application/json".  The
+                    be <spanx style="verb">application/secevent+jwt</spanx> as defined in
+                    Sections 2.3 and 7.2 of <xref target="RFC8417"/>, and the
+                    <spanx style="verb">Accept</spanx> header MUST be <spanx style="verb">application/json</spanx>.  The
                     request body MUST consist of the SET itself, represented as a
                     <xref target="RFC7519">JWT</xref>.
                 </t>
@@ -232,19 +235,16 @@ Content-Type: application/secevent+jwt
 
 eyJ0eXAiOiJzZWNldmVudCtqd3QiLCJhbGciOiJIUzI1NiJ9Cg
 .
-eyJwdWJsaXNoZXJVcmkiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20iLCJmZWV
-kVXJpcyI6WyJodHRwczovL2podWIuZXhhbXBsZS5jb20vRmVlZHMvOThkNTI0Nj
-FmYTViYmM4Nzk1OTNiNzc1NCIsImh0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZ
-WVkcy81ZDc2MDQ1MTZiMWQwODY0MWQ3Njc2ZWU3Il0sInJlc291cmNlVXJpcyI6
-WyJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcnMvNDRmNjE0MmRmOTZiZDZ
-hYjYxZTc1MjFkOSJdLCJldmVudFR5cGVzIjpbIkNSRUFURSJdLCJhdHRyaWJ1dG
-VzIjpbImlkIiwibmFtZSIsInVzZXJOYW1lIiwicGFzc3dvcmQiLCJlbWFpbHMiX
-SwidmFsdWVzIjp7ImVtYWlscyI6W3sidHlwZSI6IndvcmsiLCJ2YWx1ZSI6Impk
-b2VAZXhhbXBsZS5jb20ifV0sInBhc3N3b3JkIjoibm90NHUybm8iLCJ1c2VyTmF
-tZSI6Impkb2UiLCJpZCI6IjQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJuYW
-1lIjp7ImdpdmVuTmFtZSI6IkpvaG4iLCJmYW1pbHlOYW1lIjoiRG9lIn19fQo
+eyJpc3MiOiJodHRwczovL2lkcC5leGFtcGxlLmNvbS8iLCJqdGkiOiI3NTZFNjk
+3MTc1NjUyMDY5NjQ2NTZFNzQ2OTY2Njk2NTcyIiwiaWF0IjoxNTA4MTg0ODQ1LC
+JhdWQiOiI2MzZDNjk2NTZFNzQ1RjY5NjQiLCJldmVudHMiOnsiaHR0cHM6Ly9zY
+2hlbWFzLm9wZW5pZC5uZXQvc2VjZXZlbnQvcmlzYy9ldmVudC10eXBlL2FjY291
+bnQtZGlzYWJsZWQiOnsic3ViamVjdCI6eyJzdWJqZWN0X3R5cGUiOiJpc3Mtc3V
+iIiwiaXNzIjoiaHR0cHM6Ly9pZHAuZXhhbXBsZS5jb20vIiwic3ViIjoiNzM3NT
+YyNkE2NTYzNzQifSwicmVhc29uIjoiaGlqYWNraW5nIn19fQ
 .
-Y4rXxMD406P2edv00cr9Wf3/XwNtLjB9n+jTqN1/lLc</artwork>
+Y4rXxMD406P2edv00cr9Wf3_XwNtLjB9n-jTqN1_lLc
+</artwork>
                 </figure>
             </section>
 
@@ -363,36 +363,46 @@ Content-Type: application/json
                         invalid or otherwise unacceptable to the SET Recipient. (e.g., expired,
                         revoked, failed certificate validation, etc.)</c>
                     <c>authentication_failed</c><c>The SET Recipient could not authenticate the
-                        SET Transmitter from the contents of the request.</c>
+                        SET Transmitter.</c>
                     <c>access_denied</c><c>The SET Transmitter is not authorized to transmit the
-                        provided SET to the SET Recipient.</c>
+                        SET to the SET Recipient.</c>
                 </texttable>
+		<t>
+		  Implementations SHOULD expect that other Error Codes MAY also be received,
+		  as the set of Error Codes is extensible
+		  via the IANA "Security Event Token Delivery Error Codes" registry
+		  established in <xref target="iana_set_errors"/>.
+		</t>
             </section>
         </section>
 
         <section anchor="aa" title="Authentication and Authorization" toc="default">
             <t>The SET delivery method described in this specification is
-                based upon HTTP and depends on the use of TLS and/or standard
+	        based upon HTTP and and HTTP over TLS <xref target="RFC2818"/> and/or standard
                 HTTP authentication and authorization schemes, as per
                 <xref target="RFC7235" />.
+		The TLS server certificate MUST be validated, per <xref target="RFC6125"/>.
             </t>
 
-            <t>Because SET Delivery describes a simple function, authorization
-                for the ability to pick-up or deliver SETs can be derived by
-                considering the identity of the SET Issuer, or via other employed
-                authentication methods.  Because SETs are
-                not commands, SET Recipients are free to ignore SETs that
-                are not of interest.</t>
+            <t>
+	      Authorization for the eligibility to provide actionable SETs can be determined by
+	      using the identity of the SET Issuer,
+	      the identity of the SET Transmitter, perhaps using mutual TLS,
+	      or via other employed authentication methods.
+	      Because SETs are
+	      not commands, SET Recipients are free to ignore SETs that
+	      are not of interest.
+	    </t>
         </section>
         <section anchor="reliability" title="Delivery Reliability" toc="default">
             <t>
-                Delivery reliability requirements may vary from implementation to
-                implementation.  This specification defines the response from the SET
+                Delivery reliability requirements may vary depending upon the use cases.
+		This specification defines the response from the SET
                 Recipient in such a way as to provide the SET Transmitter with the
                 information necessary to determine what further action is required,
                 if any, in order to meet their requirements.  SET Transmitters with
                 high reliability requirements may be tempted to always retry failed
-                transmissions, however it should be noted that for many types of SET
+                transmissions, however, it should be noted that for many types of SET
                 delivery errors, a retry is extremely unlikely to be successful.  For
                 example, <spanx style="verb">invalid_request</spanx> indicates a structural
                 error in the content of the request body that is likely to remain when
@@ -401,9 +411,9 @@ Content-Type: application/json
                 credentials prior to re-transmission.
             </t>
             <t>
-                Implementers SHOULD evaluate their reliability requirements and the
+                Implementers SHOULD evaluate the reliability requirements of their use cases and the
                 impact of various retry mechanisms on the performance of their systems
-                to determine the correct strategy for various error conditions.
+                to determine an appropriate strategy for handling various error conditions.
             </t>
         </section>
         <section anchor="Security" title="Security Considerations" toc="default">
@@ -411,11 +421,23 @@ Content-Type: application/json
             <section anchor="payloadAuthentication" title="Authentication Using Signed SETs">
                 <t>In scenarios where HTTP authorization or TLS mutual authentication
                     are not used or are considered weak, JWS signed SETs SHOULD be
-                    used (see <xref target="RFC7515"/> and <xref target="RFC8417">
-                    Security Considerations</xref>). This enables the SET Recipient
+                    used (see <xref target="RFC7515"/> and Section 5 of <xref target="RFC8417"/>).
+                    This enables the SET Recipient
                     to validate that the SET Transmitter is authorized to deliver the SET.
                 </t>
             </section>
+
+	    <section title="HTTP Considerations">
+	      <t>SET delivery depends on the use of Hypertext Transfer Protocol and is thus
+	      subject to the security considerations of HTTP Section 9 of <xref
+	      target="RFC7230"/> and its related specifications.</t>
+
+	      <t>As stated in Section 2.7.1 of <xref target="RFC7230"/>, an
+	      HTTP requestor MUST NOT generate the <spanx style="verb">userinfo</spanx>
+	      (i.e., username and password) component (and its "@" delimiter) when
+	      an "http" URI reference is generated with a message, as they are now
+	      disallowed in HTTP.</t>
+	    </section>
 
             <section title="Confidentiality of SETs">
                 <t>SETs may contain sensitive information that is considered Personally Identifiable
@@ -425,8 +447,10 @@ Content-Type: application/json
                     using a transport-layer security mechanism such as TLS, or both. If
                     an Event delivery endpoint supports TLS, it MUST support at least TLS
                     version 1.2 <xref target="RFC5246"/> and SHOULD support the newest version
-                    of TLS that meets its security requirements. When using TLS, the client MUST
-                    perform a TLS/SSL server certificate check, per <xref target="RFC6125"/>.
+		    of TLS that meets its security requirements,
+		    which as of the time of this publication is TLS 1.3 <xref target="RFC8446"/>.
+		    When using TLS, the client MUST
+                    perform a TLS/SSL server certificate check using DNS-ID <xref target="RFC6125"/>.
                     Implementation security considerations for TLS can be found in
                     "Recommendations for Secure Use of TLS and DTLS" <xref target="RFC7525"/>.</t>
             </section>
@@ -458,20 +482,24 @@ Content-Type: application/json
         </section>
 
         <section title="Privacy Considerations">
-            <t>If a SET needs to be retained for audit purposes, a JWS signature MAY
-                be used to provide verification of its authenticity.</t>
 
             <t>When sharing personally identifiable information or information
                 that is otherwise considered confidential to affected users, SET
                 Transmitters and Recipients MUST have the appropriate legal agreements
-                and user consent or terms of service in place.</t>
+                and user consent or terms of service in place.
+		Furthermore, data that needs confidentiality protection MUST be encrypted,
+		either via TLS or using JSON Web Encryption (JWE) <xref target="RFC7516"/>,
+		or both.
+	    </t>
 
-            <t>In some cases subject identifiers themselves may be considered sensitive
-                information, such that its inclusion within a SET may be considered a violation
-                of privacy.  SET Transmitters should consider the ramifications of sharing a
-                particular subject identifier with a SET Recipient (e.g., whether doing so could
-                enable correlation and/or de-anonymization of data), and choose appropriate
-                subject identifiers for their use case.</t>
+	    <t>
+	      In some cases, subject identifiers themselves may be considered sensitive
+	      information, such that their inclusion within a SET may be considered a violation
+	      of privacy.  SET Transmitters should consider the ramifications of sharing a
+	      particular subject identifier with a SET Recipient (e.g., whether doing so could
+	      enable correlation and/or de-anonymization of data), and choose appropriate
+	      subject identifiers for their use cases.
+	    </t>
 
         </section>
 
@@ -481,8 +509,8 @@ Content-Type: application/json
                     This document defines Security Event Token Delivery Error Codes, for which IANA
                     is asked to create and maintain a new registry titled "Security Event Token
                     Delivery Error Codes".  Initial values for the Security Event Token Delivery
-                    Error Codes registry are given in <xref target="reqErrors"/>.  Future assignments
-                    are to be made through the First Come First Served registration policy (<xref target="RFC8126"/>)
+                    Error Codes registry are defined in <xref target="reqErrors"/> and registered below.  Future assignments
+                    are to be made through the Specification Required registration policy (<xref target="RFC8126"/>)
                     and shall follow the template presented in <xref target="iana_set_errors_template"/>.
                 </t>
                 <t>
@@ -533,9 +561,9 @@ Content-Type: application/json
 		      <t>Error Code: invalid_request</t>
                       <t>Description: The request body cannot be parsed as a SET or the event
                           payload within the SET does not conform to the event's definition.</t>
-		      <t>Change Controller: IETF Secevent Working Group</t>
-		      <t>Defining Document(s): 
-		      <xref target="error_codes"/> of this document
+		      <t>Change Controller: IETF</t>
+		      <t>Defining Document(s):
+		      <xref target="error_codes"/> of [[ this specification ]]
 		      </t>
 		    </list>
 		  </t>
@@ -545,20 +573,19 @@ Content-Type: application/json
                       <t>Description: One or more keys used to encrypt or sign the SET is invalid
                           or otherwise unacceptable to the SET Recipient. (e.g., expired, revoked,
                           failed certificate validation, etc.)</t>
-		      <t>Change Controller: IETF Secevent Working Group</t>
+		      <t>Change Controller: IETF</t>
 		      <t>Defining Document(s): 
-		      <xref target="error_codes"/> of this document
+		      <xref target="error_codes"/> of [[ this specification ]]
 		      </t>
 		    </list>
 		  </t>
 		  <t>
 		    <list style="hanging">
                       <t>Error Code: authentication_failed</t>
-                      <t>Description: The SET Recipient could not authenticate the SET Transmitter
-                          from the contents of the request.</t>
-		      <t>Change Controller: IETF Secevent Working Group</t>
+                      <t>Description: The SET Recipient could not authenticate the SET Transmitter.</t>
+		      <t>Change Controller: IETF</t>
 		      <t>Defining Document(s): 
-		      <xref target="error_codes"/> of this document
+		      <xref target="error_codes"/> of [[ this specification ]]
 		      </t>
 		    </list>
 		  </t>
@@ -567,9 +594,9 @@ Content-Type: application/json
                       <t>Error Code: access_denied</t>
                       <t>Description: The SET Transmitter is not authorized to transmit the 
                           SET to the SET Recipient.</t>
-		      <t>Change Controller: IETF Secevent Working Group</t>
+		      <t>Change Controller: IETF</t>
 		      <t>Defining Document(s): 
-		      <xref target="error_codes"/> of this document
+		      <xref target="error_codes"/> of [[ this specification ]]
 		      </t>
 		    </list>
 		  </t>
@@ -582,12 +609,13 @@ Content-Type: application/json
     <back>
         <references title="Normative References">
             <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2277.xml'?><!-- IETF Language Policy -->
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2818.xml' ?><!-- HTTP over TLS -->
             <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml' ?><!-- TLS 1.2 -->
 
             <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6125.xml' ?><!-- TLS Certs -->
 
-            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml' ?><!-- JSON -->
-
+	    <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7230.xml' ?><!-- HTTP Msg -->
             <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
             <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
             <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
@@ -596,8 +624,9 @@ Content-Type: application/json
 
             <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8126.xml' ?>
             <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml' ?>
+            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml' ?><!-- JSON -->
             <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8417.xml'?><!-- SET -->
-            <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2277.xml'?><!-- IETF Language Policy -->
+	    <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8446.xml' ?><!-- TLS 1.3 -->
         </references>
 
         <references title="Informative References">
@@ -605,7 +634,7 @@ Content-Type: application/json
         </references>
 
         <section title="Other Streaming Specifications">
-            <t>[[EDITORS NOTE: This section to be removed prior to publication]]</t>
+            <t>[[ NOTE TO THE RFC EDITOR: This section to be removed prior to publication ]]</t>
 
             <t>The following pub/sub, queuing, streaming systems were reviewed
                 as possible solutions or as input to the current draft:</t>
@@ -680,6 +709,8 @@ need for assurance.</artwork>
         </section>
 
         <section anchor="History" title="Change Log">
+            <t>[[ NOTE TO THE RFC EDITOR: This section to be removed prior to publication ]]</t>
+
             <t>Draft 00 - AB - Based on draft-ietf-secevent-delivery-02 with the
                 following changes:<list style="symbols">
                 <t>Renamed to "Push-Based SET Token Delivery Using HTTP"</t>
@@ -802,6 +833,14 @@ need for assurance.</artwork>
                     <t>Removed "SET Recipient" definition and added explicit list of terms used from RFC8417.</t>
                 </list>
             </t>
+	    <t>
+	      Draft 08 - mbj
+	      <list style="symbols">
+		<t>
+		  Addressed area director review comments by Benjamin Kaduk.
+		</t>
+	      </list>
+	    </t>
         </section>
     </back>
 </rfc>
