@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-poll-06"
+<rfc category="std" docName="draft-ietf-secevent-http-poll-07"
 	ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-http-poll">
@@ -56,7 +56,10 @@
       </address>
     </author>
 
-    <date year="2019" month="November" day="19" />
+    <date year="2020" month="February" day="5" />
+
+    <area>Security</area>
+    <workgroup>Security Events Working Group</workgroup>
 
     <keyword>Internet-Draft</keyword>
 
@@ -86,7 +89,7 @@
       </t>
       <t>
 	A mechanism for exchanging configuration metadata such as endpoint URLs
-	and cryptographic key parameters between the transmitter and recipient is
+	and cryptographic keys between the transmitter and recipient is
         out of scope for this specification.  How SETs are defined and the process
         by which security events are identified for SET Recipients are specified in
 	<xref target="RFC8417"/>.
@@ -100,9 +103,9 @@
 	when, and only when, they appear in all capitals, as shown here.
 	</t>
 
-	<t>Throughout this document, all figures MAY contain spaces and
-	extra
-	line wrapping for readability and due to space limitations.
+	<t>
+	  Throughout this document, all figures may contain spaces and extra
+	  line wrapping for readability and due to space limitations.
 	</t>
       </section>
 
@@ -117,8 +120,7 @@
     <section title="SET Delivery">
       <t>
 	When a SET is available for a SET Recipient, the SET Transmitter
-	attempts to deliver the SET 
-	by queueing the SET in a buffer so that
+	queues the SET in a buffer so that
 	a SET Recipient can poll for SETs using HTTP/1.1 POST.
       </t>
 
@@ -141,7 +143,8 @@
       <t>
 	Upon receiving a SET, the SET Recipient reads the SET and validates
 	it in the manner described in Section 2 of <xref target="I-D.ietf-secevent-http-push"/>.
-	The SET Recipient MUST acknowledge receipt to the SET Transmitter.
+	The SET Recipient MUST acknowledge receipt to the SET Transmitter,
+	and SHOULD do in a timely fashion, as described in <xref target="pollRequest"/>.
 	The SET Recipient SHALL NOT use the event acknowledgement mechanism
         to report event errors other than those relating to the parsing and
         validation of the SET.
@@ -154,7 +157,11 @@
 	SETs and to check for and receive zero or more SETs. Requests
 	MAY be made at a periodic interval (short polling) or requests
 	MAY wait, pending availability of new SETs using long polling,
-	per Section 2 of <xref target="RFC6202"/>.</t>
+	per Section 2 of <xref target="RFC6202"/>.
+	Note that short polling will result in retrieving zero or more SETs
+	whereas long polling will typically result in retrieving one or more SETs
+	unless a timeout occurs.
+	</t>
 	
 	<t>The delivery of SETs in this method is facilitated by HTTP
 	POST requests initiated by the SET Recipient in which:<list style="symbols">
@@ -163,7 +170,7 @@
         Transmitter or,</t>
         <t>after validating previously received SETs, the SET Recipient
         initiates another poll request using HTTP POST that includes
-        acknowledgement of previous SETs and waits for the next batch
+        acknowledgement of previous SETs and requests the next batch
         of SETs.</t>
 	</list></t>
 	
@@ -181,8 +188,6 @@
 	<t>When initiating a poll request, the SET Recipient constructs
 	a JSON document that consists of polling request parameters
 	and SET acknowledgement parameters in the form of JSON objects.
-	The request payloads are delivered in a JSON document, as described
-	in <xref target="pollRequest"/> and <xref target="pollGetAck"/>.
 	</t>
 	
 	<t>When making a request, the HTTP header <spanx style="verb">Content-Type</spanx>
@@ -224,7 +229,7 @@
 	     are the <spanx style="verb">jti</spanx> values of
 	     successfully received SETs that are being acknowledged.
 	     If there are no outstanding SETs to acknowledge, this member is omitted.
-	     When acknowledging a SET, the SET Transmitter is released from
+	     Once a SET has been acknowledged, the SET Transmitter is released from
 	     any obligation to retain the SET.
 	   </t>
 	
@@ -238,7 +243,7 @@
 	     <spanx style="verb">err</spanx> and
 	     <spanx style="verb">description</spanx> values
 	     specified in <xref target="errorResponse"/>.
-	     If there are no outstanding SETs with errors to return, this member is omitted.
+	     If there are no outstanding SETs with errors to report, this member is omitted.
 	   </t>
 
          </list></t>
@@ -254,16 +259,18 @@
 	the following JSON object members:
 	<list style="hanging">
 	
-	  <t hangText="sets"><vspace/>A JSON object that contains zero
-	  or more nested JSON objects. Each nested JSON object's key
-	  corresponds to the <spanx style="verb">jti</spanx> of a SET to
-	  be delivered, and its value is a JSON string containing the
-	  value of the encoded corresponding SET. If there are no
+	  <t hangText="sets"><vspace/>A JSON object containing zero or more SETs being returned.
+	  Each member name
+	  is the <spanx style="verb">jti</spanx> of a SET to
+	  be delivered and its value is a JSON string representing the
+	  corresponding SET. If there are no
 	  outstanding SETs to be transmitted, the JSON object SHALL be
 	  empty.</t>
 	
 	  <t hangText="moreAvailable"><vspace/>A JSON boolean value that
 	  indicates if more unacknowledged SETs are available to be returned.
+	  This member MAY be omitted, with the meaning being the same as
+	  including it with the boolean value <spanx style="verb">false</spanx>.
 	  </t>
 	</list>
 	</t>
@@ -321,14 +328,12 @@
           response.</t>
         </list></t>
 
-	<section title="Poll Only Request">
+	<section anchor="PollOnlyRequest" title="Poll Only Request">
 	  <t>In the case where no SETs were received in a previous poll (see
 	  <xref target="emptyPollResponse"/>), the SET Recipient simply
 	  polls without acknowledgement parameters (<spanx style="verb">ack</spanx>
 	  and <spanx style="verb">setErrs</spanx>).</t>
 
-	  <t></t>
-	
 	  <figure anchor="pollInitRequest" title="Example Initial Poll Request">
 	    <preamble>
 	      The following is an example request made by a SET Recipient
@@ -436,8 +441,8 @@ Content-Type: application/json
   "ack": ["3d0c3cf797584bd193bd0fb1bd4e7d30"],
   "setErrs": {
     "4d3559ec67504aaba65d40b0363faad8": {
-      "err": "jwtAud",
-      "description": "The audience value was invalid."
+      "err": "authentication_failed",
+      "description": "The SET could not be authenticated"
     }
   },
   "returnImmediately": true
@@ -455,10 +460,11 @@ Content-Type: application/json
 	If no SETs are available at the time of the request, the
 	SET Transmitter SHALL delay responding until a SET is
 	available or the timeout interval has elapsed unless the poll request parameter
-	<spanx style="verb">returnImmediately</spanx> is <spanx style="verb">true</spanx>.</t>
+	<spanx style="verb">returnImmediately</spanx> is present with the value <spanx style="verb">true</spanx>.
+	</t>
 	
 	<t>As described in <xref target="pollResp"/>, a JSON document
-	is returned containing a number of members including
+	is returned containing members including
 	<spanx style="verb">sets</spanx>, which SHALL contain zero or more
 	SETs.</t>
 	<figure anchor="pollResponse" title="Example Poll Response">
@@ -501,7 +507,7 @@ Content-Type: application/json
 	
 	<figure anchor="emptyPollResponse" title="Example No SETs Poll Response">
 	  <preamble>The following is a non-normative example response to
-	  the request shown in <xref target="pollRequest"/>, which indicates that no new
+	  the request shown in <xref target="PollOnlyRequest"/>, which indicates that no new
 	  SETs or unacknowledged SETs are available:</preamble>
 	  <artwork align="left">HTTP/1.1 200 OK
 Content-Type: application/json
@@ -530,7 +536,10 @@ Content-Type: application/json
                 information disclosure risk. When no more specific code might apply, the service
                 provider SHALL respond to an invalid poll request with an HTTP Status Code of 400.</t>
 
-            <t>The response body for responses to invalid poll requests is left undefined.</t>
+            <t>
+	      The response body for responses to invalid poll requests is left undefined,
+	      and its contents SHOULD be ignored.
+	    </t>
 
             <figure title="Example Poll Error Response">
                 <preamble>
@@ -567,7 +576,7 @@ Content-Type: application/json
 	<t>
 	  When included as part of a batch of SETs, the above JSON is included
 	  as part of the <spanx style="verb">setErrs</spanx> member, as
-          defined in <xref target="pollResp"/> and <xref target="pollAckErr"/>.
+          defined in <xref target="pollReq"/> and <xref target="pollAckErr"/>.
 	</t>
         <t>
             When the SET Recipient includes one or more error responses in a request to
@@ -583,18 +592,20 @@ Content-Type: application/json
 
     <section anchor="aa" title="Authentication and Authorization" toc="default">
       <t>The SET delivery method described in this specification is
-      based upon HTTP and depends on the use of TLS and/or standard
+      based upon HTTP and and HTTP over TLS <xref target="RFC2818"/> and/or standard
       HTTP authentication and authorization schemes, as per
       <xref target="RFC7235" />.
+      The TLS server certificate MUST be validated, per <xref target="RFC6125"/>.
+      As per Section 4.1 of <xref target="RFC7235"/>, a SET
+      delivery endpoint SHALL indicate supported HTTP authentication
+      schemes via the <spanx style="verb">WWW-Authenticate</spanx> header
+      when using HTTP authentication.
       </t>
 
-      <t>As per Section 4.1 of <xref target="RFC7235"/>, a SET
-      delivery endpoint SHALL indicate supported HTTP authentication
-      schemes via the <spanx style="verb">WWW-Authenticate</spanx> header.</t>
-
       <t>
-	Authorization for the ability to pick-up or deliver SETs can be determined by
-	using the identity of the SET issuer,
+	Authorization for the eligibility to provide actionable SETs can be determined by
+	using the identity of the SET Issuer,
+	validating the polling endpoint URL, perhaps using TLS,
 	or via other employed authentication methods.
 	Among other benefits, authentication can help prevent denial-of-service attacks.
 	Because SETs are
@@ -610,9 +621,10 @@ Content-Type: application/json
 	are not used or are considered weak, JWS signed SETs SHOULD be
 	used (see <xref target="RFC7515"/> and Section 5 of <xref target="RFC8417"/>).
 	This enables the SET Recipient
-	to validate that the SET issuer is authorized to deliver the SET.
+	to validate that the SET Issuer is authorized to provide actionable SETs.
 	</t>
       </section>
+
       <section title="HTTP Considerations">
         <t>SET delivery depends on the use of Hypertext Transfer Protocol and is thus
         subject to the security considerations of HTTP Section 9 of <xref
@@ -635,22 +647,25 @@ Content-Type: application/json
 	  using a transport-layer security mechanism such as TLS, or both. If
 	  an Event delivery endpoint supports TLS, it MUST support at least TLS
 	  version 1.2 <xref target="RFC5246"/> and SHOULD support the newest version
-	  of TLS that meets its security requirements. When using TLS, the client MUST
-	  perform a TLS/SSL server certificate check, per <xref target="RFC6125"/>.
+	  of TLS that meets its security requirements,
+	  which as of the time of this publication is TLS 1.3 <xref target="RFC8446"/>.
+	  When using TLS, the client MUST
+	  perform a TLS/SSL server certificate check using DNS-ID <xref target="RFC6125"/>.
 	  Implementation security considerations for TLS can be found in
 	  "Recommendations for Secure Use of TLS and DTLS" <xref target="RFC7525"/>.
 	</t>
       </section>
 
       <section title="Access Token Considerations">
-        <t>When using access tokens, such as those issued by OAuth 2.0
-        <xref target="RFC6749"/>, implementers MUST take into account threats
+        <t>
+	  If HTTP Authentication is performed using OAuth access tokens <xref target="RFC6749"/>,
+	  implementers MUST take into account the threats
         and countermeasures documented in Section 8 of <xref
         target="RFC7521"/>.</t>
 
         <section anchor="bearerConsiderations"
 		 title="Bearer Token Considerations">
-	  <t>Due to the possibility of interception, Bearer tokens MUST be
+	  <t>Due to the possibility of interception, Bearer tokens <xref target="RFC6750"/> MUST be
 	  exchanged using TLS.</t>
 
 	  <t>Bearer tokens SHOULD have a limited lifetime that can be determined
@@ -670,10 +685,8 @@ Content-Type: application/json
 	  of the default authentication method for OAuth bearer tokens, HTTP
 	  Basic, are well documented in <xref
 	  target="RFC7617"/>, therefore implementers
-	  are encouraged to prefer stronger authentication methods. Designating
-	  the specific methods of authentication and authorization are
-	  out of scope for the delivery of SETs, however this
-	  information is provided as a resource to implementers.</t>
+	  are encouraged to prefer stronger authentication methods.
+	  </t>
 	</section>
       </section>
 
@@ -682,9 +695,6 @@ Content-Type: application/json
 
     <section title="Privacy Considerations">
 
-      <t>If a SET needs to be retained for audit purposes, a JWS signature MAY
-      be used to provide verification of its authenticity.</t>
-
       <t>SET Transmitters SHOULD attempt to deliver SETs that are
       targeted to the specific business and
       protocol needs of subscribers.</t>
@@ -692,13 +702,20 @@ Content-Type: application/json
       <t>When sharing personally identifiable information or information
       that is otherwise considered confidential to affected users, SET
       Transmitters and Recipients MUST have the appropriate legal agreements
-      and user consent or terms of service in place.</t>
+      and user consent or terms of service in place.
+      Furthermore, data that needs confidentiality protection MUST be encrypted,
+      either via TLS or using JSON Web Encryption (JWE) <xref target="RFC7516"/>,
+      or both.
+      </t>
 
-      <t>The propagation of subject identifiers can be perceived as personally
-      identifiable information. Where possible, SET Transmitters and Recipients
-      SHOULD devise approaches that prevent propagation, for example, the
-      passing of a hash value that requires the subscriber to already know
-      the subject.</t>
+      <t>
+	In some cases, subject identifiers themselves may be considered sensitive
+	information, such that their inclusion within a SET may be considered a violation
+	of privacy.  SET Transmitters should consider the ramifications of sharing a
+	particular subject identifier with a SET Recipient (e.g., whether doing so could
+	enable correlation and/or de-anonymization of data), and choose appropriate
+	subject identifiers for their use cases.
+      </t>
 
     </section>
 
@@ -714,17 +731,20 @@ Content-Type: application/json
   <back>
     <references title="Normative References">
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2119.xml' ?>
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2818.xml' ?><!-- HTTP over TLS -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml' ?><!-- TLS 1.2 -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6125.xml' ?><!-- TLS Certs -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
 
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7521.xml' ?><!-- Client Auth Assertions -->
 
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7525.xml' ?><!-- TLS Recos -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8174.xml' ?><!-- RFC 2119 bis -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8259.xml' ?><!-- JSON -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8417.xml' ?><!-- SET -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8446.xml' ?><!-- TLS 1.3 -->
 
       <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-http-push-07.xml" ?>
     </references>
@@ -733,8 +753,7 @@ Content-Type: application/json
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6202.xml' ?><!-- HTTP Long Polling -->
 
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6749.xml' ?><!-- OAuth -->
-
-      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7521.xml' ?><!-- Client Auth Assertions -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6750.xml' ?><!-- OAuth Bearer -->
 
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7230.xml' ?><!-- HTTP Msg -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7235.xml' ?><!-- HTTP Auth -->
@@ -870,6 +889,14 @@ Content-Type: application/json
         <list style="symbols">
           <t>
             Addressed nits identified by the idnits tool.
+          </t>
+        </list>
+      </t>
+      <t>
+        Draft 07 - mbj
+        <list style="symbols">
+          <t>
+            Addressed area director review comments by Benjamin Kaduk.
           </t>
         </list>
       </t>
