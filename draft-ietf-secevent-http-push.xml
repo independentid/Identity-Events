@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-push-08" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-http-push-09" ipr="trust200902">
     <front>
         <title abbrev="draft-ietf-secevent-http-push">Push-Based Security Event Token (SET) Delivery Using HTTP</title>
 
@@ -51,7 +51,7 @@
             </address>
         </author>
 
-	<date year="2020" month="February" day="5" />
+	<date year="2020" month="February" day="7" />
 
         <area>Security</area>
         <workgroup>Security Events Working Group</workgroup>
@@ -275,7 +275,7 @@ Y4rXxMD406P2edv00cr9Wf3_XwNtLjB9n-jTqN1_lLc
                     SHOULD respond with an appropriate HTTP Status Code as defined in
                     Section 6 of <xref target="RFC7231"/>.</t>
                 <t>
-                    When the SET Recipient detects an error parsing, validating or authenticating
+                    When the SET Recipient detects an error parsing, validating, or authenticating
                     a SET transmitted in a SET Transmission Request, the SET Recipient SHALL respond
                     with an HTTP Response Status Code of 400 (Bad Request).  The
                     <spanx style="verb">Content-Type</spanx> header of this response MUST be
@@ -288,7 +288,7 @@ Y4rXxMD406P2edv00cr9Wf3_XwNtLjB9n-jTqN1_lLc
                         <t hangText="description">
                             A UTF-8 string containing a human-readable description of the error
                             that MAY provide additional diagnostic information. The exact content
-                            of this field is implementation-specific.
+                            of this field is implementation specific.
                         </t>
                     </list>
                 </t>
@@ -378,7 +378,7 @@ Content-Type: application/json
 
         <section anchor="aa" title="Authentication and Authorization" toc="default">
             <t>The SET delivery method described in this specification is
-	        based upon HTTP and and HTTP over TLS <xref target="RFC2818"/> and/or standard
+	        based upon HTTP and HTTP over TLS <xref target="RFC2818"/> and/or standard
                 HTTP authentication and authorization schemes, as per
                 <xref target="RFC7235" />.
 		The TLS server certificate MUST be validated, per <xref target="RFC6125"/>.
@@ -497,7 +497,7 @@ Content-Type: application/json
 	      information, such that their inclusion within a SET may be considered a violation
 	      of privacy.  SET Transmitters should consider the ramifications of sharing a
 	      particular subject identifier with a SET Recipient (e.g., whether doing so could
-	      enable correlation and/or de-anonymization of data), and choose appropriate
+	      enable correlation and/or de-anonymization of data) and choose appropriate
 	      subject identifiers for their use cases.
 	    </t>
 
@@ -526,7 +526,7 @@ Content-Type: application/json
                                 <vspace/>
                                 The name of the Security Event Token Delivery Error Code, as described
                                 in <xref target="error_codes"/>. The name MUST be a case-sensitive ASCII
-                                string consisting only of letters, digits and underscore, these are the 
+                                string consisting only of letters, digits, and underscore; these are the 
                                 characters whose codes fall within the inclusive ranges 0x30-39, 0x41-5A,
                                 0x5F and 0x61-7A.
                             </t>
@@ -546,7 +546,7 @@ Content-Type: application/json
                                 <vspace/>
                                 A reference to the document or documents that define the Security Event
                                 Token Delivery Error Code. The definition MUST specify the name and
-                                description of the error code, and explain under what circumstances the
+                                description of the error code and explain under what circumstances the
                                 error code may be used. URIs that can be used to retrieve copies of each
                                 document at no cost SHOULD be included.
                             </t>
@@ -651,27 +651,27 @@ need for assurance.</artwork>
             </figure>
 
             <t>XMPP Events</t>
-            <t>The WG considered the XMPP events ands its ability to provide a single
+            <t>The WG considered XMPP Events and their ability to provide a single
                 messaging solution without the need for both polling and push modes.
-                The feeling was the size and methodology of XMPP was to far apart from
-                the current capabilities of the SECEVENTs community which focuses in
+                The feeling was the size and methodology of XMPP was too far apart from
+                the current capabilities of the SECEVENTs community, which focuses in
                 on HTTP based service delivery and authorization.</t>
 
             <t>Amazon Simple Notification Service</t>
-            <t>Simple Notification Service, is a pub/sub messaging product from
+            <t>Simple Notification Service is a pub/sub messaging product from
                 AWS. SNS supports a variety of subscriber types: HTTP/HTTPS endpoints,
                 AWS Lambda functions, email addresses (as JSON or plain text), phone
-                numbers (via SMS), and AWS SQS standard queues. It doesn’t directly
+                numbers (via SMS), and AWS SQS standard queues. It does not directly
                 support pull, but subscribers can get the pull model by creating an
                 SQS queue and subscribing it to the topic. Note that this puts the
                 cost of pull support back onto the subscriber, just as it is in the
                 push model. It is not clear that one way is strictly better than the
                 other; larger, sophisticated developers may be happy to own message
                 persistence so they can have their own internal delivery guarantees.
-                The long tail of OIDC clients may not care about that, or may fail
+                The long tail of OIDC clients may not care about that or may fail
                 to get it right. Regardless, I think we can learn something from the
                 Delivery Policies supported by SNS, as well as the delivery controls
-                that SQS offers (e.g., Visibility Timeout, Dead-Letter Queues). I’m
+                that SQS offers (e.g., Visibility Timeout, Dead-Letter Queues). I am
                 not suggesting that we need all of these things in the spec, but
                 they give an idea of what features people have found useful.</t>
             <t>Other information:<list style="symbols">
@@ -681,15 +681,15 @@ need for assurance.</artwork>
 
             <t>Apache Kafka</t>
             <t>Apache Kafka is an Apache open source project based upon TCP for
-                distributed streaming. It prescribes some interesting general
-                purpose features that seem to extend far beyond the simpler
-                streaming model SECEVENTs is after. A comment from MS has been that
+                distributed streaming. It prescribes some interesting general-purpose
+		features that seem to extend far beyond the simpler
+                streaming model that SECEVENTs is after. A comment from MS has been that
                 Kafka does an acknowledge with poll combination event which seems
                 to be a performance advantage. See: https://kafka.apache.org/intro</t>
 
             <t>Google Pub/Sub</t>
-            <t>Google Pub Sub system favours a model whereby polling and acknowledgement
-                of events is done as separate endpoints as separate functions.</t>
+            <t>The Google Pub Sub system favors a model whereby polling and acknowledgement
+                of events is done with separate endpoints and as separate functions.</t>
             <t>Information:<list style="symbols">
                 <t>Cloud Overview - https://cloud.google.com/pubsub/</t>
                 <t>Subscriber Overview - https://cloud.google.com/pubsub/docs/subscriber</t>
@@ -704,7 +704,7 @@ need for assurance.</artwork>
             <t>The editors would like to thank Phil Hunt and the other authors of draft-ietf-secevent-delivery-02,
                 on which this draft is based.</t>
 
-            <t>The editors would like to thank the participants in the the SecEvents
+            <t>The editors would like to thank the participants in the SecEvents
                 working group for their contributions to this specification.</t>
         </section>
 
@@ -732,7 +732,7 @@ need for assurance.</artwork>
                     <t>Removed bearer token from example delivery request, and text referencing it.</t>
                     <t>Broke delivery method description into separate request/response sections.</t>
                     <t>Added missing empty line between headers and body in example request.</t>
-                    <t>Removed unapplicable notes about example formatting.</t>
+                    <t>Removed inapplicable notes about example formatting.</t>
                     <t>Removed text about SET creation and handling.</t>
                     <t>Removed duplication in protocol description.</t>
                     <t>Added "non-normative example" text to example transmission request.</t>
@@ -791,7 +791,7 @@ need for assurance.</artwork>
                         and <spanx style="verb">Content-Language</spanx> headers.
                     </t>
                     <t>Added "recognized issuer" validation requirement in section 2.</t>
-                    <t>Added time outs as an acceptable reason to resend a SET in section 2.</t>
+                    <t>Added timeouts as an acceptable reason to resend a SET in section 2.</t>
                     <t>Edited text in section 1 to clarify that configuration is out of scope.</t>
                     <t>Made minor editorial corrections.</t>
                 </list>
@@ -838,6 +838,14 @@ need for assurance.</artwork>
 	      <list style="symbols">
 		<t>
 		  Addressed area director review comments by Benjamin Kaduk.
+		</t>
+	      </list>
+	    </t>
+	    <t>
+	      Draft 09 - mbj + AB
+	      <list style="symbols">
+		<t>
+		  Corrected editorial nits.
 		</t>
 	      </list>
 	    </t>

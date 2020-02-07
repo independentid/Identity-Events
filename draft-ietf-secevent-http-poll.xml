@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-poll-07"
+<rfc category="std" docName="draft-ietf-secevent-http-poll-08"
 	ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-http-poll">
@@ -56,7 +56,7 @@
       </address>
     </author>
 
-    <date year="2020" month="February" day="5" />
+    <date year="2020" month="February" day="7" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
@@ -592,7 +592,7 @@ Content-Type: application/json
 
     <section anchor="aa" title="Authentication and Authorization" toc="default">
       <t>The SET delivery method described in this specification is
-      based upon HTTP and and HTTP over TLS <xref target="RFC2818"/> and/or standard
+      based upon HTTP and HTTP over TLS <xref target="RFC2818"/> and/or standard
       HTTP authentication and authorization schemes, as per
       <xref target="RFC7235" />.
       The TLS server certificate MUST be validated, per <xref target="RFC6125"/>.
@@ -713,7 +713,7 @@ Content-Type: application/json
 	information, such that their inclusion within a SET may be considered a violation
 	of privacy.  SET Transmitters should consider the ramifications of sharing a
 	particular subject identifier with a SET Recipient (e.g., whether doing so could
-	enable correlation and/or de-anonymization of data), and choose appropriate
+	enable correlation and/or de-anonymization of data) and choose appropriate
 	subject identifiers for their use cases.
       </t>
 
@@ -746,7 +746,7 @@ Content-Type: application/json
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8417.xml' ?><!-- SET -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8446.xml' ?><!-- TLS 1.3 -->
 
-      <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-http-push-07.xml" ?>
+      <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-http-push-08.xml" ?>
     </references>
 
     <references title="Informative References">
@@ -897,6 +897,14 @@ Content-Type: application/json
         <list style="symbols">
           <t>
             Addressed area director review comments by Benjamin Kaduk.
+          </t>
+        </list>
+      </t>
+      <t>
+        Draft 08 - mbj + AB
+        <list style="symbols">
+          <t>
+            Corrected editorial nits.
           </t>
         </list>
       </t>
