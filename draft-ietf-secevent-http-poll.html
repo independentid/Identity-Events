@@ -406,14 +406,14 @@
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.39.0 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.35.0 - https://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Backman, A., Ed., Jones, M., Ed., Scurtescu, M., Ansari, M., and A. Nadalin" />
-  <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-secevent-http-poll-08" />
-  <meta name="dct.issued" scheme="ISO8601" content="2020-02-07" />
-  <meta name="dct.abstract" content="This specification defines how a series of Security Event Tokens (SETs) may be delivered to an intended recipient using HTTP POST over TLS initiated as a poll by the recipient. The specification also defines how delivery can be assured, subject to the SET Recipient's need for assurance.   " />
-  <meta name="description" content="This specification defines how a series of Security Event Tokens (SETs) may be delivered to an intended recipient using HTTP POST over TLS initiated as a poll by the recipient. The specification also defines how delivery can be assured, subject to the SET Recipient's need for assurance.   " />
+  <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-secevent-http-poll-09" />
+  <meta name="dct.issued" scheme="ISO8601" content="2020-04-27" />
+  <meta name="dct.abstract" content="This specification defines how a series of Security Event Tokens (SETs) may be delivered to an intended recipient using HTTP POST over TLS initiated as a poll by the recipient. The specification also defines how delivery can be assured, subject to the SET Recipient's need for assurance.  " />
+  <meta name="description" content="This specification defines how a series of Security Event Tokens (SETs) may be delivered to an intended recipient using HTTP POST over TLS initiated as a poll by the recipient. The specification also defines how delivery can be assured, subject to the SET Recipient's need for assurance.  " />
 
 </head>
 
@@ -435,7 +435,7 @@
 <td class="right">M. Jones, Ed.</td>
 </tr>
 <tr>
-<td class="left">Expires: August 10, 2020</td>
+<td class="left">Expires: October 29, 2020</td>
 <td class="right">Microsoft</td>
 </tr>
 <tr>
@@ -464,7 +464,7 @@
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">February 7, 2020</td>
+<td class="right">April 27, 2020</td>
 </tr>
 
     	
@@ -472,7 +472,7 @@
   </table>
 
   <p class="title">Poll-Based Security Event Token (SET) Delivery Using HTTP<br />
-  <span class="filename">draft-ietf-secevent-http-poll-08</span></p>
+  <span class="filename">draft-ietf-secevent-http-poll-09</span></p>
   
   <h1 id="rfc.abstract"><a href="#rfc.abstract">Abstract</a></h1>
 <p>This specification defines how a series of Security Event Tokens (SETs) may be delivered to an intended recipient using HTTP POST over TLS initiated as a poll by the recipient. The specification also defines how delivery can be assured, subject to the SET Recipient's need for assurance.  </p>
@@ -480,7 +480,7 @@
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on August 10, 2020.</p>
+<p>This Internet-Draft will expire on October 29, 2020.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2020 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -830,7 +830,7 @@ Content-Type: application/json
 <p id="rfc.section.4.2.p.2">As stated in Section 2.7.1 of <a href="#RFC7230" class="xref">[RFC7230]</a>, an HTTP requestor MUST NOT generate the <samp>userinfo</samp> (i.e., username and password) component (and its "@" delimiter) when an "http" URI reference is generated with a message, as they are now disallowed in HTTP.</p>
 <h1 id="rfc.section.4.3">
 <a href="#rfc.section.4.3">4.3.</a> Confidentiality of SETs</h1>
-<p id="rfc.section.4.3.p.1">SETs may contain sensitive information that is considered Personally Identifiable Information (PII).  In such cases, SET Transmitters and SET Recipients MUST protect the confidentiality of the SET contents by encrypting the SET as described in JWE <a href="#RFC7516" class="xref">[RFC7516]</a>, using a transport-layer security mechanism such as TLS, or both. If an Event delivery endpoint supports TLS, it MUST support at least TLS version 1.2 <a href="#RFC5246" class="xref">[RFC5246]</a> and SHOULD support the newest version of TLS that meets its security requirements, which as of the time of this publication is TLS 1.3 <a href="#RFC8446" class="xref">[RFC8446]</a>.  When using TLS, the client MUST perform a TLS/SSL server certificate check using DNS-ID <a href="#RFC6125" class="xref">[RFC6125]</a>.  Implementation security considerations for TLS can be found in "Recommendations for Secure Use of TLS and DTLS" <a href="#RFC7525" class="xref">[RFC7525]</a>.  </p>
+<p id="rfc.section.4.3.p.1">SETs may contain sensitive information that is considered Personally Identifiable Information (PII).  In such cases, SET Transmitters and SET Recipients MUST protect the confidentiality of the SET contents by encrypting the SET as described in JWE <a href="#RFC7516" class="xref">[RFC7516]</a>, using a transport-layer security mechanism such as TLS, or both. If an Event delivery endpoint supports TLS, it MUST support at least TLS version 1.2 <a href="#RFC5246" class="xref">[RFC5246]</a> and SHOULD support the newest version of TLS that meets its security requirements, which as of the time of this publication is TLS 1.3 <a href="#RFC8446" class="xref">[RFC8446]</a>.  When using TLS, the client MUST perform a TLS/SSL server certificate check using DNS-ID <a href="#RFC6125" class="xref">[RFC6125]</a>.  How a SET Recipient determines the expected service identity to match the SET Transmitter's server certificate against is out of scope for this document.  Implementation security considerations for TLS can be found in "Recommendations for Secure Use of TLS and DTLS" <a href="#RFC7525" class="xref">[RFC7525]</a>.  </p>
 <h1 id="rfc.section.4.4">
 <a href="#rfc.section.4.4">4.4.</a> Access Token Considerations</h1>
 <p id="rfc.section.4.4.p.1">If HTTP Authentication is performed using OAuth access tokens <a href="#RFC6749" class="xref">[RFC6749]</a>, implementers MUST take into account the threats and countermeasures documented in Section 8 of <a href="#RFC7521" class="xref">[RFC7521]</a>.</p>
@@ -1041,6 +1041,13 @@ Content-Type: application/json
 <p id="rfc.section.B.p.10">Draft 08 - mbj + AB </p>
 
 <ul><li>Corrected editorial nits.  </li></ul>
+
+<p> </p>
+<p id="rfc.section.B.p.11">Draft 09 - AB </p>
+
+<ul><li>Addressed area director review comments by Benamin Kaduk: <ul><li>Added text clarifying that determining the SET Recipient's service identity is out of scope.</li></ul>
+<p> </p>
+</li></ul>
 
 <p> </p>
 <h1 id="rfc.authors"><a href="#rfc.authors">Authors' Addresses</a></h1>

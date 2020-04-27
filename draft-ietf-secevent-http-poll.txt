@@ -5,18 +5,18 @@
 Security Events Working Group                            A. Backman, Ed.
 Internet-Draft                                                    Amazon
 Intended status: Standards Track                           M. Jones, Ed.
-Expires: August 10, 2020                                       Microsoft
+Expires: October 29, 2020                                      Microsoft
                                                             M. Scurtescu
                                                                 Coinbase
                                                                M. Ansari
                                                                    Cisco
                                                               A. Nadalin
                                                                Microsoft
-                                                        February 7, 2020
+                                                          April 27, 2020
 
 
        Poll-Based Security Event Token (SET) Delivery Using HTTP
-                    draft-ietf-secevent-http-poll-08
+                    draft-ietf-secevent-http-poll-09
 
 Abstract
 
@@ -41,7 +41,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on August 10, 2020.
+   This Internet-Draft will expire on October 29, 2020.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Backman, et al.          Expires August 10, 2020                [Page 1]
+Backman, et al.         Expires October 29, 2020                [Page 1]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
    (https://trustee.ietf.org/license-info) in effect on the date of
@@ -93,7 +93,7 @@ Table of Contents
    5.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .  14
    6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .  14
    7.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  14
-     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  14
+     7.1.  Normative References  . . . . . . . . . . . . . . . . . .  15
      7.2.  Informative References  . . . . . . . . . . . . . . . . .  16
    Appendix A.  Acknowledgments  . . . . . . . . . . . . . . . . . .  17
    Appendix B.  Change Log . . . . . . . . . . . . . . . . . . . . .  17
@@ -109,9 +109,9 @@ Table of Contents
 
 
 
-Backman, et al.          Expires August 10, 2020                [Page 2]
+Backman, et al.         Expires October 29, 2020                [Page 2]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
    A mechanism for exchanging configuration metadata such as endpoint
@@ -165,9 +165,9 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
 
 
 
-Backman, et al.          Expires August 10, 2020                [Page 3]
+Backman, et al.         Expires October 29, 2020                [Page 3]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
 2.1.  Polling Delivery using HTTP
@@ -221,9 +221,9 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
 
 
 
-Backman, et al.          Expires August 10, 2020                [Page 4]
+Backman, et al.         Expires October 29, 2020                [Page 4]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
          Recipients that would like to perform an acknowledge only
@@ -277,9 +277,9 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
 
 
 
-Backman, et al.          Expires August 10, 2020                [Page 5]
+Backman, et al.         Expires October 29, 2020                [Page 5]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
       the meaning being the same as including it with the boolean value
@@ -333,9 +333,9 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
 
 
 
-Backman, et al.          Expires August 10, 2020                [Page 6]
+Backman, et al.         Expires October 29, 2020                [Page 6]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
 2.4.1.  Poll Only Request
@@ -389,9 +389,9 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
 
 
 
-Backman, et al.          Expires August 10, 2020                [Page 7]
+Backman, et al.         Expires October 29, 2020                [Page 7]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
    The following is a non-normative example poll request with
@@ -445,9 +445,9 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
 
 
 
-Backman, et al.          Expires August 10, 2020                [Page 8]
+Backman, et al.         Expires October 29, 2020                [Page 8]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
 2.4.4.  Poll with Acknowledgement and Errors
@@ -501,9 +501,9 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
 
 
 
-Backman, et al.          Expires August 10, 2020                [Page 9]
+Backman, et al.         Expires October 29, 2020                [Page 9]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
    The following is a non-normative example response to the request
@@ -557,9 +557,9 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
 
 
 
-Backman, et al.          Expires August 10, 2020               [Page 10]
+Backman, et al.         Expires October 29, 2020               [Page 10]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
    The following is a non-normative example response to the request
@@ -613,9 +613,9 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
 
 
 
-Backman, et al.          Expires August 10, 2020               [Page 11]
+Backman, et al.         Expires October 29, 2020               [Page 11]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
    described in Section 2.3 of [I-D.ietf-secevent-http-push], an error
@@ -669,9 +669,9 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
 
 
 
-Backman, et al.          Expires August 10, 2020               [Page 12]
+Backman, et al.         Expires October 29, 2020               [Page 12]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
 4.1.  Authentication Using Signed SETs
@@ -704,9 +704,11 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
    1.2 [RFC5246] and SHOULD support the newest version of TLS that meets
    its security requirements, which as of the time of this publication
    is TLS 1.3 [RFC8446].  When using TLS, the client MUST perform a TLS/
-   SSL server certificate check using DNS-ID [RFC6125].  Implementation
-   security considerations for TLS can be found in "Recommendations for
-   Secure Use of TLS and DTLS" [RFC7525].
+   SSL server certificate check using DNS-ID [RFC6125].  How a SET
+   Recipient determines the expected service identity to match the SET
+   Transmitter's server certificate against is out of scope for this
+   document.  Implementation security considerations for TLS can be
+   found in "Recommendations for Secure Use of TLS and DTLS" [RFC7525].
 
 4.4.  Access Token Considerations
 
@@ -719,17 +721,18 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
    Due to the possibility of interception, Bearer tokens [RFC6750] MUST
    be exchanged using TLS.
 
+
+
+
+
+Backman, et al.         Expires October 29, 2020               [Page 13]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
+
+
    Bearer tokens SHOULD have a limited lifetime that can be determined
    directly or indirectly (e.g., by checking with a validation service)
    by the service provider.  By expiring tokens, clients are forced to
-
-
-
-Backman, et al.          Expires August 10, 2020               [Page 13]
-
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
-
-
    obtain a new token (which usually involves re-authentication) for
    continued authorized access.  For example, in OAuth 2.0, a client MAY
    use an OAuth refresh token to obtain a new bearer token after
@@ -772,19 +775,18 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
 
 7.  References
 
-7.1.  Normative References
 
 
 
 
 
 
-
-
-Backman, et al.          Expires August 10, 2020               [Page 14]
+Backman, et al.         Expires October 29, 2020               [Page 14]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
+
+7.1.  Normative References
 
    [I-D.ietf-secevent-http-push]
               Backman, A., Jones, M., Scurtescu, M., Ansari, M., and A.
@@ -835,11 +837,9 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
 
 
 
-
-
-Backman, et al.          Expires August 10, 2020               [Page 15]
+Backman, et al.         Expires October 29, 2020               [Page 15]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
    [RFC7525]  Sheffer, Y., Holz, R., and P. Saint-Andre,
@@ -893,9 +893,9 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
 
 
 
-Backman, et al.          Expires August 10, 2020               [Page 16]
+Backman, et al.         Expires October 29, 2020               [Page 16]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
    [RFC7235]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer
@@ -949,9 +949,9 @@ Appendix B.  Change Log
 
 
 
-Backman, et al.          Expires August 10, 2020               [Page 17]
+Backman, et al.         Expires October 29, 2020               [Page 17]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
       [I-D.ietf-secevent-http-push], referencing, rather that
@@ -1005,9 +1005,9 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
 
 
 
-Backman, et al.          Expires August 10, 2020               [Page 18]
+Backman, et al.         Expires October 29, 2020               [Page 18]
 
-Internet-Draft        draft-ietf-secevent-http-poll        February 2020
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
 
 
    o  Added normative text defining how to respond to invalid poll
@@ -1026,6 +1026,13 @@ Internet-Draft        draft-ietf-secevent-http-poll        February 2020
    Draft 08 - mbj + AB
 
    o  Corrected editorial nits.
+
+   Draft 09 - AB
+
+   o  Addressed area director review comments by Benamin Kaduk:
+
+      *  Added text clarifying that determining the SET Recipient's
+         service identity is out of scope.
 
 Authors' Addresses
 
@@ -1048,6 +1055,17 @@ Authors' Addresses
    Email: marius.scurtescu@coinbase.com
 
 
+
+
+
+
+
+
+Backman, et al.         Expires October 29, 2020               [Page 19]
+
+Internet-Draft        draft-ietf-secevent-http-poll           April 2020
+
+
    Morteza Ansari
    Cisco
 
@@ -1061,4 +1079,42 @@ Authors' Addresses
 
 
 
-Backman, et al.          Expires August 10, 2020               [Page 19]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Backman, et al.         Expires October 29, 2020               [Page 20]
