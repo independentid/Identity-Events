@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-poll-08"
+<rfc category="std" docName="draft-ietf-secevent-http-poll-09"
 	ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-http-poll">
@@ -56,7 +56,7 @@
       </address>
     </author>
 
-    <date year="2020" month="February" day="7" />
+    <date year="2020" month="April" day="27" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
@@ -651,6 +651,8 @@ Content-Type: application/json
 	  which as of the time of this publication is TLS 1.3 <xref target="RFC8446"/>.
 	  When using TLS, the client MUST
 	  perform a TLS/SSL server certificate check using DNS-ID <xref target="RFC6125"/>.
+          How a SET Recipient determines the expected service identity to match the SET
+          Transmitter's server certificate against is out of scope for this document.
 	  Implementation security considerations for TLS can be found in
 	  "Recommendations for Secure Use of TLS and DTLS" <xref target="RFC7525"/>.
 	</t>
@@ -905,6 +907,17 @@ Content-Type: application/json
         <list style="symbols">
           <t>
             Corrected editorial nits.
+          </t>
+        </list>
+      </t>
+      <t>
+        Draft 09 - AB
+        <list style="symbols">
+          <t>
+            Addressed area director review comments by Benamin Kaduk:
+            <list style="symbols">
+              <t>Added text clarifying that determining the SET Recipient's service identity is out of scope.</t>
+            </list>
           </t>
         </list>
       </t>

@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-push-09" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-http-push-10" ipr="trust200902">
     <front>
         <title abbrev="draft-ietf-secevent-http-push">Push-Based Security Event Token (SET) Delivery Using HTTP</title>
 
@@ -51,7 +51,7 @@
             </address>
         </author>
 
-	<date year="2020" month="February" day="7" />
+	<date year="2020" month="April" day="27" />
 
         <area>Security</area>
         <workgroup>Security Events Working Group</workgroup>
@@ -91,7 +91,9 @@
             <t>
                 A mechanism for exchanging configuration metadata such as endpoint URLs
                 and cryptographic keys between the transmitter and recipient is
-                out of scope for this specification.
+                out of scope for this specification. How SETs are defined and the process
+                by which security events are identified for SET Recipients are specified
+                in <xref target="RFC8417"/>.
             </t>
             
             <section anchor="notat" title="Notational Conventions" toc="default">
@@ -441,7 +443,7 @@ Content-Type: application/json
 
             <section title="Confidentiality of SETs">
                 <t>SETs may contain sensitive information that is considered Personally Identifiable
-                    Information (e.g., subject claims). In such cases, SET Transmitters and
+                    Information (PII). In such cases, SET Transmitters and
                     SET Recipients MUST protect the confidentiality of the SET contents by
                     encrypting the SET as described in <xref target="RFC7516">JWE</xref>,
                     using a transport-layer security mechanism such as TLS, or both. If
@@ -451,6 +453,8 @@ Content-Type: application/json
 		    which as of the time of this publication is TLS 1.3 <xref target="RFC8446"/>.
 		    When using TLS, the client MUST
                     perform a TLS/SSL server certificate check using DNS-ID <xref target="RFC6125"/>.
+                    How a SET Transmitter determines the expected service identity to match the SET
+                    Recipient's server certificate against is out of scope for this document.
                     Implementation security considerations for TLS can be found in
                     "Recommendations for Secure Use of TLS and DTLS" <xref target="RFC7525"/>.</t>
             </section>
@@ -482,6 +486,10 @@ Content-Type: application/json
         </section>
 
         <section title="Privacy Considerations">
+            <t>
+                SET Transmistters SHOULD attempt to deliver SETs that are targeted to the specific
+                business and protocol needs of subscribers.
+            </t>
 
             <t>When sharing personally identifiable information or information
                 that is otherwise considered confidential to affected users, SET
@@ -849,6 +857,26 @@ need for assurance.</artwork>
 		</t>
 	      </list>
 	    </t>
+            <t>
+                Draft 10 - AB
+                <list style="symbols">
+                    <t>
+                        Addressed area director review comments by Benamin Kaduk:
+                        <list style="symbols">
+                            <t>Added reference to 8417 as definition document for SETs.</t>
+                            <t>
+                                Added text clarifying that determining the SET Recipient's service identity
+                                is out of scope.
+                            </t>
+                            <t>
+                                Added normative recommendation for transmitters to target SETs to specific
+                                business needs of subscribers.
+                            </t>
+                            <t>Minor editorial corrections.</t>
+                        </list>
+                    </t>
+                </list>
+            </t>
         </section>
     </back>
 </rfc>
