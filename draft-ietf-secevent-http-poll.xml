@@ -56,7 +56,7 @@
       </address>
     </author>
 
-    <date year="2020" month="April" day="27" />
+    <date year="2020" month="April" day="29" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
@@ -607,7 +607,6 @@ Content-Type: application/json
 	using the identity of the SET Issuer,
 	validating the polling endpoint URL, perhaps using TLS,
 	or via other employed authentication methods.
-	Among other benefits, authentication can help prevent denial-of-service attacks.
 	Because SETs are
       not commands, SET Recipients are free to ignore SETs that
       are not of interest after acknowledging their receipt.</t>
@@ -917,6 +916,7 @@ Content-Type: application/json
             Addressed area director review comments by Benamin Kaduk:
             <list style="symbols">
               <t>Added text clarifying that determining the SET Recipient's service identity is out of scope.</t>
+              <t>Removed unelaborated reference to use of authentication to prevent DoS attacks.</t>
             </list>
           </t>
         </list>

@@ -411,7 +411,7 @@
 
   <meta name="dct.creator" content="Backman, A., Ed., Jones, M., Ed., Scurtescu, M., Ansari, M., and A. Nadalin" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-secevent-http-poll-09" />
-  <meta name="dct.issued" scheme="ISO8601" content="2020-04-27" />
+  <meta name="dct.issued" scheme="ISO8601" content="2020-04-29" />
   <meta name="dct.abstract" content="This specification defines how a series of Security Event Tokens (SETs) may be delivered to an intended recipient using HTTP POST over TLS initiated as a poll by the recipient. The specification also defines how delivery can be assured, subject to the SET Recipient's need for assurance.  " />
   <meta name="description" content="This specification defines how a series of Security Event Tokens (SETs) may be delivered to an intended recipient using HTTP POST over TLS initiated as a poll by the recipient. The specification also defines how delivery can be assured, subject to the SET Recipient's need for assurance.  " />
 
@@ -435,7 +435,7 @@
 <td class="right">M. Jones, Ed.</td>
 </tr>
 <tr>
-<td class="left">Expires: October 29, 2020</td>
+<td class="left">Expires: October 31, 2020</td>
 <td class="right">Microsoft</td>
 </tr>
 <tr>
@@ -464,7 +464,7 @@
 </tr>
 <tr>
 <td class="left"></td>
-<td class="right">April 27, 2020</td>
+<td class="right">April 29, 2020</td>
 </tr>
 
     	
@@ -480,7 +480,7 @@
 <p>This Internet-Draft is submitted in full conformance with the provisions of BCP 78 and BCP 79.</p>
 <p>Internet-Drafts are working documents of the Internet Engineering Task Force (IETF).  Note that other groups may also distribute working documents as Internet-Drafts.  The list of current Internet-Drafts is at https://datatracker.ietf.org/drafts/current/.</p>
 <p>Internet-Drafts are draft documents valid for a maximum of six months and may be updated, replaced, or obsoleted by other documents at any time.  It is inappropriate to use Internet-Drafts as reference material or to cite them other than as "work in progress."</p>
-<p>This Internet-Draft will expire on October 29, 2020.</p>
+<p>This Internet-Draft will expire on October 31, 2020.</p>
 <h1 id="rfc.copyrightnotice"><a href="#rfc.copyrightnotice">Copyright Notice</a></h1>
 <p>Copyright (c) 2020 IETF Trust and the persons identified as the document authors.  All rights reserved.</p>
 <p>This document is subject to BCP 78 and the IETF Trust's Legal Provisions Relating to IETF Documents (https://trustee.ietf.org/license-info) in effect on the date of publication of this document.  Please review these documents carefully, as they describe your rights and restrictions with respect to this document.  Code Components extracted from this document must include Simplified BSD License text as described in Section 4.e of the Trust Legal Provisions and are provided without warranty as described in the Simplified BSD License.</p>
@@ -816,7 +816,7 @@ Content-Type: application/json
 <a href="#rfc.section.3">3.</a> <a href="#aa" id="aa">Authentication and Authorization</a>
 </h1>
 <p id="rfc.section.3.p.1">The SET delivery method described in this specification is based upon HTTP and HTTP over TLS <a href="#RFC2818" class="xref">[RFC2818]</a> and/or standard HTTP authentication and authorization schemes, as per <a href="#RFC7235" class="xref">[RFC7235]</a>.  The TLS server certificate MUST be validated, per <a href="#RFC6125" class="xref">[RFC6125]</a>.  As per Section 4.1 of <a href="#RFC7235" class="xref">[RFC7235]</a>, a SET delivery endpoint SHALL indicate supported HTTP authentication schemes via the <samp>WWW-Authenticate</samp> header when using HTTP authentication.  </p>
-<p id="rfc.section.3.p.2">Authorization for the eligibility to provide actionable SETs can be determined by using the identity of the SET Issuer, validating the polling endpoint URL, perhaps using TLS, or via other employed authentication methods.  Among other benefits, authentication can help prevent denial-of-service attacks.  Because SETs are not commands, SET Recipients are free to ignore SETs that are not of interest after acknowledging their receipt.</p>
+<p id="rfc.section.3.p.2">Authorization for the eligibility to provide actionable SETs can be determined by using the identity of the SET Issuer, validating the polling endpoint URL, perhaps using TLS, or via other employed authentication methods.  Because SETs are not commands, SET Recipients are free to ignore SETs that are not of interest after acknowledging their receipt.</p>
 <h1 id="rfc.section.4">
 <a href="#rfc.section.4">4.</a> <a href="#Security" id="Security">Security Considerations</a>
 </h1>
@@ -1045,7 +1045,10 @@ Content-Type: application/json
 <p> </p>
 <p id="rfc.section.B.p.11">Draft 09 - AB </p>
 
-<ul><li>Addressed area director review comments by Benamin Kaduk: <ul><li>Added text clarifying that determining the SET Recipient's service identity is out of scope.</li></ul>
+<ul><li>Addressed area director review comments by Benamin Kaduk: <ul>
+<li>Added text clarifying that determining the SET Recipient's service identity is out of scope.</li>
+<li>Removed unelaborated reference to use of authentication to prevent DoS attacks.</li>
+</ul>
 <p> </p>
 </li></ul>
 
