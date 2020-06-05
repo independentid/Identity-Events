@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-push-10" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-http-push-11" ipr="trust200902">
     <front>
         <title abbrev="draft-ietf-secevent-http-push">Push-Based Security Event Token (SET) Delivery Using HTTP</title>
 
@@ -51,7 +51,7 @@
             </address>
         </author>
 
-	<date year="2020" month="April" day="27" />
+	<date year="2020" month="June" day="4" />
 
         <area>Security</area>
         <workgroup>Security Events Working Group</workgroup>
@@ -189,9 +189,10 @@
             <t>
                 Once the SET has been validated and persisted, the SET Recipient SHOULD
                 immediately return a response indicating that the SET was successfully
-                delivered. The SET Recipient SHOULD NOT perform extensive business logic that
-                processes the event expressed by the SET prior to sending this response.
-                Such logic SHOULD be executed asynchronously from delivery, in order to
+                delivered. The SET Recipient SHOULD NOT perform
+		anything beyond the required validation steps
+                prior to sending this response.
+                Any additional steps SHOULD be executed asynchronously from delivery, in order to
                 minimize the expense and impact of SET delivery on the SET Transmitter.
             </t>
             <t>
@@ -329,7 +330,7 @@ Content-Type: application/json
 
 {
   "err": "authentication_failed",
-  "description": "Access token is expired."
+  "description": "Access token has expired."
 }</artwork>
                 </figure>
 
@@ -370,7 +371,7 @@ Content-Type: application/json
                         SET to the SET Recipient.</c>
                 </texttable>
 		<t>
-		  Implementations SHOULD expect that other Error Codes MAY also be received,
+		  Implementations SHOULD expect that other Error Codes may also be received,
 		  as the set of Error Codes is extensible
 		  via the IANA "Security Event Token Delivery Error Codes" registry
 		  established in <xref target="iana_set_errors"/>.
@@ -421,11 +422,11 @@ Content-Type: application/json
         <section anchor="Security" title="Security Considerations" toc="default">
 
             <section anchor="payloadAuthentication" title="Authentication Using Signed SETs">
-                <t>In scenarios where HTTP authorization or TLS mutual authentication
-                    are not used or are considered weak, JWS signed SETs SHOULD be
-                    used (see <xref target="RFC7515"/> and Section 5 of <xref target="RFC8417"/>).
-                    This enables the SET Recipient
-                    to validate that the SET Transmitter is authorized to deliver the SET.
+                <t>
+		  JWS signed SETs can be
+		  used (see <xref target="RFC7515"/> and Section 5 of <xref target="RFC8417"/>)
+		  to enable the SET Recipient
+		  to validate that the SET Issuer is authorized to provide actionable SETs.
                 </t>
             </section>
 
@@ -433,12 +434,6 @@ Content-Type: application/json
 	      <t>SET delivery depends on the use of Hypertext Transfer Protocol and is thus
 	      subject to the security considerations of HTTP Section 9 of <xref
 	      target="RFC7230"/> and its related specifications.</t>
-
-	      <t>As stated in Section 2.7.1 of <xref target="RFC7230"/>, an
-	      HTTP requestor MUST NOT generate the <spanx style="verb">userinfo</spanx>
-	      (i.e., username and password) component (and its "@" delimiter) when
-	      an "http" URI reference is generated with a message, as they are now
-	      disallowed in HTTP.</t>
 	    </section>
 
             <section title="Confidentiality of SETs">
@@ -465,8 +460,7 @@ Content-Type: application/json
                     malicious party makes a high volume of requests containing invalid SETs,
                     causing the endpoint to expend significant resources on cryptographic
                     operations that are bound to fail. This may be mitigated by authenticating
-                    SET Transmitters with a mechanism with low runtime overhead, such as mutual
-                    TLS.
+                    SET Transmitters with a mechanism such as mutual TLS.
                 </t>
             </section>
 
@@ -487,7 +481,7 @@ Content-Type: application/json
 
         <section title="Privacy Considerations">
             <t>
-                SET Transmistters SHOULD attempt to deliver SETs that are targeted to the specific
+                SET Transmitters SHOULD attempt to deliver SETs that are targeted to the specific
                 business and protocol needs of subscribers.
             </t>
 
@@ -503,10 +497,16 @@ Content-Type: application/json
 	    <t>
 	      In some cases, subject identifiers themselves may be considered sensitive
 	      information, such that their inclusion within a SET may be considered a violation
-	      of privacy.  SET Transmitters should consider the ramifications of sharing a
+	      of privacy.  SET Issuers should consider the ramifications of sharing a
 	      particular subject identifier with a SET Recipient (e.g., whether doing so could
 	      enable correlation and/or de-anonymization of data) and choose appropriate
 	      subject identifiers for their use cases.
+	    </t>
+	    <t>
+	      If SETs are transmitted over unencrypted channels, some privacy-sensitive
+	      information about them might leak, even though the SETs themselves are encrypted.
+	      For instance, an attacker may be able to determine whether or not a SET was accepted and the reason for its rejection
+	      or may be able to derive information from being able to observe the size of the encrypted SET.
 	    </t>
 
         </section>
@@ -706,14 +706,23 @@ need for assurance.</artwork>
         </section>
 
         <section title="Acknowledgments">
-            <t>The editors would like to thank the members of the SCIM working group, which
-                began discussions of provisioning events starting with draft-hunt-scim-notify-00 in 2015.</t>
-
-            <t>The editors would like to thank Phil Hunt and the other authors of draft-ietf-secevent-delivery-02,
-                on which this draft is based.</t>
-
-            <t>The editors would like to thank the participants in the SecEvents
-                working group for their contributions to this specification.</t>
+	  <t>
+	    The editors would like to thank the members of the SCIM working group, which
+	    began discussions of provisioning events starting with draft-hunt-scim-notify-00 in 2015.
+	    We would like to thank Phil Hunt and the other authors of draft-ietf-secevent-delivery-02,
+	    upon which this specification is based.
+	    We would like to thank the participants in the SecEvents
+	    working group for their contributions to this specification.
+	  </t>
+	  <t>
+	    Additionally, we would like to thank the following individuals for their reviews of the specification:
+	    Joe Clarke,
+	    Vijay Gurbani,
+	    Benjamin Kaduk,
+	    Yaron Sheffer,
+	    and
+	    Valery Smyslov.
+	  </t>
         </section>
 
         <section anchor="History" title="Change Log">
@@ -861,7 +870,7 @@ need for assurance.</artwork>
                 Draft 10 - AB
                 <list style="symbols">
                     <t>
-                        Addressed area director review comments by Benamin Kaduk:
+                        Addressed area director review comments by Benjamin Kaduk:
                         <list style="symbols">
                             <t>Added reference to 8417 as definition document for SETs.</t>
                             <t>
@@ -877,6 +886,20 @@ need for assurance.</artwork>
                     </t>
                 </list>
             </t>
+	    <t>
+	      Draft 11 - mbj
+	      <list style="symbols">
+		<t>
+		  Addressed SecDir review comments by Valery Smyslov.
+		</t>
+		<t>
+		  Addressed OpsDir review comments by Joe Clarke.
+		</t>
+		<t>
+		  Addressed GenArt review comments by Vijay Gurbani.
+		</t>
+	      </list>
+	    </t>
         </section>
     </back>
 </rfc>
