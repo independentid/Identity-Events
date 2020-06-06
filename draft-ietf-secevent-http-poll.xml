@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-poll-09"
+<rfc category="std" docName="draft-ietf-secevent-http-poll-10"
 	ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-http-poll">
@@ -56,7 +56,7 @@
       </address>
     </author>
 
-    <date year="2020" month="April" day="29" />
+    <date year="2020" month="June" day="4" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
@@ -121,7 +121,7 @@
       <t>
 	When a SET is available for a SET Recipient, the SET Transmitter
 	queues the SET in a buffer so that
-	a SET Recipient can poll for SETs using HTTP/1.1 POST.
+	a SET Recipient can poll for SETs using HTTP POST.
       </t>
 
       <t>
@@ -139,7 +139,11 @@
       <t>After successful (acknowledged) SET delivery, SET
       Transmitters are not required to retain or record SETs for
       retransmission. Once a SET is acknowledged, the SET Recipient SHALL be
-      responsible for retention, if needed.</t>
+      responsible for retention, if needed.
+      Transmitters may also discard undelivered SETs under deployment-specific conditions,
+      such as if they have not been polled for over too long a period of time
+      or if an excessive amount of storage is needed to retain them.
+      </t>
       <t>
 	Upon receiving a SET, the SET Recipient reads the SET and validates
 	it in the manner described in Section 2 of <xref target="I-D.ietf-secevent-http-push"/>.
@@ -616,11 +620,11 @@ Content-Type: application/json
     <section anchor="Security" title="Security Considerations" toc="default">
 
       <section anchor="payloadAuthentication" title="Authentication Using Signed SETs">
-	<t>In scenarios where HTTP authorization or TLS mutual authentication
-	are not used or are considered weak, JWS signed SETs SHOULD be
-	used (see <xref target="RFC7515"/> and Section 5 of <xref target="RFC8417"/>).
-	This enables the SET Recipient
-	to validate that the SET Issuer is authorized to provide actionable SETs.
+	<t>
+	  JWS signed SETs can be
+	  used (see <xref target="RFC7515"/> and Section 5 of <xref target="RFC8417"/>)
+	  to enable the SET Recipient
+	  to validate that the SET Issuer is authorized to provide actionable SETs.
 	</t>
       </section>
 
@@ -628,12 +632,6 @@ Content-Type: application/json
         <t>SET delivery depends on the use of Hypertext Transfer Protocol and is thus
         subject to the security considerations of HTTP Section 9 of <xref
         target="RFC7230"/> and its related specifications.</t>
-
-        <t>As stated in Section 2.7.1 of <xref target="RFC7230"/>, an
-        HTTP requestor MUST NOT generate the <spanx style="verb">userinfo</spanx>
-        (i.e., username and password) component (and its "@" delimiter) when
-        an "http" URI reference is generated with a message, as they are now
-        disallowed in HTTP.</t>
       </section>
 
       <section title="Confidentiality of SETs">
@@ -712,10 +710,16 @@ Content-Type: application/json
       <t>
 	In some cases, subject identifiers themselves may be considered sensitive
 	information, such that their inclusion within a SET may be considered a violation
-	of privacy.  SET Transmitters should consider the ramifications of sharing a
+	of privacy.  SET Issuers should consider the ramifications of sharing a
 	particular subject identifier with a SET Recipient (e.g., whether doing so could
 	enable correlation and/or de-anonymization of data) and choose appropriate
 	subject identifiers for their use cases.
+      </t>
+      <t>
+	If SETs are transmitted over unencrypted channels, some privacy-sensitive
+	information about them might leak, even though the SETs themselves are encrypted.
+	For instance, an attacker may be able to determine whether or not a SET was accepted and the reason for its rejection
+	or may be able to derive information from being able to observe the size of the encrypted SET.
       </t>
 
     </section>
@@ -764,14 +768,23 @@ Content-Type: application/json
     </references>
 
     <section title="Acknowledgments">
-      <t>The editors would like to thank the members of the SCIM working group, which
-      began discussions of provisioning events starting with draft-hunt-scim-notify-00 in 2015.</t>
-
-      <t>The editors would like to thank Phil Hunt and the other the authors of draft-ietf-secevent-delivery-02,
-      on which this specification is based.</t>
-
-      <t>The editors would like to thank the participants in the SecEvents
-      working group for their contributions to this specification.</t>
+      <t>
+	The editors would like to thank the members of the SCIM working group, which
+	began discussions of provisioning events starting with draft-hunt-scim-notify-00 in 2015.
+	We would like to thank Phil Hunt and the other the authors of draft-ietf-secevent-delivery-02,
+	upon which this specification is based.
+	We would like to thank the participants in the SecEvents
+	working group for their contributions to this specification.
+      </t>
+      <t>
+	Additionally, we would like to thank the following individuals for their reviews of the specification:
+	Benjamin Kaduk,
+	Mark Nottingham,
+	Yaron Sheffer,
+	Valery Smyslov,
+	and
+	Robert Sparks.
+      </t>
     </section>
 
     <section anchor="History" title="Change Log">
@@ -913,13 +926,28 @@ Content-Type: application/json
         Draft 09 - AB
         <list style="symbols">
           <t>
-            Addressed area director review comments by Benamin Kaduk:
+            Addressed area director review comments by Benjamin Kaduk:
             <list style="symbols">
               <t>Added text clarifying that determining the SET Recipient's service identity is out of scope.</t>
               <t>Removed unelaborated reference to use of authentication to prevent DoS attacks.</t>
             </list>
           </t>
         </list>
+      </t>
+      <t>
+	Draft 10 - mbj
+	<list style="symbols">
+	  <t>
+	    Addressed SecDir review comments by Valery Smyslov
+	    on draft-ietf-secevent-http-push-10 that also applied here.
+	  </t>
+	  <t>
+	    Addressed IETF last call comments by Mark Nottingham.
+	  </t>
+	  <t>
+	    Addressed GenArt review comments by Robert Sparks.
+	  </t>
+	</list>
       </t>
     </section>
   </back>
