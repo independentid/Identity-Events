@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-push-11" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-http-push-12" ipr="trust200902">
     <front>
         <title abbrev="draft-ietf-secevent-http-push">Push-Based Security Event Token (SET) Delivery Using HTTP</title>
 
@@ -26,7 +26,7 @@
             <organization abbrev="Microsoft">Microsoft</organization>
             <address>
                 <email>mbj@microsoft.com</email>
-                <uri>http://self-issued.info/</uri>
+                <uri>https://self-issued.info/</uri>
             </address>
         </author>
 
@@ -51,7 +51,7 @@
             </address>
         </author>
 
-	<date year="2020" month="June" day="4" />
+	<date year="2020" month="June" day="15" />
 
         <area>Security</area>
         <workgroup>Security Events Working Group</workgroup>
@@ -60,7 +60,7 @@
         <abstract>
             <t>
                 This specification defines how a Security Event Token (SET)
-                may be delivered to an intended recipient using HTTP POST.
+                can be delivered to an intended recipient using HTTP POST over TLS.
                 The SET is transmitted in the body of an HTTP POST request to an
                 endpoint operated by the recipient, and the recipient indicates
                 successful or failed transmission via the HTTP response.
@@ -73,16 +73,19 @@
 
             <t>
                 This specification defines a mechanism by which a transmitter of a
-                <xref target="RFC8417">Security Event Token (SET)</xref> may deliver
-                the SET to an intended recipient via <xref target="RFC7231">HTTP POST</xref>.
+                <xref target="RFC8417">Security Event Token (SET)</xref> can deliver
+                the SET to an intended SET Recipient via <xref target="RFC7231">HTTP POST</xref>
+		over TLS.
+		This is an alternative SET delivery method to the one defined in
+		<xref target="I-D.ietf-secevent-http-poll"/>.
             </t>
             <t>
-                Push-Based SET Delivery over HTTP POST is intended for scenarios where all of
+                Push-based SET delivery over HTTP POST is intended for scenarios where all of
                 the following apply:
                 <list style="symbols">
                     <t>The transmitter of the SET is capable of making outbound HTTP requests.</t>
                     <t>
-                        The recipient is capable of hosting an HTTP endpoint that is accessible
+                        The recipient is capable of hosting an HTTP endpoint using TLS that is accessible
                         to the transmitter.
                     </t>
                     <t>The transmitter and recipient are known to one another.</t>
@@ -130,7 +133,7 @@
             </section>
         </section>
 
-        <section title="SET Delivery">
+        <section anchor="Delivery" title="SET Delivery">
             <t>
                 To deliver a SET to a given SET Recipient, the SET Transmitter
                 makes a SET transmission request to the SET Recipient, with the SET
@@ -208,7 +211,7 @@
 
                 <t>
                     To transmit a SET to a SET Recipient, the SET Transmitter makes
-                    an HTTP POST request to an HTTP endpoint provided by the SET Recipient.  The
+                    an HTTP POST request to an HTTP endpoint using TLS provided by the SET Recipient.  The
                     <spanx style="verb">Content-Type</spanx> header of this request MUST
                     be <spanx style="verb">application/secevent+jwt</spanx> as defined in
                     Sections 2.3 and 7.2 of <xref target="RFC8417"/>, and the
@@ -344,7 +347,7 @@ Content-Type: application/json
 
 {
   "err": "access_denied",
-  "description": "Not authorized for issuer http://iss.example.com/."
+  "description": "Not authorized for issuer https://iss.example.com/."
 }</artwork>
                 </figure>
             </section>
@@ -381,7 +384,7 @@ Content-Type: application/json
 
         <section anchor="aa" title="Authentication and Authorization" toc="default">
             <t>The SET delivery method described in this specification is
-	        based upon HTTP and HTTP over TLS <xref target="RFC2818"/> and/or standard
+	        based upon HTTP over TLS <xref target="RFC2818"/> and standard
                 HTTP authentication and authorization schemes, as per
                 <xref target="RFC7235" />.
 		The TLS server certificate MUST be validated, per <xref target="RFC6125"/>.
@@ -430,23 +433,26 @@ Content-Type: application/json
                 </t>
             </section>
 
-	    <section title="HTTP Considerations">
+	    <section anchor="HTTP" title="HTTP Considerations">
 	      <t>SET delivery depends on the use of Hypertext Transfer Protocol and is thus
 	      subject to the security considerations of HTTP Section 9 of <xref
 	      target="RFC7230"/> and its related specifications.</t>
 	    </section>
 
-            <section title="Confidentiality of SETs">
-                <t>SETs may contain sensitive information that is considered Personally Identifiable
-                    Information (PII). In such cases, SET Transmitters and
-                    SET Recipients MUST protect the confidentiality of the SET contents by
-                    encrypting the SET as described in <xref target="RFC7516">JWE</xref>,
-                    using a transport-layer security mechanism such as TLS, or both. If
-                    an Event delivery endpoint supports TLS, it MUST support at least TLS
+            <section anchor="Confidentiality" title="Confidentiality of SETs">
+                <t>
+		    SETs may contain sensitive information that is considered
+		    Personally Identifiable Information (PII).
+		    In such cases, SET Transmitters and
+                    SET Recipients MUST protect the confidentiality of the SET contents.
+		    In some use cases, using TLS to secure the transmitted SETs will be sufficient.
+		    In other use cases,
+		    encrypting the SET as described in <xref target="RFC7516">JWE</xref> will also be required.
+		    The Event delivery endpoint MUST support at least TLS
                     version 1.2 <xref target="RFC5246"/> and SHOULD support the newest version
 		    of TLS that meets its security requirements,
 		    which as of the time of this publication is TLS 1.3 <xref target="RFC8446"/>.
-		    When using TLS, the client MUST
+		    The client MUST
                     perform a TLS/SSL server certificate check using DNS-ID <xref target="RFC6125"/>.
                     How a SET Transmitter determines the expected service identity to match the SET
                     Recipient's server certificate against is out of scope for this document.
@@ -454,7 +460,7 @@ Content-Type: application/json
                     "Recommendations for Secure Use of TLS and DTLS" <xref target="RFC7525"/>.</t>
             </section>
 
-            <section title="Denial of Service">
+            <section anchor="DoS" title="Denial of Service">
                 <t>
                     The SET Recipient may be vulnerable to a denial-of-service attack where a
                     malicious party makes a high volume of requests containing invalid SETs,
@@ -464,7 +470,7 @@ Content-Type: application/json
                 </t>
             </section>
 
-            <section title="Authenticating Persisted SETs">
+            <section anchor="Persisted" title="Authenticating Persisted SETs">
                 <t>
                     At the time of receipt, the SET Recipient can rely upon transport layer
                     mechanisms, HTTP authentication methods, and/or other context from the
@@ -479,7 +485,7 @@ Content-Type: application/json
             </section>
         </section>
 
-        <section title="Privacy Considerations">
+        <section anchor="Privacy" title="Privacy Considerations">
             <t>
                 SET Transmitters SHOULD attempt to deliver SETs that are targeted to the specific
                 business and protocol needs of subscribers.
@@ -490,8 +496,8 @@ Content-Type: application/json
                 Transmitters and Recipients MUST have the appropriate legal agreements
                 and user consent or terms of service in place.
 		Furthermore, data that needs confidentiality protection MUST be encrypted,
-		either via TLS or using JSON Web Encryption (JWE) <xref target="RFC7516"/>,
-		or both.
+		at least with TLS
+		and sometimes also using JSON Web Encryption (JWE) <xref target="RFC7516"/>.
 	    </t>
 
 	    <t>
@@ -501,12 +507,6 @@ Content-Type: application/json
 	      particular subject identifier with a SET Recipient (e.g., whether doing so could
 	      enable correlation and/or de-anonymization of data) and choose appropriate
 	      subject identifiers for their use cases.
-	    </t>
-	    <t>
-	      If SETs are transmitted over unencrypted channels, some privacy-sensitive
-	      information about them might leak, even though the SETs themselves are encrypted.
-	      For instance, an attacker may be able to determine whether or not a SET was accepted and the reason for its rejection
-	      or may be able to derive information from being able to observe the size of the encrypted SET.
 	    </t>
 
         </section>
@@ -562,7 +562,7 @@ Content-Type: application/json
                     </t>
                 </section>
 
-                <section title="Initial Registry Contents">
+                <section anchor="InitialContents" title="Initial Registry Contents">
 		  <t>
 		    <?rfc subcompact="yes"?>
 		    <list style="hanging">
@@ -638,10 +638,37 @@ Content-Type: application/json
         </references>
 
         <references title="Informative References">
+	  <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-http-poll-10.xml" ?>
+
             <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7235.xml' ?><!-- HTTP Auth -->
         </references>
 
-        <section title="Other Streaming Specifications">
+	<section anchor="Unencrypted" title="Unencrypted Transport Considerations">
+	  <t>
+	    Earlier versions of this specification made the use of TLS optional
+	    and described security and privacy considerations resulting from use
+	    of unencrypted HTTP as the underlying transport.
+	    When the working group decided to mandate usage HTTP over TLS,
+	    it also decided to preserve the description of these considerations
+	    in this non-normative appendix.
+	  </t>
+	  <t>
+	    SETs may contain sensitive information that is considered
+	    Personally Identifiable Information (PII).
+	    In such cases, SET Transmitters and
+	    SET Recipients MUST protect the confidentiality of the SET contents.
+	    When TLS is not used, this means that the SET MUST be encrypted
+	    as described in <xref target="RFC7516">JWE</xref>.
+	  </t>
+	  <t>
+	    If SETs are transmitted over unencrypted channels, some privacy-sensitive
+	    information about them might leak, even though the SETs themselves are encrypted.
+	    For instance, an attacker may be able to determine whether or not a SET was accepted and the reason for its rejection
+	    or may be able to derive information from being able to observe the size of the encrypted SET.
+	  </t>
+	</section>
+
+        <section anchor="Others" title="Other Streaming Specifications">
             <t>[[ NOTE TO THE RFC EDITOR: This section to be removed prior to publication ]]</t>
 
             <t>The following pub/sub, queuing, streaming systems were reviewed
@@ -649,10 +676,10 @@ Content-Type: application/json
 
             <t>Poll-Based Security Event Token (SET) Delivery Using HTTP</t>
             <t>In addition to this specification, the WG is defining a polling-based
-                SET delivery protocol. That protocol's draft (draft-ietf-secevent-http-poll)
+                SET delivery protocol. That protocol <xref target="I-D.ietf-secevent-http-poll"/>
                 describes it as:</t>
             <figure><artwork>This specification defines how a series of Security Event Tokens
-(SETs) may be delivered to an intended recipient using HTTP POST over
+(SETs) can be delivered to an intended recipient using HTTP POST over
 TLS initiated as a poll by the recipient.  The specification also
 defines how delivery can be assured, subject to the SET Recipient's
 need for assurance.</artwork>
@@ -705,7 +732,7 @@ need for assurance.</artwork>
             </list></t>
         </section>
 
-        <section title="Acknowledgments">
+        <section anchor="Acknowledgments" title="Acknowledgments">
 	  <t>
 	    The editors would like to thank the members of the SCIM working group, which
 	    began discussions of provisioning events starting with draft-hunt-scim-notify-00 in 2015.
@@ -897,6 +924,15 @@ need for assurance.</artwork>
 		</t>
 		<t>
 		  Addressed GenArt review comments by Vijay Gurbani.
+		</t>
+	      </list>
+	    </t>
+	    <t>
+	      Draft 12 - mbj
+	      <list style="symbols">
+		<t>
+		  Revised to unambiguously require the use of TLS,
+		  while preserving descriptions of precautions needed for non-TLS use in an appendix.
 		</t>
 	      </list>
 	    </t>
