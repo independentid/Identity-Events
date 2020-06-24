@@ -688,8 +688,8 @@
 <h1 id="rfc.section.2.4.2">
 <a href="#rfc.section.2.4.2">2.4.2.</a> <a href="#AckOnlyRequest" id="AckOnlyRequest">Acknowledge Only Request</a>
 </h1>
-<p id="rfc.section.2.4.2.p.1">In this variation, the SET Recipient acknowledges previously received SETs and indicates it does not want to receive SETs in response by setting the <samp>maxEvents</samp> value to <samp>0</samp>.</p>
-<p id="rfc.section.2.4.2.p.2">This variation might be used, for instance, when a SET Recipient needs to acknowledge received SETs independently (e.g., on separate threads) from the process of receiving SETs.</p>
+<p id="rfc.section.2.4.2.p.1">In this variation, the SET Recipient acknowledges previously received SETs and indicates it does not want to receive SETs in response by setting the <samp>maxEvents</samp> value to <samp>0</samp>.  This variation might be used, for instance, when a SET Recipient needs to acknowledge received SETs independently (e.g., on separate threads) from the process of receiving SETs.  </p>
+<p id="rfc.section.2.4.2.p.2">If the poll needs to return immediately, then <samp>returnImmediately</samp> MUST also be present with the value <samp>true</samp>.  If it is <samp>false</samp>, then a long poll will still occur until an event is ready to be returned, even though no events will be returned.  </p>
 <div id="rfc.figure.3"></div>
 <div id="pollAckOnly"></div>
 <p>The following is a non-normative example poll request with acknowledgement of SETs received (for example as shown in <a href="#pollResponse" class="xref">Figure 6</a>):</p>
@@ -1001,7 +1001,7 @@
 <a href="#rfc.appendix.C">Appendix C.</a> <a href="#Acknowledgments" id="Acknowledgments">Acknowledgments</a>
 </h1>
 <p id="rfc.section.C.p.1">The editors would like to thank the members of the SCIM working group, which began discussions of provisioning events starting with draft-hunt-scim-notify-00 in 2015.  We would like to thank Phil Hunt and the other the authors of draft-ietf-secevent-delivery-02, upon which this specification is based.  We would like to thank the participants in the SecEvents working group for their contributions to this specification.  </p>
-<p id="rfc.section.C.p.2">Additionally, we would like to thank the following individuals for their reviews of the specification: Benjamin Kaduk, Murray Kucherawy, Mark Nottingham, Yaron Sheffer, Valery Smyslov, and Robert Sparks.  </p>
+<p id="rfc.section.C.p.2">Additionally, we would like to thank the following individuals for their reviews of the specification: Benjamin Kaduk, Erik Kline, Murray Kucherawy, Mark Nottingham, Yaron Sheffer, Valery Smyslov, and Robert Sparks.  </p>
 <h1 id="rfc.appendix.D">
 <a href="#rfc.appendix.D">Appendix D.</a> <a href="#History" id="History">Change Log</a>
 </h1>

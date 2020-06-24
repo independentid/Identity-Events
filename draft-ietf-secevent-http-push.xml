@@ -98,7 +98,7 @@
                 by which security events are identified for SET Recipients are specified
                 in <xref target="RFC8417"/>.
             </t>
-            
+
             <section anchor="notat" title="Notational Conventions" toc="default">
                 <t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
                     NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
@@ -206,7 +206,7 @@
                 Transmitter SHOULD delay retransmission for an appropriate amount of time
                 to avoid overwhelming the SET Recipient (see <xref target="reliability"/>).
             </t>
-            
+
             <section anchor="httpPost" title="Transmitting a SET">
 
                 <t>
@@ -313,7 +313,7 @@
                     of the languages included in the header field, the SET Recipient MUST respond with messages that are
                     understandable by an English-speaking person, as described in Section 4.5 of <xref target="RFC2277"/>.
                 </t>
-                    
+
                 <figure anchor="errorResponseInvalidKey" title="Example Error Response (invalid_key)">
                     <preamble>The following is an non-normative example error response indicating
                         that the key used to encrypt the SET has been revoked.</preamble>
@@ -354,7 +354,7 @@
   Content-Type: application/json
 
   {
-    "err": "access_denied",
+    "err": "invalid_issuer",
     "description": "Not authorized for issuer https://iss.example.com/."
   }
 ]]></artwork>
@@ -375,8 +375,10 @@
                     <c>invalid_request</c><c>The request body cannot be parsed as a SET, or the
                         Event Payload within the SET does not conform to the event's definition.</c>
                     <c>invalid_key</c><c>One or more keys used to encrypt or sign the SET is
-                        invalid or otherwise unacceptable to the SET Recipient. (e.g., expired,
-                        revoked, failed certificate validation, etc.)</c>
+                        invalid or otherwise unacceptable to the SET Recipient (e.g., expired,
+                        revoked, failed certificate validation, etc.).</c>
+                    <c>invalid_issuer</c><c>The SET issuer is invalid for the SET Recipient.</c>
+                    <c>invalid_audience</c><c>The SET audience does not correspond to the SET Recipient.</c>
                     <c>authentication_failed</c><c>The SET Recipient could not authenticate the
                         SET Transmitter.</c>
                     <c>access_denied</c><c>The SET Transmitter is not authorized to transmit the
@@ -476,6 +478,7 @@
                     causing the endpoint to expend significant resources on cryptographic
                     operations that are bound to fail. This may be mitigated by authenticating
                     SET Transmitters with a mechanism such as mutual TLS.
+		    Rate-limiting problematic transmitters is also a possible means of mitigation.
                 </t>
             </section>
 
@@ -490,6 +493,7 @@
                     validate SET authenticity outside of the context of the transmission request,
                     then the SET Recipient SHOULD ensure that such SETs have been signed in
                     accordance with <xref target="RFC7515"/>.
+		    Needed context could also be stored with the SET and retrieved with it.
                 </t>
             </section>
         </section>
@@ -543,7 +547,7 @@
                                 <vspace/>
                                 The name of the Security Event Token Delivery Error Code, as described
                                 in <xref target="error_codes"/>. The name MUST be a case-sensitive ASCII
-                                string consisting only of letters, digits, and underscore; these are the 
+                                string consisting only of letters, digits, and underscore; these are the
                                 characters whose codes fall within the inclusive ranges 0x30-39, 0x41-5A,
                                 0x5F and 0x61-7A.
                             </t>
@@ -588,10 +592,30 @@
 		    <list style="hanging">
                       <t>Error Code: invalid_key</t>
                       <t>Description: One or more keys used to encrypt or sign the SET is invalid
-                          or otherwise unacceptable to the SET Recipient. (e.g., expired, revoked,
-                          failed certificate validation, etc.)</t>
+                          or otherwise unacceptable to the SET Recipient (e.g., expired, revoked,
+                          failed certificate validation, etc.).</t>
 		      <t>Change Controller: IETF</t>
-		      <t>Defining Document(s): 
+		      <t>Defining Document(s):
+		      <xref target="error_codes"/> of [[ this specification ]]
+		      </t>
+		    </list>
+		  </t>
+		  <t>
+		    <list style="hanging">
+                      <t>Error Code: invalid_issuer</t>
+                      <t>Description: The SET issuer is invalid for the SET Recipient.</t>
+		      <t>Change Controller: IETF</t>
+		      <t>Defining Document(s):
+		      <xref target="error_codes"/> of [[ this specification ]]
+		      </t>
+		    </list>
+		  </t>
+		  <t>
+		    <list style="hanging">
+                      <t>Error Code: invalid_audience</t>
+                      <t>Description: The SET audience does not correspond to the SET Recipient.</t>
+		      <t>Change Controller: IETF</t>
+		      <t>Defining Document(s):
 		      <xref target="error_codes"/> of [[ this specification ]]
 		      </t>
 		    </list>
@@ -601,7 +625,7 @@
                       <t>Error Code: authentication_failed</t>
                       <t>Description: The SET Recipient could not authenticate the SET Transmitter.</t>
 		      <t>Change Controller: IETF</t>
-		      <t>Defining Document(s): 
+		      <t>Defining Document(s):
 		      <xref target="error_codes"/> of [[ this specification ]]
 		      </t>
 		    </list>
@@ -609,10 +633,10 @@
 		  <t>
 		    <list style="hanging">
                       <t>Error Code: access_denied</t>
-                      <t>Description: The SET Transmitter is not authorized to transmit the 
+                      <t>Description: The SET Transmitter is not authorized to transmit the
                           SET to the SET Recipient.</t>
 		      <t>Change Controller: IETF</t>
-		      <t>Defining Document(s): 
+		      <t>Defining Document(s):
 		      <xref target="error_codes"/> of [[ this specification ]]
 		      </t>
 		    </list>
@@ -757,6 +781,7 @@ need for assurance.</artwork>
 	    Joe Clarke,
 	    Vijay Gurbani,
 	    Benjamin Kaduk,
+	    Erik Kline,
 	    Murray Kucherawy,
 	    Yaron Sheffer,
 	    and

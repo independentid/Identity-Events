@@ -376,11 +376,17 @@
 	  <t>In this variation, the SET Recipient acknowledges previously
 	  received SETs and indicates it does not want to receive SETs in
 	  response by setting the <spanx style="verb">maxEvents</spanx>
-	  value to <spanx style="verb">0</spanx>.</t>
-	
-	  <t>This variation might be used, for instance, when a SET Recipient needs to
+	  value to <spanx style="verb">0</spanx>.
+	  This variation might be used, for instance, when a SET Recipient needs to
 	  acknowledge received SETs independently (e.g., on separate threads)
-	  from the process of receiving SETs.</t>
+	  from the process of receiving SETs.
+	  </t>
+	  <t>
+	    If the poll needs to return immediately, then <spanx style="verb">returnImmediately</spanx>
+	    MUST also be present with the value <spanx style="verb">true</spanx>.
+	    If it is <spanx style="verb">false</spanx>, then a long poll will still occur
+	    until an event is ready to be returned, even though no events will be returned.
+	  </t>
 	
 	  <figure anchor="pollAckOnly" title="Example Acknowledge Only Request">
 	    <preamble>The following is a non-normative example poll request with acknowledgement
@@ -819,6 +825,7 @@
       <t>
 	Additionally, we would like to thank the following individuals for their reviews of the specification:
 	Benjamin Kaduk,
+	Erik Kline,
 	Murray Kucherawy,
 	Mark Nottingham,
 	Yaron Sheffer,

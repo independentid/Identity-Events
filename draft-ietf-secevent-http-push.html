@@ -696,7 +696,7 @@
   Content-Type: application/json
 
   {
-    "err": "access_denied",
+    "err": "invalid_issuer",
     "description": "Not authorized for issuer https://iss.example.com/."
   }
 </pre>
@@ -721,7 +721,15 @@
 </tr>
 <tr>
 <td class="left">invalid_key</td>
-<td class="left">One or more keys used to encrypt or sign the SET is invalid or otherwise unacceptable to the SET Recipient. (e.g., expired, revoked, failed certificate validation, etc.)</td>
+<td class="left">One or more keys used to encrypt or sign the SET is invalid or otherwise unacceptable to the SET Recipient (e.g., expired, revoked, failed certificate validation, etc.).</td>
+</tr>
+<tr>
+<td class="left">invalid_issuer</td>
+<td class="left">The SET issuer is invalid for the SET Recipient.</td>
+</tr>
+<tr>
+<td class="left">invalid_audience</td>
+<td class="left">The SET audience does not correspond to the SET Recipient.</td>
 </tr>
 <tr>
 <td class="left">authentication_failed</td>
@@ -762,11 +770,11 @@
 <h1 id="rfc.section.5.4">
 <a href="#rfc.section.5.4">5.4.</a> <a href="#DoS" id="DoS">Denial of Service</a>
 </h1>
-<p id="rfc.section.5.4.p.1">The SET Recipient may be vulnerable to a denial-of-service attack where a malicious party makes a high volume of requests containing invalid SETs, causing the endpoint to expend significant resources on cryptographic operations that are bound to fail. This may be mitigated by authenticating SET Transmitters with a mechanism such as mutual TLS.  </p>
+<p id="rfc.section.5.4.p.1">The SET Recipient may be vulnerable to a denial-of-service attack where a malicious party makes a high volume of requests containing invalid SETs, causing the endpoint to expend significant resources on cryptographic operations that are bound to fail. This may be mitigated by authenticating SET Transmitters with a mechanism such as mutual TLS.  Rate-limiting problematic transmitters is also a possible means of mitigation.  </p>
 <h1 id="rfc.section.5.5">
 <a href="#rfc.section.5.5">5.5.</a> <a href="#Persisted" id="Persisted">Authenticating Persisted SETs</a>
 </h1>
-<p id="rfc.section.5.5.p.1">At the time of receipt, the SET Recipient can rely upon transport layer mechanisms, HTTP authentication methods, and/or other context from the transmission request to authenticate the SET Transmitter and validate the authenticity of the SET.  However, this context is typically unavailable to systems to which the SET Recipient forwards the SET, or to systems that retrieve the SET from storage.  If the SET Recipient requires the ability to validate SET authenticity outside of the context of the transmission request, then the SET Recipient SHOULD ensure that such SETs have been signed in accordance with <a href="#RFC7515" class="xref">[RFC7515]</a>.  </p>
+<p id="rfc.section.5.5.p.1">At the time of receipt, the SET Recipient can rely upon transport layer mechanisms, HTTP authentication methods, and/or other context from the transmission request to authenticate the SET Transmitter and validate the authenticity of the SET.  However, this context is typically unavailable to systems to which the SET Recipient forwards the SET, or to systems that retrieve the SET from storage.  If the SET Recipient requires the ability to validate SET authenticity outside of the context of the transmission request, then the SET Recipient SHOULD ensure that such SETs have been signed in accordance with <a href="#RFC7515" class="xref">[RFC7515]</a>.  Needed context could also be stored with the SET and retrieved with it.  </p>
 <h1 id="rfc.section.6">
 <a href="#rfc.section.6">6.</a> <a href="#Privacy" id="Privacy">Privacy Considerations</a>
 </h1>
@@ -825,7 +833,35 @@
 <dt></dt>
 <dd style="margin-left: 8">Error Code: invalid_key</dd>
 <dt></dt>
-<dd style="margin-left: 8">Description: One or more keys used to encrypt or sign the SET is invalid or otherwise unacceptable to the SET Recipient. (e.g., expired, revoked, failed certificate validation, etc.)</dd>
+<dd style="margin-left: 8">Description: One or more keys used to encrypt or sign the SET is invalid or otherwise unacceptable to the SET Recipient (e.g., expired, revoked, failed certificate validation, etc.).</dd>
+<dt></dt>
+<dd style="margin-left: 8">Change Controller: IETF</dd>
+<dt></dt>
+<dd style="margin-left: 8">Defining Document(s): <a href="#error_codes" class="xref">Section 2.4</a> of [[ this specification ]] </dd>
+</dl>
+
+<p> </p>
+<p></p>
+
+<dl>
+<dt></dt>
+<dd style="margin-left: 8">Error Code: invalid_issuer</dd>
+<dt></dt>
+<dd style="margin-left: 8">Description: The SET issuer is invalid for the SET Recipient.</dd>
+<dt></dt>
+<dd style="margin-left: 8">Change Controller: IETF</dd>
+<dt></dt>
+<dd style="margin-left: 8">Defining Document(s): <a href="#error_codes" class="xref">Section 2.4</a> of [[ this specification ]] </dd>
+</dl>
+
+<p> </p>
+<p></p>
+
+<dl>
+<dt></dt>
+<dd style="margin-left: 8">Error Code: invalid_audience</dd>
+<dt></dt>
+<dd style="margin-left: 8">Description: The SET audience does not correspond to the SET Recipient.</dd>
 <dt></dt>
 <dd style="margin-left: 8">Change Controller: IETF</dd>
 <dt></dt>
@@ -1004,7 +1040,7 @@ need for assurance.</pre>
 <a href="#rfc.appendix.C">Appendix C.</a> <a href="#Acknowledgments" id="Acknowledgments">Acknowledgments</a>
 </h1>
 <p id="rfc.section.C.p.1">The editors would like to thank the members of the SCIM working group, which began discussions of provisioning events starting with draft-hunt-scim-notify-00 in 2015.  We would like to thank Phil Hunt and the other authors of draft-ietf-secevent-delivery-02, upon which this specification is based.  We would like to thank the participants in the SecEvents working group for their contributions to this specification.  </p>
-<p id="rfc.section.C.p.2">Additionally, we would like to thank the following individuals for their reviews of the specification: Joe Clarke, Vijay Gurbani, Benjamin Kaduk, Murray Kucherawy, Yaron Sheffer, and Valery Smyslov.  </p>
+<p id="rfc.section.C.p.2">Additionally, we would like to thank the following individuals for their reviews of the specification: Joe Clarke, Vijay Gurbani, Benjamin Kaduk, Erik Kline, Murray Kucherawy, Yaron Sheffer, and Valery Smyslov.  </p>
 <h1 id="rfc.appendix.D">
 <a href="#rfc.appendix.D">Appendix D.</a> <a href="#History" id="History">Change Log</a>
 </h1>

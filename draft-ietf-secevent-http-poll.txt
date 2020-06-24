@@ -380,11 +380,11 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
    In this variation, the SET Recipient acknowledges previously received
    SETs and indicates it does not want to receive SETs in response by
-   setting the "maxEvents" value to "0".
+   setting the "maxEvents" value to "0".  This variation might be used,
+   for instance, when a SET Recipient needs to acknowledge received SETs
+   independently (e.g., on separate threads) from the process of
+   receiving SETs.
 
-   This variation might be used, for instance, when a SET Recipient
-   needs to acknowledge received SETs independently (e.g., on separate
-   threads) from the process of receiving SETs.
 
 
 
@@ -393,6 +393,11 @@ Backman, et al.         Expires December 25, 2020               [Page 7]
 
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
+
+   If the poll needs to return immediately, then "returnImmediately"
+   MUST also be present with the value "true".  If it is "false", then a
+   long poll will still occur until an event is ready to be returned,
+   even though no events will be returned.
 
    The following is a non-normative example poll request with
    acknowledgement of SETs received (for example as shown in Figure 6):
@@ -435,11 +440,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
          Figure 4: Example Poll with Acknowledgement and No Errors
 
-   In the above acknowledgement, the SET Recipient has acknowledged
-   receipt of two SETs and has indicated it wants to wait until the next
-   SET is available.
-
-
 
 
 
@@ -449,6 +449,10 @@ Backman, et al.         Expires December 25, 2020               [Page 8]
 
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
+
+   In the above acknowledgement, the SET Recipient has acknowledged
+   receipt of two SETs and has indicated it wants to wait until the next
+   SET is available.
 
 2.4.4.  Poll with Acknowledgement and Errors
 
@@ -489,10 +493,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
    As described in Section 2.3, a JSON document is returned containing
    members including "sets", which SHALL contain zero or more SETs.
-
-
-
-
 
 
 
@@ -932,8 +932,9 @@ Appendix C.  Acknowledgments
    to this specification.
 
    Additionally, we would like to thank the following individuals for
-   their reviews of the specification: Benjamin Kaduk, Murray Kucherawy,
-   Mark Nottingham, Yaron Sheffer, Valery Smyslov, and Robert Sparks.
+   their reviews of the specification: Benjamin Kaduk, Erik Kline,
+   Murray Kucherawy, Mark Nottingham, Yaron Sheffer, Valery Smyslov, and
+   Robert Sparks.
 
 Appendix D.  Change Log
 
@@ -945,7 +946,6 @@ Appendix D.  Change Log
    o  Renamed to "Poll-Based SET Token Delivery Using HTTP"
 
    o  Removed references to the HTTP Push delivery method.
-
 
 
 
