@@ -5,14 +5,14 @@
 Security Events Working Group                            A. Backman, Ed.
 Internet-Draft                                                    Amazon
 Intended status: Standards Track                           M. Jones, Ed.
-Expires: December 25, 2020                                     Microsoft
+Expires: December 26, 2020                                     Microsoft
                                                             M. Scurtescu
                                                                 Coinbase
                                                                M. Ansari
                                                                    Cisco
                                                               A. Nadalin
                                                                Microsoft
-                                                           June 23, 2020
+                                                           June 24, 2020
 
 
        Push-Based Security Event Token (SET) Delivery Using HTTP
@@ -41,7 +41,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on December 25, 2020.
+   This Internet-Draft will expire on December 26, 2020.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Copyright Notice
 
 
 
-Backman, et al.         Expires December 25, 2020               [Page 1]
+Backman, et al.         Expires December 26, 2020               [Page 1]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Backman, et al.         Expires December 25, 2020               [Page 2]
+Backman, et al.         Expires December 26, 2020               [Page 2]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -120,14 +120,16 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
    o  The transmitter of the SET is capable of making outbound HTTP
       requests.
 
-   o  The recipient is capable of hosting an TLS-enabled HTTP endpoint
+   o  The recipient is capable of hosting a TLS-enabled HTTP endpoint
       that is accessible to the transmitter.
 
-   o  The transmitter and recipient are known to one another.
+   o  The transmitter and recipient are willing to exchange data with
+      one another.
 
    A mechanism for exchanging configuration metadata such as endpoint
-   URLs and cryptographic keys between the transmitter and recipient is
-   out of scope for this specification.  How SETs are defined and the
+   URLs, cryptographic keys, and possible implementation constraints
+   such as buffer size limitations between the transmitter and recipient
+   is out of scope for this specification.  How SETs are defined and the
    process by which security events are identified for SET Recipients
    are specified in [RFC8417].
 
@@ -160,15 +162,16 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
    a SET transmission request to the SET Recipient, with the SET itself
    contained within the request.  The SET Recipient replies to this
    request with a response either acknowledging successful transmission
-   of the SET or indicating that an error occurred while receiving,
-   parsing, and/or validating the SET.
 
 
 
-Backman, et al.         Expires December 25, 2020               [Page 3]
+Backman, et al.         Expires December 26, 2020               [Page 3]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
+
+   of the SET or indicating that an error occurred while receiving,
+   parsing, and/or validating the SET.
 
    Upon receipt of a SET, the SET Recipient SHALL validate that all of
    the following are true:
@@ -191,11 +194,11 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
       SETs with the subject of the SET in question).
 
    The mechanisms by which the SET Recipient performs this validation
-   are out of scope for this document.  SET parsing, issuer, and
-   audience identification are defined in [RFC8417].  The mechanism for
-   validating the authenticity of a SET is deployment specific, and may
-   vary depending on the authentication mechanisms in use, and whether
-   the SET is signed and/or encrypted (See Section 3).
+   are out of scope for this document.  SET parsing, issuer
+   identification, and audience identification are defined in [RFC8417].
+   The mechanism for validating the authenticity of a SET is deployment
+   specific, and may vary depending on the authentication mechanisms in
+   use, and whether the SET is signed and/or encrypted (See Section 3).
 
    SET Transmitters MAY transmit SETs issued by another entity.  The SET
    Recipient may accept or reject (i.e., return an error response such
@@ -215,17 +218,17 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
    from delivery, in order to minimize the expense and impact of SET
    delivery on the SET Transmitter.
 
-   The SET Transmitter MAY re-transmit a SET if the responses from
-   previous transmissions timed out or indicated potentially recoverable
-   error (such as server unavailability that may be transient).  In all
 
 
 
-Backman, et al.         Expires December 25, 2020               [Page 4]
+Backman, et al.         Expires December 26, 2020               [Page 4]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
+   The SET Transmitter MAY re-transmit a SET if the responses from
+   previous transmissions timed out or indicated potentially recoverable
+   error (such as server unavailability that may be transient).  In all
    other cases, the SET Transmitter SHOULD NOT re-transmit a SET.  The
    SET Transmitter SHOULD delay retransmission for an appropriate amount
    of time to avoid overwhelming the SET Recipient (see Section 4).
@@ -233,7 +236,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 2.1.  Transmitting a SET
 
    To transmit a SET to a SET Recipient, the SET Transmitter makes an
-   HTTP POST request to an TLS-enabled HTTP endpoint provided by the SET
+   HTTP POST request to a TLS-enabled HTTP endpoint provided by the SET
    Recipient.  The "Content-Type" header field of this request MUST be
    "application/secevent+jwt" as defined in Sections 2.3 and 7.2 of
    [RFC8417], and the "Accept" header field MUST be "application/json".
@@ -274,10 +277,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-
-
-
-Backman, et al.         Expires December 25, 2020               [Page 5]
+Backman, et al.         Expires December 26, 2020               [Page 5]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -333,7 +333,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-Backman, et al.         Expires December 25, 2020               [Page 6]
+Backman, et al.         Expires December 26, 2020               [Page 6]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -344,7 +344,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
    Recipient MUST respond with messages that are understandable by an
    English-speaking person, as described in Section 4.5 of [RFC2277].
 
-   The following is an non-normative example error response indicating
+   The following is a non-normative example error response indicating
    that the key used to encrypt the SET has been revoked.
 
      HTTP/1.1 400 Bad Request
@@ -358,7 +358,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
               Figure 3: Example Error Response (invalid_key)
 
-   The following is an non-normative example error response indicating
+   The following is a non-normative example error response indicating
    that the access token included in the request is expired.
 
      HTTP/1.1 400 Bad Request
@@ -372,7 +372,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
          Figure 4: Example Error Response (authentication_failed)
 
-   The following is an non-normative example error response indicating
+   The following is a non-normative example error response indicating
    that the SET Receiver is not willing to accept SETs issued by the
    specified issuer from this particular SET Transmitter.
 
@@ -389,7 +389,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-Backman, et al.         Expires December 25, 2020               [Page 7]
+Backman, et al.         Expires December 26, 2020               [Page 7]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -445,7 +445,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-Backman, et al.         Expires December 25, 2020               [Page 8]
+Backman, et al.         Expires December 26, 2020               [Page 8]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -501,7 +501,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-Backman, et al.         Expires December 25, 2020               [Page 9]
+Backman, et al.         Expires December 26, 2020               [Page 9]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -557,7 +557,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-Backman, et al.         Expires December 25, 2020              [Page 10]
+Backman, et al.         Expires December 26, 2020              [Page 10]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -613,7 +613,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-Backman, et al.         Expires December 25, 2020              [Page 11]
+Backman, et al.         Expires December 26, 2020              [Page 11]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -669,7 +669,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-Backman, et al.         Expires December 25, 2020              [Page 12]
+Backman, et al.         Expires December 26, 2020              [Page 12]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -725,7 +725,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-Backman, et al.         Expires December 25, 2020              [Page 13]
+Backman, et al.         Expires December 26, 2020              [Page 13]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -781,7 +781,7 @@ Appendix A.  Unencrypted Transport Considerations
 
 
 
-Backman, et al.         Expires December 25, 2020              [Page 14]
+Backman, et al.         Expires December 26, 2020              [Page 14]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -837,7 +837,7 @@ Appendix B.  Other Streaming Specifications
 
 
 
-Backman, et al.         Expires December 25, 2020              [Page 15]
+Backman, et al.         Expires December 26, 2020              [Page 15]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -893,7 +893,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-Backman, et al.         Expires December 25, 2020              [Page 16]
+Backman, et al.         Expires December 26, 2020              [Page 16]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -912,8 +912,8 @@ Appendix C.  Acknowledgments
 
    Additionally, we would like to thank the following individuals for
    their reviews of the specification: Joe Clarke, Vijay Gurbani,
-   Benjamin Kaduk, Erik Kline, Murray Kucherawy, Yaron Sheffer, and
-   Valery Smyslov.
+   Benjamin Kaduk, Erik Kline, Murray Kucherawy, Yaron Sheffer, Valery
+   Smyslov, and Eric Vyncke.
 
 Appendix D.  Change Log
 
@@ -949,7 +949,7 @@ Appendix D.  Change Log
 
 
 
-Backman, et al.         Expires December 25, 2020              [Page 17]
+Backman, et al.         Expires December 26, 2020              [Page 17]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -1005,7 +1005,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-Backman, et al.         Expires December 25, 2020              [Page 18]
+Backman, et al.         Expires December 26, 2020              [Page 18]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -1061,7 +1061,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-Backman, et al.         Expires December 25, 2020              [Page 19]
+Backman, et al.         Expires December 26, 2020              [Page 19]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -1117,7 +1117,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-Backman, et al.         Expires December 25, 2020              [Page 20]
+Backman, et al.         Expires December 26, 2020              [Page 20]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -1173,7 +1173,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-Backman, et al.         Expires December 25, 2020              [Page 21]
+Backman, et al.         Expires December 26, 2020              [Page 21]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
@@ -1229,4 +1229,4 @@ Authors' Addresses
 
 
 
-Backman, et al.         Expires December 25, 2020              [Page 22]
+Backman, et al.         Expires December 26, 2020              [Page 22]

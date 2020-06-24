@@ -56,7 +56,7 @@
       </address>
     </author>
 
-    <date year="2020" month="June" day="23" />
+    <date year="2020" month="June" day="24" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
@@ -88,8 +88,10 @@
 	<xref target="I-D.ietf-secevent-http-push"/>.
       </t>
       <t>
-	A mechanism for exchanging configuration metadata such as endpoint URLs
-	and cryptographic keys between the transmitter and recipient is
+	A mechanism for exchanging configuration metadata such as endpoint URLs,
+	cryptographic keys,
+	and possible implementation constraints such as buffer size limitations
+	between the transmitter and recipient is
         out of scope for this specification.  How SETs are defined and the process
         by which security events are identified for SET Recipients are specified in
 	<xref target="RFC8417"/>.
@@ -205,7 +207,10 @@
 	    <t hangText="maxEvents"><vspace/>An OPTIONAL integer value
 	    indicating the maximum number of unacknowledged SETs that
 	    may be returned. If more than the maximum number of SETs
-	    are available, the oldest SETs available are returned
+	    are available, the SET Transmitter determines which to return first;
+	    the oldest SETs available MAY returned first,
+	    or another selection algorithm MAY be used,
+	    such as prioritizing SETs in some manner that makes sese for the use case.
 	    first. A value of <spanx style="verb">0</spanx> MAY be used by
 	    SET Recipients that would like to perform an acknowledge only
 	    request. This enables the Recipient to use separate HTTP requests
@@ -230,7 +235,7 @@
 	   <t hangText="ack">
 	     <vspace/>
 	     A JSON array of strings whose values
-	     are the <spanx style="verb">jti</spanx> values of
+	     are the <spanx style="verb">jti</spanx> <xref target="RFC7519"/> values of
 	     successfully received SETs that are being acknowledged.
 	     If there are no outstanding SETs to acknowledge, this member is omitted.
 	     Once a SET has been acknowledged, the SET Transmitter is released from
@@ -763,6 +768,7 @@
 
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7521.xml' ?><!-- Client Auth Assertions -->
 
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7525.xml' ?><!-- TLS Recos -->
@@ -824,14 +830,16 @@
       </t>
       <t>
 	Additionally, we would like to thank the following individuals for their reviews of the specification:
+	Martin Duke,
 	Benjamin Kaduk,
 	Erik Kline,
 	Murray Kucherawy,
 	Mark Nottingham,
 	Yaron Sheffer,
 	Valery Smyslov,
+	Robert Sparks,
 	and
-	Robert Sparks.
+	Éric Vyncke.
       </t>
     </section>
 
