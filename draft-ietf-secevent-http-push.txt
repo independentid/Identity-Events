@@ -487,17 +487,17 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 5.3.  Confidentiality of SETs
 
-   SETs may contain sensitive information that is considered Personally
-   Identifiable Information (PII).  In such cases, SET Transmitters and
-   SET Recipients MUST protect the confidentiality of the SET contents.
-   In some use cases, using TLS to secure the transmitted SETs will be
-   sufficient.  In other use cases, encrypting the SET as described in
-   JWE [RFC7516] will also be required.  The Event delivery endpoint
-   MUST support at least TLS version 1.2 [RFC5246] and SHOULD support
-   the newest version of TLS that meets its security requirements, which
-   as of the time of this publication is TLS 1.3 [RFC8446].  The client
-   MUST perform a TLS/SSL server certificate check using DNS-ID
-   [RFC6125].  How a SET Transmitter determines the expected service
+   SETs may contain sensitive information, including Personally
+   Identifiable Information (PII), or be distributed through third
+   parties.  In such cases, SET Transmitters and SET Recipients MUST
+   protect the confidentiality of the SET contents.  TLS MUST be used to
+   secure the transmitted SETs.  In some use cases, encrypting the SET
+   as described in JWE [RFC7516] will also be required.  The Event
+   delivery endpoint MUST support at least TLS version 1.2 [RFC5246] and
+   SHOULD support the newest version of TLS that meets its security
+   requirements, which as of the time of this publication is TLS 1.3
+   [RFC8446].  The client MUST perform a TLS/SSL server certificate
+   check using DNS-ID [RFC6125].  How a SET Transmitter determines the
 
 
 
@@ -506,10 +506,10 @@ Backman, et al.         Expires December 26, 2020               [Page 9]
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
-   identity to match the SET Recipient's server certificate against is
-   out of scope for this document.  Implementation security
-   considerations for TLS can be found in "Recommendations for Secure
-   Use of TLS and DTLS" [RFC7525].
+   expected service identity to match the SET Recipient's server
+   certificate against is out of scope for this document.  The
+   implementation security considerations for TLS in "Recommendations
+   for Secure Use of TLS and DTLS" [RFC7525] MUST be followed.
 
 5.4.  Denial of Service
 
@@ -523,9 +523,9 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 5.5.  Authenticating Persisted SETs
 
-   At the time of receipt, the SET Recipient can rely upon transport
-   layer mechanisms, HTTP authentication methods, and/or other context
-   from the transmission request to authenticate the SET Transmitter and
+   At the time of receipt, the SET Recipient can rely upon TLS
+   mechanisms, HTTP authentication methods, and/or other context from
+   the transmission request to authenticate the SET Transmitter and
    validate the authenticity of the SET.  However, this context is
    typically unavailable to systems to which the SET Recipient forwards
    the SET, or to systems that retrieve the SET from storage.  If the
@@ -789,14 +789,15 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
    When TLS is not used, this means that the SET MUST be encrypted as
    described in JWE [RFC7516].
 
-   If SETs are transmitted over unencrypted channels, some privacy-
-   sensitive information about them might leak, even though the SETs
-   themselves are encrypted.  For instance, an attacker may be able to
-   determine whether or not a SET was accepted and the reason for its
-   rejection or may be able to derive information from being able to
-   observe the size of the encrypted SET.  (Note that even when TLS is
-   utilized, some information leakage is still possible; message padding
-   algorithms to prevent side channels remain an open research topic.)
+   If SETs were allowed to be transmitted over unencrypted channels,
+   some privacy-sensitive information about them might leak, even though
+   the SETs themselves are encrypted.  For instance, an attacker may be
+   able to determine whether or not a SET was accepted and the reason
+   for its rejection or may be able to derive information from being
+   able to observe the size of the encrypted SET.  (Note that even when
+   TLS is utilized, some information leakage is still possible; message
+   padding algorithms to prevent side channels remain an open research
+   topic.)
 
 Appendix B.  Other Streaming Specifications
 
@@ -833,7 +834,6 @@ Appendix B.  Other Streaming Specifications
    Lambda functions, email addresses (as JSON or plain text), phone
    numbers (via SMS), and AWS SQS standard queues.  It does not directly
    support pull, but subscribers can get the pull model by creating an
-   SQS queue and subscribing it to the topic.  Note that this puts the
 
 
 
@@ -842,6 +842,7 @@ Backman, et al.         Expires December 26, 2020              [Page 15]
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
+   SQS queue and subscribing it to the topic.  Note that this puts the
    cost of pull support back onto the subscriber, just as it is in the
    push model.  It is not clear that one way is strictly better than the
    other; larger, sophisticated developers may be happy to own message
@@ -892,7 +893,6 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
 
 
 
-
 Backman, et al.         Expires December 26, 2020              [Page 16]
 
 Internet-Draft        draft-ietf-secevent-http-push            June 2020
@@ -909,9 +909,9 @@ Appendix C.  Acknowledgments
    specification.
 
    Additionally, we would like to thank the following individuals for
-   their reviews of the specification: Joe Clarke, Vijay Gurbani,
-   Benjamin Kaduk, Erik Kline, Murray Kucherawy, Yaron Sheffer, Valery
-   Smyslov, Eric Vyncke, and Robert Wilton.
+   their reviews of the specification: Joe Clarke, Roman Danyliw, Vijay
+   Gurbani, Benjamin Kaduk, Erik Kline, Murray Kucherawy, Yaron Sheffer,
+   Robert Sparks, Valery Smyslov, Eric Vyncke, and Robert Wilton.
 
 Appendix D.  Change Log
 

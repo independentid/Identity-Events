@@ -446,12 +446,12 @@
 
             <section anchor="Confidentiality" title="Confidentiality of SETs">
                 <t>
-		    SETs may contain sensitive information that is considered
-		    Personally Identifiable Information (PII).
+		  SETs may contain sensitive information, including Personally Identifiable Information (PII),
+		  or be distributed through third parties.
 		    In such cases, SET Transmitters and
                     SET Recipients MUST protect the confidentiality of the SET contents.
-		    In some use cases, using TLS to secure the transmitted SETs will be sufficient.
-		    In other use cases,
+		    TLS MUST be used to secure the transmitted SETs.
+		    In some use cases,
 		    encrypting the SET as described in <xref target="RFC7516">JWE</xref> will also be required.
 		    The Event delivery endpoint MUST support at least TLS
                     version 1.2 <xref target="RFC5246"/> and SHOULD support the newest version
@@ -461,8 +461,10 @@
                     perform a TLS/SSL server certificate check using DNS-ID <xref target="RFC6125"/>.
                     How a SET Transmitter determines the expected service identity to match the SET
                     Recipient's server certificate against is out of scope for this document.
-                    Implementation security considerations for TLS can be found in
-                    "Recommendations for Secure Use of TLS and DTLS" <xref target="RFC7525"/>.</t>
+		    The implementation security considerations for TLS in
+		    "Recommendations for Secure Use of TLS and DTLS" <xref target="RFC7525"/>
+		    MUST be followed.
+		</t>
             </section>
 
             <section anchor="DoS" title="Denial of Service">
@@ -478,7 +480,7 @@
 
             <section anchor="Persisted" title="Authenticating Persisted SETs">
                 <t>
-                    At the time of receipt, the SET Recipient can rely upon transport layer
+                    At the time of receipt, the SET Recipient can rely upon TLS
                     mechanisms, HTTP authentication methods, and/or other context from the
                     transmission request to authenticate the SET Transmitter and validate the
                     authenticity of the SET.  However, this context is typically unavailable to
@@ -688,7 +690,7 @@
 	    as described in <xref target="RFC7516">JWE</xref>.
 	  </t>
 	  <t>
-	    If SETs are transmitted over unencrypted channels, some privacy-sensitive
+	    If SETs were allowed to be transmitted over unencrypted channels, some privacy-sensitive
 	    information about them might leak, even though the SETs themselves are encrypted.
 	    For instance, an attacker may be able to determine whether or not a SET was accepted and the reason for its rejection
 	    or may be able to derive information from being able to observe the size of the encrypted SET.
@@ -773,11 +775,13 @@ need for assurance.</artwork>
 	  <t>
 	    Additionally, we would like to thank the following individuals for their reviews of the specification:
 	    Joe Clarke,
+	    Roman Danyliw,
 	    Vijay Gurbani,
 	    Benjamin Kaduk,
 	    Erik Kline,
 	    Murray Kucherawy,
 	    Yaron Sheffer,
+	    Robert Sparks,
 	    Valery Smyslov,
 	    Éric Vyncke,
 	    and

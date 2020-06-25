@@ -237,7 +237,8 @@
 	     A JSON array of strings whose values
 	     are the <spanx style="verb">jti</spanx> <xref target="RFC7519"/> values of
 	     successfully received SETs that are being acknowledged.
-	     If there are no outstanding SETs to acknowledge, this member is omitted.
+	     If there are no outstanding SETs to acknowledge, this member is omitted
+	     or contains an empty array.
 	     Once a SET has been acknowledged, the SET Transmitter is released from
 	     any obligation to retain the SET.
 	   </t>
@@ -252,7 +253,8 @@
 	     <spanx style="verb">err</spanx> and
 	     <spanx style="verb">description</spanx> values
 	     specified in <xref target="errorResponse"/>.
-	     If there are no outstanding SETs with errors to report, this member is omitted.
+	     If there are no outstanding SETs with errors to report, this member is omitted
+	     or contains an empty JSON object.
 	   </t>
 
          </list></t>
@@ -302,7 +304,7 @@
 	<spanx style="verb">setErrs</spanx> request parameters are omitted.</t>
 
 	<t>
-	  After a period of time configured between the SET
+	  After a period of time configured in an out-of-band manner between the SET
 	Transmitter and Recipient, a SET Transmitter MAY redeliver SETs
 	it has previously delivered. The SET Recipient SHOULD accept
 	repeat SETs and acknowledge the SETs regardless of whether the
@@ -349,7 +351,7 @@
 
 	  <figure anchor="pollInitRequest" title="Example Initial Poll Request">
 	    <preamble>
-	      The following is an example request made by a SET Recipient
+	      The following is a non-normative example request made by a SET Recipient
 	      that has no outstanding SETs to acknowledge and is polling
 	      for available SETs at the endpoint
 	      <spanx style="verb">https://notify.idp.example.com/Events</spanx>:
@@ -669,8 +671,8 @@
 
       <section anchor="Confidentiality" title="Confidentiality of SETs">
         <t>
-	  SETs may contain sensitive information that is considered
-	  Personally Identifiable Information (PII).
+	  SETs may contain sensitive information, including Personally Identifiable Information (PII),
+	  or be distributed through third parties.
 	  In such cases, SET Transmitters and
 	  SET Recipients MUST protect the confidentiality of the SET contents.
 	  In some use cases, using TLS to secure the transmitted SETs will be sufficient.
@@ -684,8 +686,9 @@
 	  perform a TLS/SSL server certificate check using DNS-ID <xref target="RFC6125"/>.
           How a SET Recipient determines the expected service identity to match the SET
           Transmitter's server certificate against is out of scope for this document.
-	  Implementation security considerations for TLS can be found in
-	  "Recommendations for Secure Use of TLS and DTLS" <xref target="RFC7525"/>.
+	  The implementation security considerations for TLS in
+	  "Recommendations for Secure Use of TLS and DTLS" <xref target="RFC7525"/>
+	  MUST be followed.
 	</t>
       </section>
 
@@ -834,6 +837,7 @@
       </t>
       <t>
 	Additionally, we would like to thank the following individuals for their reviews of the specification:
+	Roman Danyliw,
 	Martin Duke,
 	Benjamin Kaduk,
 	Erik Kline,

@@ -74,7 +74,7 @@ Table of Contents
    2.  SET Delivery  . . . . . . . . . . . . . . . . . . . . . . . .   3
      2.1.  Polling Delivery using HTTP . . . . . . . . . . . . . . .   4
      2.2.  Polling HTTP Request  . . . . . . . . . . . . . . . . . .   4
-     2.3.  Polling HTTP Response . . . . . . . . . . . . . . . . . .   5
+     2.3.  Polling HTTP Response . . . . . . . . . . . . . . . . . .   6
      2.4.  Poll Request  . . . . . . . . . . . . . . . . . . . . . .   6
        2.4.1.  Poll Only Request . . . . . . . . . . . . . . . . . .   7
        2.4.2.  Acknowledge Only Request  . . . . . . . . . . . . . .   8
@@ -257,9 +257,9 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
          A JSON array of strings whose values are the "jti" [RFC7519]
          values of successfully received SETs that are being
          acknowledged.  If there are no outstanding SETs to acknowledge,
-         this member is omitted.  Once a SET has been acknowledged, the
-         SET Transmitter is released from any obligation to retain the
-         SET.
+         this member is omitted or contains an empty array.  Once a SET
+         has been acknowledged, the SET Transmitter is released from any
+         obligation to retain the SET.
 
       setErrs
          A JSON object with one or more members whose keys are the "jti"
@@ -267,13 +267,13 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
          are themselves JSON objects that describe the errors detected
          using the "err" and "description" values specified in
          Section 2.6.  If there are no outstanding SETs with errors to
-         report, this member is omitted.
+         report, this member is omitted or contains an empty JSON
+         object.
 
-2.3.  Polling HTTP Response
 
-   In response to a poll request, the SET Transmitter checks for
-   available SETs and responds with a JSON document containing the
-   following JSON object members:
+
+
+
 
 
 
@@ -281,6 +281,12 @@ Backman, et al.         Expires December 26, 2020               [Page 5]
 
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
+
+2.3.  Polling HTTP Response
+
+   In response to a poll request, the SET Transmitter checks for
+   available SETs and responds with a JSON document containing the
+   following JSON object members:
 
    sets
       A JSON object containing zero or more SETs being returned.  Each
@@ -307,12 +313,13 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
    that are available.  Because the SET Recipient has no prior SETs to
    acknowledge, the "ack" and "setErrs" request parameters are omitted.
 
-   After a period of time configured between the SET Transmitter and
-   Recipient, a SET Transmitter MAY redeliver SETs it has previously
-   delivered.  The SET Recipient SHOULD accept repeat SETs and
-   acknowledge the SETs regardless of whether the Recipient believes it
-   has already acknowledged the SETs previously.  A SET Transmitter MAY
-   limit the number of times it attempts to deliver a SET.
+   After a period of time configured in an out-of-band manner between
+   the SET Transmitter and Recipient, a SET Transmitter MAY redeliver
+   SETs it has previously delivered.  The SET Recipient SHOULD accept
+   repeat SETs and acknowledge the SETs regardless of whether the
+   Recipient believes it has already acknowledged the SETs previously.
+   A SET Transmitter MAY limit the number of times it attempts to
+   deliver a SET.
 
    If the SET Recipient has received SETs from the SET Transmitter, the
    SET Recipient parses and validates that received SETs meet its own
@@ -324,13 +331,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
    Poll requests have three variations:
 
-   Poll Only
-      In which a SET Recipient asks for the next set of events where no
-      previous SET deliveries are acknowledged (such as in the initial
-      poll request).
-
-   Acknowledge Only
-
 
 
 Backman, et al.         Expires December 26, 2020               [Page 6]
@@ -338,6 +338,12 @@ Backman, et al.         Expires December 26, 2020               [Page 6]
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
 
+   Poll Only
+      In which a SET Recipient asks for the next set of events where no
+      previous SET deliveries are acknowledged (such as in the initial
+      poll request).
+
+   Acknowledge Only
       In which a SET Recipient sets the "maxEvents" value to "0" along
       with "ack" and "setErrs" members indicating the SET Recipient is
       acknowledging previously received SETs and does not want to
@@ -354,9 +360,10 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
    Figure 7), the SET Recipient simply polls without acknowledgement
    parameters ("ack" and "setErrs").
 
-   The following is an example request made by a SET Recipient that has
-   no outstanding SETs to acknowledge and is polling for available SETs
-   at the endpoint "https://notify.idp.example.com/Events":
+   The following is a non-normative example request made by a SET
+   Recipient that has no outstanding SETs to acknowledge and is polling
+   for available SETs at the endpoint "https://notify.idp.example.com/
+   Events":
 
      POST /Events HTTP/1.1
      Host: notify.idp.example.com
@@ -371,16 +378,9 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
    A SET Recipient can poll using default parameter values by passing an
    empty JSON object.
 
-   The following is a non-normative example default poll request to the
-   endpoint "https://notify.idp.example.com/Events":
 
-     POST /Events HTTP/1.1
-     Host: notify.idp.example.com
-     Content-Type: application/json
 
-     {}
 
-                  Figure 2: Example Default Poll Request
 
 
 
@@ -393,6 +393,17 @@ Backman, et al.         Expires December 26, 2020               [Page 7]
 
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
+
+   The following is a non-normative example default poll request to the
+   endpoint "https://notify.idp.example.com/Events":
+
+     POST /Events HTTP/1.1
+     Host: notify.idp.example.com
+     Content-Type: application/json
+
+     {}
+
+                  Figure 2: Example Default Poll Request
 
 2.4.2.  Acknowledge Only Request
 
@@ -431,17 +442,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
    This variation allows a recipient thread to simultaneously
    acknowledge previously received SETs and wait for the next group of
    SETs in a single request.
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -690,21 +690,22 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
 4.3.  Confidentiality of SETs
 
-   SETs may contain sensitive information that is considered Personally
-   Identifiable Information (PII).  In such cases, SET Transmitters and
-   SET Recipients MUST protect the confidentiality of the SET contents.
-   In some use cases, using TLS to secure the transmitted SETs will be
-   sufficient.  In other use cases, encrypting the SET as described in
-   JWE [RFC7516] will also be required.  The Event delivery endpoint
-   MUST support at least TLS version 1.2 [RFC5246] and SHOULD support
-   the newest version of TLS that meets its security requirements, which
-   as of the time of this publication is TLS 1.3 [RFC8446].  The client
-   MUST perform a TLS/SSL server certificate check using DNS-ID
-   [RFC6125].  How a SET Recipient determines the expected service
-   identity to match the SET Transmitter's server certificate against is
-   out of scope for this document.  Implementation security
-   considerations for TLS can be found in "Recommendations for Secure
-   Use of TLS and DTLS" [RFC7525].
+   SETs may contain sensitive information, including Personally
+   Identifiable Information (PII), or be distributed through third
+   parties.  In such cases, SET Transmitters and SET Recipients MUST
+   protect the confidentiality of the SET contents.  In some use cases,
+   using TLS to secure the transmitted SETs will be sufficient.  In
+   other use cases, encrypting the SET as described in JWE [RFC7516]
+   will also be required.  The Event delivery endpoint MUST support at
+   least TLS version 1.2 [RFC5246] and SHOULD support the newest version
+   of TLS that meets its security requirements, which as of the time of
+   this publication is TLS 1.3 [RFC8446].  The client MUST perform a
+   TLS/SSL server certificate check using DNS-ID [RFC6125].  How a SET
+   Recipient determines the expected service identity to match the SET
+   Transmitter's server certificate against is out of scope for this
+   document.  The implementation security considerations for TLS in
+   "Recommendations for Secure Use of TLS and DTLS" [RFC7525] MUST be
+   followed.
 
 4.4.  Access Token Considerations
 
@@ -721,7 +722,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
    directly or indirectly (e.g., by checking with a validation service)
    by the service provider.  By expiring tokens, clients are forced to
    obtain a new token (which usually involves re-authentication) for
-   continued authorized access.  For example, in OAuth 2.0, a client MAY
 
 
 
@@ -730,6 +730,7 @@ Backman, et al.         Expires December 26, 2020              [Page 13]
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
 
+   continued authorized access.  For example, in OAuth 2.0, a client MAY
    use an OAuth refresh token to obtain a new bearer token after
    authenticating to an authorization server, per Section 6 of
    [RFC6749].
@@ -777,7 +778,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
               Nadalin, "Push-Based Security Event Token (SET) Delivery
               Using HTTP", draft-ietf-secevent-http-push-12 (work in
               progress), June 2020.
-
 
 
 
@@ -932,9 +932,10 @@ Appendix C.  Acknowledgments
    to this specification.
 
    Additionally, we would like to thank the following individuals for
-   their reviews of the specification: Martin Duke, Benjamin Kaduk, Erik
-   Kline, Murray Kucherawy, Mark Nottingham, Yaron Sheffer, Valery
-   Smyslov, Robert Sparks, Eric Vyncke, and Robert Wilton.
+   their reviews of the specification: Roman Danyliw, Martin Duke,
+   Benjamin Kaduk, Erik Kline, Murray Kucherawy, Mark Nottingham, Yaron
+   Sheffer, Valery Smyslov, Robert Sparks, Eric Vyncke, and Robert
+   Wilton.
 
 Appendix D.  Change Log
 
@@ -945,7 +946,6 @@ Appendix D.  Change Log
 
    o  Renamed to "Poll-Based SET Token Delivery Using HTTP"
 
-   o  Removed references to the HTTP Push delivery method.
 
 
 
@@ -953,6 +953,8 @@ Backman, et al.         Expires December 26, 2020              [Page 17]
 
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
+
+   o  Removed references to the HTTP Push delivery method.
 
    Draft 01 - mbj:
 
@@ -1000,8 +1002,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
    o  Referenced SET Transmitter definition in http-push.
 
-   o  Removed incorrect normative text regarding SET construction.
-
 
 
 
@@ -1009,6 +1009,8 @@ Backman, et al.         Expires December 26, 2020              [Page 18]
 
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
+
+   o  Removed incorrect normative text regarding SET construction.
 
    o  Consolidated general out-of-scope items under Introduction.
 
@@ -1056,8 +1058,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
    o  Addressed SecDir review comments by Valery Smyslov on draft-ietf-
       secevent-http-push-10 that also applied here.
 
-   o  Addressed IETF last call comments by Mark Nottingham.
-
 
 
 
@@ -1065,6 +1065,8 @@ Backman, et al.         Expires December 26, 2020              [Page 19]
 
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
+
+   o  Addressed IETF last call comments by Mark Nottingham.
 
    o  Addressed GenArt review comments by Robert Sparks.
 
@@ -1108,8 +1110,6 @@ Authors' Addresses
    Microsoft
 
    Email: tonynad@microsoft.com
-
-
 
 
 
