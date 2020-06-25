@@ -382,8 +382,8 @@
 <link href="#rfc.section.2.2" rel="Chapter" title="2.2 Polling HTTP Request">
 <link href="#rfc.section.2.3" rel="Chapter" title="2.3 Polling HTTP Response">
 <link href="#rfc.section.2.4" rel="Chapter" title="2.4 Poll Request">
-<link href="#rfc.section.2.4.1" rel="Chapter" title="2.4.1 Poll Only Request">
-<link href="#rfc.section.2.4.2" rel="Chapter" title="2.4.2 Acknowledge Only Request">
+<link href="#rfc.section.2.4.1" rel="Chapter" title="2.4.1 Poll-Only Request">
+<link href="#rfc.section.2.4.2" rel="Chapter" title="2.4.2 Acknowledge-Only Request">
 <link href="#rfc.section.2.4.3" rel="Chapter" title="2.4.3 Poll with Acknowledgement">
 <link href="#rfc.section.2.4.4" rel="Chapter" title="2.4.4 Poll with Acknowledgement and Errors">
 <link href="#rfc.section.2.5" rel="Chapter" title="2.5 Poll Response">
@@ -508,9 +508,9 @@
 </li>
 <li>2.4.   <a href="#rfc.section.2.4">Poll Request</a>
 </li>
-<ul><li>2.4.1.   <a href="#rfc.section.2.4.1">Poll Only Request</a>
+<ul><li>2.4.1.   <a href="#rfc.section.2.4.1">Poll-Only Request</a>
 </li>
-<li>2.4.2.   <a href="#rfc.section.2.4.2">Acknowledge Only Request</a>
+<li>2.4.2.   <a href="#rfc.section.2.4.2">Acknowledge-Only Request</a>
 </li>
 <li>2.4.3.   <a href="#rfc.section.2.4.3">Poll with Acknowledgement</a>
 </li>
@@ -564,7 +564,16 @@
 <a href="#rfc.section.1">1.</a> <a href="#intro" id="intro">Introduction and Overview</a>
 </h1>
 <p id="rfc.section.1.p.1">This specification defines how a stream of Security Event Tokens (SETs) <a href="#RFC8417" class="xref">[RFC8417]</a> can be transmitted to an intended SET Recipient using HTTP <a href="#RFC7231" class="xref">[RFC7231]</a> over TLS. The specification defines a method to poll for SETs using HTTP POST.  This is an alternative SET delivery method to the one defined in <a href="#I-D.ietf-secevent-http-push" class="xref">[I-D.ietf-secevent-http-push]</a>.  </p>
-<p id="rfc.section.1.p.2">A mechanism for exchanging configuration metadata such as endpoint URLs, cryptographic keys, and possible implementation constraints such as buffer size limitations between the transmitter and recipient is out of scope for this specification.  How SETs are defined and the process by which security events are identified for SET Recipients are specified in <a href="#RFC8417" class="xref">[RFC8417]</a>.  </p>
+<p id="rfc.section.1.p.2">Poll-based SET delivery is intended for scenarios where all of the following apply: </p>
+
+<ul>
+<li>The recipient of the SET is capable of making outbound HTTP requests.</li>
+<li>The transmitter is capable of hosting a TLS-enabled HTTP endpoint that is accessible to the recipient.  </li>
+<li>The transmitter and recipient are willing to exchange data with one another.  </li>
+</ul>
+
+<p> In some scenarios, either push-based or poll-based delivery could be used, and in others, only one of them would be applicable.  </p>
+<p id="rfc.section.1.p.3">A mechanism for exchanging configuration metadata such as endpoint URLs, cryptographic keys, and possible implementation constraints such as buffer size limitations between the transmitter and recipient is out of scope for this specification.  How SETs are defined and the process by which security events are identified for SET Recipients are specified in <a href="#RFC8417" class="xref">[RFC8417]</a>.  </p>
 <h1 id="rfc.section.1.1">
 <a href="#rfc.section.1.1">1.1.</a> <a href="#notat" id="notat">Notational Conventions</a>
 </h1>
@@ -580,7 +589,7 @@
 <p id="rfc.section.2.p.1">When a SET is available for a SET Recipient, the SET Transmitter queues the SET in a buffer so that a SET Recipient can poll for SETs using HTTP POST.  </p>
 <p id="rfc.section.2.p.2">In poll-based SET delivery using HTTP over TLS, zero or more SETs are delivered in a JSON <a href="#RFC8259" class="xref">[RFC8259]</a> document to a SET Recipient in response to an HTTP POST request to the SET Transmitter. Then in a following request, the SET Recipient acknowledges received SETs and can poll for more.  All requests and responses are JSON documents and use a <samp>Content-Type</samp> of <samp>application/json</samp>, as described in <a href="#httpPoll" class="xref">Section 2.1</a>.  </p>
 <p id="rfc.section.2.p.3">After successful (acknowledged) SET delivery, SET Transmitters are not required to retain or record SETs for retransmission. Once a SET is acknowledged, the SET Recipient SHALL be responsible for retention, if needed.  Transmitters may also discard undelivered SETs under deployment-specific conditions, such as if they have not been polled for over too long a period of time or if an excessive amount of storage is needed to retain them.  </p>
-<p id="rfc.section.2.p.4">Upon receiving a SET, the SET Recipient reads the SET and validates it in the manner described in Section 2 of <a href="#I-D.ietf-secevent-http-push" class="xref">[I-D.ietf-secevent-http-push]</a>.  The SET Recipient MUST acknowledge receipt to the SET Transmitter, and SHOULD do in a timely fashion, as described in <a href="#pollRequest" class="xref">Section 2.4</a>.  The SET Recipient SHALL NOT use the event acknowledgement mechanism to report event errors other than those relating to the parsing and validation of the SET.  </p>
+<p id="rfc.section.2.p.4">Upon receiving a SET, the SET Recipient reads the SET and validates it in the manner described in Section 2 of <a href="#I-D.ietf-secevent-http-push" class="xref">[I-D.ietf-secevent-http-push]</a>.  The SET Recipient MUST acknowledge receipt to the SET Transmitter, and SHOULD do so in a timely fashion, as described in <a href="#pollRequest" class="xref">Section 2.4</a>.  The SET Recipient SHALL NOT use the event acknowledgement mechanism to report event errors other than those relating to the parsing and validation of the SET.  </p>
 <h1 id="rfc.section.2.1">
 <a href="#rfc.section.2.1">2.1.</a> <a href="#httpPoll" id="httpPoll">Polling Delivery using HTTP</a>
 </h1>
@@ -604,7 +613,7 @@
 <dd style="margin-left: 8"><dl>
 <dt>maxEvents</dt>
 <dd style="margin-left: 8">
-<br>An OPTIONAL integer value indicating the maximum number of unacknowledged SETs that may be returned. If more than the maximum number of SETs are available, the SET Transmitter determines which to return first; the oldest SETs available MAY returned first, or another selection algorithm MAY be used, such as prioritizing SETs in some manner that makes sese for the use case.  first. A value of <samp>0</samp> MAY be used by SET Recipients that would like to perform an acknowledge only request. This enables the Recipient to use separate HTTP requests for acknowledgement and reception of SETs.  If this parameter is omitted, no limit is placed on the number of SETs to be returned.  </dd>
+<br>An OPTIONAL integer value indicating the maximum number of unacknowledged SETs to be returned.  The SET Transmitter SHOULD NOT send more SETs than the specified maximum.  If more than the maximum number of SETs are available, the SET Transmitter determines which to return first; the oldest SETs available MAY returned first, or another selection algorithm MAY be used, such as prioritizing SETs in some manner that makes sese for the use case.  first. A value of <samp>0</samp> MAY be used by SET Recipients that would like to perform an acknowledge-only request. This enables the Recipient to use separate HTTP requests for acknowledgement and reception of SETs.  If this parameter is omitted, no limit is placed on the number of SETs to be returned.  </dd>
 <dt>returnImmediately</dt>
 <dd style="margin-left: 8">
 <br>An OPTIONAL JSON boolean value that indicates the SET Transmitter SHOULD return an immediate response even if no results are available (short polling). The default value is <samp>false</samp>, which indicates the request is to be treated as an HTTP Long Poll, per Section 2 of <a href="#RFC6202" class="xref">[RFC6202]</a>. The timeout for the request is part of the configuration between the participants, which is out of scope of this specification.</dd>
@@ -646,10 +655,10 @@
 <p id="rfc.section.2.4.p.4">Poll requests have three variations: </p>
 
 <dl>
-<dt>Poll Only</dt>
+<dt>Poll-Only</dt>
 <dd style="margin-left: 8">
 <br>In which a SET Recipient asks for the next set of events where no previous SET deliveries are acknowledged (such as in the initial poll request).</dd>
-<dt>Acknowledge Only</dt>
+<dt>Acknowledge-Only</dt>
 <dd style="margin-left: 8">
 <br>In which a SET Recipient sets the <samp>maxEvents</samp> value to <samp>0</samp> along with <samp>ack</samp> and <samp>setErrs</samp> members indicating the SET Recipient is acknowledging previously received SETs and does not want to receive any new SETs in response to the request. </dd>
 <dt>Combined Acknowledge and Poll</dt>
@@ -657,7 +666,7 @@
 <br>In which a SET Recipient is both acknowledging previously received SETs using the <samp>ack</samp> and <samp>setErrs</samp> members and will wait for the next group of SETs in the SET Transmitters response.</dd>
 </dl>
 <h1 id="rfc.section.2.4.1">
-<a href="#rfc.section.2.4.1">2.4.1.</a> <a href="#PollOnlyRequest" id="PollOnlyRequest">Poll Only Request</a>
+<a href="#rfc.section.2.4.1">2.4.1.</a> <a href="#PollOnlyRequest" id="PollOnlyRequest">Poll-Only Request</a>
 </h1>
 <p id="rfc.section.2.4.1.p.1">In the case where no SETs were received in a previous poll (see <a href="#emptyPollResponse" class="xref">Figure 7</a>), the SET Recipient simply polls without acknowledgement parameters (<samp>ack</samp> and <samp>setErrs</samp>).</p>
 <div id="rfc.figure.1"></div>
@@ -686,7 +695,7 @@
 </pre>
 <p class="figure">Figure 2: Example Default Poll Request</p>
 <h1 id="rfc.section.2.4.2">
-<a href="#rfc.section.2.4.2">2.4.2.</a> <a href="#AckOnlyRequest" id="AckOnlyRequest">Acknowledge Only Request</a>
+<a href="#rfc.section.2.4.2">2.4.2.</a> <a href="#AckOnlyRequest" id="AckOnlyRequest">Acknowledge-Only Request</a>
 </h1>
 <p id="rfc.section.2.4.2.p.1">In this variation, the SET Recipient acknowledges previously received SETs and indicates it does not want to receive SETs in response by setting the <samp>maxEvents</samp> value to <samp>0</samp>.  This variation might be used, for instance, when a SET Recipient needs to acknowledge received SETs independently (e.g., on separate threads) from the process of receiving SETs.  </p>
 <p id="rfc.section.2.4.2.p.2">If the poll needs to return immediately, then <samp>returnImmediately</samp> MUST also be present with the value <samp>true</samp>.  If it is <samp>false</samp>, then a long poll will still occur until an event is ready to be returned, even though no events will be returned.  </p>
@@ -707,7 +716,7 @@
     "returnImmediately": true
   }
 </pre>
-<p class="figure">Figure 3: Example Acknowledge Only Request</p>
+<p class="figure">Figure 3: Example Acknowledge-Only Request</p>
 <h1 id="rfc.section.2.4.3">
 <a href="#rfc.section.2.4.3">2.4.3.</a> <a href="#pollAck" id="pollAck">Poll with Acknowledgement</a>
 </h1>
@@ -840,7 +849,7 @@
 <h1 id="rfc.section.3">
 <a href="#rfc.section.3">3.</a> <a href="#aa" id="aa">Authentication and Authorization</a>
 </h1>
-<p id="rfc.section.3.p.1">The SET delivery method described in this specification is based upon HTTP over TLS <a href="#RFC2818" class="xref">[RFC2818]</a> and standard HTTP authentication and authorization schemes, as per <a href="#RFC7235" class="xref">[RFC7235]</a>.  The TLS server certificate MUST be validated using DNS-ID <a href="#RFC6125" class="xref">[RFC6125]</a>.  As per Section 4.1 of <a href="#RFC7235" class="xref">[RFC7235]</a>, a SET delivery endpoint SHALL indicate supported HTTP authentication schemes via the <samp>WWW-Authenticate</samp> header field when using HTTP authentication.  </p>
+<p id="rfc.section.3.p.1">The SET delivery method described in this specification is based upon HTTP over TLS <a href="#RFC2818" class="xref">[RFC2818]</a> and standard HTTP authentication and authorization schemes, as per <a href="#RFC7235" class="xref">[RFC7235]</a>.  The TLS server certificate MUST be validated using DNS-ID <a href="#RFC6125" class="xref">[RFC6125]</a> and/or DANE <a href="#RFC6698" class="xref">[RFC6698]</a>.  As per Section 4.1 of <a href="#RFC7235" class="xref">[RFC7235]</a>, a SET delivery endpoint SHALL indicate supported HTTP authentication schemes via the <samp>WWW-Authenticate</samp> header field when using HTTP authentication.  </p>
 <p id="rfc.section.3.p.2">Authorization for the eligibility to provide actionable SETs can be determined by using the identity of the SET Issuer, validating the identity of the SET Transmitter, or via other employed authentication methods.  Likewise, the SET Transmitter may choose to validate the identity of the SET Recipient, perhaps using mutual TLS.  Because SETs are not commands, SET Recipients are free to ignore SETs that are not of interest after acknowledging their receipt.</p>
 <h1 id="rfc.section.4">
 <a href="#rfc.section.4">4.</a> <a href="#Security" id="Security">Security Considerations</a>
@@ -856,7 +865,7 @@
 <h1 id="rfc.section.4.3">
 <a href="#rfc.section.4.3">4.3.</a> <a href="#Confidentiality" id="Confidentiality">Confidentiality of SETs</a>
 </h1>
-<p id="rfc.section.4.3.p.1">SETs may contain sensitive information, including Personally Identifiable Information (PII), or be distributed through third parties.  In such cases, SET Transmitters and SET Recipients MUST protect the confidentiality of the SET contents.  In some use cases, using TLS to secure the transmitted SETs will be sufficient.  In other use cases, encrypting the SET as described in JWE <a href="#RFC7516" class="xref">[RFC7516]</a> will also be required.  The Event delivery endpoint MUST support at least TLS version 1.2 <a href="#RFC5246" class="xref">[RFC5246]</a> and SHOULD support the newest version of TLS that meets its security requirements, which as of the time of this publication is TLS 1.3 <a href="#RFC8446" class="xref">[RFC8446]</a>.  The client MUST perform a TLS/SSL server certificate check using DNS-ID <a href="#RFC6125" class="xref">[RFC6125]</a>.  How a SET Recipient determines the expected service identity to match the SET Transmitter's server certificate against is out of scope for this document.  The implementation security considerations for TLS in "Recommendations for Secure Use of TLS and DTLS" <a href="#RFC7525" class="xref">[RFC7525]</a> MUST be followed.  </p>
+<p id="rfc.section.4.3.p.1">SETs may contain sensitive information, including Personally Identifiable Information (PII), or be distributed through third parties.  In such cases, SET Transmitters and SET Recipients MUST protect the confidentiality of the SET contents.  In some use cases, using TLS to secure the transmitted SETs will be sufficient.  In other use cases, encrypting the SET as described in JWE <a href="#RFC7516" class="xref">[RFC7516]</a> will also be required.  The Event delivery endpoint MUST support at least TLS version 1.2 <a href="#RFC5246" class="xref">[RFC5246]</a> and SHOULD support the newest version of TLS that meets its security requirements, which as of the time of this publication is TLS 1.3 <a href="#RFC8446" class="xref">[RFC8446]</a>.  The client MUST perform a TLS/SSL server certificate check using DNS-ID <a href="#RFC6125" class="xref">[RFC6125]</a> and/or DANE <a href="#RFC6698" class="xref">[RFC6698]</a>.  How a SET Recipient determines the expected service identity to match the SET Transmitter's server certificate against is out of scope for this document.  The implementation security considerations for TLS in "Recommendations for Secure Use of TLS and DTLS" <a href="#RFC7525" class="xref">[RFC7525]</a> MUST be followed.  </p>
 <h1 id="rfc.section.4.4">
 <a href="#rfc.section.4.4">4.4.</a> <a href="#AT" id="AT">Access Token Considerations</a>
 </h1>
@@ -906,6 +915,11 @@
 <td class="reference"><b id="RFC6125">[RFC6125]</b></td>
 <td class="top">
 <a>Saint-Andre, P.</a> and <a>J. Hodges</a>, "<a href="https://tools.ietf.org/html/rfc6125">Representation and Verification of Domain-Based Application Service Identity within Internet Public Key Infrastructure Using X.509 (PKIX) Certificates in the Context of Transport Layer Security (TLS)</a>", RFC 6125, DOI 10.17487/RFC6125, March 2011.</td>
+</tr>
+<tr>
+<td class="reference"><b id="RFC6698">[RFC6698]</b></td>
+<td class="top">
+<a>Hoffman, P.</a> and <a>J. Schlyter</a>, "<a href="https://tools.ietf.org/html/rfc6698">The DNS-Based Authentication of Named Entities (DANE) Transport Layer Security (TLS) Protocol: TLSA</a>", RFC 6698, DOI 10.17487/RFC6698, August 2012.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC7231">[RFC7231]</b></td>
@@ -1006,7 +1020,7 @@
 <a href="#rfc.appendix.C">Appendix C.</a> <a href="#Acknowledgments" id="Acknowledgments">Acknowledgments</a>
 </h1>
 <p id="rfc.section.C.p.1">The editors would like to thank the members of the SCIM working group, which began discussions of provisioning events starting with draft-hunt-scim-notify-00 in 2015.  We would like to thank Phil Hunt and the other the authors of draft-ietf-secevent-delivery-02, upon which this specification is based.  We would like to thank the participants in the SecEvents working group for their contributions to this specification.  </p>
-<p id="rfc.section.C.p.2">Additionally, we would like to thank the following individuals for their reviews of the specification: Roman Danyliw, Martin Duke, Benjamin Kaduk, Erik Kline, Murray Kucherawy, Mark Nottingham, Yaron Sheffer, Valery Smyslov, Robert Sparks, &#201;ric Vyncke, and Robert Wilton.  </p>
+<p id="rfc.section.C.p.2">Additionally, we would like to thank the following individuals for their reviews of the specification: Roman Danyliw, Martin Duke, Benjamin Kaduk, Erik Kline, Murray Kucherawy, Barry Leiba, Mark Nottingham, Yaron Sheffer, Valery Smyslov, Robert Sparks, &#201;ric Vyncke, and Robert Wilton.  </p>
 <h1 id="rfc.appendix.D">
 <a href="#rfc.appendix.D">Appendix D.</a> <a href="#History" id="History">Change Log</a>
 </h1>

@@ -88,6 +88,22 @@
 	<xref target="I-D.ietf-secevent-http-push"/>.
       </t>
       <t>
+	Poll-based SET delivery is intended for scenarios where all of
+	the following apply:
+	<list style="symbols">
+	  <t>The recipient of the SET is capable of making outbound HTTP requests.</t>
+	  <t>
+	    The transmitter is capable of hosting a TLS-enabled HTTP endpoint that is accessible
+	    to the recipient.
+	  </t>
+	  <t>
+	    The transmitter and recipient are willing to exchange data with one another.
+	  </t>
+	</list>
+	In some scenarios, either push-based or poll-based delivery could be used,
+	and in others, only one of them would be applicable.
+      </t>
+      <t>
 	A mechanism for exchanging configuration metadata such as endpoint URLs,
 	cryptographic keys,
 	and possible implementation constraints such as buffer size limitations
@@ -150,7 +166,7 @@
 	Upon receiving a SET, the SET Recipient reads the SET and validates
 	it in the manner described in Section 2 of <xref target="I-D.ietf-secevent-http-push"/>.
 	The SET Recipient MUST acknowledge receipt to the SET Transmitter,
-	and SHOULD do in a timely fashion, as described in <xref target="pollRequest"/>.
+	and SHOULD do so in a timely fashion, as described in <xref target="pollRequest"/>.
 	The SET Recipient SHALL NOT use the event acknowledgement mechanism
         to report event errors other than those relating to the parsing and
         validation of the SET.
@@ -205,14 +221,15 @@
 	  <t hangText="Request Processing Parameters"><list style="hanging">
 	
 	    <t hangText="maxEvents"><vspace/>An OPTIONAL integer value
-	    indicating the maximum number of unacknowledged SETs that
-	    may be returned. If more than the maximum number of SETs
+	    indicating the maximum number of unacknowledged SETs to be returned.
+	    The SET Transmitter SHOULD NOT send more SETs than the specified maximum.
+	    If more than the maximum number of SETs
 	    are available, the SET Transmitter determines which to return first;
 	    the oldest SETs available MAY returned first,
 	    or another selection algorithm MAY be used,
 	    such as prioritizing SETs in some manner that makes sese for the use case.
 	    first. A value of <spanx style="verb">0</spanx> MAY be used by
-	    SET Recipients that would like to perform an acknowledge only
+	    SET Recipients that would like to perform an acknowledge-only
 	    request. This enables the Recipient to use separate HTTP requests
 	    for acknowledgement and reception of SETs.
 	    If this parameter is omitted, no limit is placed on
@@ -324,10 +341,10 @@
 
         <t>Poll requests have three variations:
         <list style="hanging">
-          <t hangText="Poll Only"><vspace/>In which a SET Recipient
+          <t hangText="Poll-Only"><vspace/>In which a SET Recipient
           asks for the next set of events where no previous SET deliveries
           are acknowledged (such as in the initial poll request).</t>
-          <t hangText="Acknowledge Only"><vspace/>In which a SET
+          <t hangText="Acknowledge-Only"><vspace/>In which a SET
           Recipient sets the <spanx style="verb">maxEvents</spanx>
           value to <spanx style="verb">0</spanx> along with
           <spanx style="verb">ack</spanx> and
@@ -343,7 +360,7 @@
           response.</t>
         </list></t>
 
-	<section anchor="PollOnlyRequest" title="Poll Only Request">
+	<section anchor="PollOnlyRequest" title="Poll-Only Request">
 	  <t>In the case where no SETs were received in a previous poll (see
 	  <xref target="emptyPollResponse"/>), the SET Recipient simply
 	  polls without acknowledgement parameters (<spanx style="verb">ack</spanx>
@@ -383,7 +400,7 @@
 	  </figure>
 	</section>
 	
-	<section anchor="AckOnlyRequest" title="Acknowledge Only Request">
+	<section anchor="AckOnlyRequest" title="Acknowledge-Only Request">
 	  <t>In this variation, the SET Recipient acknowledges previously
 	  received SETs and indicates it does not want to receive SETs in
 	  response by setting the <spanx style="verb">maxEvents</spanx>
@@ -399,7 +416,7 @@
 	    until an event is ready to be returned, even though no events will be returned.
 	  </t>
 	
-	  <figure anchor="pollAckOnly" title="Example Acknowledge Only Request">
+	  <figure anchor="pollAckOnly" title="Example Acknowledge-Only Request">
 	    <preamble>The following is a non-normative example poll request with acknowledgement
 	    of SETs received (for example as shown in
 	    <xref target="pollResponse"/>):</preamble>
@@ -632,7 +649,8 @@
       based upon HTTP over TLS <xref target="RFC2818"/> and standard
       HTTP authentication and authorization schemes, as per
       <xref target="RFC7235" />.
-      The TLS server certificate MUST be validated using DNS-ID <xref target="RFC6125"/>.
+      The TLS server certificate MUST be validated using DNS-ID <xref target="RFC6125"/>
+      and/or DANE <xref target="RFC6698"/>.
       As per Section 4.1 of <xref target="RFC7235"/>, a SET
       delivery endpoint SHALL indicate supported HTTP authentication
       schemes via the <spanx style="verb">WWW-Authenticate</spanx> header field
@@ -683,7 +701,8 @@
 	  of TLS that meets its security requirements,
 	  which as of the time of this publication is TLS 1.3 <xref target="RFC8446"/>.
 	  The client MUST
-	  perform a TLS/SSL server certificate check using DNS-ID <xref target="RFC6125"/>.
+	  perform a TLS/SSL server certificate check using DNS-ID <xref target="RFC6125"/>
+	  and/or DANE <xref target="RFC6698"/>.
           How a SET Recipient determines the expected service identity to match the SET
           Transmitter's server certificate against is out of scope for this document.
 	  The implementation security considerations for TLS in
@@ -771,6 +790,7 @@
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2818.xml' ?><!-- HTTP over TLS -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml' ?><!-- TLS 1.2 -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6125.xml' ?><!-- TLS Certs -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6698.xml' ?><!-- DANE -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
 
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
@@ -842,6 +862,7 @@
 	Benjamin Kaduk,
 	Erik Kline,
 	Murray Kucherawy,
+	Barry Leiba,
 	Mark Nottingham,
 	Yaron Sheffer,
 	Valery Smyslov,
