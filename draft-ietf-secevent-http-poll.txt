@@ -251,7 +251,7 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
          the maximum number of SETs are available, the SET Transmitter
          determines which to return first; the oldest SETs available MAY
          returned first, or another selection algorithm MAY be used,
-         such as prioritizing SETs in some manner that makes sese for
+         such as prioritizing SETs in some manner that makes sense for
          the use case.  first.  A value of "0" MAY be used by SET
          Recipients that would like to perform an acknowledge-only
          request.  This enables the Recipient to use separate HTTP
@@ -998,9 +998,9 @@ Appendix C.  Acknowledgments
 
    Additionally, we would like to thank the following individuals for
    their reviews of the specification: Roman Danyliw, Martin Duke,
-   Benjamin Kaduk, Erik Kline, Murray Kucherawy, Barry Leiba, Mark
-   Nottingham, Yaron Sheffer, Valery Smyslov, Robert Sparks, Eric
-   Vyncke, and Robert Wilton.
+   Benjamin Kaduk, Erik Kline, Murray Kucherawy, Warren Kumari, Barry
+   Leiba, Mark Nottingham, Alvaro Retana, Yaron Sheffer, Valery Smyslov,
+   Robert Sparks, Eric Vyncke, and Robert Wilton.
 
 
 

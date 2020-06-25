@@ -613,7 +613,7 @@
 <dd style="margin-left: 8"><dl>
 <dt>maxEvents</dt>
 <dd style="margin-left: 8">
-<br>An OPTIONAL integer value indicating the maximum number of unacknowledged SETs to be returned.  The SET Transmitter SHOULD NOT send more SETs than the specified maximum.  If more than the maximum number of SETs are available, the SET Transmitter determines which to return first; the oldest SETs available MAY returned first, or another selection algorithm MAY be used, such as prioritizing SETs in some manner that makes sese for the use case.  first. A value of <samp>0</samp> MAY be used by SET Recipients that would like to perform an acknowledge-only request. This enables the Recipient to use separate HTTP requests for acknowledgement and reception of SETs.  If this parameter is omitted, no limit is placed on the number of SETs to be returned.  </dd>
+<br>An OPTIONAL integer value indicating the maximum number of unacknowledged SETs to be returned.  The SET Transmitter SHOULD NOT send more SETs than the specified maximum.  If more than the maximum number of SETs are available, the SET Transmitter determines which to return first; the oldest SETs available MAY returned first, or another selection algorithm MAY be used, such as prioritizing SETs in some manner that makes sense for the use case.  first. A value of <samp>0</samp> MAY be used by SET Recipients that would like to perform an acknowledge-only request. This enables the Recipient to use separate HTTP requests for acknowledgement and reception of SETs.  If this parameter is omitted, no limit is placed on the number of SETs to be returned.  </dd>
 <dt>returnImmediately</dt>
 <dd style="margin-left: 8">
 <br>An OPTIONAL JSON boolean value that indicates the SET Transmitter SHOULD return an immediate response even if no results are available (short polling). The default value is <samp>false</samp>, which indicates the request is to be treated as an HTTP Long Poll, per Section 2 of <a href="#RFC6202" class="xref">[RFC6202]</a>. The timeout for the request is part of the configuration between the participants, which is out of scope of this specification.</dd>
@@ -1020,7 +1020,7 @@
 <a href="#rfc.appendix.C">Appendix C.</a> <a href="#Acknowledgments" id="Acknowledgments">Acknowledgments</a>
 </h1>
 <p id="rfc.section.C.p.1">The editors would like to thank the members of the SCIM working group, which began discussions of provisioning events starting with draft-hunt-scim-notify-00 in 2015.  We would like to thank Phil Hunt and the other the authors of draft-ietf-secevent-delivery-02, upon which this specification is based.  We would like to thank the participants in the SecEvents working group for their contributions to this specification.  </p>
-<p id="rfc.section.C.p.2">Additionally, we would like to thank the following individuals for their reviews of the specification: Roman Danyliw, Martin Duke, Benjamin Kaduk, Erik Kline, Murray Kucherawy, Barry Leiba, Mark Nottingham, Yaron Sheffer, Valery Smyslov, Robert Sparks, &#201;ric Vyncke, and Robert Wilton.  </p>
+<p id="rfc.section.C.p.2">Additionally, we would like to thank the following individuals for their reviews of the specification: Roman Danyliw, Martin Duke, Benjamin Kaduk, Erik Kline, Murray Kucherawy, Warren Kumari, Barry Leiba, Mark Nottingham, Alvaro Retana, Yaron Sheffer, Valery Smyslov, Robert Sparks, &#201;ric Vyncke, and Robert Wilton.  </p>
 <h1 id="rfc.appendix.D">
 <a href="#rfc.appendix.D">Appendix D.</a> <a href="#History" id="History">Change Log</a>
 </h1>

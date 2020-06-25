@@ -227,7 +227,7 @@
 	    are available, the SET Transmitter determines which to return first;
 	    the oldest SETs available MAY returned first,
 	    or another selection algorithm MAY be used,
-	    such as prioritizing SETs in some manner that makes sese for the use case.
+	    such as prioritizing SETs in some manner that makes sense for the use case.
 	    first. A value of <spanx style="verb">0</spanx> MAY be used by
 	    SET Recipients that would like to perform an acknowledge-only
 	    request. This enables the Recipient to use separate HTTP requests
@@ -862,8 +862,10 @@
 	Benjamin Kaduk,
 	Erik Kline,
 	Murray Kucherawy,
+	Warren Kumari,
 	Barry Leiba,
 	Mark Nottingham,
+	Alvaro Retana,
 	Yaron Sheffer,
 	Valery Smyslov,
 	Robert Sparks,
