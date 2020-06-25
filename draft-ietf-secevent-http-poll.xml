@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-poll-11"
+<rfc category="std" docName="draft-ietf-secevent-http-poll-12"
 	ipr="trust200902">
   <front>
     <title abbrev="draft-ietf-secevent-http-poll">
@@ -56,7 +56,7 @@
       </address>
     </author>
 
-    <date year="2020" month="June" day="15" />
+    <date year="2020" month="June" day="24" />
 
     <area>Security</area>
     <workgroup>Security Events Working Group</workgroup>
@@ -88,8 +88,26 @@
 	<xref target="I-D.ietf-secevent-http-push"/>.
       </t>
       <t>
-	A mechanism for exchanging configuration metadata such as endpoint URLs
-	and cryptographic keys between the transmitter and recipient is
+	Poll-based SET delivery is intended for scenarios where all of
+	the following apply:
+	<list style="symbols">
+	  <t>The recipient of the SET is capable of making outbound HTTP requests.</t>
+	  <t>
+	    The transmitter is capable of hosting a TLS-enabled HTTP endpoint that is accessible
+	    to the recipient.
+	  </t>
+	  <t>
+	    The transmitter and recipient are willing to exchange data with one another.
+	  </t>
+	</list>
+	In some scenarios, either push-based or poll-based delivery could be used,
+	and in others, only one of them would be applicable.
+      </t>
+      <t>
+	A mechanism for exchanging configuration metadata such as endpoint URLs,
+	cryptographic keys,
+	and possible implementation constraints such as buffer size limitations
+	between the transmitter and recipient is
         out of scope for this specification.  How SETs are defined and the process
         by which security events are identified for SET Recipients are specified in
 	<xref target="RFC8417"/>.
@@ -148,7 +166,7 @@
 	Upon receiving a SET, the SET Recipient reads the SET and validates
 	it in the manner described in Section 2 of <xref target="I-D.ietf-secevent-http-push"/>.
 	The SET Recipient MUST acknowledge receipt to the SET Transmitter,
-	and SHOULD do in a timely fashion, as described in <xref target="pollRequest"/>.
+	and SHOULD do so in a timely fashion, as described in <xref target="pollRequest"/>.
 	The SET Recipient SHALL NOT use the event acknowledgement mechanism
         to report event errors other than those relating to the parsing and
         validation of the SET.
@@ -180,9 +198,9 @@
 	
 	<t>The purpose of the acknowledgement is to inform the
 	SET Transmitter that delivery has succeeded and
-	redelivery is no longer required. Before acknowledgement, SET
-	Recipients SHOULD ensure that received SETs have been validated and
-	retained in a manner appropriate to the recipient's
+	redelivery is no longer required.
+	Before acknowledgement, SET Recipients validate the received SETs
+	and retain them in a manner appropriate to the recipient's
 	requirements. The level and method of retention of SETs
 	by SET Recipients is out of scope of this specification.</t>
       </section>
@@ -194,7 +212,7 @@
 	and SET acknowledgement parameters in the form of JSON objects.
 	</t>
 	
-	<t>When making a request, the HTTP header <spanx style="verb">Content-Type</spanx>
+	<t>When making a request, the HTTP <spanx style="verb">Content-Type</spanx> header field
 	is set to <spanx style="verb">application/json</spanx>.</t>
 	
 	<t>The following JSON object members are used in a polling request:
@@ -202,12 +220,16 @@
 	
 	  <t hangText="Request Processing Parameters"><list style="hanging">
 	
-	    <t hangText="maxEvents"><vspace/>An OPTIONAL JSON integer value
-	    indicating the maximum number of unacknowledged SETs that
-	    SHOULD be returned. If more than the maximum number of SETs
-	    are available, the oldest SETs available SHOULD be returned
+	    <t hangText="maxEvents"><vspace/>An OPTIONAL integer value
+	    indicating the maximum number of unacknowledged SETs to be returned.
+	    The SET Transmitter SHOULD NOT send more SETs than the specified maximum.
+	    If more than the maximum number of SETs
+	    are available, the SET Transmitter determines which to return first;
+	    the oldest SETs available MAY returned first,
+	    or another selection algorithm MAY be used,
+	    such as prioritizing SETs in some manner that makes sense for the use case.
 	    first. A value of <spanx style="verb">0</spanx> MAY be used by
-	    SET Recipients that would like to perform an acknowledge only
+	    SET Recipients that would like to perform an acknowledge-only
 	    request. This enables the Recipient to use separate HTTP requests
 	    for acknowledgement and reception of SETs.
 	    If this parameter is omitted, no limit is placed on
@@ -230,9 +252,10 @@
 	   <t hangText="ack">
 	     <vspace/>
 	     A JSON array of strings whose values
-	     are the <spanx style="verb">jti</spanx> values of
+	     are the <spanx style="verb">jti</spanx> <xref target="RFC7519"/> values of
 	     successfully received SETs that are being acknowledged.
-	     If there are no outstanding SETs to acknowledge, this member is omitted.
+	     If there are no outstanding SETs to acknowledge, this member is omitted
+	     or contains an empty array.
 	     Once a SET has been acknowledged, the SET Transmitter is released from
 	     any obligation to retain the SET.
 	   </t>
@@ -247,7 +270,8 @@
 	     <spanx style="verb">err</spanx> and
 	     <spanx style="verb">description</spanx> values
 	     specified in <xref target="errorResponse"/>.
-	     If there are no outstanding SETs with errors to report, this member is omitted.
+	     If there are no outstanding SETs with errors to report, this member is omitted
+	     or contains an empty JSON object.
 	   </t>
 
          </list></t>
@@ -269,7 +293,11 @@
 	  be delivered and its value is a JSON string representing the
 	  corresponding SET. If there are no
 	  outstanding SETs to be transmitted, the JSON object SHALL be
-	  empty.</t>
+	  empty.
+	  Note that both SETs being transmitted for the first time and
+	  SETs that are being re-transmitted after not having been acknowledged
+	  are communicated here.
+	  </t>
 	
 	  <t hangText="moreAvailable"><vspace/>A JSON boolean value that
 	  indicates if more unacknowledged SETs are available to be returned.
@@ -279,7 +307,7 @@
 	</list>
 	</t>
 	
-	<t>When making a response, the HTTP header <spanx style="verb">Content-Type</spanx>
+	<t>When making a response, the HTTP <spanx style="verb">Content-Type</spanx> header field
 	is set to <spanx style="verb">application/json</spanx>.</t>
       </section>
 
@@ -293,7 +321,7 @@
 	<spanx style="verb">setErrs</spanx> request parameters are omitted.</t>
 
 	<t>
-	  After a period of time configured between the SET
+	  After a period of time configured in an out-of-band manner between the SET
 	Transmitter and Recipient, a SET Transmitter MAY redeliver SETs
 	it has previously delivered. The SET Recipient SHOULD accept
 	repeat SETs and acknowledge the SETs regardless of whether the
@@ -303,8 +331,8 @@
 	</t>
 	
         <t>If the SET Recipient has received SETs from the
-        SET Transmitter, the SET Recipient SHOULD parse and validate
-        received SETs to meet its own requirements and SHOULD acknowledge
+        SET Transmitter, the SET Recipient parses and validates that
+        received SETs meet its own requirements and SHOULD acknowledge
         receipt in a timely fashion (e.g., seconds or minutes) so that the SET
         Transmitter can mark the SETs as received. SET Recipients SHOULD
         acknowledge receipt before taking any local actions based on
@@ -313,10 +341,10 @@
 
         <t>Poll requests have three variations:
         <list style="hanging">
-          <t hangText="Poll Only"><vspace/>In which a SET Recipient
+          <t hangText="Poll-Only"><vspace/>In which a SET Recipient
           asks for the next set of events where no previous SET deliveries
           are acknowledged (such as in the initial poll request).</t>
-          <t hangText="Acknowledge Only"><vspace/>In which a SET
+          <t hangText="Acknowledge-Only"><vspace/>In which a SET
           Recipient sets the <spanx style="verb">maxEvents</spanx>
           value to <spanx style="verb">0</spanx> along with
           <spanx style="verb">ack</spanx> and
@@ -332,7 +360,7 @@
           response.</t>
         </list></t>
 
-	<section anchor="PollOnlyRequest" title="Poll Only Request">
+	<section anchor="PollOnlyRequest" title="Poll-Only Request">
 	  <t>In the case where no SETs were received in a previous poll (see
 	  <xref target="emptyPollResponse"/>), the SET Recipient simply
 	  polls without acknowledgement parameters (<spanx style="verb">ack</spanx>
@@ -340,18 +368,20 @@
 
 	  <figure anchor="pollInitRequest" title="Example Initial Poll Request">
 	    <preamble>
-	      The following is an example request made by a SET Recipient
+	      The following is a non-normative example request made by a SET Recipient
 	      that has no outstanding SETs to acknowledge and is polling
 	      for available SETs at the endpoint
 	      <spanx style="verb">https://notify.idp.example.com/Events</spanx>:
 	    </preamble>
-	    <artwork align="left">POST /Events HTTP/1.1
-Host: notify.idp.example.com
-Content-Type: application/json
+	    <artwork><![CDATA[
+  POST /Events HTTP/1.1
+  Host: notify.idp.example.com
+  Content-Type: application/json
 
-{
- "returnImmediately": true
-}</artwork>
+  {
+   "returnImmediately": true
+  }
+]]></artwork>
 	  </figure>
 
 	  <t>A SET Recipient can poll using default parameter values by passing
@@ -360,40 +390,50 @@ Content-Type: application/json
 	  <figure anchor="pollDefaultRequest" title="Example Default Poll Request">
 	    <preamble>The following is a non-normative example default poll request to the
 	    endpoint <spanx style="verb">https://notify.idp.example.com/Events</spanx>:</preamble>
-	    <artwork align="left">POST /Events HTTP/1.1
-Host: notify.idp.example.com
-Content-Type: application/json
+	    <artwork><![CDATA[
+  POST /Events HTTP/1.1
+  Host: notify.idp.example.com
+  Content-Type: application/json
 
-{}</artwork>
+  {}
+]]></artwork>
 	  </figure>
 	</section>
 	
-	<section anchor="AckOnlyRequest" title="Acknowledge Only Request">
+	<section anchor="AckOnlyRequest" title="Acknowledge-Only Request">
 	  <t>In this variation, the SET Recipient acknowledges previously
 	  received SETs and indicates it does not want to receive SETs in
 	  response by setting the <spanx style="verb">maxEvents</spanx>
-	  value to <spanx style="verb">0</spanx>.</t>
-	
-	  <t>This variation might be used, for instance, when a SET Recipient needs to
+	  value to <spanx style="verb">0</spanx>.
+	  This variation might be used, for instance, when a SET Recipient needs to
 	  acknowledge received SETs independently (e.g., on separate threads)
-	  from the process of receiving SETs.</t>
+	  from the process of receiving SETs.
+	  </t>
+	  <t>
+	    If the poll needs to return immediately, then <spanx style="verb">returnImmediately</spanx>
+	    MUST also be present with the value <spanx style="verb">true</spanx>.
+	    If it is <spanx style="verb">false</spanx>, then a long poll will still occur
+	    until an event is ready to be returned, even though no events will be returned.
+	  </t>
 	
-	  <figure anchor="pollAckOnly" title="Example Acknowledge Only Request">
+	  <figure anchor="pollAckOnly" title="Example Acknowledge-Only Request">
 	    <preamble>The following is a non-normative example poll request with acknowledgement
 	    of SETs received (for example as shown in
 	    <xref target="pollResponse"/>):</preamble>
-	    <artwork>POST /Events HTTP/1.1
-Host: notify.idp.example.com
-Content-Type: application/json
+	    <artwork><![CDATA[
+  POST /Events HTTP/1.1
+  Host: notify.idp.example.com
+  Content-Type: application/json
 
-{
-  "ack": [
-    "4d3559ec67504aaba65d40b0363faad8",
-    "3d0c3cf797584bd193bd0fb1bd4e7d30"
-  ],
-  "maxEvents": 0,
-  "returnImmediately": true
-}</artwork>
+  {
+    "ack": [
+      "4d3559ec67504aaba65d40b0363faad8",
+      "3d0c3cf797584bd193bd0fb1bd4e7d30"
+    ],
+    "maxEvents": 0,
+    "returnImmediately": true
+  }
+]]></artwork>
 	  </figure>
 	</section>
 
@@ -406,17 +446,19 @@ Content-Type: application/json
 	  <figure anchor="pollGoodResponse" title="Example Poll with Acknowledgement and No Errors">
 	    <preamble>The following is a non-normative example poll with acknowledgement
 	    of the SETs received in <xref target="pollResponse"/>:</preamble>
-	    <artwork>POST /Events HTTP/1.1
-Host: notify.idp.example.com
-Content-Type: application/json
+	    <artwork><![CDATA[
+  POST /Events HTTP/1.1
+  Host: notify.idp.example.com
+  Content-Type: application/json
 
-{
-  "ack": [
-    "4d3559ec67504aaba65d40b0363faad8",
-    "3d0c3cf797584bd193bd0fb1bd4e7d30"
-  ],
-  "returnImmediately": false
-}</artwork>
+  {
+    "ack": [
+      "4d3559ec67504aaba65d40b0363faad8",
+      "3d0c3cf797584bd193bd0fb1bd4e7d30"
+    ],
+    "returnImmediately": false
+  }
+]]></artwork>
 	  </figure>
 
 	  <t>In the above acknowledgement, the SET Recipient has acknowledged
@@ -436,21 +478,23 @@ Content-Type: application/json
 	    <preamble>The following is a non-normative example of a response
 	    acknowledging one successfully received SET and one SET with an error
 	    from the two SETs received in <xref target="pollResponse"/>:</preamble>
-	    <artwork>POST /Events HTTP/1.1
-Host: notify.idp.example.com
-Content-Language: en-US
-Content-Type: application/json
+	    <artwork><![CDATA[
+  POST /Events HTTP/1.1
+  Host: notify.idp.example.com
+  Content-Language: en-US
+  Content-Type: application/json
 
-{
-  "ack": ["3d0c3cf797584bd193bd0fb1bd4e7d30"],
-  "setErrs": {
-    "4d3559ec67504aaba65d40b0363faad8": {
-      "err": "authentication_failed",
-      "description": "The SET could not be authenticated"
-    }
-  },
-  "returnImmediately": true
-}</artwork>
+  {
+    "ack": ["3d0c3cf797584bd193bd0fb1bd4e7d30"],
+    "setErrs": {
+      "4d3559ec67504aaba65d40b0363faad8": {
+	"err": "authentication_failed",
+	"description": "The SET could not be authenticated"
+      }
+    },
+    "returnImmediately": true
+  }
+]]></artwork>
 	  </figure>
 
 	</section>
@@ -475,34 +519,36 @@ Content-Type: application/json
 	  <preamble>The following is a non-normative example response to
 	  the request shown in <xref target="pollRequest"/>. This example
 	  shows two SETs being returned:</preamble>
-	  <artwork align="left">HTTP/1.1 200 OK
-Content-Type: application/json
+	  <artwork><![CDATA[
+  HTTP/1.1 200 OK
+  Content-Type: application/json
 
-{
-"sets": {
-  "4d3559ec67504aaba65d40b0363faad8":
-   "eyJhbGciOiJub25lIn0.
-   eyJqdGkiOiI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIsImlhdCI6MTQ
-   1ODQ5NjQwNCwiaXNzIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwiYXVkIjpbIm
-   h0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M
-   2I3NzU0IiwiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIx
-   ZDA4NjQxZDc2NzZlZTciXSwiZXZlbnRzIjp7InVybjppZXRmOnBhcmFtczpzY2ltOmV
-   2ZW50OmNyZWF0ZSI6eyJyZWYiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcn
-   MvNDRmNjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIsImF0dHJpYnV0ZXMiOlsiaWQiLCJuY
-   W1lIiwidXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.",
-  "3d0c3cf797584bd193bd0fb1bd4e7d30":
-   "eyJhbGciOiJub25lIn0.
-   eyJqdGkiOiIzZDBjM2NmNzk3NTg0YmQxOTNiZDBmYjFiZDRlN2QzMCIsImlhdCI6MTQ
-   1ODQ5NjAyNSwiaXNzIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwiYXVkIjpbIm
-   h0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M
-   2I3NzU0IiwiaHR0cHM6Ly9qaHViLmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIx
-   ZDA4NjQxZDc2NzZlZTciXSwic3ViIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL1V
-   zZXJzLzQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJldmVudHMiOnsidXJuOmlldG
-   Y6cGFyYW1zOnNjaW06ZXZlbnQ6cGFzc3dvcmRSZXNldCI6eyJpZCI6IjQ0ZjYxNDJkZ
-   jk2YmQ2YWI2MWU3NTIxZDkifSwiaHR0cHM6Ly9leGFtcGxlLmNvbS9zY2ltL2V2ZW50
-   L3Bhc3N3b3JkUmVzZXRFeHQiOnsicmVzZXRBdHRlbXB0cyI6NX19fQ."
- }
-}</artwork>
+  {
+  "sets": {
+    "4d3559ec67504aaba65d40b0363faad8":
+     "eyJhbGciOiJub25lIn0.
+     eyJqdGkiOiI0ZDM1NTllYzY3NTA0YWFiYTY1ZDQwYjAzNjNmYWFkOCIsImlhdCI6MTQ
+     1ODQ5NjQwNCwiaXNzIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwiYXVkIjpbIm
+     h0dHBzOi8vc2NpbS5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M
+     2I3NzU0IiwiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIx
+     ZDA4NjQxZDc2NzZlZTciXSwiZXZlbnRzIjp7InVybjppZXRmOnBhcmFtczpzY2ltOmV
+     2ZW50OmNyZWF0ZSI6eyJyZWYiOiJodHRwczovL3NjaW0uZXhhbXBsZS5jb20vVXNlcn
+     MvNDRmNjE0MmRmOTZiZDZhYjYxZTc1MjFkOSIsImF0dHJpYnV0ZXMiOlsiaWQiLCJuY
+     W1lIiwidXNlck5hbWUiLCJwYXNzd29yZCIsImVtYWlscyJdfX19.",
+    "3d0c3cf797584bd193bd0fb1bd4e7d30":
+     "eyJhbGciOiJub25lIn0.
+     eyJqdGkiOiIzZDBjM2NmNzk3NTg0YmQxOTNiZDBmYjFiZDRlN2QzMCIsImlhdCI6MTQ
+     1ODQ5NjAyNSwiaXNzIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tIiwiYXVkIjpbIm
+     h0dHBzOi8vamh1Yi5leGFtcGxlLmNvbS9GZWVkcy85OGQ1MjQ2MWZhNWJiYzg3OTU5M
+     2I3NzU0IiwiaHR0cHM6Ly9qaHViLmV4YW1wbGUuY29tL0ZlZWRzLzVkNzYwNDUxNmIx
+     ZDA4NjQxZDc2NzZlZTciXSwic3ViIjoiaHR0cHM6Ly9zY2ltLmV4YW1wbGUuY29tL1V
+     zZXJzLzQ0ZjYxNDJkZjk2YmQ2YWI2MWU3NTIxZDkiLCJldmVudHMiOnsidXJuOmlldG
+     Y6cGFyYW1zOnNjaW06ZXZlbnQ6cGFzc3dvcmRSZXNldCI6eyJpZCI6IjQ0ZjYxNDJkZ
+     jk2YmQ2YWI2MWU3NTIxZDkifSwiaHR0cHM6Ly9leGFtcGxlLmNvbS9zY2ltL2V2ZW50
+     L3Bhc3N3b3JkUmVzZXRFeHQiOnsicmVzZXRBdHRlbXB0cyI6NX19fQ."
+   }
+  }
+]]></artwork>
 	</figure>
 	<t>In the above example, two SETs whose <spanx style="verb">jti</spanx> values
 	are <spanx style="verb">4d3559ec67504aaba65d40b0363faad8</spanx>
@@ -513,12 +559,14 @@ Content-Type: application/json
 	  <preamble>The following is a non-normative example response to
 	  the request shown in <xref target="PollOnlyRequest"/>, which indicates that no new
 	  SETs or unacknowledged SETs are available:</preamble>
-	  <artwork align="left">HTTP/1.1 200 OK
-Content-Type: application/json
+	  <artwork><![CDATA[
+  HTTP/1.1 200 OK
+  Content-Type: application/json
 
-{
- "sets": {}
-}</artwork>
+  {
+   "sets": {}
+  }
+]]></artwork>
 	</figure>
 	
 	<t>Upon receiving the JSON document (e.g., as shown in
@@ -530,8 +578,8 @@ Content-Type: application/json
 	
         <section anchor="PollErrorResponse" title="Poll Error Response">
             <t>In the event of a general HTTP error condition in the context of
-                processing a poll request, the service provider SHOULD respond with
-                an appropriate HTTP Response Status Code as defined in Section 6 of
+                processing a poll request, the service provider responds with
+                the applicable HTTP Response Status Code, as defined in Section 6 of
                 <xref target="RFC7231" />.</t>
 
             <t>Service providers MAY respond to any invalid poll request with an HTTP Response
@@ -549,7 +597,9 @@ Content-Type: application/json
                 <preamble>
                     The following is a non-normative example of a response to an invalid poll request:
                 </preamble>
-                <artwork>HTTP/1.1 400 Bad Request</artwork>
+                <artwork><![CDATA[
+  HTTP/1.1 400 Bad Request
+]]></artwork>
             </figure>
         </section>
       </section>
@@ -585,7 +635,7 @@ Content-Type: application/json
         <t>
             When the SET Recipient includes one or more error responses in a request to
             the SET Transmitter, it must also include in the request a 
-            <spanx style="verb">Content-Language</spanx> header whose value indicates the
+            <spanx style="verb">Content-Language</spanx> header field whose value indicates the
             language of the error descriptions included in the request.  The method of
             language selection in the case when the SET Recipient can provide error messages
             in multiple languages is out of scope for this specification.
@@ -599,18 +649,21 @@ Content-Type: application/json
       based upon HTTP over TLS <xref target="RFC2818"/> and standard
       HTTP authentication and authorization schemes, as per
       <xref target="RFC7235" />.
-      The TLS server certificate MUST be validated, per <xref target="RFC6125"/>.
+      The TLS server certificate MUST be validated using DNS-ID <xref target="RFC6125"/>
+      and/or DANE <xref target="RFC6698"/>.
       As per Section 4.1 of <xref target="RFC7235"/>, a SET
       delivery endpoint SHALL indicate supported HTTP authentication
-      schemes via the <spanx style="verb">WWW-Authenticate</spanx> header
+      schemes via the <spanx style="verb">WWW-Authenticate</spanx> header field
       when using HTTP authentication.
       </t>
 
       <t>
 	Authorization for the eligibility to provide actionable SETs can be determined by
 	using the identity of the SET Issuer,
-	validating the polling endpoint URL, perhaps using mutual TLS,
+	validating the identity of the SET Transmitter,
 	or via other employed authentication methods.
+	Likewise, the SET Transmitter may choose to validate the identity of the SET Recipient,
+	perhaps using mutual TLS.
 	Because SETs are
       not commands, SET Recipients are free to ignore SETs that
       are not of interest after acknowledging their receipt.</t>
@@ -636,8 +689,8 @@ Content-Type: application/json
 
       <section anchor="Confidentiality" title="Confidentiality of SETs">
         <t>
-	  SETs may contain sensitive information that is considered
-	  Personally Identifiable Information (PII).
+	  SETs may contain sensitive information, including Personally Identifiable Information (PII),
+	  or be distributed through third parties.
 	  In such cases, SET Transmitters and
 	  SET Recipients MUST protect the confidentiality of the SET contents.
 	  In some use cases, using TLS to secure the transmitted SETs will be sufficient.
@@ -648,11 +701,13 @@ Content-Type: application/json
 	  of TLS that meets its security requirements,
 	  which as of the time of this publication is TLS 1.3 <xref target="RFC8446"/>.
 	  The client MUST
-	  perform a TLS/SSL server certificate check using DNS-ID <xref target="RFC6125"/>.
+	  perform a TLS/SSL server certificate check using DNS-ID <xref target="RFC6125"/>
+	  and/or DANE <xref target="RFC6698"/>.
           How a SET Recipient determines the expected service identity to match the SET
           Transmitter's server certificate against is out of scope for this document.
-	  Implementation security considerations for TLS can be found in
-	  "Recommendations for Secure Use of TLS and DTLS" <xref target="RFC7525"/>.
+	  The implementation security considerations for TLS in
+	  "Recommendations for Secure Use of TLS and DTLS" <xref target="RFC7525"/>
+	  MUST be followed.
 	</t>
       </section>
 
@@ -696,7 +751,7 @@ Content-Type: application/json
 
     <section anchor="Privacy" title="Privacy Considerations">
 
-      <t>SET Transmitters SHOULD attempt to deliver SETs that are
+      <t>SET Transmitters should attempt to deliver SETs that are
       targeted to the specific business and
       protocol needs of subscribers.</t>
 
@@ -712,7 +767,7 @@ Content-Type: application/json
       <t>
 	In some cases, subject identifiers themselves may be considered sensitive
 	information, such that their inclusion within a SET may be considered a violation
-	of privacy.  SET Issuers should consider the ramifications of sharing a
+	of privacy.  SET Issuers and SET Transmitters should consider the ramifications of sharing a
 	particular subject identifier with a SET Recipient (e.g., whether doing so could
 	enable correlation and/or de-anonymization of data) and choose appropriate
 	subject identifiers for their use cases.
@@ -735,10 +790,12 @@ Content-Type: application/json
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.2818.xml' ?><!-- HTTP over TLS -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.5246.xml' ?><!-- TLS 1.2 -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6125.xml' ?><!-- TLS Certs -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.6698.xml' ?><!-- DANE -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7231.xml' ?><!-- HTTP Semantics -->
 
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7515.xml' ?><!-- JWS -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7516.xml' ?><!-- JWE -->
+      <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7519.xml' ?><!-- JWT -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7521.xml' ?><!-- Client Auth Assertions -->
 
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7525.xml' ?><!-- TLS Recos -->
@@ -747,7 +804,7 @@ Content-Type: application/json
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8417.xml' ?><!-- SET -->
       <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.8446.xml' ?><!-- TLS 1.3 -->
 
-      <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-http-push-11.xml" ?>
+      <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-http-push-12.xml" ?>
     </references>
 
     <references title="Informative References">
@@ -779,6 +836,16 @@ Content-Type: application/json
       </t>
     </section>
 
+    <section anchor="Others" title="Other Streaming Specifications">
+      <t>[[ NOTE TO THE RFC EDITOR: This section to be removed prior to publication ]]</t>
+      <t>
+	A number of pub/sub, queuing, and streaming systems were reviewed
+	as possible solutions or as input to the current draft.
+	These are listed in Appendix B of <xref target="I-D.ietf-secevent-http-push"/>,
+	and are therefore not repeated here.
+      </t>
+    </section>
+
     <section anchor="Acknowledgments" title="Acknowledgments">
       <t>
 	The editors would like to thank the members of the SCIM working group, which
@@ -790,12 +857,21 @@ Content-Type: application/json
       </t>
       <t>
 	Additionally, we would like to thank the following individuals for their reviews of the specification:
+	Roman Danyliw,
+	Martin Duke,
 	Benjamin Kaduk,
+	Erik Kline,
+	Murray Kucherawy,
+	Warren Kumari,
+	Barry Leiba,
 	Mark Nottingham,
+	Alvaro Retana,
 	Yaron Sheffer,
 	Valery Smyslov,
+	Robert Sparks,
+	Éric Vyncke,
 	and
-	Robert Sparks.
+	Robert Wilton.
       </t>
     </section>
 
@@ -967,6 +1043,14 @@ Content-Type: application/json
 	  <t>
 	    Revised to unambiguously require the use of TLS,
 	    while preserving descriptions of precautions needed for non-TLS use in an appendix.
+	  </t>
+	</list>
+      </t>
+      <t>
+	Draft 12 - mbj
+	<list style="symbols">
+	  <t>
+	    Addressed IESG comments.
 	  </t>
 	</list>
       </t>
