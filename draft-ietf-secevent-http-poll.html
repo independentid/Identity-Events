@@ -629,7 +629,7 @@
 <dl>
 <dt>sets</dt>
 <dd style="margin-left: 8">
-<br>A JSON object containing zero or more SETs being returned.  Each member name is the <samp>jti</samp> of a SET to be delivered and its value is a JSON string representing the corresponding SET. If there are no outstanding SETs to be transmitted, the JSON object SHALL be empty.</dd>
+<br>A JSON object containing zero or more SETs being returned.  Each member name is the <samp>jti</samp> of a SET to be delivered and its value is a JSON string representing the corresponding SET. If there are no outstanding SETs to be transmitted, the JSON object SHALL be empty.  Note that both SETs being transmitted for the first time and SETs that are being re-transmitted after not having been acknowledged are communicated here.  </dd>
 <dt>moreAvailable</dt>
 <dd style="margin-left: 8">
 <br>A JSON boolean value that indicates if more unacknowledged SETs are available to be returned.  This member MAY be omitted, with the meaning being the same as including it with the boolean value <samp>false</samp>.  </dd>
@@ -1006,7 +1006,7 @@
 <a href="#rfc.appendix.C">Appendix C.</a> <a href="#Acknowledgments" id="Acknowledgments">Acknowledgments</a>
 </h1>
 <p id="rfc.section.C.p.1">The editors would like to thank the members of the SCIM working group, which began discussions of provisioning events starting with draft-hunt-scim-notify-00 in 2015.  We would like to thank Phil Hunt and the other the authors of draft-ietf-secevent-delivery-02, upon which this specification is based.  We would like to thank the participants in the SecEvents working group for their contributions to this specification.  </p>
-<p id="rfc.section.C.p.2">Additionally, we would like to thank the following individuals for their reviews of the specification: Martin Duke, Benjamin Kaduk, Erik Kline, Murray Kucherawy, Mark Nottingham, Yaron Sheffer, Valery Smyslov, Robert Sparks, and &#201;ric Vyncke.  </p>
+<p id="rfc.section.C.p.2">Additionally, we would like to thank the following individuals for their reviews of the specification: Martin Duke, Benjamin Kaduk, Erik Kline, Murray Kucherawy, Mark Nottingham, Yaron Sheffer, Valery Smyslov, Robert Sparks, &#201;ric Vyncke, and Robert Wilton.  </p>
 <h1 id="rfc.appendix.D">
 <a href="#rfc.appendix.D">Appendix D.</a> <a href="#History" id="History">Change Log</a>
 </h1>

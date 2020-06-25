@@ -274,7 +274,11 @@
 	  be delivered and its value is a JSON string representing the
 	  corresponding SET. If there are no
 	  outstanding SETs to be transmitted, the JSON object SHALL be
-	  empty.</t>
+	  empty.
+	  Note that both SETs being transmitted for the first time and
+	  SETs that are being re-transmitted after not having been acknowledged
+	  are communicated here.
+	  </t>
 	
 	  <t hangText="moreAvailable"><vspace/>A JSON boolean value that
 	  indicates if more unacknowledged SETs are available to be returned.
@@ -838,8 +842,9 @@
 	Yaron Sheffer,
 	Valery Smyslov,
 	Robert Sparks,
+	Éric Vyncke,
 	and
-	Éric Vyncke.
+	Robert Wilton.
       </t>
     </section>
 

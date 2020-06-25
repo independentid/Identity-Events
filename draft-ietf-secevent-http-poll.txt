@@ -77,14 +77,14 @@ Table of Contents
      2.3.  Polling HTTP Response . . . . . . . . . . . . . . . . . .   5
      2.4.  Poll Request  . . . . . . . . . . . . . . . . . . . . . .   6
        2.4.1.  Poll Only Request . . . . . . . . . . . . . . . . . .   7
-       2.4.2.  Acknowledge Only Request  . . . . . . . . . . . . . .   7
+       2.4.2.  Acknowledge Only Request  . . . . . . . . . . . . . .   8
        2.4.3.  Poll with Acknowledgement . . . . . . . . . . . . . .   8
        2.4.4.  Poll with Acknowledgement and Errors  . . . . . . . .   9
-     2.5.  Poll Response . . . . . . . . . . . . . . . . . . . . . .   9
+     2.5.  Poll Response . . . . . . . . . . . . . . . . . . . . . .  10
        2.5.1.  Poll Error Response . . . . . . . . . . . . . . . . .  11
-     2.6.  Error Response Handling . . . . . . . . . . . . . . . . .  11
+     2.6.  Error Response Handling . . . . . . . . . . . . . . . . .  12
    3.  Authentication and Authorization  . . . . . . . . . . . . . .  12
-   4.  Security Considerations . . . . . . . . . . . . . . . . . . .  12
+   4.  Security Considerations . . . . . . . . . . . . . . . . . . .  13
      4.1.  Authentication Using Signed SETs  . . . . . . . . . . . .  13
      4.2.  HTTP Considerations . . . . . . . . . . . . . . . . . . .  13
      4.3.  Confidentiality of SETs . . . . . . . . . . . . . . . . .  13
@@ -287,7 +287,9 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
       member name is the "jti" of a SET to be delivered and its value is
       a JSON string representing the corresponding SET.  If there are no
       outstanding SETs to be transmitted, the JSON object SHALL be
-      empty.
+      empty.  Note that both SETs being transmitted for the first time
+      and SETs that are being re-transmitted after not having been
+      acknowledged are communicated here.
 
    moreAvailable
       A JSON boolean value that indicates if more unacknowledged SETs
@@ -328,8 +330,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
       poll request).
 
    Acknowledge Only
-      In which a SET Recipient sets the "maxEvents" value to "0" along
-      with "ack" and "setErrs" members indicating the SET Recipient is
 
 
 
@@ -338,6 +338,8 @@ Backman, et al.         Expires December 26, 2020               [Page 6]
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
 
+      In which a SET Recipient sets the "maxEvents" value to "0" along
+      with "ack" and "setErrs" members indicating the SET Recipient is
       acknowledging previously received SETs and does not want to
       receive any new SETs in response to the request.
 
@@ -380,12 +382,10 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
                   Figure 2: Example Default Poll Request
 
-2.4.2.  Acknowledge Only Request
 
-   In this variation, the SET Recipient acknowledges previously received
-   SETs and indicates it does not want to receive SETs in response by
-   setting the "maxEvents" value to "0".  This variation might be used,
-   for instance, when a SET Recipient needs to acknowledge received SETs
+
+
+
 
 
 
@@ -394,6 +394,12 @@ Backman, et al.         Expires December 26, 2020               [Page 7]
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
 
+2.4.2.  Acknowledge Only Request
+
+   In this variation, the SET Recipient acknowledges previously received
+   SETs and indicates it does not want to receive SETs in response by
+   setting the "maxEvents" value to "0".  This variation might be used,
+   for instance, when a SET Recipient needs to acknowledge received SETs
    independently (e.g., on separate threads) from the process of
    receiving SETs.
 
@@ -426,6 +432,24 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
    acknowledge previously received SETs and wait for the next group of
    SETs in a single request.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+Backman, et al.         Expires December 26, 2020               [Page 8]
+
+Internet-Draft        draft-ietf-secevent-http-poll            June 2020
+
+
    The following is a non-normative example poll with acknowledgement of
    the SETs received in Figure 6:
 
@@ -442,13 +466,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
      }
 
          Figure 4: Example Poll with Acknowledgement and No Errors
-
-
-
-Backman, et al.         Expires December 26, 2020               [Page 8]
-
-Internet-Draft        draft-ietf-secevent-http-poll            June 2020
-
 
    In the above acknowledgement, the SET Recipient has acknowledged
    receipt of two SETs and has indicated it wants to wait until the next
@@ -482,6 +499,13 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
              Figure 5: Example Poll Acknowledgement with Error
 
+
+
+Backman, et al.         Expires December 26, 2020               [Page 9]
+
+Internet-Draft        draft-ietf-secevent-http-poll            June 2020
+
+
 2.5.  Poll Response
 
    In response to a valid poll request, the service provider MAY respond
@@ -493,18 +517,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
    As described in Section 2.3, a JSON document is returned containing
    members including "sets", which SHALL contain zero or more SETs.
-
-
-
-
-
-
-
-
-Backman, et al.         Expires December 26, 2020               [Page 9]
-
-Internet-Draft        draft-ietf-secevent-http-poll            June 2020
-
 
    The following is a non-normative example response to the request
    shown in Section 2.4.  This example shows two SETs being returned:
@@ -540,18 +552,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
                       Figure 6: Example Poll Response
 
-   In the above example, two SETs whose "jti" values are
-   "4d3559ec67504aaba65d40b0363faad8" and
-   "3d0c3cf797584bd193bd0fb1bd4e7d30" are delivered.
-
-
-
-
-
-
-
-
-
 
 
 
@@ -561,6 +561,10 @@ Backman, et al.         Expires December 26, 2020              [Page 10]
 
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
+
+   In the above example, two SETs whose "jti" values are
+   "4d3559ec67504aaba65d40b0363faad8" and
+   "3d0c3cf797584bd193bd0fb1bd4e7d30" are delivered.
 
    The following is a non-normative example response to the request
    shown in Section 2.4.1, which indicates that no new SETs or
@@ -605,11 +609,7 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
                         Example Poll Error Response
 
-2.6.  Error Response Handling
 
-   If a SET is invalid, error codes from the IANA "Security Event Token
-   Delivery Error Codes" registry established by
-   [I-D.ietf-secevent-http-push] are used in error responses.  As
 
 
 
@@ -618,6 +618,11 @@ Backman, et al.         Expires December 26, 2020              [Page 11]
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
 
+2.6.  Error Response Handling
+
+   If a SET is invalid, error codes from the IANA "Security Event Token
+   Delivery Error Codes" registry established by
+   [I-D.ietf-secevent-http-push] are used in error responses.  As
    described in Section 2.3 of [I-D.ietf-secevent-http-push], an error
    response is a JSON object providing details about the error that
    includes the following name/value pairs:
@@ -660,11 +665,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
    SETs are not commands, SET Recipients are free to ignore SETs that
    are not of interest after acknowledging their receipt.
 
-4.  Security Considerations
-
-
-
-
 
 
 
@@ -673,6 +673,8 @@ Backman, et al.         Expires December 26, 2020              [Page 12]
 
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
+
+4.  Security Considerations
 
 4.1.  Authentication Using Signed SETs
 
@@ -720,8 +722,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
    by the service provider.  By expiring tokens, clients are forced to
    obtain a new token (which usually involves re-authentication) for
    continued authorized access.  For example, in OAuth 2.0, a client MAY
-   use an OAuth refresh token to obtain a new bearer token after
-
 
 
 
@@ -730,6 +730,7 @@ Backman, et al.         Expires December 26, 2020              [Page 13]
 Internet-Draft        draft-ietf-secevent-http-poll            June 2020
 
 
+   use an OAuth refresh token to obtain a new bearer token after
    authenticating to an authorization server, per Section 6 of
    [RFC6749].
 
@@ -776,7 +777,6 @@ Internet-Draft        draft-ietf-secevent-http-poll            June 2020
               Nadalin, "Push-Based Security Event Token (SET) Delivery
               Using HTTP", draft-ietf-secevent-http-push-12 (work in
               progress), June 2020.
-
 
 
 
@@ -934,7 +934,7 @@ Appendix C.  Acknowledgments
    Additionally, we would like to thank the following individuals for
    their reviews of the specification: Martin Duke, Benjamin Kaduk, Erik
    Kline, Murray Kucherawy, Mark Nottingham, Yaron Sheffer, Valery
-   Smyslov, Robert Sparks, and Eric Vyncke.
+   Smyslov, Robert Sparks, Eric Vyncke, and Robert Wilton.
 
 Appendix D.  Change Log
 
