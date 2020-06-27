@@ -435,7 +435,7 @@
                 prevent the SET Transmitter from recording the fact that the SET was delivered. 
                 It is left to the implementer to decide how to handle such cases, based on
                 their requirements. For example, it may be appropriate for the SET Transmitter to
-                transmit the SET to the SET Recipient, erring on the side of guaranteeing delivery,
+                re-transmit the SET to the SET Recipient, erring on the side of guaranteeing delivery,
                 or it may be appropriate to assume delivery was successful, erring on the side of
                 not spending resources re-transmitting previously delivered SETs. Other options,
                 such as sending the SET to a "dead letter queue" for manual examination may also
@@ -711,7 +711,7 @@
         </references>
 
         <references title="Informative References">
-	  <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-http-poll-11.xml" ?>
+	  <?rfc include="http://xml2rfc.tools.ietf.org/public/rfc/bibxml3/reference.I-D.draft-ietf-secevent-http-poll-12.xml" ?>
 
             <?rfc include='http://xml2rfc.tools.ietf.org/public/rfc/bibxml/reference.RFC.7235.xml' ?><!-- HTTP Auth -->
         </references>

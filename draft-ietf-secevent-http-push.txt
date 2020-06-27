@@ -522,8 +522,8 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
    recording the fact that the SET was delivered.  It is left to the
    implementer to decide how to handle such cases, based on their
    requirements.  For example, it may be appropriate for the SET
-   Transmitter to transmit the SET to the SET Recipient, erring on the
-   side of guaranteeing delivery, or it may be appropriate to assume
+   Transmitter to re-transmit the SET to the SET Recipient, erring on
+   the side of guaranteeing delivery, or it may be appropriate to assume
    delivery was successful, erring on the side of not spending resources
    re-transmitting previously delivered SETs.  Other options, such as
    sending the SET to a "dead letter queue" for manual examination may
@@ -856,7 +856,7 @@ Internet-Draft        draft-ietf-secevent-http-push            June 2020
    [I-D.ietf-secevent-http-poll]
               Backman, A., Jones, M., Scurtescu, M., Ansari, M., and A.
               Nadalin, "Poll-Based Security Event Token (SET) Delivery
-              Using HTTP", draft-ietf-secevent-http-poll-11 (work in
+              Using HTTP", draft-ietf-secevent-http-poll-12 (work in
               progress), June 2020.
 
    [RFC7235]  Fielding, R., Ed. and J. Reschke, Ed., "Hypertext Transfer

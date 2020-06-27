@@ -405,14 +405,14 @@
 <link href="#rfc.authors" rel="Chapter">
 
 
-  <meta name="generator" content="xml2rfc version 2.35.0 - https://tools.ietf.org/tools/xml2rfc" />
+  <meta name="generator" content="xml2rfc version 2.46.0 - https://tools.ietf.org/tools/xml2rfc" />
   <link rel="schema.dct" href="http://purl.org/dc/terms/" />
 
   <meta name="dct.creator" content="Backman, A., Ed., Jones, M., Ed., Scurtescu, M., Ansari, M., and A. Nadalin" />
   <meta name="dct.identifier" content="urn:ietf:id:draft-ietf-secevent-http-push-14" />
   <meta name="dct.issued" scheme="ISO8601" content="2020-06-26" />
-  <meta name="dct.abstract" content="This specification defines how a Security Event Token (SET) can be delivered to an intended recipient using HTTP POST over TLS.  The SET is transmitted in the body of an HTTP POST request to an endpoint operated by the recipient, and the recipient indicates successful or failed transmission via the HTTP response.  " />
-  <meta name="description" content="This specification defines how a Security Event Token (SET) can be delivered to an intended recipient using HTTP POST over TLS.  The SET is transmitted in the body of an HTTP POST request to an endpoint operated by the recipient, and the recipient indicates successful or failed transmission via the HTTP response.  " />
+  <meta name="dct.abstract" content="This specification defines how a Security Event Token (SET) can be delivered to an intended recipient using HTTP POST over TLS.  The SET is transmitted in the body of an HTTP POST request to an endpoint operated by the recipient, and the recipient indicates successful or failed transmission via the HTTP response.   " />
+  <meta name="description" content="This specification defines how a Security Event Token (SET) can be delivered to an intended recipient using HTTP POST over TLS.  The SET is transmitted in the body of an HTTP POST request to an endpoint operated by the recipient, and the recipient indicates successful or failed transmission via the HTTP response.   " />
 
 </head>
 
@@ -749,7 +749,7 @@
 <a href="#rfc.section.4">4.</a> <a href="#reliability" id="reliability">Delivery Reliability</a>
 </h1>
 <p id="rfc.section.4.p.1">Delivery reliability requirements may vary depending upon the use cases.  This specification defines the response from the SET Recipient in such a way as to provide the SET Transmitter with the information necessary to determine what further action is required, if any, in order to meet their requirements.  SET Transmitters with high reliability requirements may be tempted to always retry failed transmissions. However, it should be noted that for many types of SET delivery errors, a retry is extremely unlikely to be successful.  For example, <samp>invalid_request</samp> indicates a structural error in the content of the request body that is likely to remain when re-transmitting the same SET.  Others such as <samp>access_denied</samp> may be transient, for example if the SET Transmitter refreshes expired credentials prior to re-transmission.  </p>
-<p id="rfc.section.4.p.2">The SET Transmitter may be unaware of whether or not a SET has been delivered to a SET Recipient. For example, a network interruption could prevent the SET Transmitter from receiving the success response, or a service outage could prevent the SET Transmitter from recording the fact that the SET was delivered.  It is left to the implementer to decide how to handle such cases, based on their requirements. For example, it may be appropriate for the SET Transmitter to transmit the SET to the SET Recipient, erring on the side of guaranteeing delivery, or it may be appropriate to assume delivery was successful, erring on the side of not spending resources re-transmitting previously delivered SETs. Other options, such as sending the SET to a "dead letter queue" for manual examination may also be appropriate.  </p>
+<p id="rfc.section.4.p.2">The SET Transmitter may be unaware of whether or not a SET has been delivered to a SET Recipient. For example, a network interruption could prevent the SET Transmitter from receiving the success response, or a service outage could prevent the SET Transmitter from recording the fact that the SET was delivered.  It is left to the implementer to decide how to handle such cases, based on their requirements. For example, it may be appropriate for the SET Transmitter to re-transmit the SET to the SET Recipient, erring on the side of guaranteeing delivery, or it may be appropriate to assume delivery was successful, erring on the side of not spending resources re-transmitting previously delivered SETs. Other options, such as sending the SET to a "dead letter queue" for manual examination may also be appropriate.  </p>
 <p id="rfc.section.4.p.3">Implementers SHOULD evaluate the reliability requirements of their use cases and the impact of various retry mechanisms and re-transmission policies on the performance of their systems to determine an appropriate strategy for handling various error conditions.  </p>
 <h1 id="rfc.section.5">
 <a href="#rfc.section.5">5.</a> <a href="#Security" id="Security">Security Considerations</a>
@@ -996,7 +996,7 @@
 <tr>
 <td class="reference"><b id="I-D.ietf-secevent-http-poll">[I-D.ietf-secevent-http-poll]</b></td>
 <td class="top">
-<a>Backman, A.</a>, <a>Jones, M.</a>, <a>Scurtescu, M.</a>, <a>Ansari, M.</a> and <a>A. Nadalin</a>, "<a href="https://tools.ietf.org/html/draft-ietf-secevent-http-poll-11">Poll-Based Security Event Token (SET) Delivery Using HTTP</a>", Internet-Draft draft-ietf-secevent-http-poll-11, June 2020.</td>
+<a>Backman, A.</a>, <a>Jones, M.</a>, <a>Scurtescu, M.</a>, <a>Ansari, M.</a> and <a>A. Nadalin</a>, "<a href="https://tools.ietf.org/html/draft-ietf-secevent-http-poll-12">Poll-Based Security Event Token (SET) Delivery Using HTTP</a>", Internet-Draft draft-ietf-secevent-http-poll-12, June 2020.</td>
 </tr>
 <tr>
 <td class="reference"><b id="RFC7235">[RFC7235]</b></td>
