@@ -11,7 +11,7 @@
 <?rfc inline="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc category="std" docName="draft-ietf-secevent-http-push-13" ipr="trust200902">
+<rfc category="std" docName="draft-ietf-secevent-http-push-14" ipr="trust200902">
     <front>
         <title abbrev="draft-ietf-secevent-http-push">Push-Based Security Event Token (SET) Delivery Using HTTP</title>
 
@@ -51,7 +51,7 @@
             </address>
         </author>
 
-	<date year="2020" month="June" day="24" />
+	<date year="2020" month="June" day="26" />
 
         <area>Security</area>
         <workgroup>Security Events Working Group</workgroup>
@@ -187,14 +187,9 @@
             </t>
             <t>
                 The SET Recipient persists the SET in a way that
-                is sufficient to meet the SET Recipient's own reliability requirements,
-                and MUST NOT expect or depend on a SET Transmitter to re-transmit or
-                otherwise make available to the SET Recipient a SET once the SET Recipient
-                acknowledges that it was received successfully.
+                is sufficient to meet the SET Recipient's own reliability requirements.
 		The level and method of retention of SETs
 		by SET Recipients is out of scope of this specification.
-            </t>
-            <t>
                 Once the SET has been validated and persisted, the SET Recipient SHOULD
                 immediately return a response indicating that the SET was successfully
                 delivered. The SET Recipient SHOULD NOT perform further processing of the SET
@@ -203,10 +198,19 @@
 		to minimize the time the SET Transmitter is waiting for a response.
             </t>
             <t>
-                The SET Transmitter MAY re-transmit a SET if the responses from previous
-                transmissions timed out or indicated potentially recoverable errors (such
-                as server unavailability that may be transient). In all
-                other cases, the SET Transmitter SHOULD NOT re-transmit a SET. The SET
+                The SET Transmitter MAY transmit the same SET to the SET Recipient multiple
+                times, regardless of the response from the SET Recipient. The SET Recipient
+                MUST respond as it would if the SET had not been previously received by the 
+                SET Recipient. The SET Recipient MUST NOT expect or depend on a SET Transmitter
+                to re-transmit a SET or otherwise make a SET available to the SET Recipient
+                once the SET Recipient acknowledges that it was received successfully.
+            </t>
+            <t>
+                The SET Transmitter should not re-transmit a SET unless the SET Transmitter
+                suspects that previous transmissions may have failed due to potentially
+                recoverable errors (such as network outage or temporary service interruption at
+                either the SET Transmitter or SET Recipient). In all other cases, the SET
+                Transmitter SHOULD NOT re-transmit a SET. The SET
                 Transmitter SHOULD delay retransmission for an appropriate amount of time
                 to avoid overwhelming the SET Recipient (see <xref target="reliability"/>).
             </t>
@@ -425,9 +429,23 @@
                 credentials prior to re-transmission.
             </t>
             <t>
+                The SET Transmitter may be unaware of whether or not a SET has been delivered
+                to a SET Recipient. For example, a network interruption could prevent the
+                SET Transmitter from receiving the success response, or a service outage could
+                prevent the SET Transmitter from recording the fact that the SET was delivered. 
+                It is left to the implementer to decide how to handle such cases, based on
+                their requirements. For example, it may be appropriate for the SET Transmitter to
+                transmit the SET to the SET Recipient, erring on the side of guaranteeing delivery,
+                or it may be appropriate to assume delivery was successful, erring on the side of
+                not spending resources re-transmitting previously delivered SETs. Other options,
+                such as sending the SET to a "dead letter queue" for manual examination may also
+                be appropriate.
+            </t>
+            <t>
                 Implementers SHOULD evaluate the reliability requirements of their use cases and the
-                impact of various retry mechanisms on the performance of their systems
-                to determine an appropriate strategy for handling various error conditions.
+                impact of various retry mechanisms and re-transmission policies on the performance
+                of their systems to determine an appropriate strategy for handling various error
+                conditions.
             </t>
         </section>
         <section anchor="Security" title="Security Considerations" toc="default">
@@ -1008,6 +1026,19 @@ need for assurance.</artwork>
 		</t>
 	      </list>
 	    </t>
+            <t>
+                Draft 14 - AB
+                <list style="symbols">
+                    <t>
+                        Revised normative requirements for SET re-transmission to clarify "at least once"
+                        delivery expectiations.
+                    </t>
+                    <t>
+                        Added non-normative text to Section 4 - Delivery Reliability describing conditions
+                        where re-transmission of successfully delivered SETs may occur.
+                    </t>
+                </list>
+            </t>
         </section>
     </back>
 </rfc>
